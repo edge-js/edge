@@ -4,6 +4,23 @@
 
 In order to make sure that edge serves it purpose, we need solid exception handling inside the entire code base.
 
+## First Level Benchmarks
+
+### Simple Conditionals (compile only)
+```
+Edge x 68,128 ops/sec ±2.66% (86 runs sampled)
+Nunjucks x 5,766 ops/sec ±3.19% (83 runs sampled)
+Fastest is Edge
+```
+
+### Each Loop (compile only)
+```
+Edge x 72,273 ops/sec ±0.79% (91 runs sampled)
+Nunjucks x 5,823 ops/sec ±2.69% (83 runs sampled)
+Fastest is Edge
+```
+
+
 ### Lexer Exceptions
 
 Lexer exceptions should be broad and does not contain any domain logic, since Lexer has no idea about the template context and basically is a simple Javascript expression parser.
