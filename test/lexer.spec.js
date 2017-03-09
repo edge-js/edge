@@ -72,17 +72,6 @@ test.group('Lexer', (group) => {
     assert.throw(parsed, 'Literal is the only allowed statement, instead got Identifier')
   })
 
-  test('call error callback when defined', (assert) => {
-    assert.plan(1)
-    const statement = 'user'
-    this.lexer.parseRaw(statement, ['Literal'], function (error) {
-      assert.deepEqual(error, {
-        allowed: ['Literal'],
-        current: 'Identifier'
-      })
-    })
-  })
-
   test('convert binary expression to statement', (assert) => {
     const statement = 'age > 12'
     const parsedStatement = this.lexer.parseRaw(statement)

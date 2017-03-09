@@ -9,6 +9,10 @@
  * file that was distributed with this source code.
 */
 
+/**
+ * The official if tag. It is used
+ * as `@if` inside templates.
+ */
 class IfTag {
   get allowedExpressions () {
     return ['BinaryExpression', 'Literal', 'Identifier', 'CallExpression', 'MemberExpression']
@@ -76,7 +80,8 @@ class IfTag {
   }
 
   /**
-   * Method to be called on runtime.
+   * Nothing needs to be in done in runtime for
+   * an if tag.
    *
    * @method run
    */

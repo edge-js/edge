@@ -10,11 +10,32 @@
 */
 
 const _ = require('lodash')
+const debug = require('debug')('edge:context')
+const escape = require('escape-html')
 
+/**
+ * Runtime context used to run the compiled
+ * templates. View **locals**, **globals**,
+ * **presenters** all are accessible from
+ * the context.
+ *
+ * Values are resolved in following order.
+ *
+ * 1. Frames
+ * 2. Presenter
+ * 3. Data
+ * 4. Globals
+ *
+ * @class Context
+ * @constructor
+ */
 class Context {
-  constructor (data, globals) {
-    this._data = data
+  constructor (viewName, presenter = {}, globals = {}) {
+    debug('created context for %s view with %s presenter', viewName, presenter.constructor.name)
+    this._viewName = viewName
     this._globals = globals
+    this._presenter = presenter
+    this._data = presenter.$data || {}
     this._frames = []
   }
 
@@ -24,16 +45,18 @@ class Context {
    *
    * @method _getFrame
    *
-   * @param  {Number}  depth
+   * @param  {Number}  [depth=0]
    *
-   * @return {Mixed}
+   * @return {Object}
+   *
+   * @private
    */
-  _getFrame (depth) {
-    return _.nth(this._frames, -`${depth+1}`)
+  _getFrame (depth = 0) {
+    return _.nth(this._frames, -`${depth + 1}`)
   }
 
   /**
-   * Parses a key from removing `parent.`
+   * Parses a key from removing `$parent.`
    * from it and returns the depth of
    * parent accessor.
    *
@@ -42,18 +65,68 @@ class Context {
    * @param  {String}  key
    *
    * @return {Object}
+   *
+   * @private
    */
   _parseKey (key) {
-    const keys = key.split('parent.')
+    const keys = key.split('$parent.')
     const filteredKeys = keys.filter((key) => key !== '')
+
     return {
       depth: keys.length - filteredKeys.length,
       key: filteredKeys.join('.')
     }
   }
 
+  /**
+   * Returns the value for a given key by resolving
+   * it in the defined order.
+   *
+   * See class description for resolve order.
+   *
+   * @method _getValue
+   *
+   * @param  {Object}  frame
+   * @param  {String}  key
+   *
+   * @return {Mixed} The output value for the key
+   *
+   * @private
+   */
   _getValue (frame, key) {
-    return _.get(frame, key, _.get(this._data, key, _.get(this._globals, key)))
+    /**
+     * Step 1: Look for value inside given frame
+     */
+    debug('resolving %s key inside frame %j', key, frame)
+    let value = _.get(frame, key)
+
+    /**
+     * Step 2: Look for value inside the presenter
+     * object.
+     */
+    if (value === undefined) {
+      debug('resolving %s key on presenter', key)
+      value = _.get(this._presenter, key)
+    }
+
+    /**
+     * Step 3: Look for value inside presenter
+     * data object.
+     */
+    if (value === undefined) {
+      debug('resolving %s key on presenter data', key)
+      value = _.get(this._data, key)
+    }
+
+    /**
+     * Step 4: Finally look for value inside globally.
+     */
+    if (value === undefined) {
+      debug('resolving %s key on globals', key)
+      value = _.get(this._globals, key)
+    }
+
+    return value
   }
 
   /**
@@ -64,6 +137,7 @@ class Context {
    * @return {void}
    */
   newFrame () {
+    debug('adding new frame')
     this._frames.push({})
   }
 
@@ -78,10 +152,13 @@ class Context {
    * @throws {Exception} If trying to set value without calling the `newFrame` method.
    */
   setOnFrame (key, value) {
+    debug('setting %s to %j on frame', key, value)
     const activeFrame = _.last(this._frames)
+
     if (!activeFrame) {
       throw new Error(`Trying to set value ${value} on undefined frame. Make sure to call (newFrame) first.`)
     }
+
     activeFrame[key] = value
   }
 
@@ -93,6 +170,7 @@ class Context {
    * @return {void}
    */
   clearFrame () {
+    debug('clearing the frame')
     this._frames = _.dropRight(this._frames)
   }
 
@@ -120,15 +198,16 @@ class Context {
    * @return {String}
    */
   escape (input) {
-    return input
+    return escape(input)
   }
 
   /**
    * Resolves a key in following order.
    *
    * 1. frame
-   * 2. local
-   * 3. global
+   * 2. presenter
+   * 3. presenter data
+   * 4. global
    *
    * @method resolve
    *
@@ -143,7 +222,8 @@ class Context {
   }
 
   /**
-   * Calls a function and pass the arguments
+   * Calls a function and pass the arguments. Also the
+   * function scope will be changed to context scope.
    *
    * @method callFn
    *
@@ -153,10 +233,11 @@ class Context {
    * @return {Mixed}
    */
   callFn (name, args) {
-    const parsedKey = this._parseKey(name)
-    const frame = this._getFrame(parsedKey.depth)
-    const fn = this.resolve(parsedKey.key)
-    return fn.apply(null, args)
+    const fn = this.resolve(name)
+    if (typeof (fn) !== 'function') {
+      throw new Error(`Cannot call function ${name} from ${this._viewName} view`)
+    }
+    return fn.apply(this, args)
   }
 
   /**

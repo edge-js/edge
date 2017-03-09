@@ -9,6 +9,12 @@
  * file that was distributed with this source code.
 */
 
+/**
+ * The official else tag. It is used
+ * as `@else` inside templates.
+ *
+ * @class ElseTag
+ */
 class ElseTag {
   /**
    * The tag name to used for registering the tag
@@ -57,7 +63,8 @@ class ElseTag {
   }
 
   /**
-   * Method to be called on runtime.
+   * Nothing needs to be in done in runtime for
+   * an else tag.
    *
    * @method run
    */

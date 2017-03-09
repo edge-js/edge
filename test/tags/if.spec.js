@@ -46,9 +46,12 @@ test.group('Tags | If ', (group) => {
     const template = new Template(this.tags, statement)
     const output = template.compile(statement)
     assert.equal(output, dedent `
-    let out = new String()
-    if (this.resolve('username') === 'virk') {
-      out += \`  <p> Hello virk </p>\`
+    module.exports = function () {
+      let out = new String()
+      if (this.resolve('username') === 'virk') {
+        out += \`  <p> Hello virk </p>\\n\`
+      }
+      return out
     }`)
   })
 
@@ -63,12 +66,16 @@ test.group('Tags | If ', (group) => {
     const template = new Template(this.tags, statement)
     const output = template.compile(statement)
     assert.equal(output, dedent `
-    let out = new String()
-    if (this.resolve('username') === 'virk') {
-      out += \`  <p> Hello virk </p>\`
-    } else {
-      out += \`  <p> Hello anonymous </p>\`
-    }`)
+    module.exports = function () {
+      let out = new String()
+      if (this.resolve('username') === 'virk') {
+        out += \`  <p> Hello virk </p>\\n\`
+      } else {
+        out += \`  <p> Hello anonymous </p>\\n\`
+      }
+      return out
+    }
+    `)
   })
 
   test('parse block with elseif', (assert) => {
@@ -84,13 +91,16 @@ test.group('Tags | If ', (group) => {
     const template = new Template(this.tags, statement)
     const output = template.compile(statement)
     assert.equal(output, dedent `
-    let out = new String()
-    if (this.resolve('username') === 'virk') {
-      out += \`  <p> Hello virk </p>\`
-    } else if (this.resolve('username') === 'nikk') {
-      out += \`  <p> Hey Nikk </p>\`
-    } else {
-      out += \`  <p> Hello anonymous </p>\`
+    module.exports = function () {
+      let out = new String()
+      if (this.resolve('username') === 'virk') {
+        out += \`  <p> Hello virk </p>\\n\`
+      } else if (this.resolve('username') === 'nikk') {
+        out += \`  <p> Hey Nikk </p>\\n\`
+      } else {
+        out += \`  <p> Hello anonymous </p>\\n\`
+      }
+      return out
     }`)
   })
 
@@ -103,9 +113,12 @@ test.group('Tags | If ', (group) => {
     const template = new Template(this.tags, statement)
     const output = template.compile(statement)
     assert.equal(output, dedent `
-    let out = new String()
-    if ('virk') {
-      out += \`  <p> Hello virk </p>\`
+    module.exports = function () {
+      let out = new String()
+      if ('virk') {
+        out += \`  <p> Hello virk </p>\\n\`
+      }
+      return out
     }`)
   })
 
@@ -118,9 +131,12 @@ test.group('Tags | If ', (group) => {
     const template = new Template(this.tags, statement)
     const output = template.compile(statement)
     assert.equal(output, dedent `
-    let out = new String()
-    if (this.resolve('username')) {
-      out += \`  <p> Hello \${this.escape(this.resolve('username'))} </p>\`
+    module.exports = function () {
+      let out = new String()
+      if (this.resolve('username')) {
+        out += \`  <p> Hello \${this.escape(this.resolve('username'))} </p>\\n\`
+      }
+      return out
     }`)
   })
 
@@ -133,9 +149,12 @@ test.group('Tags | If ', (group) => {
     const template = new Template(this.tags, statement)
     const output = template.compile(statement)
     assert.equal(output, dedent `
-    let out = new String()
-    if (2 + 2) {
-      out += \`  <p> It is \${this.escape(2 + 2)} </p>\`
+    module.exports = function () {
+      let out = new String()
+      if (2 + 2) {
+        out += \`  <p> It is \${this.escape(2 + 2)} </p>\\n\`
+      }
+      return out
     }`)
   })
 
@@ -148,9 +167,12 @@ test.group('Tags | If ', (group) => {
     const template = new Template(this.tags, statement)
     const output = template.compile(statement)
     assert.equal(output, dedent `
-    let out = new String()
-    if (2 + 2 === this.resolve('cartTotal')) {
-      out += \`  <p> Hello \${this.escape(this.resolve('cartTotal'))} </p>\`
+    module.exports = function () {
+      let out = new String()
+      if (2 + 2 === this.resolve('cartTotal')) {
+        out += \`  <p> Hello \${this.escape(this.resolve('cartTotal'))} </p>\\n\`
+      }
+      return out
     }`)
   })
 
@@ -163,9 +185,12 @@ test.group('Tags | If ', (group) => {
     const template = new Template(this.tags, statement)
     const output = template.compile(statement)
     assert.equal(output, dedent `
-    let out = new String()
-    if (this.callFn('count', [this.resolve('users')])) {
-      out += \`  <p> There are \${this.escape(this.callFn('count', [this.resolve('users')]))} </p>\`
+    module.exports = function () {
+      let out = new String()
+      if (this.callFn('count', [this.resolve('users')])) {
+        out += \`  <p> There are \${this.escape(this.callFn('count', [this.resolve('users')]))} </p>\\n\`
+      }
+      return out
     }`)
   })
 
@@ -178,9 +203,12 @@ test.group('Tags | If ', (group) => {
     const template = new Template(this.tags, statement)
     const output = template.compile(statement)
     assert.equal(output, dedent `
-    let out = new String()
-    if (this.resolve('users').indexOf('virk') > -1) {
-      out += \`  <p> Hello \${this.escape(this.accessChild(this.resolve('users'), ['virk']))} </p>\`
+    module.exports = function () {
+      let out = new String()
+      if (this.resolve('users').indexOf('virk') > -1) {
+        out += \`  <p> Hello \${this.escape(this.accessChild(this.resolve('users'), ['virk']))} </p>\\n\`
+      }
+      return out
     }`)
   })
 
@@ -193,9 +221,12 @@ test.group('Tags | If ', (group) => {
     const template = new Template(this.tags, statement)
     const output = template.compile(statement)
     assert.equal(output, dedent `
-    let out = new String()
-    if (this.accessChild(this.resolve('user'), ['isLoggedIn'])) {
-      out += \`  <p> Hello \${this.escape(this.accessChild(this.resolve('user'), ['username']))} </p>\`
+    module.exports = function () {
+      let out = new String()
+      if (this.accessChild(this.resolve('user'), ['isLoggedIn'])) {
+        out += \`  <p> Hello \${this.escape(this.accessChild(this.resolve('user'), ['username']))} </p>\\n\`
+      }
+      return out
     }`)
   })
 

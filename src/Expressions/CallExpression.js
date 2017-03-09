@@ -9,7 +9,6 @@
  * file that was distributed with this source code.
 */
 
-const CE = require('../Exceptions')
 const BaseExpression = require('./BaseExpression')
 
 class CallExpression extends BaseExpression {

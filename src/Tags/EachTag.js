@@ -11,6 +11,12 @@
 
 const _ = require('lodash')
 
+/**
+ * The official each tag. It is used
+ * as `@each` inside templates.
+ *
+ * @class EachTag
+ */
 class EachTag {
   /**
    * The tag name
@@ -112,7 +118,8 @@ class EachTag {
   }
 
   /**
-   * Adds the macro to the runtime context
+   * Adds the macro to the runtime context to run
+   * the loop.
    *
    * @method run
    *

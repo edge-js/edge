@@ -11,7 +11,7 @@
 
 const esprima = require('esprima')
 const _ = require('lodash')
-const debug = require('debug')('edge')
+const debug = require('debug')('edge:lexer')
 const Expressions = require('../Expressions')
 const Statements = require('../Statements')
 const CE = require('../Exceptions')
@@ -39,11 +39,11 @@ class Lexer {
      * again and again when memoize is set to true.
      */
     this._toEsprima = memoize ? _.memoize(_toEsprima) : _toEsprima
-    this.parseRaw = memoize ? _.memoize(this._parseRaw) : this._parseRaw
   }
+
   /**
-   * The method to be used for resolving
-   * an identifier
+   * The method to be used by compiled template
+   * for resolving an identifier.
    *
    * @attribute resolveFn
    *
@@ -54,8 +54,8 @@ class Lexer {
   }
 
   /**
-   * The method to be used for accessing
-   * a child on an object or array
+   * The method to be used by compiled template for
+   * accessing a child on an object or array.
    *
    * @attribute accessFn
    *
@@ -66,8 +66,8 @@ class Lexer {
   }
 
   /**
-   * Method to be used for calling a method
-   * inside compiled templates
+   * The method to be used by compiled template for
+   * calling a method inside compiled templates.
    *
    * @attribute callFn
    *
@@ -121,13 +121,11 @@ class Lexer {
    * @method parseRaw
    *
    * @param  {String}   statement
-   * @param  {Array}    [allowed]
+   * @param  {Array}    [allowed] The expressions to be allowed otherwise thrown exception
    *
    * @return {Object}
-   *
-   * @private
    */
-  _parseRaw (statement, allowed = []) {
+  parseRaw (statement, allowed = []) {
     return this.parse(this._toEsprima(statement), allowed)
   }
 

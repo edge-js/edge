@@ -133,7 +133,12 @@ test.group('Template Compiler', (group) => {
 
     const template = new Template(tags, statement)
     const compiledTemplate = template.compile()
-    assert.deepEqual(compiledTemplate, 'let out = new String()\ncompiled')
+    assert.deepEqual(compiledTemplate, dedent`
+      module.exports = function () {
+        let out = new String()
+        compiled
+        return out
+      }`)
   })
 
   test('throw exception when invalid expression passed inside {{ }}', (assert) => {
@@ -179,9 +184,11 @@ test.group('Template Compiler', (group) => {
     const template = new Template({}, statement)
     const compiledTemplate = template.compile()
     assert.equal(compiledTemplate, dedent `
-    let out = new String()
-    out += \`\${this.escape(2 + 2)}\`
-    `)
+    module.exports = function () {
+      let out = new String()
+      out += \`\${this.escape(2 + 2)}\\n\`
+      return out
+    }`)
   })
 
   test('keep expression starting with @ untouch', (assert) => {
@@ -189,10 +196,12 @@ test.group('Template Compiler', (group) => {
 
     const template = new Template({}, statement)
     const compiledTemplate = template.compile()
-    assert.equal(compiledTemplate, dedent `
-    let out = new String()
-    out += \`{{2 + 2}}\`
-    `)
+    assert.equal(compiledTemplate, dedent`
+    module.exports = function () {
+      let out = new String()
+      out += \`{{2 + 2}}\\n\`
+      return out
+    }`)
   })
 
   test('do not escape expressions wrapped under {{{ }}}', (assert) => {
@@ -200,10 +209,12 @@ test.group('Template Compiler', (group) => {
 
     const template = new Template({}, statement)
     const compiledTemplate = template.compile()
-    assert.equal(compiledTemplate, dedent `
-    let out = new String()
-    out += \`\${2 + 2}\`
-    `)
+    assert.equal(compiledTemplate, dedent`
+    module.exports = function () {
+      let out = new String()
+      out += \`\${2 + 2}\\n\`
+      return out
+    }`)
   })
 
   test('track errors with right line and char numbers', (assert) => {

@@ -48,18 +48,20 @@ At this point we should be 90% cover, since Javascript keeps lot of runtime cont
 ```
 const edge = require('edge')
 
-edge.compiledDir('out')
-edge.mountDefault(path.join(__dirname, 'views'))
-edge.mount('abc', path.join(__dirname, 'abc'))
+edge.compiledDir('out') // optional
+edge.registerViews(path.join(__dirname, 'views')) // mount views
+edge.registerPresenters(path.join(__dirname, 'views')) // mount presenters
 
-edge.render('somepath')
-edge.renderString()
-edge.compileString()
+edge.render('somepath') // mounting required
+edge.renderString() // a plain string
 
-edge.compile()
+edge.compile() // compile a file - mounting required
+edge.compileString() // compile a string to a function
 
-edge.tag()
-edge.global()
+edge.tag() // register a tag
+edge.global() // register a global
+edge.presenter().render() // render with presenter
+
+edge.doNotCompile() // do not compile in runtime
+
 ```
-
-

@@ -10,7 +10,6 @@
 */
 
 const os = require('os')
-const debug = require('debug')('edge')
 const identString = require('indent-string')
 
 /**
@@ -19,41 +18,55 @@ const identString = require('indent-string')
  * buffer, but a simple class with array
  * to push new lines to.
  *
+ * Also it will handle the opening and closing tags
+ * for a compile function.
+ *
  * @class Buffer
+ * @constructor
  */
 class Buffer {
-  constructor () {
+  constructor (asFunction = false) {
     this._lines = []
     this._identation = 0
+    /**
+     * Export the template as function instead of
+     * module.exports.
+     */
+    this._asFunction = asFunction
     this._start()
   }
 
   /**
    * Starts the buffer by adding required lines
-   * to the start of the compiled template
+   * to the start.
    *
    * @method _start
    *
    * @private
    */
   _start () {
-    this.writeLine('module.exports = function () {')
+    this._asFunction
+      ? this.writeLine('return (function templateFn () {')
+      : this.writeLine('module.exports = function () {')
+
     this.indent()
     this.writeLine('let out = new String()')
   }
 
   /**
-   * Ends the buffer by adding required line
-   * to the end of the compiled template.
+   * Returns an array of lines to be used for
+   * marking the template buffer closed.
    *
-   * @method _end
+   * @method _getEndLines
+   *
+   * @return {Array}
    *
    * @private
    */
-  _end () {
-    this.writeLine('return out')
-    this.dedent()
-    this.writeLine('}')
+  _getEndLines () {
+    const output = [identString('return out', this._identation)]
+    this._asFunction ? output.push('}).bind(this)()') : output.push('}')
+    return output
   }
 
   /**
@@ -80,23 +93,20 @@ class Buffer {
   }
 
   /**
-   * Writes a line to the buffer.
+   * Writes a new line to the buffer.
    *
    * @method writeLine
    *
    * @param  {String}  line
    *
-   * @chainable
+   * @return {void}
    */
-  writeLine(line) {
-    debug('writing following line to the buffer \n %s', line)
+  writeLine (line) {
     this._lines.push(identString(line, this._identation))
-    return this
   }
 
   /**
-   * Write a new line as if you are appending
-   * to the output variable.
+   * Writes a new line to the output variable.
    *
    * @method writeToOutput
    *
@@ -106,10 +116,10 @@ class Buffer {
    * ```
    * buffer.writeLine('foo')
    * // says
-   * // out += 'foo'
+   * // out += \`foo\n\`
    * ```
    *
-   * @chainable
+   * @return {void}
    */
   writeToOutput (line) {
     this.writeLine(`out += \`${line}\\n\``)
@@ -117,16 +127,17 @@ class Buffer {
   }
 
   /**
-   * Returns the lines in a buffer as a
-   * string.
+   * Returns the lines in a buffer as a string wrapped
+   * inside `module.exports` or `function` based upon
+   * the `asFunction` property.
    *
    * @method getLines
    *
    * @return {String}
    */
   getLines () {
-    this._end()
-    return this._lines.join(os.EOL)
+    const lines = this._lines.concat(this._getEndLines())
+    return lines.join(os.EOL)
   }
 }
 

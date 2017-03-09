@@ -10,13 +10,15 @@
 */
 
 const vm = require('vm')
-const _ = require('lodash')
 const Context = require('../Context')
 
 class TemplateRunner {
-  constructor (templateFn, data) {
+  constructor (templateFn, context) {
+    if (context instanceof Context === false) {
+      throw new Error('Cannot run template without a context')
+    }
     this.templateFn = templateFn
-    this.context = new Context(data)
+    this.context = context
   }
 
   /**

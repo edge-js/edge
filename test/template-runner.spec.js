@@ -53,12 +53,12 @@ test.group('Template Runner', (group) => {
     Hello {{ username }}
     `
     const compiled = new TemplateCompiler({}, statement).compile()
-    const output = new TemplateRunner(compiled, { username: 'virk'}).run()
-    assert.equal(output, 'Hello virk')
+    const output = new TemplateRunner(compiled, new Context('', { username: 'virk' })).run()
+    assert.equal(output, 'Hello virk\n')
   })
 
   test('run a precompiled template with conditional', (assert) => {
-    const statement = dedent `
+    const statement = dedent`
     @if(username)
       <p> Hello {{ username }} </p>
     @else
@@ -66,12 +66,12 @@ test.group('Template Runner', (group) => {
     @endif
     `
     const compiled = new TemplateCompiler(this.tags, statement).compile()
-    const output = new TemplateRunner(compiled, { username: 'virk'}).run()
-    assert.equal(output, '  <p> Hello virk </p>')
+    const output = new TemplateRunner(compiled, new Context('', { username: 'virk' })).run()
+    assert.equal(output, '  <p> Hello virk </p>\n')
   })
 
   test('run a precompiled template with conditional turning to false', (assert) => {
-    const statement = dedent `
+    const statement = dedent`
     @if(username)
       <p> Hello {{ username }} </p>
     @else
@@ -79,25 +79,24 @@ test.group('Template Runner', (group) => {
     @endif
     `
     const compiled = new TemplateCompiler(this.tags, statement).compile()
-    const output = new TemplateRunner(compiled, {}).run()
-    assert.equal(output, '  <p> Hello Anonymous </p>')
+    const output = new TemplateRunner(compiled, new Context('', {})).run()
+    assert.equal(output, '  <p> Hello Anonymous </p>\n')
   })
 
   test('run each loop', (assert) => {
-    const statement = dedent `
+    const statement = dedent`
     @each(user in users)
       <li> {{ user.username }} </li>
     @endeach
     `
     const compiled = new TemplateCompiler(this.tags, statement).compile()
-    const output = new TemplateRunner(compiled, {
+    const output = new TemplateRunner(compiled, new Context('', {
       users: [{
         username: 'virk'
       }, {
         username: 'nikk'
       }]
-    }).run()
-    assert.equal(output.trim(), '<li> virk </li>  <li> nikk </li>')
+    })).run()
+    assert.equal(output.trim(), '<li> virk </li>\n  <li> nikk </li>')
   })
 })
-

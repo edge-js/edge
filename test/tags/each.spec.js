@@ -25,14 +25,16 @@ test.group('Tags | If ', (group) => {
     const output = template.compile(statement)
 
     assert.equal(output, dedent `
-    let out = new String()
-    this.newFrame()
-    this.loop(this.resolve('users'), function (user, loop) {
-      this.setOnFrame('user', user)
-      this.setOnFrame('$loop', loop)
-    })
-    this.clearFrame()
-    `)
+    module.exports = function () {
+      let out = new String()
+      this.newFrame()
+      this.loop(this.resolve('users'), (user, loop) => {
+        this.setOnFrame('user', user)
+        this.setOnFrame('$loop', loop)
+      })
+      this.clearFrame()
+      return out
+    }`)
   })
 
   test('parse each block with content to compiled template', (assert) => {
@@ -45,15 +47,17 @@ test.group('Tags | If ', (group) => {
     const output = template.compile(statement)
 
     assert.equal(output, dedent `
-    let out = new String()
-    this.newFrame()
-    this.loop(this.resolve('users'), function (user, loop) {
-      this.setOnFrame('user', user)
-      this.setOnFrame('$loop', loop)
-      out += \`  <p> Hello \${this.escape(this.accessChild(this.resolve('user'), ['username']))} </p>\`
-    })
-    this.clearFrame()
-    `)
+    module.exports = function () {
+      let out = new String()
+      this.newFrame()
+      this.loop(this.resolve('users'), (user, loop) => {
+        this.setOnFrame('user', user)
+        this.setOnFrame('$loop', loop)
+        out += \`  <p> Hello \${this.escape(this.accessChild(this.resolve('user'), ['username']))} </p>\\n\`
+      })
+      this.clearFrame()
+      return out
+    }`)
   })
 
   test('parse nested each blocks', (assert) => {
@@ -66,8 +70,8 @@ test.group('Tags | If ', (group) => {
     `
     const template = new Template(this.tags, statement)
     const output = template.compile(statement).split('\n')
-    assert.equal(output[2], `this.loop(this.resolve('users'), function (user, loop) {`)
-    assert.equal(output[6].trim(), `this.loop(this.accessChild(this.resolve('user'), ['profiles']), function (profile, loop) {`)
+    assert.equal(output[3].trim(), `this.loop(this.resolve('users'), (user, loop) => {`)
+    assert.equal(output[7].trim(), `this.loop(this.accessChild(this.resolve('user'), ['profiles']), (profile, loop) => {`)
   })
 
   test('throw exception when expression is not binary', (assert) => {

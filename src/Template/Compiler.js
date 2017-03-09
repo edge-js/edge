@@ -11,7 +11,8 @@
 
 const os = require('os')
 const _ = require('lodash')
-const lexer = new(require('../Lexer'))(true)
+const debug = require('debug')('edge:compiler')
+const lexer = new (require('../Lexer'))(true)
 const InternalBuffer = require('../Buffer')
 const CE = require('../Exceptions')
 
@@ -46,7 +47,7 @@ class TemplateCompiler {
    * @return {Regex}
    */
   _makeBlockRegex () {
-    return new RegExp(`^\\s*\@(${_.keys(this.tags).join('|')})(?:\\((.*)\\))?`)
+    return new RegExp(`^\\s*\\@(${_.keys(this.tags).join('|')})(?:\\((.*)\\))?`)
   }
 
   /**
@@ -237,7 +238,9 @@ class TemplateCompiler {
    */
   compile () {
     this.toAst()
-    return this.compileAst()
+    const output = this.compileAst()
+    debug('compiled template to %s', output)
+    return output
   }
 }
 

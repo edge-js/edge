@@ -1,29 +1,8 @@
 'use strict'
 
 const nunjucks = require('nunjucks')
-const suite = new(require('benchmark')).Suite
-const Template = require('../src/Template/compiler')
-const ifTag = require('../src/Tags/').ifTag
-const elseIfTag = require('../src/Tags/').elseIfTag
-const elseTag = require('../src/Tags/').elseTag
-
-const tags = {
-  if: {
-    name: 'if',
-    isBlock: true,
-    compile: ifTag.compile.bind(ifTag)
-  },
-  elseif: {
-    name: 'elseif',
-    isBlock: false,
-    compile: elseIfTag.compile.bind(elseIfTag)
-  },
-  else: {
-    name: 'else',
-    isBlock: false,
-    compile: elseTag.compile.bind(elseTag)
-  }
-}
+const suite = new (require('benchmark')).Suite
+const edge = new (require('../src/Edge'))()
 
 const edgeStatement = `
 @if(username === 'virk')
@@ -42,31 +21,29 @@ const nunjucksStatement = `
 `
 
 function compileEdge () {
-  const template = new Template(tags, edgeStatement)
-  return template.compile()
+  return edge.compileString(edgeStatement)
 }
 
-const env = new nunjucks.Environment({
-  noCache: false
+nunjucks.configure('', {
+  noCache: true
 })
 
 function compileNunjucks () {
-  return nunjucks.precompileString(nunjucksStatement, {
-    name: 'foo',
-    env: env
+  return nunjucks.renderString(nunjucksStatement, {
+    username: 'foo'
   })
 }
 
-suite.add('Edge', function() {
+suite.add('Edge', function () {
   compileEdge()
 })
-.add('Nunjucks', function() {
+.add('Nunjucks', function () {
   compileNunjucks()
 })
-.on('cycle', function(event) {
+.on('cycle', function (event) {
   console.log(String(event.target))
 })
-.on('complete', function() {
+.on('complete', function () {
   console.log('Fastest is ' + this.filter('fastest').map('name'))
 })
 .run()

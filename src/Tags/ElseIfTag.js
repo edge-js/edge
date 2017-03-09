@@ -9,6 +9,12 @@
  * file that was distributed with this source code.
 */
 
+/**
+ * The official elseif tag. It is used
+ * as `@elseif` inside templates.
+ *
+ * @class ElseIfTag
+ */
 class ElseIfTag {
   get allowedExpressions () {
     return ['BinaryExpression', 'Literal', 'Identifier', 'CallExpression', 'MemberExpression']
@@ -66,7 +72,8 @@ class ElseIfTag {
   }
 
   /**
-   * Method to be called on runtime.
+   * Nothing needs to be in done in runtime for
+   * an elseif tag.
    *
    * @method run
    */
