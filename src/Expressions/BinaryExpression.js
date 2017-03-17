@@ -1,7 +1,7 @@
 'use strict'
 
 /*
- * adonis-edge
+ * edge
  *
  * (c) Harminder Virk <virk@adonisjs.com>
  *
@@ -11,6 +11,22 @@
 
 const BaseExpression = require('./BaseExpression')
 
+/**
+ * Binary expression parses the binary expression
+ * into tokens.
+ *
+ * @class BinaryExpression
+ * @extends {BaseExpression}
+ * @constructor
+ *
+ * @example
+ * ```
+ * // following the valid binary expressions
+ * username === 'virk'
+ * username !== 'virk'
+ * 2 * 2 === 4
+ * ```
+ */
 class BinaryExpression extends BaseExpression {
   constructor (lexer) {
     super(lexer)

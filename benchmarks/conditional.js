@@ -1,7 +1,7 @@
 'use strict'
 
 const nunjucks = require('nunjucks')
-const suite = new (require('benchmark')).Suite
+const suite = new (require('benchmark')).Suite()
 const edge = new (require('../src/Edge'))()
 
 const edgeStatement = `
@@ -21,7 +21,7 @@ const nunjucksStatement = `
 `
 
 function compileEdge () {
-  return edge.compileString(edgeStatement)
+  return edge.compileString(edgeStatement, { username: 'virk' })
 }
 
 nunjucks.configure('', {
@@ -29,8 +29,8 @@ nunjucks.configure('', {
 })
 
 function compileNunjucks () {
-  return nunjucks.renderString(nunjucksStatement, {
-    username: 'foo'
+  return nunjucks.precompileString(nunjucksStatement, {
+    name: 'foo'
   })
 }
 

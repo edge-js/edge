@@ -1,7 +1,7 @@
 'use strict'
 
 /*
- * adonis-edge
+ * edge
  *
  * (c) Harminder Virk <virk@adonisjs.com>
  *
@@ -11,6 +11,20 @@
 
 const BaseExpression = require('./BaseExpression')
 
+/**
+ * Assigment expression parses the assignment into
+ * tokens.
+ *
+ * @class AssignmentExpression
+ * @extends {BaseExpression}
+ * @constructor
+ *
+ * @example
+ * ```
+ * // the following is a valid assignment expression.
+ * username = 'virk'
+ * ```
+ */
 class AssignmentExpression extends BaseExpression {
   constructor (lexer) {
     super(lexer)

@@ -1,7 +1,7 @@
 'use strict'
 
 /*
- * adonis-edge
+ * edge
  *
  * (c) Harminder Virk <virk@adonisjs.com>
  *
@@ -9,21 +9,21 @@
  * file that was distributed with this source code.
 */
 
+const BaseTag = require('./BaseTag')
+
 /**
  * The official elseif tag. It is used
  * as `@elseif` inside templates.
  *
  * @class ElseIfTag
+ * @extends {BaseTag}
+ * @static
  */
-class ElseIfTag {
-  get allowedExpressions () {
-    return ['BinaryExpression', 'Literal', 'Identifier', 'CallExpression', 'MemberExpression']
-  }
-
+class ElseIfTag extends BaseTag {
   /**
    * The tag name to used for registering the tag
    *
-   * @method tagName
+   * @attribute tagName
    *
    * @return {String}
    */
@@ -35,12 +35,23 @@ class ElseIfTag {
    * Whether tag is a block level tag or
    * not.
    *
-   * @method isBlock
+   * @attribute isBlock
    *
    * @return {Boolean}
    */
   get isBlock () {
     return false
+  }
+
+  /**
+   * The expressions to be allowed to an elseif block
+   *
+   * @attribute allowedExpressions
+   *
+   * @return {Array}
+   */
+  get allowedExpressions () {
+    return ['BinaryExpression', 'Literal', 'Identifier', 'CallExpression', 'MemberExpression']
   }
 
   /**
@@ -58,10 +69,7 @@ class ElseIfTag {
    * @return {void}
    */
   compile (parser, lexer, buffer, { body, childs, lineno }) {
-    /**
-     * Parse the statement to a compiled statement
-     */
-    const compiledStatement = lexer.parseRaw(body, this.allowedExpressions).toStatement()
+    const compiledStatement = this._compileStatement(lexer, body, lineno).toStatement()
 
     /**
      * Write to buffer.
@@ -81,4 +89,4 @@ class ElseIfTag {
   }
 }
 
-module.exports = new ElseIfTag()
+module.exports = ElseIfTag

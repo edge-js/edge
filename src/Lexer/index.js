@@ -1,7 +1,7 @@
 'use strict'
 
 /*
- * adonis-edge
+ * edge
  *
  * (c) Harminder Virk <virk@adonisjs.com>
  *
@@ -26,11 +26,13 @@ function _toEsprima (statement) {
 }
 
 /**
- * Lexer is used to parse a given expression from
- * javascript into tokens and convert it back
- * to a statement.
+ * Lexer is used to parse Javascript expression from
+ * string into internal expressions. Later internal
+ * expression can be used to get propery javascript
+ * statements.
  *
  * @class Lexer
+ * @constructor
  */
 class Lexer {
   constructor (memoize) {
@@ -50,7 +52,7 @@ class Lexer {
    * @return {String}
    */
   get resolveFn () {
-    return 'this.resolve'
+    return 'this.context.resolve'
   }
 
   /**
@@ -62,7 +64,7 @@ class Lexer {
    * @return {String}
    */
   get accessFn () {
-    return 'this.accessChild'
+    return 'this.context.accessChild'
   }
 
   /**
@@ -74,7 +76,7 @@ class Lexer {
    * @return {String}
    */
   get callFn () {
-    return 'this.callFn'
+    return 'this.context.callFn'
   }
 
   /**
@@ -86,7 +88,7 @@ class Lexer {
    * @return {String}
    */
   get newFrameFn () {
-    return 'this.newFrame'
+    return 'this.context.newFrame'
   }
 
   /**
@@ -99,7 +101,7 @@ class Lexer {
    * @return {String}
    */
   get setOnFrameFn () {
-    return 'this.setOnFrame'
+    return 'this.context.setOnFrame'
   }
 
   /**
@@ -111,22 +113,31 @@ class Lexer {
    * @return {String}
    */
   get clearFrameFn () {
-    return 'this.clearFrame'
+    return 'this.context.clearFrame'
   }
 
   /**
-   * Parse a raw statement to an expression
-   * or a statement object.
+   * The method to be used for escaping
+   * the content
    *
-   * @method parseRaw
+   * @attribute escapeFn
    *
-   * @param  {String}   statement
-   * @param  {Array}    [allowed] The expressions to be allowed otherwise thrown exception
-   *
-   * @return {Object}
+   * @return {String}
    */
-  parseRaw (statement, allowed = []) {
-    return this.parse(this._toEsprima(statement), allowed)
+  get escapeFn () {
+    return 'this.context.escape'
+  }
+
+  /**
+   * The method to be used for rendering
+   * the template in runtime
+   *
+   * @attribute runTimeRenderFn
+   *
+   * @return {String}
+   */
+  get runTimeRenderFn () {
+    return 'this.runTimeRender'
   }
 
   /**
@@ -152,6 +163,21 @@ class Lexer {
     }
 
     throw CE.InvalidExpressionException.notAllowed(allowed, current, term)
+  }
+
+  /**
+   * Parse a raw statement to an expression
+   * or a statement object.
+   *
+   * @method parseRaw
+   *
+   * @param  {String}   statement
+   * @param  {Array}    [allowed] The expressions to be allowed otherwise thrown exception
+   *
+   * @return {Object}
+   */
+  parseRaw (statement, allowed = []) {
+    return this.parse(this._toEsprima(statement), allowed)
   }
 
   /**
@@ -201,6 +227,7 @@ class Lexer {
    */
   parseStatement (expression, allowed = []) {
     debug('parsing %s statement', expression.type)
+
     this._validateType(allowed, expression.type, 'statement')
 
     if (Statements[expression.type]) {
@@ -225,6 +252,7 @@ class Lexer {
    */
   parseExpression (expression, allowed = []) {
     debug('parsing %s', expression.type)
+
     this._validateType(allowed, expression.type, 'expression')
 
     if (Expressions[expression.type]) {
@@ -250,6 +278,7 @@ class Lexer {
    */
   parse (expression, allowed = []) {
     debug('attempting to parse %s', expression.type)
+
     try {
       if (this.isStatement(expression.type)) {
         return this.parseStatement(expression, allowed)

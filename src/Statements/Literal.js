@@ -1,7 +1,7 @@
 'use strict'
 
 /*
- * adonis-edge
+ * edge
  *
  * (c) Harminder Virk <virk@adonisjs.com>
  *

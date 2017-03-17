@@ -1,7 +1,7 @@
 'use strict'
 
 /*
- * adonis-edge
+ * edge
  *
  * (c) Harminder Virk <virk@adonisjs.com>
  *
@@ -10,7 +10,28 @@
 */
 
 const BaseExpression = require('./BaseExpression')
+const CE = require('../Exceptions')
 
+/**
+ * Call expression parses the a function call
+ * into tokens. Also it gracefully handles
+ * the raw functions and functions called
+ * via prototype.
+ *
+ * @class CallExpression
+ * @extends {BaseExpression}
+ * @constructor
+ *
+ * @example
+ * ```
+ * // raw functions
+ * count(users)
+ *
+ * // prototype functions
+ * ['virk', 'nikk'].indexOf('nikk')
+ * 'virk'.includes('v')
+ * ```
+ */
 class CallExpression extends BaseExpression {
   constructor (lexer) {
     super(lexer)
@@ -35,7 +56,7 @@ class CallExpression extends BaseExpression {
    */
   parse (expression) {
     if (this._lexer.isExpression(expression.callee.type) && expression.callee.type !== 'MemberExpression') {
-      throw NE.InvalidArgumentException.cannotCallFunction(expression.callee.type)
+      throw CE.InvalidArgumentException.cannotCallFunction(expression.callee.type)
     }
 
     this._tokens.callee = this._lexer.parse(expression.callee)
@@ -62,7 +83,7 @@ class CallExpression extends BaseExpression {
       /**
        * Fetch all members
        */
-      const members = this._tokens.callee.getMembers()
+      const members = callee.getMembers()
 
       /**
        * Consider the last member to be the actual

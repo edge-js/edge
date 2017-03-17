@@ -1,7 +1,7 @@
 'use strict'
 
 /*
- * adonis-edge
+ * edge
  *
  * (c) Harminder Virk <virk@adonisjs.com>
  *
@@ -13,9 +13,11 @@ const NE = require('node-exceptions')
 const _ = require('lodash')
 
 /**
- * Exception class responsible for throwing invalid expression.
+ * Exception class responsible for throwing invalid expression
+ * exceptions.
  *
  * @class  InvalidExpressionException
+ * @static
  */
 class InvalidExpressionException extends NE.LogicalException {
   /**
@@ -48,6 +50,25 @@ class InvalidExpressionException extends NE.LogicalException {
   }
 
   /**
+   * A generic expression with the ability to attach
+   * lineno and charno to the error.
+   *
+   * @method generic
+   *
+   * @param  {String} message
+   * @param  {Number} lineno
+   * @param  {Number} charno
+   *
+   * @return {Object}
+   */
+  static generic (message, lineno, charno) {
+    const error = new this(message, 500, 'E_INVALID_EXPRESSION')
+    error.lineno = lineno
+    error.charno = charno
+    return error
+  }
+
+  /**
    * This exception is throw when invalid expression is passed
    * to a tag. This exception contains more context on which
    * line/tag and what expression was used.
@@ -57,12 +78,16 @@ class InvalidExpressionException extends NE.LogicalException {
    * @param  {String}  statement
    * @param  {String}  tagName
    * @param  {Number}  lineno
+   * @param  {Number}  charno
    *
    * @return {Object}
    */
-  static invalidTagExpression (statement, tagName, lineno) {
-    const message = `lineno:${lineno} Invalid expression <${statement}> passed to (${tagName}) block.`
-    return new this(message.trim(), 500, 'E_INVALID_EXPRESSION')
+  static invalidTagExpression (statement, tagName, lineno, charno) {
+    const message = `Invalid expression <${statement}> passed to (${tagName}) block`
+    const error = new this(message, 500, 'E_INVALID_EXPRESSION')
+    error.lineno = lineno
+    error.charno = charno
+    return error
   }
 
   /**
@@ -72,15 +97,15 @@ class InvalidExpressionException extends NE.LogicalException {
    *
    * @param  {String} statement
    * @param  {Number} lineno
-   * @param  {Number} indexno
+   * @param  {Number} charno
    *
    * @return {Object}
    */
-  static invalidLineExpression (statement, lineno, indexno) {
-    let message = `lineno:${lineno} `
-    message += indexno && `char:${indexno} `
-    message += `Invalid expression <${statement}>`
-    return new this(message, 500, 'E_INVALID_EXPRESSION')
+  static invalidLineExpression (statement, lineno, charno) {
+    const error = new this(`Invalid expression <${statement}>`, 500, 'E_INVALID_EXPRESSION')
+    error.lineno = lineno
+    error.charno = charno
+    return error
   }
 }
 
@@ -91,7 +116,6 @@ class InvalidExpressionException extends NE.LogicalException {
  * @class InvalidTemplateException
  */
 class InvalidTemplateException extends NE.LogicalException {
-
   /**
    * Exception thrown when unclosed block tags are
    * found in a template.
@@ -111,9 +135,10 @@ class InvalidTemplateException extends NE.LogicalException {
    * @return {Object}
    */
   static unClosedTag (tagName, lineno, statement) {
-    const message = `lineno:${lineno} Unclosed (${tagName}) tag found as <${statement}> statement. Make sure to close it as (end${tagName})`
-
-    return new this(message, 500, 'E_UNCLOSED_TAG')
+    const message = `Unclosed (${tagName}) tag found as <${statement}> statement. Make sure to close it as (end${tagName})`
+    const error = new this(message, 500, 'E_UNCLOSED_TAG')
+    error.lineno = lineno
+    return error
   }
 }
 
@@ -145,6 +170,19 @@ class InvalidArgumentException extends NE.InvalidArgumentException {
     const message = `Cannot call function on ${expressionType} expression`
     return new this(message, 500, 'E_CANNOT_CALL_FN')
   }
+
+  /**
+   * This exception is thrown when argument is not valid
+   *
+   * @method invalidArgument
+   *
+   * @param  {String}        message
+   *
+   * @return {Object}
+   */
+  static invalidArgument (message) {
+    return new this(message, 500, 'E_INVALID_ARGUMENT')
+  }
 }
 
 /**
@@ -168,6 +206,68 @@ class RuntimeException extends NE.RuntimeException {
   static cannotParse (errorMessage) {
     const message = `${errorMessage} Report to the package author`
     return new this(message, 500, 'E_CANNOT_PARSE')
+  }
+
+  /**
+   * Exception is thrown when trying to make use of a presenter
+   * and it does not exists on a given location.
+   *
+   * @method missingPresenter
+   *
+   * @param  {String}         presenterName
+   * @param  {String}         location
+   *
+   * @return {Object}
+   */
+  static missingPresenter (presenterName, location) {
+    const message = `Cannot load ${presenterName} Presenter. Make sure the file exists at ${location} location.`
+    return new this(message, 500, 'E_MISSING_PRESENTER')
+  }
+
+  /**
+   * Exception is thrown when trying to make use of a presenter
+   * and the `presentersPath` has never been defined.
+   *
+   * @method unregisterdPresenters
+   *
+   * @param  {String}              presenterName
+   *
+   * @return {Object}
+   */
+  static unregisterdPresenters (presenterName) {
+    const message = `Cannot load ${presenterName} Presenter. Make sure to register the presenters path first.`
+    return new this(message, 500, 'E_MISSING_PRESENTER')
+  }
+
+  /**
+   * Exception thrown when trying to render a view
+   * and it does not exists on a given location.
+   *
+   * @method missingPresenter
+   *
+   * @param  {String}         viewName
+   * @param  {String}         location
+   *
+   * @return {Object}
+   */
+  static missingView (viewName, location) {
+    const message = `Cannot render ${viewName}. Make sure the file exists at ${location} location.`
+    return new this(message, 500, 'E_MISSING_VIEW')
+  }
+
+  /**
+   * Exception is thrown when trying to render a view
+   * and the `viewsPath` has never been defined.
+   *
+   * @method unregisterdPresenters
+   *
+   * @param  {String}              viewName
+   *
+   * @return {Object}
+   */
+  static unregisteredViews (viewName) {
+    const message = `Cannot render ${viewName}. Make sure to register the views path first.`
+    return new this(message, 500, 'E_MISSING_VIEW')
   }
 }
 

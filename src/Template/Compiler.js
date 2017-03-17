@@ -1,7 +1,7 @@
 'use strict'
 
 /*
- * adonis-edge
+ * edge
  *
  * (c) Harminder Virk <virk@adonisjs.com>
  *
@@ -9,12 +9,11 @@
  * file that was distributed with this source code.
 */
 
-const os = require('os')
-const _ = require('lodash')
 const debug = require('debug')('edge:compiler')
 const lexer = new (require('../Lexer'))(true)
 const InternalBuffer = require('../Buffer')
 const CE = require('../Exceptions')
+const Ast = require('../Ast')
 
 /**
  * Static expression. They never change
@@ -23,31 +22,19 @@ const expressions = {
   interpolate: /(@)?{{({)?\s+(.+?)\s+(})?}}/g
 }
 
+/**
+ * Template compiler compiles a template into a
+ * Javascript executable string.
+ *
+ * @class TemplateCompiler
+ * @constructor
+ */
 class TemplateCompiler {
-  constructor (tags, template) {
-    this.tags = tags
-    /**
-     * Creating a regex for only available tags. Which means
-     * any expression starting with `@` will not be treated
-     * as a tag unless it has been defined as a tag.
-     */
-    this.blockExpression = this._makeBlockRegex()
-    this.template = template
-    this.ast = []
-    this.openedTags = []
-    this.buffer = new InternalBuffer()
+  constructor (tags, loader, asFunction = false) {
+    this._tags = tags
     this._processedLines = {}
-  }
-
-  /**
-   * Makes a dynamic regex for all tags
-   *
-   * @method _makeBlockRegex
-   *
-   * @return {Regex}
-   */
-  _makeBlockRegex () {
-    return new RegExp(`^\\s*\\@(${_.keys(this.tags).join('|')})(?:\\((.*)\\))?`)
+    this._loader = loader
+    this.buffer = new InternalBuffer(asFunction)
   }
 
   /**
@@ -57,21 +44,26 @@ class TemplateCompiler {
    * @method _parseTagLine
    *
    * @param  {Object}      line
+   * @param  {Boolean}     writeToBuffer
    *
    * @return {void}
+   *
+   * @private
    */
-  _parseTagLine (line) {
-    try {
-      this.tags[line.tag].compile(this, lexer, this.buffer, {
-        body: line.args,
-        childs: line.childs,
-        lineno: line.lineno
-      })
-    } catch (e) {
-      if (e.name === 'InvalidExpressionException') {
-        throw e
-      }
-      throw CE.InvalidExpressionException.invalidTagExpression(line.args, line.tag, line.lineno)
+  _parseTagLine (line, writeToBuffer) {
+    const buffer = writeToBuffer ? this.buffer : new InternalBuffer(true)
+    this._tags[line.tag].compile(this, lexer, buffer, {
+      body: line.args,
+      childs: line.childs,
+      lineno: line.lineno
+    })
+
+    /**
+     * Return the buffer lines when write to
+     * buffer is not set to true.
+     */
+    if (!writeToBuffer) {
+      return `\${${buffer.getLines().replace(/^return/, '')}}`
     }
   }
 
@@ -84,11 +76,19 @@ class TemplateCompiler {
    * @param  {Object}      line
    *
    * @return {void}
+   *
+   * @private
    */
-  _parseRawLine ({ body, lineno }) {
+  _parseRawLine ({ body, lineno }, writeToBuffer) {
+    /**
+     * If line has already been processed, use it from
+     * cache.
+     */
     if (this._processedLines[body]) {
-      this.buffer.writeToOutput(`${this._processedLines[body]}`)
-      return
+      if (writeToBuffer) {
+        this.buffer.writeToOutput(`${this._processedLines[body]}`)
+      }
+      return this._processedLines[body]
     }
 
     const contents = body.replace(expressions.interpolate, (i, group, oCurly, matched, eCurly) => {
@@ -102,7 +102,7 @@ class TemplateCompiler {
 
       try {
         const parsedStatement = lexer.parseRaw(matched).toStatement()
-        return oCurly && eCurly ? `\${${parsedStatement}}` : `\${this.escape(${parsedStatement})}`
+        return oCurly && eCurly ? `\${${parsedStatement}}` : `\${${lexer.escapeFn}(${parsedStatement})}`
       } catch (e) {
         throw CE.InvalidExpressionException.invalidLineExpression(matched, lineno, body.indexOf(matched))
       }
@@ -113,7 +113,10 @@ class TemplateCompiler {
      * the expression when it is used twice in a single template.
      */
     this._processedLines[body] = contents
-    this.buffer.writeToOutput(`${contents}`)
+    if (writeToBuffer) {
+      this.buffer.writeToOutput(`${contents}`)
+    }
+    return contents
   }
 
   /**
@@ -122,88 +125,30 @@ class TemplateCompiler {
    *
    * @method toAst
    *
+   * @param {String} template
+   *
    * @return {Array}
+   *
+   * @private
    */
-  toAst () {
-    this
-      .template
-      .trim()
-      .split(os.EOL)
-      .forEach((line, number) => {
-        const [match, tag, args] = this.blockExpression.exec(line) || []
-        const token = {
-          tag: null,
-          args: null,
-          childs: [],
-          body: line,
-          lineno: (number + 1)
-        }
-
-        /**
-         * STEP: 1
-         * Add tag and args property if there is
-         * a regex match
-         */
-        if (tag) {
-          token.tag = tag
-          token.args = args
-          // trim if line is a tag otherwise we need to preserve whitespace
-          token.body = token.body.trim()
-        }
-
-        /**
-         * STEP: 2
-         * Look for the recently opened tags and
-         * push new tags as childs until it is
-         * closed.
-         */
-        const lastTag = _.last(this.openedTags)
-        if (lastTag) {
-          (`@end${lastTag.tag}` === `${token.body}`.trim()) ? this.openedTags.pop() : lastTag.childs.push(token)
-          return
-        }
-
-        /**
-         * STEP: 3 Push to opened tags when tag
-         * has a tag property
-         */
-        if (token.tag && this.tags[token.tag].isBlock === true) {
-          this.openedTags.push(token)
-        }
-
-        /**
-         * STEP: 4 Push to ast array
-         */
-        this.ast.push(token)
-      })
-
-    /**
-     * Bad template with opened tags found
-     */
-    const openedTag = this.openedTags[0]
-
-    /**
-     * Make sure there are no opened tags found
-     */
-    if (openedTag) {
-      throw CE.InvalidTemplateException.unClosedTag(openedTag.tag, openedTag.lineno, openedTag.body)
-    }
-
-    return this.ast
+  _toAst (template) {
+    return new Ast(this._tags, template).parse()
   }
 
   /**
    * Compiles the generated ast to an array
    * of pre-compiled lines
    *
-   * @param {Array} [ast]
+   * @param {Array} ast
    *
-   * @method compileAst
+   * @method _compileAst
    *
    * @return {Array}
+   *
+   * @private
    */
-  compileAst () {
-    this.ast.forEach(this.parseLine.bind(this))
+  _compileAst (ast) {
+    ast.forEach((leaf) => this.parseLine(leaf))
     return this.buffer.getLines()
   }
 
@@ -215,16 +160,15 @@ class TemplateCompiler {
    * @method parseLine
    *
    * @param  {String}  line
+   * @param  {Boolean} writeToBuffer
    *
    * @return {void}
    */
-  parseLine (line) {
+  parseLine (line, writeToBuffer = true) {
     if (line.tag) {
-      this._parseTagLine(line)
-      return
+      return this._parseTagLine(line, writeToBuffer)
     }
-
-    this._parseRawLine(line)
+    return this._parseRawLine(line, writeToBuffer)
   }
 
   /**
@@ -234,11 +178,28 @@ class TemplateCompiler {
    *
    * @method compile
    *
+   * @param {String} view
+   *
    * @return {Array}
    */
-  compile () {
-    this.toAst()
-    const output = this.compileAst()
+  compile (view) {
+    const template = this._loader.load(view)
+    const output = this._compileAst(this._toAst(template))
+    debug('compiled template to %s', output)
+    return output
+  }
+
+  /**
+   * Compile a raw string
+   *
+   * @method compileString
+   *
+   * @param  {String}      statement
+   *
+   * @return {String}
+   */
+  compileString (statement) {
+    const output = this._compileAst(this._toAst(statement))
     debug('compiled template to %s', output)
     return output
   }

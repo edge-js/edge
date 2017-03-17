@@ -1,7 +1,7 @@
 'use strict'
 
 /*
- * adonis-edge
+ * edge
  *
  * (c) Harminder Virk <virk@adonisjs.com>
  *
@@ -11,6 +11,15 @@
 
 const BaseExpression = require('./BaseExpression')
 
+/**
+ * Object expression parses a javascript object
+ * into tokens.
+ *
+ * @class ObjectExpression
+ * @extends {BaseExpression}
+ * @constructor
+ *
+ */
 class ObjectExpression extends BaseExpression {
   constructor (lexer) {
     super(lexer)
@@ -29,6 +38,8 @@ class ObjectExpression extends BaseExpression {
    * @param  {Object} member
    *
    * @return {String}
+   *
+   * @private
    */
   _getKey (member) {
     const isRefrencedKey = member.computed && !member.shorthand
@@ -43,6 +54,8 @@ class ObjectExpression extends BaseExpression {
    * @param  {Object}  member
    *
    * @return {String}
+   *
+   * @private
    */
   _getValue (member) {
     return this._convertToStatement(member.value, true)

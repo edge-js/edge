@@ -1,7 +1,7 @@
 'use strict'
 
 /*
- * adonis-edge
+ * edge
  *
  * (c) Harminder Virk <virk@adonisjs.com>
  *
@@ -10,8 +10,11 @@
 */
 
 module.exports = {
-  ifTag: require('./IfTag'),
-  elseIfTag: require('./ElseIfTag'),
-  elseTag: require('./ElseTag'),
-  eachTag: require('./eachTag')
+  ifTag: new (require('./IfTag'))(),
+  elseIfTag: new (require('./ElseIfTag'))(),
+  elseTag: new (require('./ElseTag'))(),
+  eachTag: new (require('./EachTag'))(),
+  includeTag: new (require('./IncludeTag'))(),
+  componentTag: new (require('./ComponentTag'))(),
+  slotTag: new (require('./SlotTag'))()
 }

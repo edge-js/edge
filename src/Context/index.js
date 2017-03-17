@@ -16,20 +16,30 @@ const escape = require('escape-html')
 /**
  * Runtime context used to run the compiled
  * templates. View **locals**, **globals**,
- * **presenters** all are accessible from
- * the context.
+ * and **presenter** all are accessible
+ * from the context.
  *
  * Values are resolved in following order.
  *
  * 1. Frames
  * 2. Presenter
- * 3. Data
+ * 3. Data/Locals
  * 4. Globals
  *
  * @class Context
+ *
  * @constructor
  */
 class Context {
+  /**
+   * The constructor for Context
+   *
+   * @method constructor
+   *
+   * @param  {String}    viewName
+   * @param  {Object}    [presenter]
+   * @param  {Object}    [globals]
+   */
   constructor (viewName, presenter = {}, globals = {}) {
     debug('created context for %s view with %s presenter', viewName, presenter.constructor.name)
     this._viewName = viewName
@@ -183,13 +193,19 @@ class Context {
    * @param  {Array}    childs
    *
    * @return {Mixed}
+   *
+   * @example
+   * ```
+   * const users = [{username: 'foo'}]
+   * const username = accessChild(users, ['0', 'username'])
+   * ```
    */
   accessChild (hash, childs) {
     return _.get(hash, childs)
   }
 
   /**
-   * Escapes the input by sanitizing HTML
+   * Escapes the input by sanitizing HTML.
    *
    * @method escape
    *
@@ -206,7 +222,7 @@ class Context {
    *
    * 1. frame
    * 2. presenter
-   * 3. presenter data
+   * 3. presenter data/locals
    * 4. global
    *
    * @method resolve

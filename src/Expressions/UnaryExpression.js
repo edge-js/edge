@@ -1,7 +1,7 @@
 'use strict'
 
 /*
- * adonis-edge
+ * edge
  *
  * (c) Harminder Virk <virk@adonisjs.com>
  *
@@ -11,6 +11,21 @@
 
 const BaseExpression = require('./BaseExpression')
 
+/**
+ * Unary expression parses *unary* statement into tokens.
+ *
+ * @class UnaryExpression
+ * @extends {BaseExpression}
+ * @constructor
+ *
+ * @example
+ * ```
+ * // following are the valid Sequence expressions
+ * !username
+ * !!username
+ * ```
+ *
+ */
 class UnaryExpression extends BaseExpression {
   constructor (lexer) {
     super(lexer)
@@ -33,7 +48,7 @@ class UnaryExpression extends BaseExpression {
    * @return {void}
    */
   parse (expression) {
-    this._tokens.operator = expression.operator,
+    this._tokens.operator = expression.operator
     this._tokens.arg = this._lexer.parse(expression.argument)
   }
 
@@ -47,7 +62,6 @@ class UnaryExpression extends BaseExpression {
   toStatement () {
     return `${this.tokens.operator}${this._convertToStatement(this._tokens.arg, true)}`
   }
-
 }
 
 module.exports = UnaryExpression

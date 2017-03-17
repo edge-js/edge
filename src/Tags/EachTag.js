@@ -1,7 +1,7 @@
 'use strict'
 
 /*
- * adonis-edge
+ * edge
  *
  * (c) Harminder Virk <virk@adonisjs.com>
  *
@@ -9,15 +9,19 @@
  * file that was distributed with this source code.
 */
 
+const BaseTag = require('./BaseTag')
 const _ = require('lodash')
+const CE = require('../Exceptions')
 
 /**
  * The official each tag. It is used
  * as `@each` inside templates.
  *
  * @class EachTag
+ * @extends {BaseTag}
+ * @static
  */
-class EachTag {
+class EachTag extends BaseTag {
   /**
    * The tag name
    *
@@ -41,9 +45,11 @@ class EachTag {
   }
 
   /**
-   * The allowed expressions
+   * The expressions allowed to be passed to the
+   * tag. Any other expressions will cause an
+   * error.
    *
-   * @attribute allowedExpressions
+   * @method allowedExpressions
    *
    * @return {Array}
    */
@@ -66,20 +72,56 @@ class EachTag {
    * @return {void}
    */
   compile (parser, lexer, buffer, { body, childs, lineno }) {
-    /**
-     * Compile the statement to expression instance. Also throw an exception
-     * when expression is not in allowed expressions.
-     */
-    const compiledStatement = lexer.parseRaw(body, this.allowedExpressions)
+    const compiledStatement = this._compileStatement(lexer, body, lineno)
 
     /**
      * Throw exception when invalid operator is used.
      */
     if (compiledStatement.tokens.operator !== 'in') {
-      throw new Error(`lineno: ${lineno} Invalid operator <${compiledStatement.tokens.operator}> used inside an each block. Make sure to use <in> operator`)
+      const message = `Invalid operator <${compiledStatement.tokens.operator}> used inside an each block. Make sure to use <in> operator`
+      throw CE.InvalidExpressionException.generic(message, lineno, 0)
     }
 
-    const itteratorName = compiledStatement.tokens.lhs.value
+    const lhs = compiledStatement.tokens.lhs
+    const rhs = compiledStatement.rhsStatement()
+
+    /**
+     * Throw exception when invalid expression passed
+     * inside an each block.
+     */
+    if (!_.includes(['source', 'sequence'], lhs.type)) {
+      const message = `Invalid left hand side expression <${body}> used inside an each block.`
+      throw CE.InvalidExpressionException.generic(message, lineno, 0)
+    }
+
+    /**
+     * If lhs.type is sequence then we need to pull the itteratorName
+     * and itteratorKey from the sequence expresssion itself.
+     *
+     * @example
+     * (user, index) from users
+     */
+    const itteratorName = lhs.type === 'sequence' ? lhs.tokens.members[0].value : lhs.value
+    const itteratorKey = lhs.type === 'sequence' ? lhs.tokens.members[1].value : ''
+
+    /**
+     * If there is an else block, we need to find the childs
+     * before the else tag and close the each block, before
+     * else beings. Also we need to wrap each inside an
+     * if block.
+     */
+    const elseIndex = _.findIndex(childs, (child) => child.tag === 'else')
+    const hasElse = elseIndex > -1
+    const elseChilds = hasElse ? childs.splice(elseIndex) : childs
+
+    /**
+     * Wrap each inside if block when child
+     * has a else tag
+     */
+    if (hasElse) {
+      buffer.writeLine(`if (this.context.hasLength(${rhs})) {`)
+      buffer.indent()
+    }
 
     /**
      * Create a new frame before running the
@@ -88,9 +130,9 @@ class EachTag {
     buffer.writeLine(`${lexer.newFrameFn}()`)
 
     /**
-     * Write the actual each loop processor
+     * Write the actual each loop
      */
-    buffer.writeLine(`this.loop(${compiledStatement.rhsStatement()}, (${itteratorName}, loop) => {`)
+    buffer.writeLine(`this.context.loop(${rhs}, (${itteratorName}, loop) => {`)
     buffer.indent()
 
     /**
@@ -101,9 +143,16 @@ class EachTag {
     buffer.writeLine(`${lexer.setOnFrameFn}('$loop', loop)`)
 
     /**
+     * Set the itterator key when defined
+     */
+    if (itteratorKey) {
+      buffer.writeLine(`${lexer.setOnFrameFn}('${itteratorKey}', loop.key)`)
+    }
+
+    /**
      * Parse all childs
      */
-    childs.forEach(parser.parseLine.bind(parser))
+    childs.forEach((child) => parser.parseLine(child))
 
     /**
      * Close the each loop
@@ -115,6 +164,17 @@ class EachTag {
      * Clear the frame after the each loop is completed
      */
     buffer.writeLine(`${lexer.clearFrameFn}()`)
+
+    /**
+     * Parse childs within else tag defined
+     * within each tag and then close the
+     * opened if tag.
+     */
+    if (hasElse) {
+      elseChilds.forEach((child) => parser.parseLine(child))
+      buffer.dedent()
+      buffer.writeLine('}')
+    }
   }
 
   /**
@@ -127,14 +187,24 @@ class EachTag {
    */
   run (context) {
     context.macro('loop', function (data, callback) {
-      _.each(data, (item, index) => {
+      let index = 0
+      const total = _.size(data)
+      _.each(data, (item, key) => {
         callback(item, {
+          key: key,
           index: index,
-          total: _.size(data)
+          first: index === 0,
+          last: (index + 1 === total),
+          total: total
         })
+        index++
       })
+    })
+
+    context.macro('hasLength', function (data) {
+      return _.size(data)
     })
   }
 }
 
-module.exports = new EachTag()
+module.exports = EachTag

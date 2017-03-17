@@ -1,7 +1,7 @@
 'use strict'
 
 /*
- * adonis-edge
+ * edge
  *
  * (c) Harminder Virk <virk@adonisjs.com>
  *
@@ -11,6 +11,21 @@
 
 const BaseExpression = require('./BaseExpression')
 
+/**
+ * Sequence expression parses a sequence statement seperated
+ * by (comma) into tokens.
+ *
+ * @class SequenceExpression
+ * @extends {BaseExpression}
+ * @constructor
+ *
+ * @example
+ * ```
+ * // following are the valid Sequence expressions
+ * user, age, email
+ * ```
+ *
+ */
 class SequenceExpression extends BaseExpression {
   constructor (lexer) {
     super(lexer)

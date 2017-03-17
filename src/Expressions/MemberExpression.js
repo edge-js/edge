@@ -1,7 +1,7 @@
 'use strict'
 
 /*
- * adonis-edge
+ * edge
  *
  * (c) Harminder Virk <virk@adonisjs.com>
  *
@@ -11,6 +11,21 @@
 
 const BaseExpression = require('./BaseExpression')
 
+/**
+ * Member expression parses an value accessors into tokens.
+ *
+ * @class MemberExpression
+ * @extends {BaseExpression}
+ * @constructor
+ *
+ * @example
+ * ```
+ * // following are the valid Member expressions
+ * user.username
+ * user[0].username
+ * user[username]
+ * ```
+ */
 class MemberExpression extends BaseExpression {
   constructor (lexer) {
     super(lexer)

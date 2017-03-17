@@ -9,16 +9,19 @@
  * file that was distributed with this source code.
 */
 
-const vm = require('vm')
-const Context = require('../Context')
-
+/**
+ * Template runner executes a pre-compiled template.
+ * If the pre-compiled file is a javascript module,
+ * it will be executed as a function. If it is a
+ * function wrapped as a string, then it will
+ * executed via `new Function()`.
+ *
+ * @class TemplateRunner
+ */
 class TemplateRunner {
-  constructor (templateFn, context) {
-    if (context instanceof Context === false) {
-      throw new Error('Cannot run template without a context')
-    }
+  constructor (templateFn, scope) {
     this.templateFn = templateFn
-    this.context = context
+    this.scope = scope
   }
 
   /**
@@ -33,14 +36,23 @@ class TemplateRunner {
     let templateFn = this.templateFn
 
     /**
-     * If template fn is a string, make sure to run
-     * it inside a context.
+     * Throw exception when template is a string and starts
+     * with module.exports.
      */
-    if (typeof (this.templateFn) === 'string') {
-      templateFn = vm.runInNewContext(this.templateFn, { module: module })
+    if (typeof (this.templateFn) === 'string' && this.templateFn.startsWith('module.exports')) {
+      throw new Error('Cannot run template string exported as a module. Make sure to compile template with asFunction set to true')
     }
 
-    return templateFn.bind(this.context)()
+    /**
+     * If template fn is a string, make sure to run
+     * it inside a scope.
+     */
+    if (typeof (this.templateFn) === 'string') {
+      /*eslint no-new-func: "ignore"*/
+      templateFn = new Function(this.templateFn)
+    }
+
+    return templateFn.bind(this.scope)()
   }
 }
 

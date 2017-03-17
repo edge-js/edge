@@ -1,7 +1,7 @@
 'use strict'
 
 /*
- * adonis-edge
+ * edge
  *
  * (c) Harminder Virk <virk@adonisjs.com>
  *
@@ -10,7 +10,8 @@
 */
 
 const _ = require('lodash')
-const Renderer = require('./Renderer')
+const Template = require('../Template')
+const Loader = require('../Loader')
 const Context = require('../Context')
 const ExistingTags = require('../Tags')
 
@@ -24,8 +25,7 @@ class Edge {
   constructor () {
     this._tags = {}
     this._globals = {}
-    this._viewsPath = null
-    this._presentersPath = null
+    this._loader = new Loader()
     this._boot()
   }
 
@@ -47,24 +47,40 @@ class Edge {
    * Returns the render instance to be used
    * for rendering the template.
    *
-   * @method _getRenderer
-   *
-   * @param  {String}     viewName
+   * @method _getTemplate
    *
    * @return {Object}
    *
    * @private
    */
-  _getRenderer (viewName) {
-    return new Renderer(viewName, this._tags, this._globals)
+  _getTemplate () {
+    return new Template(this._tags, this._globals, this._loader)
   }
 
   /**
-   * Registers a new tag
+   * The directory to be used for reading compiled templates
+   *
+   * @method compiledDir
+   *
+   * @param {String} compiledDir
+   *
+   * @return {String}
+   */
+  compiledDir (compiledDir) {
+    this._loader.compiledDir = compiledDir
+  }
+
+  /**
+   * Registers a new tag. A tag must have following
+   * attributes.
+   *
+   * 1. tagName
+   * 2. compile
+   * 3. run
    *
    * @method tag
    *
-   * @param  {Object} tag
+   * @param  {Class} tag
    *
    * @return {void}
    *
@@ -83,15 +99,16 @@ class Edge {
      */
     this._tags[tag.tagName] = {
       name: tag.tagName,
-      isBlock: tag.isBlock,
+      isBlock: !!tag.isBlock,
       compile: tag.compile.bind(tag),
       run: tag.run.bind(tag)
     }
 
     /**
-     * Calling the run method on tag by pass the
-     * context. Here any tag can add macros to
-     * `Context.prototype`
+     * We pass context to the run method of the
+     * tag. The run method should make use
+     * of macro function to add methods
+     * to the context prototype.
      */
     tag.run(Context)
   }
@@ -102,22 +119,20 @@ class Edge {
    * @method global
    *
    * @param  {String}   name
-   * @param  {Function} fn
+   * @param  {Mixed}    value
    *
    * @return {void}
-   *
-   * @throws {Error} If fn is not a function
    */
-  global (name, fn) {
-    if (typeof (fn) !== 'function') {
-      throw new Error('edge.global expects 2nd argument to be a function.')
-    }
-    this._globals[name] = fn
+  global (name, value) {
+    this._globals[name] = value
   }
 
   /**
    * Registers the views path to load views. Path
    * must be absolute.
+   *
+   * **Note** This method does not validates whether
+   * path exists or not.
    *
    * @method registerViews
    *
@@ -126,51 +141,60 @@ class Edge {
    * @return {void}
    */
   registerViews (location) {
-    this._viewsPath = location
-    Renderer.viewsPath = location
+    this._loader.viewsPath = location
   }
 
   /**
-   * Renders the string using the renderer instance
+   * Register the path from where to load the presenters
    *
-   * @method renderString
+   * @method registerPresenters
    *
-   * @param  {String}  inputString
-   * @param  {Object}  [data = {}]
-   *
-   * @return {String}
+   * @return {void}
    */
-  renderString (inputString, data) {
-    return this._getRenderer('unamed').renderString(inputString, data)
+  registerPresenters (location) {
+    this._loader.presentersPath = location
   }
 
   /**
-   * Compiles the string using renderer instance and returns
-   * a string to be invoked as a function.
-   *
-   * @method compileString
-   *
-   * @param  {String}   inputString
-   *
-   * @return {String}
+   * docblock defined in template renderer
    */
-  compileString (inputString) {
-    return this._getRenderer('unamed').compileString(inputString)
+  renderString (...args) {
+    return this._getTemplate().renderString(...args)
   }
 
   /**
-   * Renders a view using it path relative from the
-   * registered views directory
-   *
-   * @method render
-   *
-   * @param  {String}    view
-   * @param  {Object}    [data = {}]
-   *
-   * @return {String}
+   * docblock defined in template renderer
    */
-  render (view, data) {
-    return this._getRenderer(view).render(view, data)
+  compileString (...args) {
+    return this._getTemplate().compileString(...args)
+  }
+
+  /**
+   * docblock defined in template renderer
+   */
+  render (view, ...args) {
+    return this._getTemplate().sourceView(view).render(view, ...args)
+  }
+
+  /**
+   * docblock defined in template renderer
+   */
+  compile (view, ...args) {
+    return this._getTemplate().sourceView(view).compile(view, ...args)
+  }
+
+  /**
+   * docblock defined in template renderer
+   */
+  presenter (...args) {
+    return this._getTemplate().presenter(...args)
+  }
+
+  /**
+   * docblock defined in template renderer
+   */
+  share (...args) {
+    return this._getTemplate().share(...args)
   }
 }
 

@@ -1,7 +1,7 @@
 'use strict'
 
 /*
- * adonis-edge
+ * edge
  *
  * (c) Harminder Virk <virk@adonisjs.com>
  *
@@ -9,15 +9,17 @@
  * file that was distributed with this source code.
 */
 
+const BaseTag = require('./BaseTag')
+
 /**
  * The official if tag. It is used
  * as `@if` inside templates.
+ *
+ * @class IfTag
+ * @extends {BaseTag}
+ * @static
  */
-class IfTag {
-  get allowedExpressions () {
-    return ['BinaryExpression', 'Literal', 'Identifier', 'CallExpression', 'MemberExpression']
-  }
-
+class IfTag extends BaseTag {
   /**
    * The tag name to used for registering the tag
    *
@@ -42,6 +44,19 @@ class IfTag {
   }
 
   /**
+   * The expressions allowed to be passed to the
+   * tag. Any other expressions will cause an
+   * error.
+   *
+   * @attribute allowedExpressions
+   *
+   * @return {Array}
+   */
+  get allowedExpressions () {
+    return ['BinaryExpression', 'Literal', 'Identifier', 'CallExpression', 'MemberExpression']
+  }
+
+  /**
    * Compile the template and write to the buffer.
    *
    * @method compile
@@ -56,10 +71,7 @@ class IfTag {
    * @return {void}
    */
   compile (parser, lexer, buffer, { body, childs, lineno }) {
-    /**
-     * Parse the statement to a compiled statement
-     */
-    const compiledStatement = lexer.parseRaw(body, this.allowedExpressions).toStatement()
+    const compiledStatement = this._compileStatement(lexer, body, lineno).toStatement()
 
     /**
      * Open if tag
@@ -70,7 +82,7 @@ class IfTag {
     /**
      * Re-parse all childs via parser.
      */
-    childs.forEach(parser.parseLine.bind(parser))
+    childs.forEach((child) => parser.parseLine(child))
 
     /**
      * Close the if tag
@@ -89,4 +101,4 @@ class IfTag {
   }
 }
 
-module.exports = new IfTag()
+module.exports = IfTag

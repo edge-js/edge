@@ -1,7 +1,7 @@
 'use strict'
 
 /*
- * adonis-edge
+ * edge
  *
  * (c) Harminder Virk <virk@adonisjs.com>
  *
@@ -9,6 +9,14 @@
  * file that was distributed with this source code.
 */
 
+/**
+ * A base expression class to be extended by other
+ * expressions. It has some helpful methods to
+ * keep the code DRY.
+ *
+ * @class BaseExpression
+ * @constructor
+ */
 class BaseExpression {
   constructor (lexer) {
     this._lexer = lexer
@@ -17,6 +25,8 @@ class BaseExpression {
   /**
    * Returns type of the expression.
    *
+   * @attribute type
+   *
    * @return {String}
    */
   get type () {
@@ -24,8 +34,10 @@ class BaseExpression {
   }
 
   /**
-   * Returns original type of the
+   * Returns original *esprima* type of the
    * expression.
+   *
+   * @attribute originalType
    *
    * @return {String}
    */
@@ -36,6 +48,8 @@ class BaseExpression {
   /**
    * Returns tokens object. Make sure to
    * call parse before accessing tokens.
+   *
+   * @attribute tokens
    *
    * @return {Object}
    */

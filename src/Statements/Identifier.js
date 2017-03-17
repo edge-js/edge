@@ -1,7 +1,7 @@
 'use strict'
 
 /*
- * adonis-edge
+ * edge
  *
  * (c) Harminder Virk <virk@adonisjs.com>
  *
@@ -15,7 +15,7 @@ module.exports = function (expression) {
     type: 'source',
     originalType: expression.type,
     toStatement (unWrapSource) {
-      return unWrapSource ? this.value : `this.resolve('${this.value}')`
+      return unWrapSource ? this.value : `this.context.resolve('${this.value}')`
     }
   }
 }

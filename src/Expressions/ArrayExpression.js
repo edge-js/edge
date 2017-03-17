@@ -1,7 +1,7 @@
 'use strict'
 
 /*
- * adonis-edge
+ * edge
  *
  * (c) Harminder Virk <virk@adonisjs.com>
  *
@@ -11,6 +11,14 @@
 
 const BaseExpression = require('./BaseExpression')
 
+/**
+ * Array expression parses the javascript array
+ * into tokens.
+ *
+ * @class ArrayExpression
+ * @extends {BaseExpression}
+ * @constructor
+ */
 class ArrayExpression extends BaseExpression {
   constructor (lexer) {
     super(lexer)
@@ -21,9 +29,9 @@ class ArrayExpression extends BaseExpression {
   }
 
   /**
-   * Parses the expression. It is responsibility of the
-   * consumer to pass the right expression otherwise
-   * things will blow.
+   * Parses the esprima expression. It is responsibility of the
+   * consumer to pass the right expression otherwise things
+   * will blow.
    *
    * @method parse
    *
@@ -36,8 +44,8 @@ class ArrayExpression extends BaseExpression {
   }
 
   /**
-   * Converts tokens back to an consumable
-   * array string.
+   * Converts parsed tokens back to
+   * consumable statement.
    *
    * @method toStatement
    *

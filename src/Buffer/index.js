@@ -1,7 +1,7 @@
 'use strict'
 
 /*
- * adonis-edge
+ * edge
  *
  * (c) Harminder Virk <virk@adonisjs.com>
  *
@@ -13,25 +13,30 @@ const os = require('os')
 const identString = require('indent-string')
 
 /**
- * Buffer class is used to write the compiled
- * template output. This is not the actual
- * buffer, but a simple class with array
- * to push new lines to.
+ * Buffer class is used to write compiled lines to
+ * an array. Later this array can be used to
+ * save a pre-compiled template.
  *
- * Also it will handle the opening and closing tags
- * for a compile function.
+ * ### Note
+ * Buffer has no idea on how a template is compiled, it is
+ * just a store to keep compiled lines for any given
+ * template.
  *
  * @class Buffer
  * @constructor
  */
 class Buffer {
+  /**
+   * The buffer constructor
+   *
+   * @method constructor
+   *
+   * @param  {Boolean}   asFunction Compile template as a function
+   *                                instead of `module.exports`
+   */
   constructor (asFunction = false) {
     this._lines = []
     this._identation = 0
-    /**
-     * Export the template as function instead of
-     * module.exports.
-     */
     this._asFunction = asFunction
     this._start()
   }
@@ -67,6 +72,17 @@ class Buffer {
     const output = [identString('return out', this._identation)]
     this._asFunction ? output.push('}).bind(this)()') : output.push('}')
     return output
+  }
+
+  /**
+   * The EOL to be used for new lines
+   *
+   * @attribute EOL
+   *
+   * @return {String}
+   */
+  get EOL () {
+    return os.EOL
   }
 
   /**
@@ -138,6 +154,36 @@ class Buffer {
   getLines () {
     const lines = this._lines.concat(this._getEndLines())
     return lines.join(os.EOL)
+  }
+
+  /**
+   * Adds a new line calling the rutime isolate function.
+   * This is required when some piece of code needs
+   * isolated instance.
+   *
+   * @method startIsolation
+   *
+   * @return {void}
+   */
+  startIsolation () {
+    this.writeLine('this.isolate(function () {')
+    this.indent()
+  }
+
+  /**
+   * Ends the isolate method. Any values passed to this
+   * method will be given to nexContext method.
+   *
+   * @method endIsolation
+   *
+   * @param  {Object}     props
+   *
+   * @return {void}
+   */
+  endIsolation (props) {
+    this.dedent()
+    const newContextFn = props ? `this.newContext(${props})` : 'this.newContext()'
+    this.writeLine(`}.bind(${newContextFn}))`)
   }
 }
 

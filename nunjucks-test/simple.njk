@@ -1,0 +1,9 @@
+{% extends 'master.njk' %}
+
+{% block content %}
+  {% if username %}
+    <h2> Hello {{ username }} </h2>
+  {% else %}
+    <h2> Hello Hey </h2>
+  {% endif %}
+{% endblock %}

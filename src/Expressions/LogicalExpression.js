@@ -1,7 +1,7 @@
 'use strict'
 
 /*
- * adonis-edge
+ * edge
  *
  * (c) Harminder Virk <virk@adonisjs.com>
  *
@@ -11,6 +11,21 @@
 
 const BaseExpression = require('./BaseExpression')
 
+/**
+ * Logical expression parses a logical expression
+ * into tokens.
+ *
+ * @class LogicalExpression
+ * @extends {BaseExpression}
+ * @constructor
+ *
+ * @example
+ * ```
+ * // following are the valid logical expressions
+ * username || 'virk'
+ * (username && email) || sessionToken
+ * ```
+ */
 class LogicalExpression extends BaseExpression {
   constructor (lexer) {
     super(lexer)
@@ -46,6 +61,8 @@ class LogicalExpression extends BaseExpression {
   /**
    * Convert the lhs expression to a statement
    *
+   * @method lhsStatement
+   *
    * @return {String}
    */
   lhsStatement () {
@@ -57,7 +74,9 @@ class LogicalExpression extends BaseExpression {
   }
 
   /**
-   * Converts the rhs expression to a statement
+   * Converts the rhs expression to a statement.
+   *
+   * @method rhsStatement
    *
    * @return {String}
    */

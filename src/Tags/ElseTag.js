@@ -1,7 +1,7 @@
 'use strict'
 
 /*
- * adonis-edge
+ * edge
  *
  * (c) Harminder Virk <virk@adonisjs.com>
  *
@@ -9,17 +9,21 @@
  * file that was distributed with this source code.
 */
 
+const BaseTag = require('./BaseTag')
+
 /**
  * The official else tag. It is used
  * as `@else` inside templates.
  *
  * @class ElseTag
+ * @extends {BaseTag}
+ * @static
  */
-class ElseTag {
+class ElseTag extends BaseTag {
   /**
    * The tag name to used for registering the tag
    *
-   * @method tagName
+   * @attribute tagName
    *
    * @return {String}
    */
@@ -31,7 +35,7 @@ class ElseTag {
    * Whether tag is a block level tag or
    * not.
    *
-   * @method isBlock
+   * @attribute isBlock
    *
    * @return {Boolean}
    */
@@ -72,4 +76,4 @@ class ElseTag {
   }
 }
 
-module.exports = new ElseTag()
+module.exports = ElseTag
