@@ -35,6 +35,7 @@ class TemplateCompiler {
     this._processedLines = {}
     this._loader = loader
     this.buffer = new InternalBuffer(asFunction)
+    this._runtimeVarIndex = 0
   }
 
   /**
@@ -202,6 +203,20 @@ class TemplateCompiler {
     const output = this._compileAst(this._toAst(statement))
     debug('compiled template to %s', output)
     return output
+  }
+
+  /**
+   * Get a unique runtime variable for a given template
+   *
+   * @method runtimeVariable
+   *
+   * @param  {String}        [prefix = 'var']
+   *
+   * @return {String}
+   */
+  runtimeVariable (prefix = 'var') {
+    this._runtimeVarIndex++
+    return `${prefix}_${this._runtimeVarIndex}`
   }
 }
 

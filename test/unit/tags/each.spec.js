@@ -1,5 +1,6 @@
 'use strict'
 
+const _ = require('lodash')
 const test = require('japa')
 const Template = require('../../../src/Template')
 const TemplateRunner = require('../../../src/Template/Runner')
@@ -22,8 +23,9 @@ test.group('Tags | Each ', (group) => {
     assert.equal(output, dedent`
     return (function templateFn () {
       let out = new String()
+      const payload_1 = this.context.resolve('users')
       this.context.newFrame()
-      this.context.loop(this.context.resolve('users'), (user, loop) => {
+      this.context.loop(payload_1, (user, loop) => {
         this.context.setOnFrame('user', user)
         this.context.setOnFrame('$loop', loop)
       })
@@ -44,8 +46,9 @@ test.group('Tags | Each ', (group) => {
     assert.equal(output, dedent`
     return (function templateFn () {
       let out = new String()
+      const payload_1 = this.context.resolve('users')
       this.context.newFrame()
-      this.context.loop(this.context.resolve('users'), (user, loop) => {
+      this.context.loop(payload_1, (user, loop) => {
         this.context.setOnFrame('user', user)
         this.context.setOnFrame('$loop', loop)
         out += \`  <p> Hello \${this.context.escape(this.context.accessChild(this.context.resolve('user'), ['username']))} </p>\\n\`
@@ -65,8 +68,9 @@ test.group('Tags | Each ', (group) => {
     `
     const template = new Template(this.tags)
     const output = template.compileString(statement).split('\n')
-    assert.equal(output[3].trim(), `this.context.loop(this.context.resolve('users'), (user, loop) => {`)
-    assert.equal(output[7].trim(), `this.context.loop(this.context.accessChild(this.context.resolve('user'), ['profiles']), (profile, loop) => {`)
+    assert.equal(output[4].trim(), `this.context.loop(payload_1, (user, loop) => {`)
+    assert.equal(output[7].trim(), `const payload_2 = this.context.accessChild(this.context.resolve('user'), ['profiles'])`)
+    assert.equal(output[9].trim(), `this.context.loop(payload_2, (profile, loop) => {`)
   })
 
   test('throw exception when expression is not binary', (assert) => {
@@ -110,8 +114,9 @@ test.group('Tags | Each ', (group) => {
     assert.equal(output, dedent`
     return (function templateFn () {
       let out = new String()
+      const payload_1 = this.context.resolve('users')
       this.context.newFrame()
-      this.context.loop(this.context.resolve('users'), (user, loop) => {
+      this.context.loop(payload_1, (user, loop) => {
         this.context.setOnFrame('user', user)
         this.context.setOnFrame('$loop', loop)
         this.context.setOnFrame('index', loop.key)
@@ -201,8 +206,9 @@ test.group('Tags | Each ', (group) => {
     return (function templateFn () {
       let out = new String()
       if (this.context.hasLength(this.context.resolve('users'))) {
+        const payload_1 = this.context.resolve('users')
         this.context.newFrame()
-        this.context.loop(this.context.resolve('users'), (user, loop) => {
+        this.context.loop(payload_1, (user, loop) => {
           this.context.setOnFrame('user', user)
           this.context.setOnFrame('$loop', loop)
           out += \`  \${this.context.escape(this.context.accessChild(this.context.resolve('user'), ['username']))}\\n\`
@@ -234,5 +240,34 @@ test.group('Tags | Each ', (group) => {
       context: ctx
     }).run()
     assert.equal(output.trim(), '<p> No users found </p>')
+  })
+
+  test('parse nested loop', (assert) => {
+    const statement = dedent`
+    @each(users in usersGroup)
+      @each(user in users)
+        {{ user.username }}
+      @endeach
+    @else
+      <p> No users found </p>
+    @endeach
+    `
+    const template = new Template(this.tags).compileString(statement)
+    this.tags.each.run(Context)
+
+    const users = [{username: 'virk'}, {username: 'nikk'}]
+
+    const ctx = new Context('', {
+      usersGroup: _.chunk(users, 2)
+    })
+
+    const output = new TemplateRunner(template, {
+      context: ctx
+    }).run()
+
+    assert.equal(output.trim(), dedent`
+    virk
+        nikk
+    `)
   })
 })

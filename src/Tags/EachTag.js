@@ -123,6 +123,9 @@ class EachTag extends BaseTag {
       buffer.indent()
     }
 
+    const varName = parser.runtimeVariable('payload')
+    buffer.writeLine(`const ${varName} = ${rhs}`)
+
     /**
      * Create a new frame before running the
      * each loop.
@@ -132,7 +135,7 @@ class EachTag extends BaseTag {
     /**
      * Write the actual each loop
      */
-    buffer.writeLine(`this.context.loop(${rhs}, (${itteratorName}, loop) => {`)
+    buffer.writeLine(`this.context.loop(${varName}, (${itteratorName}, loop) => {`)
     buffer.indent()
 
     /**
