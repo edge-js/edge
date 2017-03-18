@@ -13,7 +13,7 @@ const exec = require('shelljs').exec
 const ygor = require('ygor')
 const path = require('path')
 
-const BIN = 'node'
+const BIN = 'node --harmony-async-await'
 const COVERALLS_BIN = './node_modules/.bin/coveralls'
 const COVERAGE_DIR = `${path.join(__dirname, '../coverage')}`
 const COVERAGE_FILE = `${path.join(COVERAGE_DIR, 'lcov.info')}`
