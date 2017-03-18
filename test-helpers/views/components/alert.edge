@@ -1,7 +1,11 @@
-<div class="header">
-  {{{ $header }}}
-</div>
+@if($slot.yield)
+  {{{ $slot.yield }}}
+@else
+  <div class="header">
+    {{{ $slot.header }}}
+  </div>
 
-<div class="body">
-  {{{ $body }}}
-</div>
+  <div class="body">
+    {{{ $slot.body }}}
+  </div>
+@endif

@@ -10,6 +10,7 @@
 */
 
 const test = require('japa')
+const cheerio = require('cheerio')
 const Template = require('../../../src/Template')
 const Loader = require('../../../src/Loader')
 const dedent = require('dedent-js')
@@ -33,11 +34,8 @@ test.group('Tags | Component ', (group) => {
     return (function templateFn () {
       let out = new String()
       this.isolate(function () {
-        this.context.newFrame()
-        this.context.setOnFrame('$slot', \`  <h2> Hello dude </h2>\`)
         out += \`\${this.runTimeRender('components.alert')}\\n\`
-        this.context.clearFrame()
-      }.bind(this.newContext()))
+      }.bind(this.newContext({$slot: { yield: \`  <h2> Hello dude </h2>\` } })))
       return out
     }).bind(this)()
     `)
@@ -56,11 +54,8 @@ test.group('Tags | Component ', (group) => {
     return (function templateFn () {
       let out = new String()
       this.isolate(function () {
-        this.context.newFrame()
-        this.context.setOnFrame('$slot', \`  <h2> Hello dude </h2>\`)
         out += \`\${this.runTimeRender('components.alert')}\\n\`
-        this.context.clearFrame()
-      }.bind(this.newContext({username: 'virk'})))
+      }.bind(this.newContext({username: 'virk'},{$slot: { yield: \`  <h2> Hello dude </h2>\` } })))
       return out
     }).bind(this)()
     `)
@@ -79,11 +74,8 @@ test.group('Tags | Component ', (group) => {
     return (function templateFn () {
       let out = new String()
       this.isolate(function () {
-        this.context.newFrame()
-        this.context.setOnFrame('$slot', \`  <h2> Hello dude </h2>\`)
         out += \`\${this.runTimeRender('components.alert')}\\n\`
-        this.context.clearFrame()
-      }.bind(this.newContext({username: this.context.resolve('username')})))
+      }.bind(this.newContext({username: this.context.resolve('username')},{$slot: { yield: \`  <h2> Hello dude </h2>\` } })))
       return out
     }).bind(this)()
     `)
@@ -102,11 +94,8 @@ test.group('Tags | Component ', (group) => {
     return (function templateFn () {
       let out = new String()
       this.isolate(function () {
-        this.context.newFrame()
-        this.context.setOnFrame('$slot', \`  <h2> Hello dude </h2>\`)
         out += \`\${this.runTimeRender('components.alert')}\\n\`
-        this.context.clearFrame()
-      }.bind(this.newContext({username: this.context.resolve('username')})))
+      }.bind(this.newContext({username: this.context.resolve('username')},{$slot: { yield: \`  <h2> Hello dude </h2>\` } })))
       return out
     }).bind(this)()
     `)
@@ -124,18 +113,15 @@ test.group('Tags | Component ', (group) => {
     @endcomponent
     `
     const output = template.compileString(statement)
+    const slot = `{$slot: { yield: \`
+    This is the body\`, header: \`    <h2> This is the header </h2>\` } }`
 
     assert.equal(output, dedent`
     return (function templateFn () {
       let out = new String()
       this.isolate(function () {
-        this.context.newFrame()
-        this.context.setOnFrame('$slot', \`
-          This is the body\`)
-        this.context.setOnFrame('$header', \`    <h2> This is the header </h2>\`)
         out += \`\${this.runTimeRender('components.alert')}\\n\`
-        this.context.clearFrame()
-      }.bind(this.newContext({username: this.context.resolve('username')})))
+      }.bind(this.newContext({username: this.context.resolve('username')},${slot})))
       return out
     }).bind(this)()
     `)
@@ -155,18 +141,14 @@ test.group('Tags | Component ', (group) => {
     @endcomponent
     `
     const output = template.compileString(statement)
+    const slot = `{$slot: { yield: \`\`, header: \`    <h2> This is the header </h2>\`, body: \`    This is the body\` } }`
 
     assert.equal(output, dedent`
     return (function templateFn () {
       let out = new String()
       this.isolate(function () {
-        this.context.newFrame()
-        this.context.setOnFrame('$slot', \`\`)
-        this.context.setOnFrame('$header', \`    <h2> This is the header </h2>\`)
-        this.context.setOnFrame('$body', \`    This is the body\`)
         out += \`\${this.runTimeRender('components.alert')}\\n\`
-        this.context.clearFrame()
-      }.bind(this.newContext({username: this.context.resolve('username')})))
+      }.bind(this.newContext({username: this.context.resolve('username')},${slot})))
       return out
     }).bind(this)()
     `)
@@ -185,13 +167,15 @@ test.group('Tags | Component ', (group) => {
     @endcomponent
     `
     const output = new Template(this.tags, {}, loader).renderString(statement)
-    assert.equal(output.trim(), dedent`<div class="header">
-          <h2> This is the header </h2>
-    </div>
 
-    <div class="body">
-          <p> This is the body <p>
-    </div>`)
+    assert.equal(output.trim(), dedent`
+      <div class="header">
+              <h2> This is the header </h2>
+        </div>
+
+        <div class="body">
+              <p> This is the body <p>
+        </div>`)
   })
 
   test('component scope must be isolated', (assert) => {
@@ -242,9 +226,68 @@ test.group('Tags | Component ', (group) => {
     @endcomponent
     `
     const output = new Template(this.tags, {}, loader).renderString(statement)
-    assert.deepEqual(
-      output.split('\n').map((line) => line.trim()).filter((line) => line.length),
-      ['<div class="header">', '</div>', '<div class="body">', '<h2> Hello joe </h2>', '</div>']
-    )
+    const $ = cheerio.load(output)
+    assert.equal($('.body').html().trim(), '<h2> Hello joe </h2>')
+  })
+
+  test('pass multiple props to a component', (assert) => {
+    const template = new Template(this.tags, {}, loader)
+    const statement = dedent`
+    @component('components.user', username = 'virk', age = 22)
+    @endcomponent
+    `
+    const output = template.renderString(statement)
+    const $ = cheerio.load(output)
+    assert.equal($('h2').text().trim(), 'Hello virk')
+    assert.equal($('p').text().trim(), '22')
+  })
+
+  test('component slots should have access to parent template scope', (assert) => {
+    const template = new Template(this.tags, {}, loader)
+    const statement = dedent`
+    @component('components.alert')
+      <h2>{{ username }}</h2>
+    @endcomponent
+    `
+    const output = template.renderString(statement, {
+      username: 'virk'
+    })
+    const $ = cheerio.load(output)
+    assert.equal($('h2').text(), 'virk')
+  })
+
+  test('include inside the components', (assert) => {
+    const template = new Template(this.tags, {}, loader)
+    const statement = dedent`
+    @component('components.alert')
+      @slot('body')
+        @include('includes.user-name')
+      @endslot
+    @endcomponent
+    `
+    const output = template.renderString(statement, {
+      username: 'virk'
+    })
+    const $ = cheerio.load(output)
+    assert.equal($('h2').text().trim(), 'virk')
+  })
+
+  test('include component inside component', (assert) => {
+    const template = new Template(this.tags, {}, loader)
+    const statement = dedent`
+    @component('components.modal')
+      @slot('header')
+        Header
+      @endslot
+
+      @slot('body')
+        Body
+      @endslot
+    @endcomponent
+    `
+    const output = template.renderString(statement)
+    const $ = cheerio.load(output)
+    assert.equal($('.header').text().trim(), 'Header')
+    assert.equal($('.body').text().trim(), 'Body')
   })
 })

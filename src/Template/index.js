@@ -9,6 +9,7 @@
  * file that was distributed with this source code.
 */
 
+const _ = require('lodash')
 const TemplateCompiler = require('./Compiler')
 const TemplateRunner = require('./Runner')
 const Context = require('../Context')
@@ -198,6 +199,7 @@ class Template {
    * @return {String}
    */
   render (view, data = {}) {
+    this.sourceView(view)
     const compiledTemplate = this._loader.loadPreCompiled(view) || this.compile(view, true)
     this._makeContext(data)
     return new TemplateRunner(compiledTemplate, this).run()
@@ -231,7 +233,8 @@ class Template {
    */
   runTimeRender (view) {
     const compiledTemplate = this._loader.loadPreCompiled(view) || this.compile(view, true)
-    return new TemplateRunner(compiledTemplate, this).run()
+    const template = new TemplateRunner(compiledTemplate, this).run()
+    return template
   }
 
   /**
@@ -253,14 +256,20 @@ class Template {
    *
    * @method newContext
    *
-   * @param  {Object}   [props = {}]
+   * @param  {Spread}   [props]
    *
    * @return {Object}
    */
-  newContext (props = {}) {
-    const newContext = new Template(this._tags, this._globals, this._loader)
-    newContext._makeContext(props)
-    return newContext
+  newContext (...props) {
+    const data = _.transform(props, (result, prop) => {
+      _.merge(result, prop)
+      return result
+    }, {})
+
+    const template = new Template(this._tags, this._globals, this._loader)
+    template.sourceView(this._viewToBeUsed)
+    template._makeContext(data)
+    return template
   }
 }
 

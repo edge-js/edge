@@ -203,7 +203,6 @@ class Loader {
   loadPreCompiled (view) {
     view = this._normalizeViewName(view, 'js')
     if (!this.compiledDir) {
-      console.warn('Trying to load a pre-compiled view, but never registered the compiledDir. You can do same as edge.compiledDir(path/to/directory)')
       return null
     }
 

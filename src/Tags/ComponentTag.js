@@ -116,10 +116,10 @@ class ComponentTag extends BaseTag {
         slotLineNo = slotLineNo + child.childs.length + 1
       } else {
         slotLineNo++
-        result.slot.push(parser.parseLine(child, false))
+        result.yield.push(parser.parseLine(child, false))
       }
       return result
-    }, {slot: []})
+    }, {yield: []})
   }
 
   /**
@@ -170,28 +170,20 @@ class ComponentTag extends BaseTag {
     buffer.startIsolation()
 
     /**
-     * Start a new frame to write component slots
-     * values.
+     * Push slots to the component as props. The slots
+     * are pre-evaluated and final string is passed
+     * to the components.
      */
-    buffer.writeLine(`${lexer.newFrameFn}()`)
-
-    /**
-     * Write all slots to the newly created frame.
-     */
-    _.each(slots, (value, key) => {
-      buffer.writeLine(`${lexer.setOnFrameFn}('$${key}', \`${value.join('\n')}\`)`)
+    const slotProps = _.map(slots, (value, key) => {
+      return `${key}: \`${value.join('\n')}\``
     })
+    props.push(`{$slot: { ${slotProps.join(', ')} } }`)
 
     /**
      * Render the component in runtime, since component name can
      * be dynamic aswell.
      */
     buffer.writeToOutput(`$\{${lexer.runTimeRenderFn}(${name})}`)
-
-    /**
-     * Clear the frame
-     */
-    buffer.writeLine(`${lexer.clearFrameFn}()`)
 
     /**
      * End the isolation

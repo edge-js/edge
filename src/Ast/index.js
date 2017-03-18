@@ -140,7 +140,7 @@ class Ast {
     /**
      * Bad template with opened tags found
      */
-    const openedTag = this.openedTags[0]
+    const openedTag = _.last(this.openedTags)
 
     /**
      * Make sure there are no opened tags found
