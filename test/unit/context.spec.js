@@ -120,7 +120,7 @@ test.group('Context', () => {
     ctx.setOnFrame('name', 'virk')
     ctx.newFrame()
     ctx.setOnFrame('name', 'james')
-    assert.equal(ctx.resolve('$parent.name'), 'virk')
+    assert.equal(ctx.accessChild(ctx.resolve('$parent'), ['name']), 'virk')
   })
 
   test('access values on the deeply parent context', (assert) => {
@@ -132,7 +132,43 @@ test.group('Context', () => {
     ctx.setOnFrame('name', 'james')
     ctx.newFrame()
     ctx.setOnFrame('name', 'jamie')
-    assert.equal(ctx.resolve('$parent.$parent.name'), 'virk')
+    assert.equal(ctx.accessChild(ctx.resolve('$parent'), ['$parent', 'name']), 'virk')
+  })
+
+  test('access direct parent via $parent', (assert) => {
+    const presenter = new Presenter({name: 'nikk'})
+    const ctx = new Context('user.edge', presenter)
+    ctx.newFrame()
+    ctx.setOnFrame('name', 'virk')
+    ctx.newFrame()
+    ctx.setOnFrame('name', 'james')
+    assert.deepEqual(ctx.resolve('$parent'), { name: 'virk' })
+  })
+
+  test('access values on the deeply parent context via accessChild', (assert) => {
+    const presenter = new Presenter({name: 'nikk'})
+    const ctx = new Context('user.edge', presenter)
+    ctx.newFrame()
+    ctx.setOnFrame('name', 'virk')
+    ctx.newFrame()
+    ctx.setOnFrame('name', 'james')
+    ctx.newFrame()
+    ctx.setOnFrame('name', 'jamie')
+    assert.equal(ctx.accessChild(ctx.resolve('$parent'), ['$parent', 'name']), 'virk')
+  })
+
+  test('access values on the 4 level deep parent context via accessChild', (assert) => {
+    const presenter = new Presenter({name: 'nikk'})
+    const ctx = new Context('user.edge', presenter)
+    ctx.newFrame()
+    ctx.setOnFrame('name', 'nikk')
+    ctx.newFrame()
+    ctx.setOnFrame('name', 'virk')
+    ctx.newFrame()
+    ctx.setOnFrame('name', 'james')
+    ctx.newFrame()
+    ctx.setOnFrame('name', 'jamie')
+    assert.equal(ctx.accessChild(ctx.resolve('$parent'), ['$parent', '$parent', 'name']), 'nikk')
   })
 
   test('call a global function', (assert) => {

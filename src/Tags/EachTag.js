@@ -62,7 +62,7 @@ class EachTag extends BaseTag {
    *
    * @method compile
    *
-   * @param  {Object} parser
+   * @param  {Object} compiler
    * @param  {Object} lexer
    * @param  {Object} buffer
    * @param  {String} options.body
@@ -71,7 +71,7 @@ class EachTag extends BaseTag {
    *
    * @return {void}
    */
-  compile (parser, lexer, buffer, { body, childs, lineno }) {
+  compile (compiler, lexer, buffer, { body, childs, lineno }) {
     const compiledStatement = this._compileStatement(lexer, body, lineno)
 
     /**
@@ -123,7 +123,7 @@ class EachTag extends BaseTag {
       buffer.indent()
     }
 
-    const varName = parser.runtimeVariable('payload')
+    const varName = compiler.runtimeVariable('payload')
     buffer.writeLine(`const ${varName} = ${rhs}`)
 
     /**
@@ -155,7 +155,7 @@ class EachTag extends BaseTag {
     /**
      * Parse all childs
      */
-    childs.forEach((child) => parser.parseLine(child))
+    childs.forEach((child) => compiler.parseLine(child))
 
     /**
      * Close the each loop
@@ -174,7 +174,7 @@ class EachTag extends BaseTag {
      * opened if tag.
      */
     if (hasElse) {
-      elseChilds.forEach((child) => parser.parseLine(child))
+      elseChilds.forEach((child) => compiler.parseLine(child))
       buffer.dedent()
       buffer.writeLine('}')
     }

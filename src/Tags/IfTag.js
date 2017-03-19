@@ -61,7 +61,7 @@ class IfTag extends BaseTag {
    *
    * @method compile
    *
-   * @param  {Object} parser
+   * @param  {Object} compiler
    * @param  {Object} lexer
    * @param  {Object} buffer
    * @param  {String} options.body
@@ -70,7 +70,7 @@ class IfTag extends BaseTag {
    *
    * @return {void}
    */
-  compile (parser, lexer, buffer, { body, childs, lineno }) {
+  compile (compiler, lexer, buffer, { body, childs, lineno }) {
     const compiledStatement = this._compileStatement(lexer, body, lineno).toStatement()
 
     /**
@@ -80,9 +80,9 @@ class IfTag extends BaseTag {
     buffer.indent()
 
     /**
-     * Re-parse all childs via parser.
+     * Re-parse all childs via compiler.
      */
-    childs.forEach((child) => parser.parseLine(child))
+    childs.forEach((child) => compiler.parseLine(child))
 
     /**
      * Close the if tag

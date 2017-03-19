@@ -9,8 +9,10 @@
  * file that was distributed with this source code.
 */
 
+const _ = require('lodash')
 const test = require('japa')
 const cheerio = require('cheerio')
+const Context = require('../../../src/Context')
 const Template = require('../../../src/Template')
 const Loader = require('../../../src/Loader')
 const dedent = require('dedent-js')
@@ -289,5 +291,35 @@ test.group('Tags | Component ', (group) => {
     const $ = cheerio.load(output)
     assert.equal($('.header').text().trim(), 'Header')
     assert.equal($('.body').text().trim(), 'Body')
+  })
+
+  test('deeply nested tags inside slots', (assert) => {
+    const template = new Template(this.tags, {}, loader)
+    const statement = dedent`
+    @component('components.modal')
+      @slot('body')
+        @each(rows in rowsGroup)
+          <div class="col-lg-6">
+            @each(row in rows)
+              <h4> {{ row.heading }} </h4>
+              <p> {{ row.body }} </p>
+            @endeach
+          </div>
+        @else
+          <h2> Nothing found </h2>
+        @endeach
+      @endslot
+    @endcomponent
+    `
+    this.tags.each.run(Context)
+    const rows = [{heading: 'foo', body: 'foo'}, {heading: 'bar', body: 'bar'}]
+    const output = template.renderString(statement, {
+      rowsGroup: _.chunk(rows, 1)
+    })
+    const $ = cheerio.load(output)
+    assert.equal($('.col-lg-6 h4').length, 2)
+    assert.equal($('.col-lg-6 p').length, 2)
+    assert.equal($('.col-lg-6:first-child h4').text().trim(), 'foo')
+    assert.equal($('.col-lg-6:last-child h4').text().trim(), 'bar')
   })
 })

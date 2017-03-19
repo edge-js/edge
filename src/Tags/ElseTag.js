@@ -48,7 +48,7 @@ class ElseTag extends BaseTag {
    *
    * @method compile
    *
-   * @param  {Object} parser
+   * @param  {Object} compiler
    * @param  {Object} lexer
    * @param  {Object} buffer
    * @param  {String} options.body
@@ -57,7 +57,7 @@ class ElseTag extends BaseTag {
    *
    * @return {void}
    */
-  compile (parser, lexer, buffer) {
+  compile (compiler, lexer, buffer) {
     /**
      * Write to buffer.
      */

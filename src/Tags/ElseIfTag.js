@@ -59,7 +59,7 @@ class ElseIfTag extends BaseTag {
    *
    * @method compile
    *
-   * @param  {Object} parser
+   * @param  {Object} compiler
    * @param  {Object} lexer
    * @param  {Object} buffer
    * @param  {String} options.body
@@ -68,7 +68,7 @@ class ElseIfTag extends BaseTag {
    *
    * @return {void}
    */
-  compile (parser, lexer, buffer, { body, childs, lineno }) {
+  compile (compiler, lexer, buffer, { body, childs, lineno }) {
     const compiledStatement = this._compileStatement(lexer, body, lineno).toStatement()
 
     /**

@@ -65,7 +65,7 @@ class ComponentTag extends BaseTag {
    *
    * @method _parseSlotName
    *
-   * @param  {Object}       parser
+   * @param  {Object}       compiler
    * @param  {String}       name
    *
    * @return {String}
@@ -89,7 +89,7 @@ class ComponentTag extends BaseTag {
    *
    * @method _getSlots
    *
-   * @param  {Object}  parser
+   * @param  {Object}  compiler
    * @param  {Object}  lexer
    * @param  {Array}   childs
    * @param  {Number}  lineno
@@ -98,16 +98,16 @@ class ComponentTag extends BaseTag {
    *
    * @private
    */
-  _getSlots (parser, lexer, childs, lineno) {
+  _getSlots (compiler, lexer, childs, lineno) {
     let slotLineNo = lineno
-    return _.transform(childs, (result, child) => {
+    const transformedChilds = _.transform(childs, (result, child) => {
       if (child.tag === 'slot') {
         /**
          * ++ for the opening tag
          */
         slotLineNo++
         const name = this._parseSlotName(lexer, child.args, slotLineNo)
-        result[name] = _.map(child.childs, (child) => parser.parseLine(child, false))
+        result[name] = _.map(child.childs, (child) => compiler.parseAndReturnLine(child))
 
         /**
          * add the childs length
@@ -116,10 +116,12 @@ class ComponentTag extends BaseTag {
         slotLineNo = slotLineNo + child.childs.length + 1
       } else {
         slotLineNo++
-        result.yield.push(parser.parseLine(child, false))
+        result.yield.push(compiler.parseAndReturnLine(child))
       }
       return result
     }, {yield: []})
+
+    return transformedChilds
   }
 
   /**
@@ -150,7 +152,7 @@ class ComponentTag extends BaseTag {
    *
    * @method compile
    *
-   * @param  {Object} parser
+   * @param  {Object} compiler
    * @param  {Object} lexer
    * @param  {Object} buffer
    * @param  {String} options.body
@@ -159,10 +161,10 @@ class ComponentTag extends BaseTag {
    *
    * @return {void}
    */
-  compile (parser, lexer, buffer, { body, childs, lineno }) {
+  compile (compiler, lexer, buffer, { body, childs, lineno }) {
     const compiledStatement = this._compileStatement(lexer, body, lineno)
     const { name, props } = this._getComponentNameAndProps(lexer, compiledStatement)
-    const slots = this._getSlots(parser, lexer, childs, lineno)
+    const slots = this._getSlots(compiler, lexer, childs, lineno)
 
     /**
      * Isolated the component instance.

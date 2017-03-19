@@ -79,8 +79,17 @@ class Context {
    * @private
    */
   _parseKey (key) {
-    const keys = key.split('$parent.')
-    const filteredKeys = keys.filter((key) => key !== '')
+    const keys = key.split('$parent')
+    const filteredKeys = keys
+      .filter((key) => key !== '' && key !== '.')
+      .map((key) => key.replace(/^\./, ''))
+
+    if (filteredKeys.length === 0) {
+      return {
+        depth: keys.length - 1,
+        key: ''
+      }
+    }
 
     return {
       depth: keys.length - filteredKeys.length,
@@ -200,7 +209,12 @@ class Context {
    * const username = accessChild(users, ['0', 'username'])
    * ```
    */
-  accessChild (hash, childs) {
+  accessChild (hash, childs, i = 1) {
+    if (childs[0] === '$parent') {
+      i++
+      childs.shift()
+      return this.accessChild(this._getFrame(i), childs, i)
+    }
     return _.get(hash, childs)
   }
 
@@ -232,9 +246,10 @@ class Context {
    * @return {Mixed}
    */
   resolve (key) {
-    const parsedKey = this._parseKey(key)
-    const frame = this._getFrame(parsedKey.depth)
-    return this._getValue(frame, parsedKey.key) || ''
+    if (key === '$parent') {
+      return this._getFrame(1)
+    }
+    return this._getValue(this._getFrame(0), key) || ''
   }
 
   /**
