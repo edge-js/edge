@@ -11,9 +11,11 @@
 
 const path = require('path')
 const test = require('japa')
+const cheerio = require('cheerio')
 const dedent = require('dedent-js')
 const Template = require('../../src/Template')
 const Loader = require('../../src/Loader')
+const Context = require('../../src/Context')
 
 test.group('Template Compiler', (group) => {
   group.before(() => {
@@ -90,6 +92,124 @@ test.group('Template Compiler', (group) => {
       assert.equal(error.message, 'E_INVALID_EXPRESSION: Invalid expression <username, age> passed to (if) block')
       assert.equal(error.stack.split('\n')[2], `at (${loader.getViewPath('ifErrorView')}:8:0)`)
     }
+  })
+
+  test('do not parse layout when it is not in the first line', (assert) => {
+    const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
+    const statement = dedent`
+    Hello world
+    @layout('layouts.master')
+    `
+
+    this.tags.section.run(Context)
+    const template = new Template(this.tags, {}, loader)
+    const output = template.renderString(statement)
+    assert.equal(output, dedent`
+    Hello world
+    @layout('layouts.master')
+
+    `)
+  })
+
+  test('ignore everything not inside sections when a layout is defined', (assert) => {
+    const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
+    const statement = dedent`
+    @layout('layouts.master')
+    <h2> Hello world </h2>
+    `
+
+    this.tags.section.run(Context)
+    const template = new Template(this.tags, {}, loader)
+    const output = template.renderString(statement)
+    const $ = cheerio.load(output)
+    assert.equal($('h2').length, 0)
+  })
+
+  test('replace layout section value with template section', (assert) => {
+    const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
+    const statement = dedent`
+    @layout('layouts.master')
+    @section('content')
+      <h2> Hello world </h2>
+    @endsection
+    `
+
+    this.tags.section.run(Context)
+    const template = new Template(this.tags, {}, loader)
+    const output = template.renderString(statement)
+    const $ = cheerio.load(output)
+    assert.equal($('h2').length, 1)
+    assert.equal($('p').length, 0)
+    assert.equal($('h2').text().trim(), 'Hello world')
+  })
+
+  test('throw exception when a section is called twice', (assert) => {
+    const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
+    const statement = dedent`
+    @layout('layouts.master')
+    @section('content')
+      <h2> Hello world </h2>
+    @endsection
+
+    @section('content')
+      <h2> Hello world </h2>
+    @endsection
+    `
+
+    this.tags.section.run(Context)
+    const template = new Template(this.tags, {}, loader)
+    const output = () => template.renderString(statement)
+    assert.throw(output, `lineno:6 charno:0 E_INVALID_EXPRESSION: Section <@section('content')> has been called multiple times. A section can only be called once`)
+  })
+
+  test('throw exception when a section name is not a literal', (assert) => {
+    const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
+    const statement = dedent`
+    @layout('layouts.master')
+    @section(content)
+      <h2> Hello world </h2>
+    @endsection
+    `
+
+    this.tags.section.run(Context)
+    const template = new Template(this.tags, {}, loader)
+    const output = () => template.renderString(statement)
+    assert.throw(output, `lineno:2 charno:0 E_INVALID_EXPRESSION: Invalid expression <content> passed to a section. Make sure section name must be a valid string`)
+  })
+
+  test('throw exception when layout file has invalid section name', (assert) => {
+    const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
+    const statement = dedent`
+    @layout('layouts.invalid.master')
+    @section('content')
+      <h2> Hello world </h2>
+    @endsection
+    `
+
+    this.tags.section.run(Context)
+    const template = new Template(this.tags, {}, loader)
+    const output = () => template.renderString(statement)
+    assert.throw(output, `lineno:8 charno:0 E_INVALID_EXPRESSION: Invalid expression <content> passed to (section) block`)
+  })
+
+  test('define dynamic layout name', (assert) => {
+    const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
+    const statement = dedent`
+    @layout(masterLayout)
+    @section('content')
+      <h2> Hello world </h2>
+    @endsection
+    `
+
+    this.tags.section.run(Context)
+    const template = new Template(this.tags, {}, loader)
+    const output = template.renderString(statement, {
+      masterLayout: 'layouts.master'
+    })
+    const $ = cheerio.load(output)
+    assert.equal($('h2').length, 1)
+    assert.equal($('p').length, 0)
+    assert.equal($('h2').text().trim(), 'Hello world')
   })
 })
 

@@ -10,6 +10,7 @@
 */
 
 const debug = require('debug')('edge:compiler')
+const LayoutTag = require('../Tags/LayoutTag')
 const lexer = new (require('../Lexer'))(true)
 const InternalBuffer = require('../Buffer')
 const CE = require('../Exceptions')
@@ -39,60 +40,18 @@ class TemplateCompiler {
   }
 
   /**
-   * Parse a line with a tag. Output should be
-   * written to buffer by the implemented tag.
+   * Interpolates a line with mustace like syntax into
+   * a javascript output.
    *
-   * @method _parseTagLine
+   * @method _interpolateMustache
    *
-   * @param  {Object}      line
-   * @param  {Boolean}     writeToBuffer
+   * @param  {String}             options.body
+   * @param  {Number}             options.lineno
    *
-   * @return {void}
-   *
-   * @private
+   * @return {String}
    */
-  _parseTagLine (line, writeToBuffer) {
-    const buffer = writeToBuffer ? this.buffer : new InternalBuffer(true)
-    this._tags[line.tag].compile(this, lexer, buffer, {
-      body: line.args,
-      childs: line.childs,
-      lineno: line.lineno
-    })
-
-    /**
-     * Return the buffer lines when write to
-     * buffer is not set to true.
-     */
-    if (!writeToBuffer) {
-      return `\${${buffer.getLines().replace(/^return/, '')}}`
-    }
-  }
-
-  /**
-   * Parse raw line by doing a regex replace. Here we
-   * write to the buffer output.
-   *
-   * @method _parseRawLine
-   *
-   * @param  {Object}      line
-   *
-   * @return {void}
-   *
-   * @private
-   */
-  _parseRawLine ({ body, lineno }, writeToBuffer) {
-    /**
-     * If line has already been processed, use it from
-     * cache.
-     */
-    if (this._processedLines[body]) {
-      if (writeToBuffer) {
-        this.buffer.writeToOutput(`${this._processedLines[body]}`)
-      }
-      return this._processedLines[body]
-    }
-
-    const contents = body.replace(expressions.interpolate, (i, group, oCurly, matched, eCurly) => {
+  _interpolateMustache (body, lineno) {
+    return body.replace(expressions.interpolate, (i, group, oCurly, matched, eCurly) => {
       /**
        * If expression starts with @ it should not
        * be touched.
@@ -108,16 +67,6 @@ class TemplateCompiler {
         throw CE.InvalidExpressionException.invalidLineExpression(matched, lineno, body.indexOf(matched))
       }
     })
-
-    /**
-     * Storing processed lines with their output. This will not reparse
-     * the expression when it is used twice in a single template.
-     */
-    this._processedLines[body] = contents
-    if (writeToBuffer) {
-      this.buffer.writeToOutput(`${contents}`)
-    }
-    return contents
   }
 
   /**
@@ -134,6 +83,20 @@ class TemplateCompiler {
    */
   _toAst (template) {
     return new Ast(this._tags, template).parse()
+  }
+
+  /**
+   * Returns a boolean indicating if the template
+   * has a layout defined
+   *
+   * @method _hasLayout
+   *
+   * @param  {Array}  ast
+   *
+   * @return {Boolean}
+   */
+  _hasLayout (ast) {
+    return ast[0].body.startsWith('@layout')
   }
 
   /**
@@ -154,6 +117,74 @@ class TemplateCompiler {
   }
 
   /**
+   * Compiles the ast as a layout
+   *
+   * @method _compileAstAsLayout
+   *
+   * @param  {Array}         ast
+   *
+   * @return {String}
+   *
+   * @private
+   *
+   */
+  _compileAstAsLayout (ast) {
+    const layoutLine = ast.shift()
+    new LayoutTag().compile(this, lexer, this.buffer, layoutLine, ast)
+    return this.buffer.getLines()
+  }
+
+  /**
+   * Compile a line with a tag. Output will be
+   * written to buffer by the implemented tag.
+   *
+   * @method parseTag
+   *
+   * @param  {String}      options.tag
+   * @param  {String}      options.args
+   * @param  {Array}       options.childs
+   * @param  {Number}      options.lineno
+   *
+   * @return {void}
+   */
+  parseTag ({ tag, args, childs, lineno }) {
+    this._tags[tag].compile(this, lexer, this.buffer, {
+      body: args,
+      childs: childs,
+      lineno: lineno
+    })
+  }
+
+  /**
+   * Parse raw line by doing a regex replace. Here we
+   * write to the buffer output.
+   *
+   * @method parsePlainLine
+   *
+   * @param  {Object}      line
+   *
+   * @return {void}
+   */
+  parsePlainLine ({ body, lineno }) {
+    /**
+     * Caching the interpolated string
+     */
+    if (!this._processedLines[body]) {
+      this._processedLines[body] = this._interpolateMustache(body, lineno)
+    }
+
+    /**
+     * Adding support of debugger to do runtime debugging
+     * of templates via chrome dev tools.
+     */
+    if (this._processedLines[body].trim() === 'debugger') {
+      this.buffer.writeLine('debugger')
+    } else {
+      this.buffer.writeToOutput(this._processedLines[body])
+    }
+  }
+
+  /**
    * Parses each line on the ast. If line is a tag,
    * it will call the tag fn, otherwise parses
    * the expressions `{{}}` within the line.
@@ -161,15 +192,34 @@ class TemplateCompiler {
    * @method parseLine
    *
    * @param  {String}  line
-   * @param  {Boolean} writeToBuffer
    *
    * @return {void}
    */
-  parseLine (line, writeToBuffer = true) {
+  parseLine (line) {
     if (line.tag) {
-      return this._parseTagLine(line, writeToBuffer)
+      this.parseTag(line)
+      return
     }
-    return this._parseRawLine(line, writeToBuffer)
+    this.parsePlainLine(line)
+  }
+
+  /**
+   * Parses a line and returns the output
+   * instead of writing it to the buffer.
+   *
+   * @method parseAndReturnLine
+   *
+   * @param  {Object}           line
+   *
+   * @return {String}
+   */
+  parseAndReturnLine (line) {
+    if (line.tag) {
+      const templateInstance = new TemplateCompiler(this._tags, this._loader, true)
+      const output = templateInstance._compileAst([line])
+      return `\${${output.replace(/^return/, '')}}`
+    }
+    return this._interpolateMustache(line.body, line.lineno)
   }
 
   /**
@@ -185,7 +235,9 @@ class TemplateCompiler {
    */
   compile (view) {
     const template = this._loader.load(view)
-    const output = this._compileAst(this._toAst(template))
+    const ast = this._toAst(template)
+    const output = this._hasLayout(ast) ? this._compileAstAsLayout(ast) : this._compileAst(ast)
+
     debug('compiled template to %s', output)
     return output
   }
@@ -200,7 +252,9 @@ class TemplateCompiler {
    * @return {String}
    */
   compileString (statement) {
-    const output = this._compileAst(this._toAst(statement))
+    const ast = this._toAst(statement)
+    const output = this._hasLayout(ast) ? this._compileAstAsLayout(ast) : this._compileAst(ast)
+
     debug('compiled template to %s', output)
     return output
   }
