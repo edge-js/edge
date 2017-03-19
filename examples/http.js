@@ -1,33 +1,26 @@
 'use strict'
 
-const edge = new (require('../src/Edge'))()
 const path = require('path')
-edge.registerViews(path.join(__dirname, './'))
-const template = require('./loop.compiled')
-
-const data = {
-  simple: {
-    username: 'virk'
-  },
-  loop: {
-    users: [{
-      username: 'virk',
-      age: 27
-    }, {
-      username: 'nikk',
-      age: 26
-    }]
-  }
-}
+const edge = require('../index')
+const viewsPath = path.join(__dirname, '/views')
+edge.registerViews(viewsPath)
+edge.registerPresenters(path.join(__dirname, '/presenters'))
 
 require('http').createServer((req, res) => {
-  // const template = req.url === '/' ? 'simple' : req.url.replace(/^\/|\/$/, '')
+  const template = `${req.url}/index`
   try {
-    const output = edge.renderPreCompiled(template, data.loop)
-    res.writeHead(200, {'content-type': 'text/html'})
-    res.end(output)
+    const output = edge.presenter(req.url.replace(/\//g, '')).render(template)
+    res.writeHead(200, { 'Content-type': 'text/html' })
+    res.write(output)
+    res.end()
   } catch (e) {
-    console.log(e.stack)
-    res.end(e.message)
+    res.writeHead(500, {'Content-type': 'application/json'})
+    res.write(JSON.stringify({
+      message: e.message,
+      stack: e.stack,
+      name: e.name,
+      code: e.code
+    }))
+    res.end()
   }
 }).listen(3333)

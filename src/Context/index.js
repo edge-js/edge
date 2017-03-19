@@ -42,10 +42,9 @@ class Context {
    */
   constructor (viewName, presenter = {}, globals = {}) {
     debug('created context for %s view with %s presenter', viewName, presenter.constructor.name)
-    this._viewName = viewName
-    this._globals = globals
-    this._presenter = presenter
-    this._data = presenter.$data || {}
+    this.$viewName = viewName
+    this.$globals = globals
+    this.$presenter = presenter
     this._frames = []
   }
 
@@ -125,7 +124,7 @@ class Context {
      */
     if (value === undefined) {
       debug('resolving %s key on presenter', key)
-      value = _.get(this._presenter, key)
+      value = _.get(this.$presenter, key)
     }
 
     /**
@@ -134,7 +133,7 @@ class Context {
      */
     if (value === undefined) {
       debug('resolving %s key on presenter data', key)
-      value = _.get(this._data, key)
+      value = _.get(this.$presenter.$data, key)
     }
 
     /**
@@ -142,7 +141,7 @@ class Context {
      */
     if (value === undefined) {
       debug('resolving %s key on globals', key)
-      value = _.get(this._globals, key)
+      value = _.get(this.$globals, key)
     }
 
     return value
@@ -266,7 +265,7 @@ class Context {
   callFn (name, args) {
     const fn = this.resolve(name)
     if (typeof (fn) !== 'function') {
-      throw new Error(`Cannot call function ${name} from ${this._viewName} view`)
+      throw new Error(`Cannot call function ${name} from ${this.$viewName} view`)
     }
     return fn.apply(this, args)
   }

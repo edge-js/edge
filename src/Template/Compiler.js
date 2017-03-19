@@ -177,7 +177,7 @@ class TemplateCompiler {
      * Adding support of debugger to do runtime debugging
      * of templates via chrome dev tools.
      */
-    if (this._processedLines[body].trim() === 'debugger') {
+    if (this._processedLines[body].trim() === '@debugger') {
       this.buffer.writeLine('debugger')
     } else {
       this.buffer.writeToOutput(this._processedLines[body])
