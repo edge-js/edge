@@ -10,6 +10,7 @@
 */
 
 const BaseTag = require('./BaseTag')
+const os = require('os')
 
 /**
  * The official section tag. It is used
@@ -73,8 +74,25 @@ class SectionTag extends BaseTag {
     const slotName = this._compileStatement(lexer, body, lineno).toStatement()
 
     /**
-     * Write an if block checking where the actual content of
-     * the section exists or not.
+     * Show the actual section content when section content is missing
+     * or @super tag was used.
+     */
+    buffer.writeLine(`if (!this.context.hasSection(${slotName}) || this.context.inheritSection(${slotName})) {`)
+    buffer.indent()
+
+    /**
+     * Process all the childs within the section tag
+     */
+    childs.forEach((child) => compiler.parseLine(child))
+
+    /**
+     * Closing the if statement
+     */
+    buffer.dedent()
+    buffer.writeLine('}')
+
+    /**
+     * If section was overrided, show the overriden content
      */
     buffer.writeLine(`if (this.context.hasSection(${slotName})) {`)
     buffer.indent()
@@ -85,20 +103,7 @@ class SectionTag extends BaseTag {
     buffer.writeToOutput(`\${this.context.outPutSection(${slotName})}`)
 
     /**
-     * Closing if and starting else
-     */
-    buffer.dedent()
-    buffer.writeLine('} else { ')
-    buffer.indent()
-
-    /**
-     * Process all the childs when section content does
-     * not exists.
-     */
-    childs.forEach((child) => compiler.parseLine(child))
-
-    /**
-     * Close else
+     * Closing if tag
      */
     buffer.dedent()
     buffer.writeLine('}')
@@ -112,11 +117,15 @@ class SectionTag extends BaseTag {
    */
   run (context) {
     context.macro('hasSection', function (name) {
-      return !!this.sections[name]
+      return this.sections[name] && typeof (this.sections[name].content) !== 'undefined'
+    })
+
+    context.macro('inheritSection', function (name) {
+      return this.sections[name] && this.sections[name].inheritParent
     })
 
     context.macro('outPutSection', function (name) {
-      return this.sections[name]
+      return this.sections[name].content
     })
   }
 }

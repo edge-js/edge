@@ -111,6 +111,44 @@ test.group('Template Compiler', (group) => {
     `)
   })
 
+})
+
+test.group('Template Runner', () => {
+  test('render a template by loading it from file', (assert) => {
+    const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
+    const template = new Template(this.tags, {}, loader)
+    template.sourceView('welcome')
+    const output = template.render('welcome', { username: 'virk' })
+    assert.equal(output.trim(), 'virk')
+  })
+
+  test('render a template from string', (assert) => {
+    const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
+    const template = new Template(this.tags, {}, loader)
+    const output = template.renderString('{{ username }}', { username: 'virk' })
+    assert.equal(output.trim(), 'virk')
+  })
+
+  test('make use of presenter when rendering the view', (assert) => {
+    const loader = new Loader(
+      path.join(__dirname, '../../test-helpers/views'),
+      path.join(__dirname, '../../test-helpers/presenters')
+    )
+    const template = new Template(this.tags, {}, loader)
+    const output = template.presenter('User').renderString('{{ username }}', { username: 'virk' })
+    assert.equal(output.trim(), 'VIRK')
+  })
+
+  test('pass locals when rendering the view', (assert) => {
+    const loader = new Loader(
+      path.join(__dirname, '../../test-helpers/views'),
+      path.join(__dirname, '../../test-helpers/presenters')
+    )
+    const template = new Template(this.tags, {}, loader)
+    const output = template.share({username: 'virk'}).renderString('{{ username }}')
+    assert.equal(output.trim(), 'virk')
+  })
+
   test('ignore everything not inside sections when a layout is defined', (assert) => {
     const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
     const statement = dedent`
@@ -211,41 +249,36 @@ test.group('Template Compiler', (group) => {
     assert.equal($('p').length, 0)
     assert.equal($('h2').text().trim(), 'Hello world')
   })
-})
 
-test.group('Template Runner', () => {
-  test('render a template by loading it from file', (assert) => {
+  test('append layout section value with template section when super keyword is used', (assert) => {
     const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
+    const statement = dedent`
+    @layout('layouts.master')
+    @section('content')
+      @super
+      <h2> Hello world </h2>
+    @endsection
+    `
+
+    this.tags.section.run(Context)
     const template = new Template(this.tags, {}, loader)
-    template.sourceView('welcome')
-    const output = template.render('welcome', { username: 'virk' })
-    assert.equal(output.trim(), 'virk')
+    const output = template.renderString(statement)
+    const $ = cheerio.load(output)
+    assert.equal($('h2').length, 1)
+    assert.equal($('p').length, 1)
+    assert.equal($('h2').text().trim(), 'Hello world')
   })
 
-  test('render a template from string', (assert) => {
+  test('do not execute default content when section is overridden', (assert) => {
     const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
-    const template = new Template(this.tags, {}, loader)
-    const output = template.renderString('{{ username }}', { username: 'virk' })
-    assert.equal(output.trim(), 'virk')
-  })
+    const statement = dedent`
+    @layout('layouts.user')
+    @section('content')
+    @endsection
+    `
 
-  test('make use of presenter when rendering the view', (assert) => {
-    const loader = new Loader(
-      path.join(__dirname, '../../test-helpers/views'),
-      path.join(__dirname, '../../test-helpers/presenters')
-    )
+    this.tags.section.run(Context)
     const template = new Template(this.tags, {}, loader)
-    const output = template.presenter('User').renderString('{{ username }}', { username: 'virk' })
-    assert.equal(output.trim(), 'VIRK')
-  })
-
-  test('pass locals when rendering the view', (assert) => {
-    const loader = new Loader(
-      path.join(__dirname, '../../test-helpers/views'),
-      path.join(__dirname, '../../test-helpers/presenters')
-    )
-    const template = new Template(this.tags, {}, loader)
-    const output = template.share({username: 'virk'}).renderString('{{ username }}')
-    assert.equal(output.trim(), 'virk')
+    template.renderString(statement)
   })
 })

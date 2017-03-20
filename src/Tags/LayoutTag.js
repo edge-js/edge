@@ -118,13 +118,23 @@ class LayoutTag extends BaseTag {
        */
       processedSections.push(sectionName)
 
+      /**
+       * Find whether or not to inherit the default
+       * section.
+       */
+      let inheritParent = false
+      if (childs.length && ['@super', '@super()'].indexOf(childs[0].body.trim()) > -1) {
+        childs.shift()
+        inheritParent = true
+      }
+
       const sectionOutput = childs.map((child) => compiler.parseAndReturnLine(child)).join(buffer.EOL)
 
       /**
        * Store the output of section inside a key on the
        * context sections object.
        */
-      buffer.writeLine(`this.context.sections[${sectionName}] = \`${sectionOutput}\``)
+      buffer.writeLine(`this.context.sections[${sectionName}] = {inheritParent: ${inheritParent}, content: \`${sectionOutput}\`}`)
 
       /**
        * ++ the line no for the `endsection` tag
