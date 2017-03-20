@@ -104,7 +104,7 @@ test.group('Edge', (group) => {
     const edge = new Edge()
     const statement = '{{ foo() }}'
     edge.global('foo', function () {
-      presenterInstance = this._presenter
+      presenterInstance = this.$presenter
     })
     edge.renderString(statement)
     assert.instanceOf(presenterInstance, Presenter)

@@ -78,7 +78,7 @@ test.group('Tags | Include ', (group) => {
     const statement = `@include('includes.user-profile')`
 
     const template = new Template(this.tags, {}, loader)
-    const output = template.renderString(statement)
+    const output = template.renderString(statement, { username: 'Foo' })
     assert.equal(output.trim(), dedent`<h1> User Profile </h1>
     <h2> Foo </h2>
     `)

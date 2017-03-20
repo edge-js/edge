@@ -35,7 +35,7 @@ class LayoutTag extends BaseTag {
    * @return {Array}
    */
   get allowedExpressions () {
-    return ['Literal', 'Identifier']
+    return ['Literal', 'Identifier', 'MemberExpression']
   }
 
   /**
