@@ -24,7 +24,7 @@ const ExistingTags = require('../Tags')
 class Edge {
   constructor () {
     this._tags = {}
-    this._globals = {}
+    this._globals = require('../Globals')
     this._loader = new Loader()
     this._boot()
   }

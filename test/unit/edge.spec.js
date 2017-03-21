@@ -14,6 +14,7 @@ const test = require('japa')
 const dedent = require('dedent-js')
 const Edge = require('../../src/Edge')
 const Presenter = require('../../src/Presenter')
+const Globals = require('../../src/Globals')
 
 test.group('Edge', (group) => {
   group.before(() => {
@@ -28,6 +29,11 @@ test.group('Edge', (group) => {
   test('register existing tags on new class instance', (assert) => {
     const edge = new Edge()
     assert.deepEqual(Object.keys(this.tags), Object.keys(edge._tags))
+  })
+
+  test('should register all inbuilt globals', (assert) => {
+    const edge = new Edge()
+    assert.deepEqual(Object.keys(Globals), Object.keys(edge._globals))
   })
 
   test('throw exception when a tag does not have a tagName', (assert) => {
@@ -267,5 +273,11 @@ test.group('Edge', (group) => {
 
     assert.equal(output.trim(), `virk
   nikk`)
+  })
+
+  test('should have access to inbuilt globals', (assert) => {
+    const edge = new Edge()
+    const statement = `{{ size('foo') }}`
+    assert.equal(edge.renderString(statement).trim(), '3')
   })
 })
