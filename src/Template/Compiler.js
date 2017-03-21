@@ -33,7 +33,6 @@ const expressions = {
 class TemplateCompiler {
   constructor (tags, loader, asFunction = false) {
     this._tags = tags
-    this._processedLines = {}
     this._loader = loader
     this.buffer = new InternalBuffer(asFunction)
     this._runtimeVarIndex = 0
@@ -167,20 +166,13 @@ class TemplateCompiler {
    */
   parsePlainLine ({ body, lineno }) {
     /**
-     * Caching the interpolated string
-     */
-    if (!this._processedLines[body]) {
-      this._processedLines[body] = this._interpolateMustache(body, lineno)
-    }
-
-    /**
      * Adding support of debugger to do runtime debugging
      * of templates via chrome dev tools.
      */
-    if (this._processedLines[body].trim() === '@debugger') {
+    if (body.trim() === '@debugger') {
       this.buffer.writeLine('debugger')
     } else {
-      this.buffer.writeToOutput(this._processedLines[body])
+      this.buffer.writeToOutput(this._interpolateMustache(body, lineno))
     }
   }
 

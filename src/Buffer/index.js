@@ -136,9 +136,27 @@ class Buffer {
    * ```
    *
    * @return {void}
+   *
+   * @chainable
    */
   writeToOutput (line) {
     this.writeLine(`out += \`${line}\\n\``)
+    return this
+  }
+
+  /**
+   * Writes multiple lines to the output
+   *
+   * @method writeMultiLineToOutput
+   *
+   * @param  {Array}               lines
+   *
+   * @return {void}
+   *
+   * @chainable
+   */
+  writeMultiLineToOutput (lines) {
+    this.writeToOutput(lines.join('\\n'))
     return this
   }
 

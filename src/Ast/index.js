@@ -14,133 +14,251 @@ const os = require('os')
 const CE = require('../Exceptions')
 
 /**
- * Ast also known as **Abstract Syntax Tree** parses the plain
- * edge template into an array of lines grouped with block
- * and inline tag.
+ * The opening tag to detect the start of
+ * block html comment.
  *
- * This is 1st step towards parsing any template as it gives
- * meaning to an edge template by abstracting all the tags
- * and converting them into a tree.
- *
- * @class Ast
- * @constructor
- *
- * @example
- *
- * ```
- * const tags = {
- *   if: {
- *     tagName: 'if',
- *     isBlock: true,
- *     compile: function () {},
- *     run: function () {}
- *   }
- * }
- *
- * const template = `
- *    @if(username === 'virk')
- *      <p> Hello virk </p>
- *    @endif
- * `
- *
- * const ast = new Ast(tags, template).parse()
- * ```
+ * @type {RegExp}
  */
+const openingHtmlComment = /^(\s*{{--\s*$)/
+
+/**
+ * The closing tag to detect end of block
+ * html comment.
+ *
+ * @type {RegExp}
+ */
+const closingHtmlComment = /(--}}$)/
+
+/**
+ * Detect inline HTML comments
+ *
+ * @type {RegExp}
+ */
+const singleLineComment = /({{--.*?--}})/g
+
 class Ast {
   constructor (tags, template) {
-    this.tags = tags
-    this.blockExpression = this._makeBlockRegex()
-    this.template = template
-    this.ast = []
-    this.openedTags = []
+    this._tags = tags
+    this._blockExpression = new RegExp(`^\\s*\\@(${_.keys(tags).join('|')})(?:\\((.*)\\))?`)
+    this._template = template
+    this._ast = []
+    this._insideBlockComment = false
+    this._openedTags = []
   }
 
   /**
-   * Makes a dynamic regex for all the available tags. It makes
-   * the search limited to only defined tags.
+   * Returns the token for a tag.
    *
-   * @method _makeBlockRegex
+   * @method _tokenForTag
    *
-   * @return {Regex}
+   * @param  {String}     line
+   * @param  {String}     tag
+   * @param  {String}     args
+   * @param  {Number}     index
+   *
+   * @return {Object}
    *
    * @private
    */
-  _makeBlockRegex () {
-    return new RegExp(`^\\s*\\@(${_.keys(this.tags).join('|')})(?:\\((.*)\\))?`)
+  _tokenForTag (line, tag, args, index) {
+    return {
+      tag,
+      args,
+      childs: [],
+      body: line,
+      lineno: index + 1,
+      end: {
+        body: null,
+        lineno: 0
+      }
+    }
   }
 
   /**
-   * Parses the raw string into an abstract syntax tree. It
-   * will use `os.EOL` as the line seperator.
+   * Returns the token for a line. Also it will
+   * parse the inline comments on a given line
    *
-   * ### Note
-   * The template will remove top and bottom white space, since there
-   * is no meaning to that.
+   * @method _tokenForLine
+   *
+   * @param  {String}      line
+   * @param  {Number}      index
+   *
+   * @return {Object}
+   *
+   * @private
+   */
+  _tokenForLine (line, index) {
+    line = line.replace(singleLineComment, '')
+
+    return {
+      tag: null,
+      args: null,
+      childs: [],
+      body: line,
+      lineno: index + 1
+    }
+  }
+
+  /**
+   * Returns the appropriate token object for a
+   * given line. It uses the regex to find the
+   * meaning of a line.
+   *
+   * @method _getTokenFor
+   *
+   * @param  {String}     line
+   * @param  {Number}     index
+   *
+   * @return {Object}
+   *
+   * @private
+   */
+  _getTokenFor (line, index) {
+    /**
+     * Look for opening of a custom tag.
+     */
+    const [, tag, args] = this._blockExpression.exec(line) || []
+    if (tag) {
+      return this._tokenForTag(line, tag, args, index)
+    }
+
+    /**
+     * Finally fallback to a plain line token.
+     */
+    return this._tokenForLine(line, index)
+  }
+
+  /**
+   * Returns whether a line is a closing tag.
+   *
+   * @method _isClosingTag
+   *
+   * @param  {Object}      lastTag
+   * @param  {String}      line
+   *
+   * @return {Boolean}
+   *
+   * @throws {Error} If there are unclosed block level tags
+   *
+   * @private
+   */
+  _isClosingTag (lastTag, line) {
+    return lastTag && `@end${lastTag.tag}` === line.trim()
+  }
+
+  /**
+   * Detects the start of a block level
+   * comment.
+   *
+   * @method _detectedBlockCommentStart
+   *
+   * @param  {String}                   line
+   *
+   * @return {Boolean}
+   */
+  _detectedBlockCommentStart (line) {
+    const [, start] = openingHtmlComment.exec(line) || []
+    if (start) {
+      this._insideBlockComment = true
+    }
+    return !!start
+  }
+
+  /**
+   * Look for the end of a block level comment
+   *
+   * @method _lookForBlockCommentEnd
+   *
+   * @param  {String}                line
+   *
+   * @return {void}
+   */
+  _lookForBlockCommentEnd (line) {
+    const [, end] = closingHtmlComment.exec(line) || []
+    if (end) {
+      this._insideBlockComment = false
+    }
+  }
+
+  /**
+   * Parses the template string by tokenizing it
+   * into multiple lines and then converting
+   * each line into a tree branch or leaf.
    *
    * @method parse
    *
    * @return {Array}
-   *
-   * @throws {InvalidTemplateException} If unclosed blocked tags found
    */
   parse () {
     this
-      .template
+      ._template
       .trim()
       .split(os.EOL)
-      .forEach((line, number) => {
-        const [, tag, args] = this.blockExpression.exec(line) || []
-
-        const token = {
-          tag: null,
-          args: null,
-          childs: [],
-          body: line,
-          lineno: (number + 1)
-        }
-
+      .forEach((line, index) => {
         /**
-         * STEP: 1
-         * Add tag and args property if there is
-         * a regex match
+         * Do not process anything when inside the block
+         * comment
          */
-        if (tag) {
-          token.tag = tag
-          token.args = args
-          // trim if line is a tag otherwise we need to preserve whitespace
-          token.body = token.body.trim()
-        }
-
-        /**
-         * STEP: 2
-         * Look for the recently opened tags and see if
-         * this line is the ending block of the last
-         * opened tag.
-         */
-        const lastTag = _.last(this.openedTags)
-        if (lastTag && `@end${lastTag.tag}` === `${token.body}`.trim()) {
-          this.openedTags.pop()
+        if (this._insideBlockComment) {
+          this._lookForBlockCommentEnd(line)
           return
         }
 
         /**
-         * STEP: 3 Push to opened tags when tag
-         * has a tag property
+         * Do not process line when line is a block comment
+         * start.
          */
-        if (token.tag && this.tags[token.tag].isBlock === true) {
-          this.openedTags.push(token)
+        if (this._detectedBlockCommentStart(line)) {
+          return
+        }
+
+        const lastTag = _.last(this._openedTags)
+
+        /**
+         * If line is a closing of a custom tag or an html block
+         * we need to mark the recently opened tag as closed.
+         */
+        if (this._isClosingTag(lastTag, line)) {
+          this._openedTags.pop()
+          lastTag.end.body = line.trim()
+          lastTag.end.lineno = index + 1
+          return
         }
 
         /**
-         * STEP: 4 Push to ast array or the recently opened tag
+         * Otherwise grab the token for the line
          */
-        lastTag ? lastTag.childs.push(token) : this.ast.push(token)
+        const token = this._getTokenFor(line, index)
+
+        /**
+         * Do not process line when original line has
+         * content but the processed one is empty.
+         * It happens when line only has a single
+         * inline comment.
+         */
+        if (line.length && !token.body.length) {
+          return
+        }
+
+        /**
+         * If token is a tag and (is a block level tag OR comment tag)
+         * then we need to push it to list of opened tags and wait
+         * for it to close.
+         */
+        if (token.tag && (token.tag === 'comment' || this._tags[token.tag].isBlock === true)) {
+          this._openedTags.push(token)
+        }
+
+        /**
+         * Push to lastTag childs or the actual ast.
+         */
+        lastTag ? lastTag.childs.push(token) : this._ast.push(token)
       })
 
     /**
      * Bad template with opened tags found
      */
-    const openedTag = _.last(this.openedTags)
+    const openedTag = _.last(this._openedTags)
 
     /**
      * Make sure there are no opened tags found
@@ -149,7 +267,7 @@ class Ast {
       throw CE.InvalidTemplateException.unClosedTag(openedTag.tag, openedTag.lineno, openedTag.body)
     }
 
-    return this.ast
+    return this._ast
   }
 }
 

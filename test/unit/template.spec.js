@@ -281,4 +281,40 @@ test.group('Template Runner', () => {
     const template = new Template(this.tags, {}, loader)
     template.renderString(statement)
   })
+
+  test('remove comments on render', (assert) => {
+    const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
+    const statement = dedent`
+    {{-- Render {{ username }} when exists --}}
+    @if(username)
+      <h2> Hey {{ username }} </h2>
+    @endif
+    `
+
+    this.tags.section.run(Context)
+    const template = new Template(this.tags, {}, loader)
+    const output = template.renderString(statement, { username: 'virk' })
+    assert.equal(output.trim(), dedent`
+      <h2> Hey virk </h2>
+    `)
+  })
+
+  test('remove block comments on render', (assert) => {
+    const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
+    const statement = dedent`
+    {{--
+      Render {{ username }} when exists
+    --}}
+    @if(username)
+      <h2> Hey {{ username }} </h2>
+    @endif
+    `
+
+    this.tags.section.run(Context)
+    const template = new Template(this.tags, {}, loader)
+    const output = template.renderString(statement, { username: 'virk' })
+    assert.equal(output.trim(), dedent`
+      <h2> Hey virk </h2>
+    `)
+  })
 })

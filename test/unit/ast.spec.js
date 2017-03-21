@@ -29,6 +29,8 @@ test.group('Template Compiler', (group) => {
     assert.equal(ast[0].tag, 'include')
     assert.deepEqual(ast[0].childs, [])
     assert.equal(ast[0].args, `'users.profile'`)
+    assert.equal(ast[0].lineno, 1)
+    assert.equal(ast[0].body, `@include('users.profile')`)
   })
 
   test('parse a block tag', (assert) => {
@@ -49,6 +51,10 @@ test.group('Template Compiler', (group) => {
     assert.equal(ast[0].tag, 'each')
     assert.deepEqual(ast[0].childs, [])
     assert.equal(ast[0].args, `'user in users'`)
+    assert.equal(ast[0].body, `@each('user in users')`)
+    assert.equal(ast[0].lineno, 1)
+    assert.equal(ast[0].end.body, '@endeach')
+    assert.equal(ast[0].end.lineno, 2)
   })
 
   test('throw exception when unclosed block tags found', (assert) => {
@@ -87,6 +93,7 @@ test.group('Template Compiler', (group) => {
     assert.equal(ast[0].tag, 'if')
     assert.lengthOf(ast[0].childs, 3)
     assert.equal(ast[0].childs[1].body.trim(), '@else')
+    assert.equal(ast[0].end.lineno, 5)
   })
 
   test('add deep nested tags as childs', (assert) => {
@@ -116,5 +123,123 @@ test.group('Template Compiler', (group) => {
     assert.equal(ast[0].childs[0].tag, 'slot')
     assert.lengthOf(ast[0].childs[0].childs, 1)
     assert.equal(ast[0].childs[0].childs[0].body.trim(), '<h2> This is the header </h2>')
+    assert.equal(ast[0].end.lineno, 6)
+  })
+
+  test('add comments to the lineComments key of the line', (assert) => {
+    const statement = `
+    {{-- hello dude --}}
+    <h2> Hello world </h2>
+    `
+    const ast = new Ast({}, statement).parse()
+    assert.lengthOf(ast, 1)
+    assert.deepEqual(ast[0].body.trim(), '<h2> Hello world </h2>')
+  })
+
+  test('parse inline comments next to the some content', (assert) => {
+    const statement = `
+    <h2> Hello world </h2>{{-- end h2 --}}
+    `
+    const ast = new Ast({}, statement).parse()
+    assert.equal(ast[0].body, '<h2> Hello world </h2>')
+  })
+
+  test('parse multiple comments on a single line', (assert) => {
+    const statement = `
+    <h2> Hello {{-- the world will be capitalized --}}world </h2>{{-- end h2 --}}
+    `
+    const ast = new Ast({}, statement).parse()
+    assert.equal(ast[0].body, '<h2> Hello world </h2>')
+  })
+
+  test('parse multi line comments', (assert) => {
+    const statement = `
+    {{--
+    Here is a simple
+    multi-line comment
+    --}}
+    `
+    const ast = new Ast({}, statement).parse()
+    assert.lengthOf(ast, 0)
+  })
+
+  test('ignore tags inside comments', (assert) => {
+    const statement = `
+    {{--
+    @each(user in users)
+    @endeach
+    --}}
+    `
+
+    const tags = {
+      each: {
+        name: 'each',
+        isBlock: true,
+        compile () {}
+      }
+    }
+
+    const ast = new Ast(tags, statement).parse()
+    assert.lengthOf(ast, 0)
+  })
+
+  test('look for closing comments only when inside comments', (assert) => {
+    const statement = `
+    @each(user in users)
+      --}}
+    @endeach
+    `
+
+    const tags = {
+      each: {
+        name: 'each',
+        isBlock: true,
+        compile () {}
+      }
+    }
+
+    const ast = new Ast(tags, statement).parse()
+    assert.lengthOf(ast, 1)
+    assert.equal(ast[0].tag, 'each')
+    assert.equal(ast[0].childs[0].body.trim(), '--}}')
+  })
+
+  test('parse a complex template', (assert) => {
+    const statement = `
+    {{-- Check if users exists --}}
+    @if(users.length)
+      {{--
+      Loop over list of all the users
+      --}}
+      <div class="user">
+        @each(user in users)
+          {{ user.username }}
+        @endeach
+      </div>{{-- end user --}}
+    @endif
+    `
+
+    const tags = {
+      each: {
+        name: 'each',
+        isBlock: true,
+        compile () {}
+      },
+      if: {
+        name: 'if',
+        isBlock: true,
+        compile () {}
+      }
+    }
+
+    const ast = new Ast(tags, statement).parse()
+    assert.lengthOf(ast, 1)
+    assert.equal(ast[0].lineno, 2)
+    assert.equal(ast[0].end.lineno, 11)
+    assert.lengthOf(ast[0].childs, 3)
+    assert.equal(ast[0].childs[0].body.trim(), '<div class="user">')
+    assert.equal(ast[0].childs[1].tag, 'each')
+    assert.lengthOf(ast[0].childs[1].childs, 1)
+    assert.equal(ast[0].childs[2].body.trim(), '</div>')
   })
 })
