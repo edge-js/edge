@@ -253,28 +253,6 @@ test.group('Edge', (group) => {
     assert.equal(output.trim(), '<p> Hello virk </p>')
   })
 
-  test('define compiled dir', (assert) => {
-    const edge = new Edge()
-    const compiledDir = path.join(__dirname, '../../test-helpers/views/compiled')
-    edge.compiledDir(compiledDir)
-    assert.equal(compiledDir, edge._loader.compiledDir)
-  })
-
-  test('load a file from the precompiled template over compiling it from source', (assert) => {
-    const edge = new Edge()
-    const compiledDir = path.join(__dirname, '../../test-helpers/views/compiled')
-    edge.compiledDir(compiledDir)
-    edge._loader.load = function () {
-      throw new Error('Not expecting a call to load')
-    }
-    const output = edge.render('loopUsers', {
-      users: [{username: 'virk'}, {username: 'nikk'}]
-    })
-
-    assert.equal(output.trim(), `virk
-  nikk`)
-  })
-
   test('should have access to inbuilt globals', (assert) => {
     const edge = new Edge()
     const statement = `{{ size('foo') }}`

@@ -21,10 +21,9 @@ const CE = require('../Exceptions')
  * @class Loader
  */
 class Loader {
-  constructor (viewsPath, presentersPath, compiledDir) {
+  constructor (viewsPath, presentersPath) {
     this._viewsPath = viewsPath
     this._presentersPath = presentersPath
-    this._compiledDir = compiledDir
   }
 
   /**
@@ -68,30 +67,6 @@ class Loader {
   }
 
   /**
-   * The path from where the load the compiled
-   * views.
-   *
-   * @attribute compiledDir
-   *
-   * @return {String}
-   */
-  get compiledDir () {
-    return this._compiledDir
-  }
-
-  /**
-   * Set the path to the compiled directory
-   * for reading pre-compiled views
-   *
-   * @param  {String}    compiledDir
-   *
-   * @return {void}
-   */
-  set compiledDir (compiledDir) {
-    this._compiledDir = compiledDir
-  }
-
-  /**
    * Normalizes the view name
    *
    * @method _normalizeViewName
@@ -110,8 +85,8 @@ class Loader {
    *
    * @private
    */
-  _normalizeViewName (view, extension = 'edge') {
-    return `${view.replace(/\.edge$/, '').replace(/\.(\w+|\d+)/, '/$1')}.${extension}`
+  normalizeViewName (view, extension = 'edge') {
+    return `${view.replace(/\.edge$/, '').replace(/\.(\w+|\d+)/g, '/$1').replace(/\/{3}/, '.')}.${extension}`
   }
 
   /**
@@ -149,8 +124,6 @@ class Loader {
    * @throws {RunTimeException} If unable to load the view
    */
   load (view) {
-    view = this._normalizeViewName(view)
-
     try {
       return fs.readFileSync(this.getViewPath(view), 'utf-8')
     } catch (error) {
@@ -186,30 +159,6 @@ class Loader {
         throw CE.RuntimeException.missingPresenter(presenter, this.presentersPath)
       }
       throw error
-    }
-  }
-
-  /**
-   * Load and return pre compiled template. It will
-   * return null when unable to load the precompiled
-   * view.
-   *
-   * @method loadPreCompiled
-   *
-   * @param  {String}                view
-   *
-   * @return {Function|Null}
-   */
-  loadPreCompiled (view) {
-    view = this._normalizeViewName(view, 'js')
-    if (!this.compiledDir) {
-      return null
-    }
-
-    try {
-      return require(path.join(this.compiledDir, view))
-    } catch (error) {
-      return null
     }
   }
 }

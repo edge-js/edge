@@ -10,10 +10,12 @@
 */
 
 const _ = require('lodash')
+const debug = require('debug')('edge:template')
 const TemplateCompiler = require('./Compiler')
 const TemplateRunner = require('./Runner')
 const Context = require('../Context')
 const BasePresenter = require('../Presenter')
+const cache = require('../Cache')
 
 /**
  * Template class is used to compile and render the
@@ -161,9 +163,24 @@ class Template {
    * @return {String}
    */
   compile (view, asFunction = false) {
+    const normalizedView = this._loader.normalizeViewName(view)
+    const preCompiledView = cache.get(normalizedView)
+
+    /**
+     * Return the precompiled view from the cache if
+     * it exists.
+     */
+    if (preCompiledView) {
+      debug('resolving view %s from cache', normalizedView)
+      return preCompiledView
+    }
+
     const compiler = new TemplateCompiler(this._tags, this._loader, asFunction)
     try {
-      return compiler.compile(view)
+      const compiledView = compiler.compile(normalizedView)
+      cache.add(normalizedView, compiledView)
+      debug('adding view %s to cache', normalizedView)
+      return compiledView
     } catch (error) {
       throw (this._prepareStack(error))
     }
@@ -200,7 +217,7 @@ class Template {
    */
   render (view, data = {}) {
     this.sourceView(view)
-    const compiledTemplate = this._loader.loadPreCompiled(view) || this.compile(view, true)
+    const compiledTemplate = this.compile(view, true)
     this._makeContext(data)
     return new TemplateRunner(compiledTemplate, this).run()
   }
@@ -232,7 +249,7 @@ class Template {
    * @return {String}
    */
   runTimeRender (view) {
-    const compiledTemplate = this._loader.loadPreCompiled(view) || this.compile(view, true)
+    const compiledTemplate = this.compile(view, true)
     const template = new TemplateRunner(compiledTemplate, this).run()
     return template
   }

@@ -58,19 +58,6 @@ class Edge {
   }
 
   /**
-   * The directory to be used for reading compiled templates
-   *
-   * @method compiledDir
-   *
-   * @param {String} compiledDir
-   *
-   * @return {String}
-   */
-  compiledDir (compiledDir) {
-    this._loader.compiledDir = compiledDir
-  }
-
-  /**
    * Registers a new tag. A tag must have following
    * attributes.
    *

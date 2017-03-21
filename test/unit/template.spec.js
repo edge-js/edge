@@ -14,8 +14,10 @@ const test = require('japa')
 const cheerio = require('cheerio')
 const dedent = require('dedent-js')
 const Template = require('../../src/Template')
+const TemplateCompiler = require('../../src/Template/Compiler')
 const Loader = require('../../src/Loader')
 const Context = require('../../src/Context')
+const cache = require('../../src/Cache')
 
 test.group('Template Compiler', (group) => {
   group.before(() => {
@@ -218,7 +220,7 @@ test.group('Template Runner', () => {
   test('throw exception when layout file has invalid section name', (assert) => {
     const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
     const statement = dedent`
-    @layout('layouts.invalid.master')
+    @layout('layouts.invalid//.master')
     @section('content')
       <h2> Hello world </h2>
     @endsection
@@ -316,5 +318,24 @@ test.group('Template Runner', () => {
     assert.equal(output.trim(), dedent`
       <h2> Hey virk </h2>
     `)
+  })
+
+  test('add template to cache after compile', (assert) => {
+    const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
+    const template = new Template(this.tags, {}, loader)
+    template.compile('welcome')
+    assert.isDefined(cache._items['welcome.edge'])
+  })
+
+  test('rendering a view multiple times should get it from the cache', (assert) => {
+    const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
+    const template = new Template(this.tags, {}, loader)
+    template.compile('welcome')
+    const existingCompile = TemplateCompiler.prototype.compile
+    TemplateCompiler.prototype.compile = function () {
+      throw new Error('Template should have been fetched from cache')
+    }
+    template.compile('welcome')
+    TemplateCompiler.prototype.compile = existingCompile
   })
 })
