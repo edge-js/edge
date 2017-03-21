@@ -17,5 +17,6 @@ module.exports = {
   includeTag: new (require('./IncludeTag'))(),
   componentTag: new (require('./ComponentTag'))(),
   slotTag: new (require('./SlotTag'))(),
-  sectionTag: new (require('./SectionTag'))()
+  sectionTag: new (require('./SectionTag'))(),
+  yieldTag: new (require('./YieldTag'))()
 }
