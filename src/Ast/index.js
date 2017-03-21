@@ -39,7 +39,7 @@ const singleLineComment = /({{--.*?--}})/g
 class Ast {
   constructor (tags, template) {
     this._tags = tags
-    this._blockExpression = new RegExp(`^\\s*\\@(${_.keys(tags).join('|')})(?:\\((.*)\\))?`)
+    this._blockExpression = new RegExp(`^\\s*\\@(!?)(${_.keys(tags).join('|')})(?:\\((.*)\\))?`)
     this._template = template
     this._ast = []
     this._insideBlockComment = false
@@ -55,15 +55,17 @@ class Ast {
    * @param  {String}     tag
    * @param  {String}     args
    * @param  {Number}     index
+   * @param  {Boolean}    selfClosing
    *
    * @return {Object}
    *
    * @private
    */
-  _tokenForTag (line, tag, args, index) {
+  _tokenForTag (line, tag, args, index, selfClosing) {
     return {
       tag,
       args,
+      selfClosing,
       childs: [],
       body: line,
       lineno: index + 1,
@@ -117,9 +119,9 @@ class Ast {
     /**
      * Look for opening of a custom tag.
      */
-    const [, tag, args] = this._blockExpression.exec(line) || []
+    const [, selfClosing, tag, args] = this._blockExpression.exec(line) || []
     if (tag) {
-      return this._tokenForTag(line, tag, args, index)
+      return this._tokenForTag(line, tag, args, index, !!selfClosing)
     }
 
     /**
@@ -245,7 +247,7 @@ class Ast {
          * then we need to push it to list of opened tags and wait
          * for it to close.
          */
-        if (token.tag && (token.tag === 'comment' || this._tags[token.tag].isBlock === true)) {
+        if (token.tag && this._tags[token.tag].isBlock === true && !token.selfClosing) {
           this._openedTags.push(token)
         }
 

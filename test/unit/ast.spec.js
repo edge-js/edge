@@ -242,4 +242,25 @@ test.group('Template Compiler', (group) => {
     assert.lengthOf(ast[0].childs[1].childs, 1)
     assert.equal(ast[0].childs[2].body.trim(), '</div>')
   })
+
+  test('should be able to define self closing block tags', (assert) => {
+    const statement = `
+    @!yield('foo')
+    `
+    const tags = {
+      yield: {
+        name: 'yield',
+        isBlock: true,
+        fn: function () {}
+      }
+    }
+
+    const ast = new Ast(tags, statement).parse()
+    assert.equal(ast[0].tag, 'yield')
+    assert.deepEqual(ast[0].childs, [])
+    assert.equal(ast[0].args, `'foo'`)
+    assert.equal(ast[0].lineno, 1)
+    assert.equal(ast[0].selfClosing, true)
+    assert.equal(ast[0].body, `@!yield('foo')`)
+  })
 })
