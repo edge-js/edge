@@ -116,10 +116,10 @@ class ComponentTag extends BaseTag {
         slotLineNo = slotLineNo + child.childs.length + 1
       } else {
         slotLineNo++
-        result.yield.push(compiler.parseAndReturnLine(child))
+        result.main.push(compiler.parseAndReturnLine(child))
       }
       return result
-    }, {yield: []})
+    }, {main: []})
 
     return transformedChilds
   }

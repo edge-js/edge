@@ -37,7 +37,7 @@ test.group('Tags | Component ', (group) => {
       let out = new String()
       this.isolate(function () {
         out += \`\${this.runTimeRender('components.alert')}\\n\`
-      }.bind(this.newContext({$slot: { yield: \`  <h2> Hello dude </h2>\` } })))
+      }.bind(this.newContext({$slot: { main: \`  <h2> Hello dude </h2>\` } })))
       return out
     }).bind(this)()
     `)
@@ -57,7 +57,7 @@ test.group('Tags | Component ', (group) => {
       let out = new String()
       this.isolate(function () {
         out += \`\${this.runTimeRender('components.alert')}\\n\`
-      }.bind(this.newContext({username: 'virk'},{$slot: { yield: \`  <h2> Hello dude </h2>\` } })))
+      }.bind(this.newContext({username: 'virk'},{$slot: { main: \`  <h2> Hello dude </h2>\` } })))
       return out
     }).bind(this)()
     `)
@@ -77,7 +77,7 @@ test.group('Tags | Component ', (group) => {
       let out = new String()
       this.isolate(function () {
         out += \`\${this.runTimeRender('components.alert')}\\n\`
-      }.bind(this.newContext({username: this.context.resolve('username')},{$slot: { yield: \`  <h2> Hello dude </h2>\` } })))
+      }.bind(this.newContext({username: this.context.resolve('username')},{$slot: { main: \`  <h2> Hello dude </h2>\` } })))
       return out
     }).bind(this)()
     `)
@@ -97,7 +97,7 @@ test.group('Tags | Component ', (group) => {
       let out = new String()
       this.isolate(function () {
         out += \`\${this.runTimeRender('components.alert')}\\n\`
-      }.bind(this.newContext({username: this.context.resolve('username')},{$slot: { yield: \`  <h2> Hello dude </h2>\` } })))
+      }.bind(this.newContext({username: this.context.resolve('username')},{$slot: { main: \`  <h2> Hello dude </h2>\` } })))
       return out
     }).bind(this)()
     `)
@@ -115,7 +115,7 @@ test.group('Tags | Component ', (group) => {
     @endcomponent
     `
     const output = template.compileString(statement)
-    const slot = `{$slot: { yield: \`
+    const slot = `{$slot: { main: \`
     This is the body\`, header: \`    <h2> This is the header </h2>\` } }`
 
     assert.equal(output, dedent`
@@ -143,7 +143,7 @@ test.group('Tags | Component ', (group) => {
     @endcomponent
     `
     const output = template.compileString(statement)
-    const slot = `{$slot: { yield: \`\`, header: \`    <h2> This is the header </h2>\`, body: \`    This is the body\` } }`
+    const slot = `{$slot: { main: \`\`, header: \`    <h2> This is the header </h2>\`, body: \`    This is the body\` } }`
 
     assert.equal(output, dedent`
     return (function templateFn () {
