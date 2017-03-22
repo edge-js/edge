@@ -21,7 +21,7 @@ const nunjucksStatement = `
 `
 
 function compileEdge () {
-  return edge.compileString(edgeStatement, { username: 'virk' })
+  return edge.compileString(edgeStatement)
 }
 
 nunjucks.configure('', {
