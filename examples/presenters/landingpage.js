@@ -11,7 +11,7 @@ class LandingPagePresenter extends BasePresenter {
   get marketingRows () {
     return _.map(_.range(6), () => {
       return {
-        heading: 'Subheading',
+        heading: 'Sub-heading',
         body: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Minus iure perferendis natus, reprehenderit rerum voluptatum nobis ratione aliquam nihil repudiandae consectetur porro ex, commodi quod tenetur sequi explicabo facere quae.'
       }
     })
