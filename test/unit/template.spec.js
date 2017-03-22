@@ -26,7 +26,7 @@ test.group('Template Compiler', (group) => {
 
   test('parse a simple template string without tags', (assert) => {
     const statement = `{{ username }}`
-    const template = new Template({})
+    const template = new Template({}, {})
     const output = template.compileString(statement)
     assert.equal(output, dedent`
     return (function templateFn () {
@@ -43,7 +43,7 @@ test.group('Template Compiler', (group) => {
       {{ username }}
     @endif
     `
-    const template = new Template(this.tags)
+    const template = new Template(this.tags, {})
     const output = template.compileString(statement)
     assert.equal(output, dedent`
     return (function templateFn () {
@@ -62,14 +62,14 @@ test.group('Template Compiler', (group) => {
       {{ username }}
     @endif
     `
-    const template = new Template(this.tags)
+    const template = new Template(this.tags, {})
     const output = () => template.compileString(statement)
     assert.throw(output, 'lineno:1 charno:0 E_INVALID_EXPRESSION: Invalid expression <username, age> passed to (if) block')
   })
 
   test('parse a template by reading it via loader', (assert) => {
     const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const output = template.compile('ifView')
     assert.equal(output, dedent`
     return (function templateFn () {
@@ -85,7 +85,7 @@ test.group('Template Compiler', (group) => {
   test('report error with correct lineno when file has error', (assert) => {
     assert.plan(2)
     const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const output = () => template.compile('ifErrorView')
     try {
       output()
@@ -103,7 +103,7 @@ test.group('Template Compiler', (group) => {
     `
 
     this.tags.section.run(Context)
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const output = template.renderString(statement)
     assert.equal(output, dedent`
     Hello world
@@ -120,7 +120,7 @@ test.group('Template Compiler', (group) => {
     `
 
     this.tags.section.run(Context)
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     try {
       template.renderString(statement)
     } catch (error) {
@@ -133,14 +133,14 @@ test.group('Template Compiler', (group) => {
 test.group('Template Runner', () => {
   test('render a template by loading it from file', (assert) => {
     const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const output = template.render('welcome', { username: 'virk' })
     assert.equal(output.trim(), 'virk')
   })
 
   test('render a template from string', (assert) => {
     const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const output = template.renderString('{{ username }}', { username: 'virk' })
     assert.equal(output.trim(), 'virk')
   })
@@ -150,7 +150,7 @@ test.group('Template Runner', () => {
       path.join(__dirname, '../../test-helpers/views'),
       path.join(__dirname, '../../test-helpers/presenters')
     )
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const output = template.presenter('User').renderString('{{ username }}', { username: 'virk' })
     assert.equal(output.trim(), 'VIRK')
   })
@@ -160,7 +160,7 @@ test.group('Template Runner', () => {
       path.join(__dirname, '../../test-helpers/views'),
       path.join(__dirname, '../../test-helpers/presenters')
     )
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const output = template.share({username: 'virk'}).renderString('{{ username }}')
     assert.equal(output.trim(), 'virk')
   })
@@ -173,7 +173,7 @@ test.group('Template Runner', () => {
     `
 
     this.tags.section.run(Context)
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const output = template.renderString(statement)
     const $ = cheerio.load(output)
     assert.equal($('h2').length, 0)
@@ -189,7 +189,7 @@ test.group('Template Runner', () => {
     `
 
     this.tags.section.run(Context)
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const output = template.renderString(statement)
     const $ = cheerio.load(output)
     assert.equal($('h2').length, 1)
@@ -211,7 +211,7 @@ test.group('Template Runner', () => {
     `
 
     this.tags.section.run(Context)
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const output = () => template.renderString(statement)
     assert.throw(output, `lineno:6 charno:0 E_INVALID_EXPRESSION: Section <@section('content')> has been called multiple times. A section can only be called once`)
   })
@@ -226,7 +226,7 @@ test.group('Template Runner', () => {
     `
 
     this.tags.section.run(Context)
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const output = () => template.renderString(statement)
     assert.throw(output, `lineno:2 charno:0 E_INVALID_EXPRESSION: Invalid expression <content> passed to a section. Make sure section name must be a valid string`)
   })
@@ -242,7 +242,7 @@ test.group('Template Runner', () => {
     `
 
     this.tags.section.run(Context)
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     try {
       template.renderString(statement)
     } catch (error) {
@@ -261,7 +261,7 @@ test.group('Template Runner', () => {
     `
 
     this.tags.section.run(Context)
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const output = template.renderString(statement, {
       masterLayout: 'layouts.master'
     })
@@ -282,7 +282,7 @@ test.group('Template Runner', () => {
     `
 
     this.tags.section.run(Context)
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const output = template.renderString(statement)
     const $ = cheerio.load(output)
     assert.equal($('h2').length, 1)
@@ -299,7 +299,7 @@ test.group('Template Runner', () => {
     `
 
     this.tags.section.run(Context)
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     template.renderString(statement)
   })
 
@@ -313,7 +313,7 @@ test.group('Template Runner', () => {
     `
 
     this.tags.section.run(Context)
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const output = template.renderString(statement, { username: 'virk' })
     assert.equal(output.trim(), dedent`
       <h2> Hey virk </h2>
@@ -332,7 +332,7 @@ test.group('Template Runner', () => {
     `
 
     this.tags.section.run(Context)
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const output = template.renderString(statement, { username: 'virk' })
     assert.equal(output.trim(), dedent`
       <h2> Hey virk </h2>
@@ -341,14 +341,14 @@ test.group('Template Runner', () => {
 
   test('add template to cache after compile', (assert) => {
     const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {cache: true}, {}, loader)
     template.compile('welcome')
     assert.isDefined(cache._items['welcome.edge'])
   })
 
   test('rendering a view multiple times should get it from the cache', (assert) => {
     const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {cache: true}, {}, loader)
     template.compile('welcome')
     const existingCompile = TemplateCompiler.prototype.compile
     TemplateCompiler.prototype.compile = function () {
@@ -367,7 +367,7 @@ test.group('Template Runner', () => {
     `
 
     this.tags.section.run(Context)
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const output = template.renderString(statement, {
       outputViewName () {
         return this.$viewName
@@ -389,7 +389,7 @@ test.group('Template Runner', () => {
     `
 
     this.tags.section.run(Context)
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const output = template.renderString(statement, {
       outputViewName () {
         return this.$viewName
@@ -413,7 +413,7 @@ test.group('Template Runner', () => {
     `
 
     this.tags.section.run(Context)
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const output = template.renderString(statement, {
       outputViewName () {
         return this.$viewName

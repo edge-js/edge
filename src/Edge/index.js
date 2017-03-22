@@ -26,6 +26,9 @@ class Edge {
     this._tags = {}
     this._globals = require('../Globals')
     this._loader = new Loader()
+    this._options = {
+      cache: false
+    }
     this._boot()
   }
 
@@ -54,7 +57,9 @@ class Edge {
    * @private
    */
   _getTemplate () {
-    return new Template(this._tags, this._globals, this._loader)
+    return new Template(this._tags, {
+      cache: this._options.cache
+    }, this._globals, this._loader)
   }
 
   /**
@@ -98,6 +103,19 @@ class Edge {
      * to the context prototype.
      */
     tag.run(Context)
+  }
+
+  /**
+   * Configure edge by passing object of options.
+   *
+   * @method configure
+   *
+   * @param  {Object}  options
+   *
+   * @return {void}
+   */
+  configure (options) {
+    this._options = _.merge(this._options, options)
   }
 
   /**

@@ -11,6 +11,7 @@
 
 const fs = require('fs')
 const path = require('path')
+const requireUncached = require('require-uncached')
 const CE = require('../Exceptions')
 
 /**
@@ -147,7 +148,7 @@ class Loader {
    *
    * @return {String}
    */
-  loadPresenter (presenter) {
+  loadPresenter (presenter, clearCache = false) {
     /**
      * Presenters path has not been registered and trying
      * to load a presenter.
@@ -157,7 +158,8 @@ class Loader {
     }
 
     try {
-      return require(path.join(this.presentersPath, presenter))
+      const presenterPath = path.join(this.presentersPath, presenter)
+      return clearCache ? requireUncached(presenterPath) : require(presenterPath)
     } catch (error) {
       if (error.code === 'MODULE_NOT_FOUND') {
         throw CE.RuntimeException.missingPresenter(presenter, this.presentersPath)

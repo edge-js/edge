@@ -25,7 +25,7 @@ test.group('Tags | Component ', (group) => {
   })
 
   test('parse a simple component without any slots', (assert) => {
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const statement = dedent`
     @component('components.alert')
       <h2> Hello dude </h2>
@@ -45,7 +45,7 @@ test.group('Tags | Component ', (group) => {
   })
 
   test('parse a simple component with props', (assert) => {
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const statement = dedent`
     @component('components.alert', username = 'virk')
       <h2> Hello dude </h2>
@@ -65,7 +65,7 @@ test.group('Tags | Component ', (group) => {
   })
 
   test('parse a simple component with dynamic props', (assert) => {
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const statement = dedent`
     @component('components.alert', username = username)
       <h2> Hello dude </h2>
@@ -85,7 +85,7 @@ test.group('Tags | Component ', (group) => {
   })
 
   test('parse a simple component with object as props', (assert) => {
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const statement = dedent`
     @component('components.alert', { username })
       <h2> Hello dude </h2>
@@ -105,7 +105,7 @@ test.group('Tags | Component ', (group) => {
   })
 
   test('parse a simple component with dynamic slots', (assert) => {
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const statement = dedent`
     @component('components.alert', { username })
       @slot('header')
@@ -131,7 +131,7 @@ test.group('Tags | Component ', (group) => {
   })
 
   test('parse a simple component with one or more dynamic slots', (assert) => {
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const statement = dedent`
     @component('components.alert', { username })
       @slot('header')
@@ -169,7 +169,7 @@ test.group('Tags | Component ', (group) => {
       @endslot
     @endcomponent
     `
-    const output = new Template(this.tags, {}, loader).renderString(statement)
+    const output = new Template(this.tags, {}, {}, loader).renderString(statement)
 
     assert.equal(output.trim(), dedent`
       <div class="header">
@@ -186,7 +186,7 @@ test.group('Tags | Component ', (group) => {
     @component('components.user', username = 'virk')
     @endcomponent
     `
-    const output = new Template(this.tags, {}, loader).renderString(statement, {
+    const output = new Template(this.tags, {}, {}, loader).renderString(statement, {
       username: 'nikk'
     })
     assert.equal(output.trim(), '<h2> Hello virk </h2>')
@@ -197,7 +197,7 @@ test.group('Tags | Component ', (group) => {
     @component('components.user', username = username)
     @endcomponent
     `
-    const output = new Template(this.tags, {}, loader).renderString(statement, {
+    const output = new Template(this.tags, {}, {}, loader).renderString(statement, {
       username: 'nikk'
     })
     assert.equal(output.trim(), '<h2> Hello nikk </h2>')
@@ -215,7 +215,7 @@ test.group('Tags | Component ', (group) => {
       @endslot
     @endcomponent
     `
-    const output = () => new Template(this.tags, {}, loader).compileString(statement)
+    const output = () => new Template(this.tags, {}, {}, loader).compileString(statement)
     assert.throw(output, 'lineno:6 charno:0 E_INVALID_EXPRESSION: Invalid name <body> passed to slot. Only strings are allowed')
   })
 
@@ -228,13 +228,13 @@ test.group('Tags | Component ', (group) => {
       @endslot
     @endcomponent
     `
-    const output = new Template(this.tags, {}, loader).renderString(statement)
+    const output = new Template(this.tags, {}, {}, loader).renderString(statement)
     const $ = cheerio.load(output)
     assert.equal($('.body').html().trim(), '<h2> Hello joe </h2>')
   })
 
   test('pass multiple props to a component', (assert) => {
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const statement = dedent`
     @component('components.user', username = 'virk', age = 22)
     @endcomponent
@@ -246,7 +246,7 @@ test.group('Tags | Component ', (group) => {
   })
 
   test('component slots should have access to parent template scope', (assert) => {
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const statement = dedent`
     @component('components.alert')
       <h2>{{ username }}</h2>
@@ -260,7 +260,7 @@ test.group('Tags | Component ', (group) => {
   })
 
   test('include inside the components', (assert) => {
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const statement = dedent`
     @component('components.alert')
       @slot('body')
@@ -276,7 +276,7 @@ test.group('Tags | Component ', (group) => {
   })
 
   test('include component inside component', (assert) => {
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const statement = dedent`
     @component('components.modal')
       @slot('header')
@@ -295,7 +295,7 @@ test.group('Tags | Component ', (group) => {
   })
 
   test('deeply nested tags inside slots', (assert) => {
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const statement = dedent`
     @component('components.modal')
       @slot('body')
@@ -326,7 +326,7 @@ test.group('Tags | Component ', (group) => {
 
   test('pass presenter to component', (assert) => {
     loader.presentersPath = path.join(__dirname, '../../../test-helpers/presenters')
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const statement = dedent`
     @!component('components.user', presenter = 'User', username = 'virk')
     `

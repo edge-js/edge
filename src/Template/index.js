@@ -38,12 +38,13 @@ const cache = require('../Cache')
  * @constructor
  */
 class Template {
-  constructor (tags, globals = {}, loader = null) {
+  constructor (tags, options, globals = {}, loader = null) {
     this._tags = tags
     this._globals = globals
     this._loader = loader
     this._viewName = 'raw string'
     this._runTimeViews = []
+    this._options = options
 
     this._locals = {}
     this._presenter = null
@@ -111,7 +112,7 @@ class Template {
    * @private
    */
   _makeContext (data) {
-    const Presenter = this._presenter ? this._loader.loadPresenter(this._presenter) : BasePresenter
+    const Presenter = this._presenter ? this._loader.loadPresenter(this._presenter, !this._options.cache) : BasePresenter
     const presenter = new Presenter(data, this._locals)
     /**
      * We should always make the context with the original view
@@ -126,6 +127,8 @@ class Template {
    * @method _addRunTimeView
    *
    * @param  {String}        view
+   *
+   * @private
    */
   _addRunTimeView (view) {
     this._runTimeViews.push(view)
@@ -138,9 +141,50 @@ class Template {
    * @method _removeRunTimeView
    *
    * @return {void}
+   *
+   * @private
    */
   _removeRunTimeView () {
     this._runTimeViews.pop()
+  }
+
+  /**
+   * Return the view from cache if cachining is
+   * turned on.
+   *
+   * @method _getFromCache
+   *
+   * @param  {String}      view
+   *
+   * @return {String|Null}
+   *
+   * @private
+   */
+  _getFromCache (view) {
+    if (!this._options.cache) {
+      return null
+    }
+    return cache.get(view)
+  }
+
+  /**
+   * Save view to cache when caching is turned on
+   *
+   * @method _saveToCache
+   *
+   * @param  {String}     view
+   * @param  {String}     output
+   *
+   * @return {void}
+   *
+   * @private
+   */
+  _saveToCache (view, output) {
+    if (!this._options.cache) {
+      return
+    }
+    cache.add(view, output)
+    debug('adding view %s to cache', view)
   }
 
   /**
@@ -155,7 +199,7 @@ class Template {
    * @return {String}
    */
   _compileView (view, asFunction = true) {
-    const preCompiledView = cache.get(view)
+    const preCompiledView = this._getFromCache(view)
 
     /**
      * Return the precompiled view from the cache if
@@ -170,13 +214,7 @@ class Template {
 
     try {
       const compiledView = compiler.compile(view)
-
-      /**
-       * Adding view to cache
-       */
-      cache.add(view, compiledView)
-      debug('adding view %s to cache', view)
-
+      this._saveToCache(view, compiledView)
       return compiledView
     } catch (error) {
       throw this._prepareStack(view, error)
@@ -378,7 +416,7 @@ class Template {
       return result
     }, {})
 
-    const template = new Template(this._tags, this._globals, this._loader)
+    const template = new Template(this._tags, this._options, this._globals, this._loader)
     template.presenter(presenter)
     template._makeContext(data)
     return template

@@ -15,7 +15,7 @@ test.group('Tags | Include ', (group) => {
     const statement = dedent`
     @include('includes.users.edge')
     `
-    const output = new Template(this.tags, {}, loader).compileString(statement)
+    const output = new Template(this.tags, {}, {}, loader).compileString(statement)
     assert.equal(output, dedent`
     return (function templateFn () {
       let out = new String()
@@ -29,7 +29,7 @@ test.group('Tags | Include ', (group) => {
     const statement = dedent`
     @include(user.profile)
     `
-    const output = new Template(this.tags, {}, loader).compileString(statement)
+    const output = new Template(this.tags, {}, {}, loader).compileString(statement)
     assert.equal(output, dedent`
     return (function templateFn () {
       let out = new String()
@@ -43,7 +43,7 @@ test.group('Tags | Include ', (group) => {
     const statement = dedent`
     @include(usersPartial)
     `
-    const output = new Template(this.tags, {}, loader).renderString(statement, {
+    const output = new Template(this.tags, {}, {}, loader).renderString(statement, {
       usersPartial: 'includes.users'
     })
     assert.equal(output.trim(), '<h2> Hello </h2>')
@@ -55,7 +55,7 @@ test.group('Tags | Include ', (group) => {
       @include(usersPartial)
     @endif
     `
-    const output = new Template(this.tags, {}, loader).renderString(statement, {
+    const output = new Template(this.tags, {}, {}, loader).renderString(statement, {
       usersPartial: 'includes.users',
       username: 'virk'
     })
@@ -68,7 +68,7 @@ test.group('Tags | Include ', (group) => {
       @include(usersPartial)
     @endif
     `
-    const output = new Template(this.tags, {}, loader).renderString(statement, {
+    const output = new Template(this.tags, {}, {}, loader).renderString(statement, {
       usersPartial: 'includes.users'
     })
     assert.equal(output.trim(), '')
@@ -77,7 +77,7 @@ test.group('Tags | Include ', (group) => {
   test('work fine with nested includes', (assert) => {
     const statement = `@include('includes.user-profile')`
 
-    const template = new Template(this.tags, {}, loader)
+    const template = new Template(this.tags, {}, {}, loader)
     const output = template.renderString(statement, { username: 'Foo' })
     assert.equal(output.trim(), dedent`<h1> User Profile </h1>
     <h2> Foo </h2>
