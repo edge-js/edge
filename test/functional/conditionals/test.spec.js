@@ -90,6 +90,6 @@ test.group('Functional | Conditionals', (group) => {
     const $ = cheerio.load(browser.html())
     const error = JSON.parse($('body').text())
     assert.equal(error.name, 'InvalidExpressionException')
-    assert.equal(error.stack.split('\n')[2], `at (${viewsPath}/error-if-else:9:0)`)
+    assert.equal(error.stack.split('\n')[1].trim(), `at (${viewsPath}/error-if-else.edge:9:0)`)
   })
 })

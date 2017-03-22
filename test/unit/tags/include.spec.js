@@ -19,7 +19,7 @@ test.group('Tags | Include ', (group) => {
     assert.equal(output, dedent`
     return (function templateFn () {
       let out = new String()
-      out += \`\${this.runTimeRender('includes.users.edge')}\\n\`
+      out += \`\${this.runTimeRender('includes.users.edge')}\`
       return out
     }).bind(this)()
     `)
@@ -33,7 +33,7 @@ test.group('Tags | Include ', (group) => {
     assert.equal(output, dedent`
     return (function templateFn () {
       let out = new String()
-      out += \`\${this.runTimeRender(this.context.accessChild(this.context.resolve('user'), ['profile']))}\\n\`
+      out += \`\${this.runTimeRender(this.context.accessChild(this.context.resolve('user'), ['profile']))}\`
       return out
     }).bind(this)()
     `)

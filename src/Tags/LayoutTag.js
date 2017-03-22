@@ -175,7 +175,7 @@ class LayoutTag extends BaseTag {
     /**
      * Now render the layout in runtime.
      */
-    buffer.writeToOutput(`$\{${lexer.runTimeRenderFn}(${layout})}`)
+    buffer.writeToOutput(`$\{${lexer.runTimeRenderFn}(${layout})}`, false)
   }
 
   /**

@@ -124,6 +124,10 @@ class Loader {
    * @throws {RunTimeException} If unable to load the view
    */
   load (view) {
+    if (!view) {
+      throw new RuntimeException('You are trying to a undefined view. Please contact package author.')
+    }
+
     try {
       return fs.readFileSync(this.getViewPath(view), 'utf-8')
     } catch (error) {

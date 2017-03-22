@@ -71,7 +71,7 @@ class IncludeTag extends BaseTag {
    */
   compile (compiler, lexer, buffer, { body, childs, lineno }) {
     const compiledStatement = this._compileStatement(lexer, body, lineno).toStatement()
-    buffer.writeToOutput(`$\{${lexer.runTimeRenderFn}(${compiledStatement})}`)
+    buffer.writeToOutput(`$\{${lexer.runTimeRenderFn}(${compiledStatement})}`, false)
   }
 
   /**

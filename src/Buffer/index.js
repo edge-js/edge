@@ -139,8 +139,9 @@ class Buffer {
    *
    * @chainable
    */
-  writeToOutput (line) {
-    this.writeLine(`out += \`${line}\\n\``)
+  writeToOutput (line, newLine = true) {
+    line = newLine ? `${line}\\n` : line
+    this.writeLine(`out += \`${line}\``)
     return this
   }
 

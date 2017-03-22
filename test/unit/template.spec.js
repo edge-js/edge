@@ -72,13 +72,13 @@ test.group('Template Compiler', (group) => {
     const template = new Template(this.tags, {}, loader)
     const output = template.compile('ifView')
     assert.equal(output, dedent`
-    module.exports = function () {
+    return (function templateFn () {
       let out = new String()
       if (this.context.resolve('username')) {
         out += \`  \${this.context.escape(this.context.resolve('username'))}\\n\`
       }
       return out
-    }
+    }).bind(this)()
     `)
   })
 
@@ -86,13 +86,12 @@ test.group('Template Compiler', (group) => {
     assert.plan(2)
     const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
     const template = new Template(this.tags, {}, loader)
-    template.sourceView('ifErrorView')
     const output = () => template.compile('ifErrorView')
     try {
       output()
     } catch (error) {
       assert.equal(error.message, 'E_INVALID_EXPRESSION: Invalid expression <username, age> passed to (if) block')
-      assert.equal(error.stack.split('\n')[2], `at (${loader.getViewPath('ifErrorView')}:8:0)`)
+      assert.equal(error.stack.split('\n')[1].trim(), `at (${loader.getViewPath('ifErrorView.edge')}:8:0)`)
     }
   })
 
@@ -113,13 +112,28 @@ test.group('Template Compiler', (group) => {
     `)
   })
 
+  test('report error when right view name when partial fails to compile', (assert) => {
+    assert.plan(2)
+    const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
+    const statement = dedent`
+    @include('includes.bad-partial')
+    `
+
+    this.tags.section.run(Context)
+    const template = new Template(this.tags, {}, loader)
+    try {
+      template.renderString(statement)
+    } catch (error) {
+      assert.equal(error.message, `E_INVALID_EXPRESSION: Invalid expression <'user', 'age'> passed to (if) block`)
+      assert.equal(error.stack.split('\n')[1].trim(), `at (${loader.getViewPath('includes/bad-partial.edge')}:2:0)`)
+    }
+  })
 })
 
 test.group('Template Runner', () => {
   test('render a template by loading it from file', (assert) => {
     const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
     const template = new Template(this.tags, {}, loader)
-    template.sourceView('welcome')
     const output = template.render('welcome', { username: 'virk' })
     assert.equal(output.trim(), 'virk')
   })
@@ -218,6 +232,7 @@ test.group('Template Runner', () => {
   })
 
   test('throw exception when layout file has invalid section name', (assert) => {
+    assert.plan(2)
     const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
     const statement = dedent`
     @layout('layouts.invalid//.master')
@@ -228,8 +243,12 @@ test.group('Template Runner', () => {
 
     this.tags.section.run(Context)
     const template = new Template(this.tags, {}, loader)
-    const output = () => template.renderString(statement)
-    assert.throw(output, `lineno:8 charno:0 E_INVALID_EXPRESSION: Invalid expression <content> passed to (section) block`)
+    try {
+      template.renderString(statement)
+    } catch (error) {
+      assert.equal(error.message, `E_INVALID_EXPRESSION: Invalid expression <content> passed to (section) block`)
+      assert.equal(error.stack.split('\n')[1].trim(), `at (${loader.getViewPath('layouts/invalid.master.edge')}:8:0)`)
+    }
   })
 
   test('define dynamic layout name', (assert) => {
@@ -337,5 +356,73 @@ test.group('Template Runner', () => {
     }
     template.compile('welcome')
     TemplateCompiler.prototype.compile = existingCompile
+  })
+
+  test('runtime render should update the partial name when inside a partial', (assert) => {
+    const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
+    const statement = dedent`
+    {{ outputViewName() }}
+    @include('includes.generic')
+    {{ outputViewName() }}
+    `
+
+    this.tags.section.run(Context)
+    const template = new Template(this.tags, {}, loader)
+    const output = template.renderString(statement, {
+      outputViewName () {
+        return this.$viewName
+      }
+    })
+    assert.equal(output.trim(), dedent`
+    raw string
+    includes/generic.edge
+    raw string
+    `)
+  })
+
+  test('runtime render should update the partial name when nested includes', (assert) => {
+    const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
+    const statement = dedent`
+    {{ outputViewName() }}
+    @include('includes.nested')
+    {{ outputViewName() }}
+    `
+
+    this.tags.section.run(Context)
+    const template = new Template(this.tags, {}, loader)
+    const output = template.renderString(statement, {
+      outputViewName () {
+        return this.$viewName
+      }
+    })
+    assert.equal(output.trim(), dedent`
+    raw string
+    includes/nested.edge
+    includes/generic.edge
+    includes/nested.edge
+    raw string
+    `)
+  })
+
+  test('runtime render of components should update the view name', (assert) => {
+    const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
+    const statement = dedent`
+    {{ outputViewName() }}
+    @!component('components.generic', { outputViewName })
+    {{ outputViewName() }}
+    `
+
+    this.tags.section.run(Context)
+    const template = new Template(this.tags, {}, loader)
+    const output = template.renderString(statement, {
+      outputViewName () {
+        return this.$viewName
+      }
+    })
+    assert.equal(output.trim(), dedent`
+    raw string
+    components/generic.edge
+    raw string
+    `)
   })
 })

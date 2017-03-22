@@ -42,11 +42,23 @@ class Template {
     this._tags = tags
     this._globals = globals
     this._loader = loader
-    this._viewToBeUsed = null
+    this._viewName = 'raw string'
+    this._runTimeViews = []
 
     this._locals = {}
     this._presenter = null
     this.context = null
+  }
+
+  /**
+   * The view to be used in runtime
+   *
+   * @method runtimeViewName
+   *
+   * @return {String}
+   */
+  get runtimeViewName () {
+    return _.last(this._runTimeViews) || this._viewName || 'raw string'
   }
 
   /**
@@ -55,13 +67,14 @@ class Template {
    *
    * @method _prepareStack
    *
+   * @param  {String}      view
    * @param  {Object}      error
    *
    * @return {Object}
    *
    * @private
    */
-  _prepareStack (error) {
+  _prepareStack (view, error) {
     if (!error.lineno) {
       return error
     }
@@ -70,9 +83,9 @@ class Template {
      * If view has been loaded for a directory, update the
      * stack by referencing the actual views path.
      */
-    if (this._viewToBeUsed && this._loader.viewsPath) {
+    if (view !== 'raw string' && this._loader.viewsPath) {
       const stack = error.stack.split('\n')
-      stack.splice(2, 0, `at (${this._loader.getViewPath(this._viewToBeUsed)}:${error.lineno}:${error.charno})`)
+      stack.splice(1, 0, `    at (${this._loader.getViewPath(view)}:${error.lineno}:${error.charno})`)
       error.stack = stack.join('\n')
       return error
     }
@@ -100,25 +113,74 @@ class Template {
   _makeContext (data) {
     const Presenter = this._presenter ? this._loader.loadPresenter(this._presenter) : BasePresenter
     const presenter = new Presenter(data, this._locals)
-    this.context = new Context(this._viewToBeUsed || 'raw string', presenter, this._globals)
+    /**
+     * We should always make the context with the original view
+     * name and update it later when required.
+     */
+    this.context = new Context(this._viewName, presenter, this._globals)
   }
 
   /**
-   * The view file to be used for reporting errors.
-   * Since we parse the raw view file, we need to
-   * report the error on the source file instead
-   * stack trace containing references to edge
-   * codebase.
+   * Add view name to the list of runtime views
    *
-   * @method sourceView
+   * @method _addRunTimeView
    *
-   * @param  {String}   view
-   *
-   * @chainable
+   * @param  {String}        view
    */
-  sourceView (view) {
-    this._viewToBeUsed = view
-    return this
+  _addRunTimeView (view) {
+    this._runTimeViews.push(view)
+  }
+
+  /**
+   * Remove last view from the list of runtime view.
+   * In short it calls `Array.pop()`
+   *
+   * @method _removeRunTimeView
+   *
+   * @return {void}
+   */
+  _removeRunTimeView () {
+    this._runTimeViews.pop()
+  }
+
+  /**
+   * Compile a view by loading it from the disk and
+   * cache the view when caching is set to true.
+   *
+   * @method _compileView
+   *
+   * @param  {String}     view
+   * @param  {Boolean}     [asFunction = true]
+   *
+   * @return {String}
+   */
+  _compileView (view, asFunction = true) {
+    const preCompiledView = cache.get(view)
+
+    /**
+     * Return the precompiled view from the cache if
+     * it exists.
+     */
+    if (preCompiledView) {
+      debug('resolving view %s from cache', view)
+      return preCompiledView
+    }
+
+    const compiler = new TemplateCompiler(this._tags, this._loader, asFunction)
+
+    try {
+      const compiledView = compiler.compile(view)
+
+      /**
+       * Adding view to cache
+       */
+      cache.add(view, compiledView)
+      debug('adding view %s to cache', view)
+
+      return compiledView
+    } catch (error) {
+      throw this._prepareStack(view, error)
+    }
   }
 
   /**
@@ -152,38 +214,34 @@ class Template {
   }
 
   /**
+   * The view to be compiled or to be
+   * rendered later
+   *
+   * @method view
+   *
+   * @param  {String} viewName
+   *
+   * @chainable
+   */
+  setView (viewName) {
+    this._viewName = this._loader.normalizeViewName(viewName)
+    return this
+  }
+
+  /**
    * Compiles a view by loading it from the
    * registered views path
    *
    * @method compile
    *
-   * @param  {String}  view
-   * @param  {Boolean} asFunction
+   * @param  {String} view
+   * @param  {Boolean} [asFunction = true]
    *
    * @return {String}
    */
-  compile (view, asFunction = false) {
-    const normalizedView = this._loader.normalizeViewName(view)
-    const preCompiledView = cache.get(normalizedView)
-
-    /**
-     * Return the precompiled view from the cache if
-     * it exists.
-     */
-    if (preCompiledView) {
-      debug('resolving view %s from cache', normalizedView)
-      return preCompiledView
-    }
-
-    const compiler = new TemplateCompiler(this._tags, this._loader, asFunction)
-    try {
-      const compiledView = compiler.compile(normalizedView)
-      cache.add(normalizedView, compiledView)
-      debug('adding view %s to cache', normalizedView)
-      return compiledView
-    } catch (error) {
-      throw (this._prepareStack(error))
-    }
+  compile (view, asFunction = true) {
+    this.setView(view)
+    return this._compileView(this._viewName, asFunction)
   }
 
   /**
@@ -201,7 +259,7 @@ class Template {
     try {
       return compiler.compileString(statement)
     } catch (error) {
-      throw (this._prepareStack(error))
+      throw (this._prepareStack('raw string', error))
     }
   }
 
@@ -216,7 +274,6 @@ class Template {
    * @return {String}
    */
   render (view, data = {}) {
-    this.sourceView(view)
     const compiledTemplate = this.compile(view, true)
     this._makeContext(data)
     return new TemplateRunner(compiledTemplate, this).run()
@@ -249,8 +306,38 @@ class Template {
    * @return {String}
    */
   runTimeRender (view) {
-    const compiledTemplate = this.compile(view, true)
+    /**
+     * Normalize the view name for proper error tracking
+     * and loading the view from disk
+     */
+    view = this._loader.normalizeViewName(view)
+
+    /**
+     * Compile view in runtime
+     */
+    const compiledTemplate = this._compileView(view)
+
+    /**
+     * Add view to the runtime stack and update viewName on
+     * context so that runtime context should point to the
+     * correct view name.
+     */
+    this._addRunTimeView(view)
+    this.context.$viewName = this.runtimeViewName
+
+    /**
+     * Run the compiled template
+     */
     const template = new TemplateRunner(compiledTemplate, this).run()
+
+    /**
+     * Pop the runtime stack to switch the context
+     * back to 1 leve up viewname and also update
+     * the context.
+     */
+    this._removeRunTimeView()
+    this.context.$viewName = this.runtimeViewName
+
     return template
   }
 
@@ -278,15 +365,33 @@ class Template {
    * @return {Object}
    */
   newContext (...props) {
+    /**
+     * Convert props array to data object
+     */
     const data = _.transform(props, (result, prop) => {
       _.merge(result, prop)
       return result
     }, {})
 
     const template = new Template(this._tags, this._globals, this._loader)
-    template.sourceView(this._viewToBeUsed)
     template._makeContext(data)
     return template
+  }
+
+  /**
+   * Render the view with existing context. In short do not create
+   * a new context and assume that `this.context` exists.
+   *
+   * @method renderWithContext
+   *
+   * @param  {String}          view
+   *
+   * @return {String}
+   */
+  renderWithContext (view) {
+    const compiledTemplate = this.compile(view, true)
+    this.context.$viewName = this._viewName
+    return new TemplateRunner(compiledTemplate, this).run()
   }
 }
 

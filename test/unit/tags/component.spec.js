@@ -36,7 +36,7 @@ test.group('Tags | Component ', (group) => {
     return (function templateFn () {
       let out = new String()
       this.isolate(function () {
-        out += \`\${this.runTimeRender('components.alert')}\\n\`
+        out += \`\${this.renderWithContext('components.alert')}\`
       }.bind(this.newContext({$slot: { main: \`  <h2> Hello dude </h2>\` } })))
       return out
     }).bind(this)()
@@ -56,7 +56,7 @@ test.group('Tags | Component ', (group) => {
     return (function templateFn () {
       let out = new String()
       this.isolate(function () {
-        out += \`\${this.runTimeRender('components.alert')}\\n\`
+        out += \`\${this.renderWithContext('components.alert')}\`
       }.bind(this.newContext({username: 'virk'},{$slot: { main: \`  <h2> Hello dude </h2>\` } })))
       return out
     }).bind(this)()
@@ -76,7 +76,7 @@ test.group('Tags | Component ', (group) => {
     return (function templateFn () {
       let out = new String()
       this.isolate(function () {
-        out += \`\${this.runTimeRender('components.alert')}\\n\`
+        out += \`\${this.renderWithContext('components.alert')}\`
       }.bind(this.newContext({username: this.context.resolve('username')},{$slot: { main: \`  <h2> Hello dude </h2>\` } })))
       return out
     }).bind(this)()
@@ -96,7 +96,7 @@ test.group('Tags | Component ', (group) => {
     return (function templateFn () {
       let out = new String()
       this.isolate(function () {
-        out += \`\${this.runTimeRender('components.alert')}\\n\`
+        out += \`\${this.renderWithContext('components.alert')}\`
       }.bind(this.newContext({username: this.context.resolve('username')},{$slot: { main: \`  <h2> Hello dude </h2>\` } })))
       return out
     }).bind(this)()
@@ -122,7 +122,7 @@ test.group('Tags | Component ', (group) => {
     return (function templateFn () {
       let out = new String()
       this.isolate(function () {
-        out += \`\${this.runTimeRender('components.alert')}\\n\`
+        out += \`\${this.renderWithContext('components.alert')}\`
       }.bind(this.newContext({username: this.context.resolve('username')},${slot})))
       return out
     }).bind(this)()
@@ -149,7 +149,7 @@ test.group('Tags | Component ', (group) => {
     return (function templateFn () {
       let out = new String()
       this.isolate(function () {
-        out += \`\${this.runTimeRender('components.alert')}\\n\`
+        out += \`\${this.renderWithContext('components.alert')}\`
       }.bind(this.newContext({username: this.context.resolve('username')},${slot})))
       return out
     }).bind(this)()

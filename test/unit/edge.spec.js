@@ -202,11 +202,11 @@ test.group('Edge', (group) => {
     edge.registerViews(viewsPath)
     const output = edge.compile('welcome')
     assert.equal(output, dedent`
-    module.exports = function () {
+    return (function templateFn () {
       let out = new String()
       out += \`\${this.context.escape(this.context.resolve('username'))}\\n\`
       return out
-    }
+    }).bind(this)()
     `)
   })
 

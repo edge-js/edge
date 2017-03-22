@@ -34,7 +34,6 @@ class TemplateRunner {
    */
   run () {
     let templateFn = this.templateFn
-
     /**
      * Throw exception when template is a string and starts
      * with module.exports.

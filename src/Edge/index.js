@@ -160,14 +160,14 @@ class Edge {
    * docblock defined in template renderer
    */
   render (view, ...args) {
-    return this._getTemplate().sourceView(view).render(view, ...args)
+    return this._getTemplate().render(view, ...args)
   }
 
   /**
    * docblock defined in template renderer
    */
   compile (view, ...args) {
-    return this._getTemplate().sourceView(view).compile(view, ...args)
+    return this._getTemplate().compile(view, ...args)
   }
 
   /**
