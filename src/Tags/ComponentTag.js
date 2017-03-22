@@ -185,7 +185,7 @@ class ComponentTag extends BaseTag {
      * Render the component in runtime, since component name can
      * be dynamic aswell.
      */
-    buffer.writeToOutput(`$\{this.renderWithContext(${name})}`, false)
+    buffer.writeToOutput(`$\{${lexer.renderWithContextFn}(${name})}`, false)
 
     /**
      * End the isolation

@@ -141,6 +141,19 @@ class Lexer {
   }
 
   /**
+   * The method to be used for rendering
+   * the template with pre-existing
+   * context.
+   *
+   * @attribute renderWithContextFn
+   *
+   * @return {String}
+   */
+  get renderWithContextFn () {
+    return 'this.renderWithContext'
+  }
+
+  /**
    * Validates the current type against the allowed types.
    * It calls the callback instead of throwing exception
    * when callback is defined. It allowed types are

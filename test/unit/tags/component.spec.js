@@ -16,7 +16,8 @@ const Context = require('../../../src/Context')
 const Template = require('../../../src/Template')
 const Loader = require('../../../src/Loader')
 const dedent = require('dedent-js')
-const loader = new Loader(require('path').join(__dirname, '../../../test-helpers/views'))
+const path = require('path')
+const loader = new Loader(path.join(__dirname, '../../../test-helpers/views'))
 
 test.group('Tags | Component ', (group) => {
   group.beforeEach(() => {
@@ -321,5 +322,17 @@ test.group('Tags | Component ', (group) => {
     assert.equal($('.col-lg-6 p').length, 2)
     assert.equal($('.col-lg-6:first-child h4').text().trim(), 'foo')
     assert.equal($('.col-lg-6:last-child h4').text().trim(), 'bar')
+  })
+
+  test('pass presenter to component', (assert) => {
+    loader.presentersPath = path.join(__dirname, '../../../test-helpers/presenters')
+    const template = new Template(this.tags, {}, loader)
+    const statement = dedent`
+    @!component('components.user', presenter = 'User', username = 'virk')
+    `
+    this.tags.each.run(Context)
+    const output = template.renderString(statement)
+    const $ = cheerio.load(output)
+    assert.equal($('h2').text().trim(), 'Hello VIRK')
   })
 })

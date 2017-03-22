@@ -368,12 +368,18 @@ class Template {
     /**
      * Convert props array to data object
      */
+    let presenter = null
     const data = _.transform(props, (result, prop) => {
-      _.merge(result, prop)
+      if (prop.presenter) {
+        presenter = prop.presenter
+      } else {
+        _.merge(result, prop)
+      }
       return result
     }, {})
 
     const template = new Template(this._tags, this._globals, this._loader)
+    template.presenter(presenter)
     template._makeContext(data)
     return template
   }
