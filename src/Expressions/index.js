@@ -18,5 +18,6 @@ module.exports = {
   AssignmentExpression: require('./AssignmentExpression'),
   CallExpression: require('./CallExpression'),
   UnaryExpression: require('./UnaryExpression'),
-  LogicalExpression: require('./LogicalExpression')
+  LogicalExpression: require('./LogicalExpression'),
+  ConditionalExpression: require('./ConditionalExpression')
 }
