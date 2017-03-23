@@ -20,7 +20,7 @@ const Ast = require('../Ast')
  * Static expression. They never change
  */
 const expressions = {
-  interpolate: /(@)?{{({)?\s+(.+?)\s+(})?}}/g
+  interpolate: /(@)?({{2,3})(.+?)}{2,3}/g
 }
 
 /**
@@ -50,18 +50,18 @@ class TemplateCompiler {
    * @return {String}
    */
   _interpolateMustache (body, lineno) {
-    return body.replace(expressions.interpolate, (i, group, oCurly, matched, eCurly) => {
+    return body.replace(expressions.interpolate, (i, group, oCurly, matched) => {
       /**
        * If expression starts with @ it should not
        * be touched.
        */
       if (group === '@') {
-        return oCurly && eCurly ? `{{{${matched}}}}` : `{{${matched}}}`
+        return oCurly === '{{{' ? `{{{${matched}}}}` : `{{${matched}}}`
       }
 
       try {
         const parsedStatement = lexer.parseRaw(matched).toStatement()
-        return oCurly && eCurly ? `\${${parsedStatement}}` : `\${${lexer.escapeFn}(${parsedStatement})}`
+        return oCurly === '{{{' ? `\${${parsedStatement}}` : `\${${lexer.escapeFn}(${parsedStatement})}`
       } catch (e) {
         throw CE.InvalidExpressionException.invalidLineExpression(matched, lineno, body.indexOf(matched))
       }
