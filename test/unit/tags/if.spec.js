@@ -232,4 +232,23 @@ test.group('Tags | If ', (group) => {
     const output = () => template.compileString(statement)
     assert.throw(output, 'lineno:1 charno:0 E_INVALID_EXPRESSION: Invalid expression <age, username> passed to (if) block')
   })
+
+  test('should work with unary expression', (assert) => {
+    const statement = dedent`
+    @if(!age)
+      <h2> Please type your age </h2>
+    @endif`
+
+    const template = new Template(this.tags)
+    const output = template.compileString(statement)
+    assert.equal(output, dedent`
+    return (function templateFn () {
+      let out = new String()
+      if (!this.context.resolve('age')) {
+        out += \`  <h2> Please type your age </h2>\\n\`
+      }
+      return out
+    }).bind(this)()
+    `)
+  })
 })

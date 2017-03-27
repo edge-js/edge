@@ -53,7 +53,7 @@ class IfTag extends BaseTag {
    * @return {Array}
    */
   get allowedExpressions () {
-    return ['BinaryExpression', 'Literal', 'Identifier', 'CallExpression', 'MemberExpression']
+    return ['BinaryExpression', 'Literal', 'Identifier', 'CallExpression', 'MemberExpression', 'UnaryExpression']
   }
 
   /**
