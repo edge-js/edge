@@ -55,7 +55,7 @@ ygor.task('test:local', () => {
  * to coveralls.
  */
 ygor.task('test:win', () => {
-  if (shell.exec(`FORCE_COLOR=true ${BIN} bin/tasks.js test:safe`).code !== 0) {
+  if (shell.exec(`${BIN} bin/tasks.js test:safe`).code !== 0) {
     shell.echo('test:win command failed')
     shell.exit(1)
   }
