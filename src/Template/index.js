@@ -81,6 +81,11 @@ class Template {
     }
 
     /**
+     * Set the charno to 1 when undefined.
+     */
+    error.charno = error.charno || 1
+
+    /**
      * If view has been loaded for a directory, update the
      * stack by referencing the actual views path.
      */

@@ -216,7 +216,7 @@ test.group('Tags | Component ', (group) => {
     @endcomponent
     `
     const output = () => new Template(this.tags, {}, {}, loader).compileString(statement)
-    assert.throw(output, 'lineno:6 charno:0 E_INVALID_EXPRESSION: Invalid name <body> passed to slot. Only strings are allowed')
+    assert.throw(output, 'lineno:6 charno:1 E_INVALID_EXPRESSION: Invalid name <body> passed to slot. Only strings are allowed')
   })
 
   test('should work fine with nested components', (assert) => {

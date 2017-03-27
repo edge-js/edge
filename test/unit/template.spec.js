@@ -213,7 +213,7 @@ test.group('Template Runner', () => {
     this.tags.section.run(Context)
     const template = new Template(this.tags, {}, {}, loader)
     const output = () => template.renderString(statement)
-    assert.throw(output, `lineno:6 charno:0 E_INVALID_EXPRESSION: Section <@section('content')> has been called multiple times. A section can only be called once`)
+    assert.throw(output, `lineno:6 charno:1 E_INVALID_EXPRESSION: Section <@section('content')> has been called multiple times. A section can only be called once`)
   })
 
   test('throw exception when a section name is not a literal', (assert) => {

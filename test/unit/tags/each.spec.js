@@ -133,7 +133,7 @@ test.group('Tags | Each ', (group) => {
     `
     const template = new Template(this.tags)
     const output = () => template.compileString(statement)
-    assert.throw(output, 'lineno:1 charno:0 E_INVALID_EXPRESSION: Invalid left hand side expression <(user in index) in users> used inside an each block')
+    assert.throw(output, 'lineno:1 charno:1 E_INVALID_EXPRESSION: Invalid left hand side expression <(user in index) in users> used inside an each block')
   })
 
   test('parse each block with an array', (assert) => {
