@@ -1,4 +1,5 @@
 module.exports = function () {
+  /* eslint no-new-wrappers: "off" */
   let out = new String()
   this.context.newFrame()
   this.context.loop(this.context.resolve('users'), (user, loop) => {

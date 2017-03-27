@@ -126,7 +126,7 @@ class Loader {
    */
   load (view) {
     if (!view) {
-      throw new RuntimeException('You are trying to a undefined view. Please contact package author.')
+      throw new CE.RuntimeException('You are trying to a undefined view. Please contact package author.')
     }
 
     try {

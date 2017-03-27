@@ -10,7 +10,6 @@
 */
 
 const BaseTag = require('./BaseTag')
-const os = require('os')
 
 /**
  * The official section tag. It is used

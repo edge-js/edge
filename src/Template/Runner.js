@@ -47,7 +47,7 @@ class TemplateRunner {
      * it inside a scope.
      */
     if (typeof (this.templateFn) === 'string') {
-      /*eslint no-new-func: "ignore"*/
+      /* eslint no-new-func: "off" */
       templateFn = new Function(this.templateFn)
     }
 

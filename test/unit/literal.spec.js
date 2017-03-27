@@ -24,21 +24,21 @@ test.group('Literal', () => {
   test('parse numeric literal', (assert) => {
     const statement = '22'
     const tokens = Literal(esprima.parse(statement).body[0].expression)
-    assert.equal(typeof(tokens.value) === 'number', true)
-    assert.equal(typeof(tokens.value), tokens.type)
+    assert.equal(typeof (tokens.value) === 'number', true)
+    assert.equal(typeof (tokens.value), tokens.type)
   })
 
   test('parse null literal', (assert) => {
     const statement = 'null'
     const tokens = Literal(esprima.parse(statement).body[0].expression)
-    assert.equal(typeof(tokens.value) === 'object', true)
+    assert.equal(typeof (tokens.value) === 'object', true)
     assert.equal(tokens.type, 'null')
   })
 
   test('parse undefined literal', (assert) => {
     const statement = 'undefined'
     const tokens = Literal(esprima.parse(statement).body[0].expression)
-    assert.equal(typeof(tokens.value) === 'undefined', true)
+    assert.equal(typeof (tokens.value) === 'undefined', true)
     assert.equal(tokens.type, 'undefined')
   })
 

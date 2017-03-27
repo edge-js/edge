@@ -4,7 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test:local": "npm run lint && node bin/tasks test:local",
+    "test:win": "npm run lint && node bin/tasks test:win",
+    "coverage": "npm run lint && node bin/tasks coverage",
+    "test": "npm run lint && node bin/tasks test",
+    "lint": "standard"
   },
   "author": "amanvirk,adonisjs",
   "license": "MIT",
@@ -18,6 +22,7 @@
     "nunjucks": "^3.0.0",
     "require-all": "^2.2.0",
     "shelljs": "^0.7.6",
+    "standard": "^9.0.2",
     "ygor": "^4.0.1",
     "zombie": "^5.0.5"
   },

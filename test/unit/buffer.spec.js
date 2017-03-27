@@ -114,7 +114,7 @@ test.group('Buffer', (group) => {
     }
     const buffer = new Buffer(true)
     buffer.writeLine('this.run()')
-    /*eslint no-new-func: "ignore"*/
+    /* eslint no-new-func: "off" */
     const fn = new Function(buffer.getLines())
     fn.bind(new Context())()
   })

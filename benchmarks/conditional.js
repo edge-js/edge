@@ -1,7 +1,8 @@
 'use strict'
 
 const nunjucks = require('nunjucks')
-const suite = new (require('benchmark')).Suite()
+const Benchmark = require('benchmark')
+const suite = new Benchmark().Suite
 const edge = new (require('../src/Edge'))()
 
 const edgeStatement = `
