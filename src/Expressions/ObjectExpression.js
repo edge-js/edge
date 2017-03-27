@@ -58,7 +58,7 @@ class ObjectExpression extends BaseExpression {
    * @private
    */
   _getValue (member) {
-    return this._convertToStatement(member.value, true)
+    return member.value.type === 'object' ? member.value.toObject() : this._convertToStatement(member.value, true)
   }
 
   /**
@@ -84,15 +84,43 @@ class ObjectExpression extends BaseExpression {
   }
 
   /**
-   * Converts tokens into parsed statement
+   * Returns the key/value pair of an object as an array
+   * containing objects with key and value. This method
+   * should be used when you want to fetch values for
+   * individual keys at compile time.
+   *
+   * For runtime you should consider using `this.toStatement()`
+   *
+   * @method toObject
+   *
+   * @return {Array}
+   */
+  toObject () {
+    return this._tokens.members.map((member) => {
+      return {
+        key: this._getKey(member),
+        value: this._getValue(member)
+      }
+    })
+  }
+
+  /**
+   * Converts the expression into a string which looks like
+   * an object, but is not an object. The `toStatement()`
+   * should be used when you want to evaluate the object
+   * at runtime.
+   *
+   * For compile time evaluation make use of `this.toObject()` instead.
    *
    * @method toStatement
    *
    * @return {String}
    */
   toStatement () {
-    const convertedMembers = this._tokens.members.map((member) => `${this._getKey(member)}: ${this._getValue(member)}`)
-    return `{${convertedMembers}}`
+    const keyValue = this._tokens.members.map((member) => {
+      return `${this._getKey(member)}: ${this._convertToStatement(member.value, true)}`
+    })
+    return `{${keyValue}}`
   }
 }
 

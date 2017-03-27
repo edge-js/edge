@@ -53,15 +53,39 @@ class AssignmentExpression extends BaseExpression {
   }
 
   /**
-   * Converts an assignment to an object
-   * string.
+   * Returns the key/value pair of assignment as an object
+   * containing key and value. This method should be used
+   * when you want to fetch values for individual keys
+   * at compile time.
+   *
+   * For runtime you should consider using `this.toStatement()`
    *
    * @method toObject
    *
-   * @return {String}
+   * @return {Object}
    */
   toObject () {
-    return `{${this._convertToStatement(this._tokens.lhs, false)}: ${this._convertToStatement(this._tokens.rhs, true)}}`
+    return {
+      key: this._convertToStatement(this._tokens.lhs, false),
+      value: this._convertToStatement(this._tokens.rhs, true)
+    }
+  }
+
+  /**
+   * Converts the expression into a string which looks like
+   * an object, but is not an object. The `toStatement()`
+   * should be used when you want to evaluate the object
+   * at runtime.
+   *
+   * For compile time evaluation make use of `this.toObject()` instead.
+   *
+   * @method toStatement
+   *
+   * @return {String}
+   */
+  toStatement () {
+    const keyValue = this.toObject()
+    return `{${keyValue.key}: ${keyValue.value}}`
   }
 }
 

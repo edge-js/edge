@@ -41,15 +41,27 @@ test.group('Assignment Expression', (group) => {
     assert.equal(this.exp.tokens.rhs.type, 'array')
   })
 
-  test('convert assignment to object', (assert) => {
+  test('convert assignment with array to object', (assert) => {
     const statement = `users = ['virk', 'nikk']`
     this.exp.parse(esprima.parse(statement).body[0].expression)
-    assert.equal(this.exp.toObject(), `{users: ['virk','nikk']}`)
+    assert.deepEqual(this.exp.toObject(), {key: 'users', value: `['virk','nikk']`})
+  })
+
+  test('convert assignment with array to statement', (assert) => {
+    const statement = `users = ['virk', 'nikk']`
+    this.exp.parse(esprima.parse(statement).body[0].expression)
+    assert.deepEqual(this.exp.toStatement(), `{users: ['virk','nikk']}`)
   })
 
   test('convert assignment to object that has identifiers', (assert) => {
     const statement = `users = [oldUsers]`
     this.exp.parse(esprima.parse(statement).body[0].expression)
-    assert.equal(this.exp.toObject(), `{users: [this.context.resolve('oldUsers')]}`)
+    assert.deepEqual(this.exp.toObject(), {key: 'users', value: `[this.context.resolve('oldUsers')]`})
+  })
+
+  test('convert assignment to statement that has identifiers', (assert) => {
+    const statement = `users = [oldUsers]`
+    this.exp.parse(esprima.parse(statement).body[0].expression)
+    assert.deepEqual(this.exp.toStatement(), `{users: [this.context.resolve('oldUsers')]}`)
   })
 })

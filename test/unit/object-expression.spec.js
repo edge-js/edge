@@ -35,7 +35,7 @@ test.group('Object Expression', (group) => {
   test('convert simple object', (assert) => {
     const statement = `a, {name: 'virk'}`
     this.exp.parse(esprima.parse(statement).body[0].expression.expressions[1])
-    assert.equal(this.exp.toStatement(), `{name: 'virk'}`)
+    assert.deepEqual(this.exp.toObject(), [{key: 'name', value: `'virk'`}])
   })
 
   test('parse shorthand object', (assert) => {
@@ -50,7 +50,7 @@ test.group('Object Expression', (group) => {
   test('convert shorthand object', (assert) => {
     const statement = `a, {name}`
     this.exp.parse(esprima.parse(statement).body[0].expression.expressions[1])
-    assert.equal(this.exp.toStatement(), `{name: this.context.resolve('name')}`)
+    assert.deepEqual(this.exp.toObject(), [{key: 'name', value: `this.context.resolve('name')`}])
   })
 
   test('parse object with numbers', (assert) => {
@@ -65,7 +65,7 @@ test.group('Object Expression', (group) => {
   test('convert object with numbers', (assert) => {
     const statement = `a, {age: 22}`
     this.exp.parse(esprima.parse(statement).body[0].expression.expressions[1])
-    assert.equal(this.exp.toStatement(), `{age: 22}`)
+    assert.deepEqual(this.exp.toObject(), [{key: 'age', value: 22}])
   })
 
   test('parse nested object', (assert) => {
@@ -79,7 +79,7 @@ test.group('Object Expression', (group) => {
   test('convert nested object', (assert) => {
     const statement = `a, {profile: { fullname: 'virk' }}`
     this.exp.parse(esprima.parse(statement).body[0].expression.expressions[1])
-    assert.equal(this.exp.toStatement(), `{profile: {fullname: 'virk'}}`)
+    assert.deepEqual(this.exp.toObject(), [{ key: 'profile', value: [{key: 'fullname', value: `'virk'`}] }])
   })
 
   test('parse object with sources on both ends', (assert) => {
@@ -94,7 +94,7 @@ test.group('Object Expression', (group) => {
   test('convert object with sources on both ends', (assert) => {
     const statement = `a, { profile: profile }`
     this.exp.parse(esprima.parse(statement).body[0].expression.expressions[1])
-    assert.equal(this.exp.toStatement(), `{profile: this.context.resolve('profile')}`)
+    assert.deepEqual(this.exp.toObject(), [{key: 'profile', value: `this.context.resolve('profile')`}])
   })
 
   test('parse object with arrays', (assert) => {
@@ -108,24 +108,48 @@ test.group('Object Expression', (group) => {
   test('convert object with arrays', (assert) => {
     const statement = `a, {users: ['virk', 'nikk']}`
     this.exp.parse(esprima.parse(statement).body[0].expression.expressions[1])
-    assert.equal(this.exp.toStatement(), `{users: ['virk','nikk']}`)
+    assert.deepEqual(this.exp.toObject(), [{key: 'users', value: `['virk','nikk']`}])
   })
 
   test('convert object with numeric keys', (assert) => {
     const statement = `a, {22: 'a'}`
     this.exp.parse(esprima.parse(statement).body[0].expression.expressions[1])
-    assert.equal(this.exp.toStatement(), `{22: 'a'}`)
+    assert.deepEqual(this.exp.toObject(), [{key: 22, value: `'a'`}])
   })
 
   test('convert object with non-standard keys', (assert) => {
     const statement = `a, {'full-name': 'virk'}`
     this.exp.parse(esprima.parse(statement).body[0].expression.expressions[1])
-    assert.equal(this.exp.toStatement(), `{'full-name': 'virk'}`)
+    assert.deepEqual(this.exp.toObject(), [{key: `'full-name'`, value: `'virk'`}])
   })
 
   test('convert object with identifier keys', (assert) => {
     const statement = `a, {[username]: 'virk'}`
     this.exp.parse(esprima.parse(statement).body[0].expression.expressions[1])
-    assert.equal(this.exp.toStatement(), `{[this.context.resolve('username')]: 'virk'}`)
+    assert.deepEqual(this.exp.toObject(), [{key: `[this.context.resolve('username')]`, value: `'virk'`}])
+  })
+
+  test('convert object with mulitple key/value pairs', (assert) => {
+    const statement = `a, {22: 'a', age: 22}`
+    this.exp.parse(esprima.parse(statement).body[0].expression.expressions[1])
+    assert.deepEqual(this.exp.toObject(), [{key: 22, value: `'a'`}, {key: 'age', value: 22}])
+  })
+
+  test('convert object with non-standard keys to statement', (assert) => {
+    const statement = `a, {'full-name': 'virk'}`
+    this.exp.parse(esprima.parse(statement).body[0].expression.expressions[1])
+    assert.deepEqual(this.exp.toStatement(), `{'full-name': 'virk'}`)
+  })
+
+  test('convert object with mulitple key/value pairs to statement', (assert) => {
+    const statement = `a, {22: 'a', age: 22}`
+    this.exp.parse(esprima.parse(statement).body[0].expression.expressions[1])
+    assert.deepEqual(this.exp.toStatement(), `{22: 'a',age: 22}`)
+  })
+
+  test('convert nested object to statement', (assert) => {
+    const statement = `a, {profile: { fullname: 'virk' }}`
+    this.exp.parse(esprima.parse(statement).body[0].expression.expressions[1])
+    assert.deepEqual(this.exp.toStatement(), `{profile: {fullname: 'virk'}}`)
   })
 })

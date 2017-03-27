@@ -51,13 +51,30 @@ class SequenceExpression extends BaseExpression {
   }
 
   /**
-   * Converts tokens into parsed statement
+   * Converts tokens into a parsed statement. All the
+   * members `toObject` method is given preference
+   * over `toStatement` method.
    *
    * @method toObject
    *
    * @return {Array}
    */
   toObject () {
+    return this._tokens.members.map((member) => {
+      return member.toObject ? member.toObject() : member.toStatement()
+    })
+  }
+
+  /**
+   * Converts tokens into a parsed statement. All the
+   * members `toStatement` method is given preference
+   * over `toObject` method.
+   *
+   * @method toStatement
+   *
+   * @return {Array}
+   */
+  toStatement () {
     return this._tokens.members.map((member) => {
       return member.toStatement ? member.toStatement() : member.toObject()
     })

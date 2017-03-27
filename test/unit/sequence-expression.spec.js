@@ -60,18 +60,36 @@ test.group('Sequence Expression', (group) => {
   test('convert sequence to object', (assert) => {
     const statement = `'message', { message }`
     this.exp.parse(esprima.parse(statement).body[0].expression)
-    assert.deepEqual(this.exp.toObject(), [`'message'`, `{message: this.context.resolve('message')}`])
+    assert.deepEqual(this.exp.toObject(), [`'message'`, [{key: 'message', value: `this.context.resolve('message')`}]])
+  })
+
+  test('convert sequence to statement', (assert) => {
+    const statement = `'message', { message }`
+    this.exp.parse(esprima.parse(statement).body[0].expression)
+    assert.deepEqual(this.exp.toStatement(), [`'message'`, `{message: this.context.resolve('message')}`])
   })
 
   test('convert sequence to object with assignment', (assert) => {
     const statement = `'message', age = 20`
     this.exp.parse(esprima.parse(statement).body[0].expression)
-    assert.deepEqual(this.exp.toObject(), [`'message'`, `{age: 20}`])
+    assert.deepEqual(this.exp.toObject(), [`'message'`, {key: 'age', value: 20}])
+  })
+
+  test('convert sequence to statement with assignment', (assert) => {
+    const statement = `'message', age = 20`
+    this.exp.parse(esprima.parse(statement).body[0].expression)
+    assert.deepEqual(this.exp.toStatement(), [`'message'`, `{age: 20}`])
   })
 
   test('convert sequence to object with source as assignment', (assert) => {
     const statement = `'message', age = userAge`
     this.exp.parse(esprima.parse(statement).body[0].expression)
-    assert.deepEqual(this.exp.toObject(), [`'message'`, `{age: this.context.resolve('userAge')}`])
+    assert.deepEqual(this.exp.toObject(), [`'message'`, {key: 'age', value: `this.context.resolve('userAge')`}])
+  })
+
+  test('convert sequence to statement with source as assignment', (assert) => {
+    const statement = `'message', age = userAge`
+    this.exp.parse(esprima.parse(statement).body[0].expression)
+    assert.deepEqual(this.exp.toStatement(), [`'message'`, `{age: this.context.resolve('userAge')}`])
   })
 })
