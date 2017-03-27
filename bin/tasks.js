@@ -14,7 +14,8 @@ const ygor = require('ygor')
 const semver = require('semver')
 const path = require('path')
 
-const BIN = semver.satisfies(process.version, '>7.0') ? 'node --harmony-async-await' : 'node'
+const HAS_ASYNC_SUPPORT = semver.satisfies(process.version, '>7.0')
+const BIN = HAS_ASYNC_SUPPORT ? 'node --harmony-async-await' : 'node'
 const COVERALLS_BIN = './node_modules/.bin/coveralls'
 const COVERAGE_DIR = `${path.join(__dirname, '../coverage')}`
 const COVERAGE_FILE = `${path.join(COVERAGE_DIR, 'lcov.info')}`
@@ -27,7 +28,12 @@ const COVERAGE_FILE = `${path.join(COVERAGE_DIR, 'lcov.info')}`
 ygor.task('test:safe', () => {
   require('require-all')({
     dirname: path.join(__dirname, '../test'),
-    filter: /(.+spec)\.js$/
+    filter: function (fileName) {
+      if (!HAS_ASYNC_SUPPORT) {
+        return !fileName.includes('async.spec.js') && fileName.endsWith('spec.js')
+      }
+      return fileName.endsWith('spec.js')
+    }
   })
 })
 
@@ -62,7 +68,7 @@ ygor.task('test:win', () => {
  * to let Travis do that for you.
  */
 ygor.task('test', () => {
-  const command = `FORCE_COLOR=true ${BIN} bin/tasks.js test:safe && cat ${COVERAGE_FILE} | ${COVERALLS_BIN} && rm -rf ${COVERAGE_DIR}`
+  const command = `FORCE_COLOR=true ${BIN} ./node_modules/.bin/istanbul cover --hook-run-in-context -x bin/tasks.js bin/tasks.js test:safe && cat ${COVERAGE_FILE} | ${COVERALLS_BIN} && rm -rf ${COVERAGE_DIR}`
 
   if (shell.exec(command).code !== 0) {
     shell.echo('test command failed')
