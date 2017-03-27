@@ -2,10 +2,13 @@
 
 const _ = require('lodash')
 const test = require('japa')
+const path = require('path')
 const Template = require('../../../src/Template')
 const TemplateRunner = require('../../../src/Template/Runner')
 const Context = require('../../../src/Context')
+const Loader = require('../../../src/Loader')
 const dedent = require('dedent-js')
+const loader = new Loader(path.join(__dirname, '../../../test-helpers/views'))
 
 test.group('Tags | Each ', (group) => {
   group.before(() => {
@@ -75,12 +78,12 @@ test.group('Tags | Each ', (group) => {
 
   test('throw exception when expression is not binary', (assert) => {
     const statement = dedent`
-    @each(user, users)
+    @each(user.users)
     @endeach
     `
     const template = new Template(this.tags)
     const output = () => template.compileString(statement)
-    assert.throw(output, 'lineno:1 charno:0 E_INVALID_EXPRESSION: Invalid expression <user, users> passed to (each) block')
+    assert.throw(output, 'lineno:1 charno:0 E_INVALID_EXPRESSION: Invalid expression <user.users> passed to (each) block')
   })
 
   test('throw exception when expression operator is not {in}', (assert) => {
@@ -269,5 +272,122 @@ test.group('Tags | Each ', (group) => {
     virk
         nikk
     `)
+  })
+
+  test('include partial within each block', (assert) => {
+    const statement = dedent`
+    @!each(user in users, include = 'includes.users-loop')
+    `
+    const templateInstance = new Template(this.tags, {}, {}, loader)
+    const template = templateInstance.compileString(statement)
+    this.tags.each.run(Context)
+
+    const ctx = new Context('', {
+      users: [{username: 'virk'}, {username: 'nikk'}]
+    })
+    templateInstance.context = ctx
+    const output = new TemplateRunner(template, templateInstance).run()
+    assert.equal(output.trim(), dedent`
+      <p>virk</p>
+      <p>nikk</p>
+    `)
+  })
+
+  test('include dynamic partial within each block', (assert) => {
+    const statement = dedent`
+    @!each(user in users, include = usersTmp)
+    `
+    const templateInstance = new Template(this.tags, {}, {}, loader)
+    const template = templateInstance.compileString(statement)
+    this.tags.each.run(Context)
+
+    const ctx = new Context('', {
+      users: [{username: 'virk'}, {username: 'nikk'}],
+      usersTmp: 'includes.users-loop'
+    })
+    templateInstance.context = ctx
+    const output = new TemplateRunner(template, templateInstance).run()
+    assert.equal(output.trim(), dedent`
+      <p>virk</p>
+      <p>nikk</p>
+    `)
+  })
+
+  test('include partial with fallback else inside each block', (assert) => {
+    const statement = dedent`
+    @each(user in users, include = 'includes.users-loop')
+    @else
+      <h2> No users found </h2>
+    @endeach
+    `
+    const templateInstance = new Template(this.tags, {}, {}, loader)
+    const template = templateInstance.compileString(statement)
+    this.tags.each.run(Context)
+
+    const ctx = new Context('', {
+      users: []
+    })
+    templateInstance.context = ctx
+    const output = new TemplateRunner(template, templateInstance).run()
+    assert.equal(output.trim(), dedent`
+      <h2> No users found </h2>
+    `)
+  })
+
+  test('loop over key value and include partial inside each loop', (assert) => {
+    const statement = dedent`
+    @!each((calories, name) in veggies, include = 'includes.veggie')
+    `
+    const templateInstance = new Template(this.tags, {}, {}, loader)
+    const template = templateInstance.compileString(statement)
+    this.tags.each.run(Context)
+
+    const ctx = new Context('', {
+      veggies: {
+        tomato: '18',
+        potato: '77',
+        carrot: '41'
+      }
+    })
+    templateInstance.context = ctx
+    const output = new TemplateRunner(template, templateInstance).run()
+    assert.equal(output.trim(), dedent`
+      <li> tomato has 18 calories </li>
+      <li> potato has 77 calories </li>
+      <li> carrot has 41 calories </li>
+    `)
+  })
+
+  test('work with include is defined as a object', (assert) => {
+    const statement = dedent`
+    @!each((calories, name) in veggies, { include: 'includes.veggie' })
+    `
+    const templateInstance = new Template(this.tags, {}, {}, loader)
+    const template = templateInstance.compileString(statement)
+    this.tags.each.run(Context)
+
+    const ctx = new Context('', {
+      veggies: {
+        tomato: '18',
+        potato: '77',
+        carrot: '41'
+      }
+    })
+    templateInstance.context = ctx
+    const output = new TemplateRunner(template, templateInstance).run()
+    assert.equal(output.trim(), dedent`
+      <li> tomato has 18 calories </li>
+      <li> potato has 77 calories </li>
+      <li> carrot has 41 calories </li>
+    `)
+  })
+
+  test('throw when include expression is passed along with include statement', (assert) => {
+    const statement = dedent`
+    @!each(calories, name in veggies, { include: 'includes.veggie' })
+    `
+    const templateInstance = new Template(this.tags, {}, {}, loader)
+    const template = () => templateInstance.compileString(statement)
+    assert.throw(template, `lineno:1 charno:1 E_INVALID_EXPRESSION: Invalid expression <calories, name in veggies, { include: 'includes.veggie' }> passed to (each) block`)
   })
 })

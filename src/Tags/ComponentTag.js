@@ -142,7 +142,7 @@ class ComponentTag extends BaseTag {
       return { name: statement.toStatement(), props: [] }
     }
 
-    const [firstChild, ...props] = statement.toObject()
+    const [firstChild, ...props] = statement.toStatement()
     const name = lexer.parseRaw(firstChild).toStatement()
     return { name, props }
   }

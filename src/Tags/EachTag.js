@@ -54,7 +54,70 @@ class EachTag extends BaseTag {
    * @return {Array}
    */
   get allowedExpressions () {
-    return ['BinaryExpression']
+    return ['BinaryExpression', 'SequenceExpression']
+  }
+
+  /**
+   * Returns the partial to be include for each loop,
+   * only if defined
+   *
+   * @method _getPartial
+   *
+   * @param  {Object}    expression
+   *
+   * @return {String|Null}
+   */
+  _getPartial (expression) {
+    if (!expression.toObject) {
+      return null
+    }
+
+    let keyValuePairs = expression.toObject()
+
+    /**
+     * Find the object where key is include if keyValuePairs
+     * is an array
+     */
+    if (_.isArray(keyValuePairs)) {
+      keyValuePairs = _.find(keyValuePairs, (item) => item.key === 'include')
+    }
+    return (keyValuePairs.key && keyValuePairs.key === 'include') ? keyValuePairs.value : null
+  }
+
+  /**
+   * Returns the each statement and the include template, by
+   * parsing each allowed expression differently.
+   *
+   * @method _getCompiledAndIncludeStatement
+   *
+   * @param  {Object}                        lexer
+   * @param  {Object}                        body
+   * @param  {Number}                        lineno
+   *
+   * @return {Array}
+   * @throws {Error} If first member of the sequence is not a binary expression.
+   */
+  _getCompiledAndIncludeStatement (lexer, body, lineno) {
+    const preCompiledStatement = this._compileStatement(lexer, body, lineno)
+    /**
+     * If statement is not sequence return it as the only statement
+     * and include partial is set to null.
+     */
+    if (preCompiledStatement.type !== 'sequence') {
+      return [preCompiledStatement, null]
+    }
+
+    const compiledStatement = preCompiledStatement.tokens.members.shift()
+    /**
+     * Throw exception if the first token on the sequence expression
+     * is not a binary expression, since that is what we need.
+     */
+    if (compiledStatement.type !== 'binary') {
+      throw CE.InvalidExpressionException.invalidTagExpression(body, this.tagName, lineno, '1')
+    }
+
+    const includeStatement = this._getPartial(preCompiledStatement.tokens.members[0])
+    return [compiledStatement, includeStatement]
   }
 
   /**
@@ -72,7 +135,7 @@ class EachTag extends BaseTag {
    * @return {void}
    */
   compile (compiler, lexer, buffer, { body, childs, lineno }) {
-    const compiledStatement = this._compileStatement(lexer, body, lineno)
+    const [compiledStatement, includeStatement] = this._getCompiledAndIncludeStatement(lexer, body, lineno)
 
     /**
      * Throw exception when invalid operator is used.
@@ -155,7 +218,11 @@ class EachTag extends BaseTag {
     /**
      * Parse all childs
      */
-    childs.forEach((child) => compiler.parseLine(child))
+    if (includeStatement) {
+      buffer.writeToOutput(`$\{${lexer.runTimeRenderFn}(${includeStatement})}`, false)
+    } else {
+      childs.forEach((child) => compiler.parseLine(child))
+    }
 
     /**
      * Close the each loop

@@ -102,21 +102,21 @@ test.group('Lexer', (group) => {
     assert.equal(parsedStatement.toStatement(), `this.context.accessChild(this.context.resolve('users'), [this.context.resolve('username')]) === this.context.accessChild(this.context.resolve('deletedUsers'), [this.context.resolve('username')])`)
   })
 
-  test('parse sequence expression to object', (assert) => {
+  test('parse sequence expression to statement', (assert) => {
     const statement = `'message', { message }`
-    const parsedObject = this.lexer.parseRaw(statement).toObject()
+    const parsedObject = this.lexer.parseRaw(statement).toStatement()
     assert.deepEqual(parsedObject, [`'message'`, `{message: this.context.resolve('message')}`])
   })
 
-  test('parse sequence expression with assignment to object', (assert) => {
+  test('parse sequence expression with assignment to statement', (assert) => {
     const statement = `'message', from = user, isPrimary = true`
-    const parsedObject = this.lexer.parseRaw(statement).toObject()
+    const parsedObject = this.lexer.parseRaw(statement).toStatement()
     assert.deepEqual(parsedObject, [`'message'`, `{from: this.context.resolve('user')}`, `{isPrimary: true}`])
   })
 
   test('parse sequence expression with assignment and object literal', (assert) => {
     const statement = `'message', from = user, { message: message }`
-    const parsedObject = this.lexer.parseRaw(statement).toObject()
+    const parsedObject = this.lexer.parseRaw(statement).toStatement()
     assert.deepEqual(parsedObject, [`'message'`, `{from: this.context.resolve('user')}`, `{message: this.context.resolve('message')}`])
   })
 
