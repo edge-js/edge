@@ -37,10 +37,9 @@ const closingHtmlComment = /(--}}$)/
 const singleLineComment = /({{--.*?--}})/g
 
 class Ast {
-  constructor (tags, template) {
+  constructor (tags, blockExpression) {
     this._tags = tags
-    this._blockExpression = new RegExp(`^\\s*\\@(!?)(${_.keys(tags).join('|')})(?:\\((.*)\\))?`)
-    this._template = template
+    this._blockExpression = blockExpression
     this._ast = []
     this._insideBlockComment = false
     this._openedTags = []
@@ -119,7 +118,7 @@ class Ast {
     /**
      * Look for opening of a custom tag.
      */
-    const [, selfClosing, tag, args] = this._blockExpression.exec(line) || []
+    const [, selfClosing, tag, args] = this._blockExpression ? (this._blockExpression.exec(line) || []) : []
     if (tag) {
       return this._tokenForTag(line, tag, args, index, !!selfClosing)
     }
@@ -187,13 +186,14 @@ class Ast {
    * into multiple lines and then converting
    * each line into a tree branch or leaf.
    *
+   * @param {String} template
+   *
    * @method parse
    *
    * @return {Array}
    */
-  parse () {
-    this
-      ._template
+  parse (template) {
+    template
       .trim()
       .split(EOL)
       .forEach((line, index) => {

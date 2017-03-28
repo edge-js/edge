@@ -9,6 +9,7 @@
  * file that was distributed with this source code.
 */
 
+const _ = require('lodash')
 const debug = require('debug')('edge:compiler')
 const LayoutTag = require('../Tags/LayoutTag')
 const lexer = new (require('../Lexer'))(true)
@@ -33,6 +34,7 @@ const expressions = {
 class TemplateCompiler {
   constructor (tags, loader, asFunction = false) {
     this._tags = tags
+    this._blockRegExp = new RegExp(`^\\s*\\@(!?)(${_.keys(tags).join('|')})(?:\\((.*)\\))?`)
     this._loader = loader
     this.buffer = new InternalBuffer(asFunction)
     this._runtimeVarIndex = 0
@@ -81,7 +83,7 @@ class TemplateCompiler {
    * @private
    */
   _toAst (template) {
-    return new Ast(this._tags, template).parse()
+    return new Ast(this._tags, this._blockRegExp).parse(template)
   }
 
   /**

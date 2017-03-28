@@ -9,6 +9,7 @@
  * file that was distributed with this source code.
 */
 
+const _ = require('lodash')
 const test = require('japa')
 const Ast = require('../../src/Ast')
 
@@ -25,7 +26,8 @@ test.group('Template Compiler', (group) => {
       }
     }
 
-    const ast = new Ast(tags, statement).parse()
+    const regExp = new RegExp(`^\\s*\\@(!?)(${_.keys(tags).join('|')})(?:\\((.*)\\))?`)
+    const ast = new Ast(tags, regExp).parse(statement)
     assert.equal(ast[0].tag, 'include')
     assert.deepEqual(ast[0].childs, [])
     assert.equal(ast[0].args, `'users.profile'`)
@@ -47,7 +49,8 @@ test.group('Template Compiler', (group) => {
       }
     }
 
-    const ast = new Ast(tags, statement).parse()
+    const regExp = new RegExp(`^\\s*\\@(!?)(${_.keys(tags).join('|')})(?:\\((.*)\\))?`)
+    const ast = new Ast(tags, regExp).parse(statement)
     assert.equal(ast[0].tag, 'each')
     assert.deepEqual(ast[0].childs, [])
     assert.equal(ast[0].args, `'user in users'`)
@@ -69,7 +72,8 @@ test.group('Template Compiler', (group) => {
       }
     }
 
-    const ast = () => new Ast(tags, statement).parse()
+    const regExp = new RegExp(`^\\s*\\@(!?)(${_.keys(tags).join('|')})(?:\\((.*)\\))?`)
+    const ast = () => new Ast(tags, regExp).parse(statement)
     assert.throw(ast, `E_UNCLOSED_TAG: Unclosed (each) tag found as <@each('user in users')> statement. Make sure to close it as (endeach)`)
   })
 
@@ -89,7 +93,8 @@ test.group('Template Compiler', (group) => {
       }
     }
 
-    const ast = new Ast(tags, statement).parse()
+    const regExp = new RegExp(`^\\s*\\@(!?)(${_.keys(tags).join('|')})(?:\\((.*)\\))?`)
+    const ast = new Ast(tags, regExp).parse(statement)
     assert.equal(ast[0].tag, 'if')
     assert.lengthOf(ast[0].childs, 3)
     assert.equal(ast[0].childs[1].body.trim(), '@else')
@@ -118,7 +123,8 @@ test.group('Template Compiler', (group) => {
       }
     }
 
-    const ast = new Ast(tags, statement).parse()
+    const regExp = new RegExp(`^\\s*\\@(!?)(${_.keys(tags).join('|')})(?:\\((.*)\\))?`)
+    const ast = new Ast(tags, regExp).parse(statement)
     assert.equal(ast[0].tag, 'component')
     assert.equal(ast[0].childs[0].tag, 'slot')
     assert.lengthOf(ast[0].childs[0].childs, 1)
@@ -131,7 +137,7 @@ test.group('Template Compiler', (group) => {
     {{-- hello dude --}}
     <h2> Hello world </h2>
     `
-    const ast = new Ast({}, statement).parse()
+    const ast = new Ast({}).parse(statement)
     assert.lengthOf(ast, 1)
     assert.deepEqual(ast[0].body.trim(), '<h2> Hello world </h2>')
   })
@@ -140,7 +146,7 @@ test.group('Template Compiler', (group) => {
     const statement = `
     <h2> Hello world </h2>{{-- end h2 --}}
     `
-    const ast = new Ast({}, statement).parse()
+    const ast = new Ast({}).parse(statement)
     assert.equal(ast[0].body, '<h2> Hello world </h2>')
   })
 
@@ -148,7 +154,7 @@ test.group('Template Compiler', (group) => {
     const statement = `
     <h2> Hello {{-- the world will be capitalized --}}world </h2>{{-- end h2 --}}
     `
-    const ast = new Ast({}, statement).parse()
+    const ast = new Ast({}).parse(statement)
     assert.equal(ast[0].body, '<h2> Hello world </h2>')
   })
 
@@ -159,7 +165,7 @@ test.group('Template Compiler', (group) => {
     multi-line comment
     --}}
     `
-    const ast = new Ast({}, statement).parse()
+    const ast = new Ast({}).parse(statement)
     assert.lengthOf(ast, 0)
   })
 
@@ -179,7 +185,8 @@ test.group('Template Compiler', (group) => {
       }
     }
 
-    const ast = new Ast(tags, statement).parse()
+    const regExp = new RegExp(`^\\s*\\@(!?)(${_.keys(tags).join('|')})(?:\\((.*)\\))?`)
+    const ast = new Ast(tags, regExp).parse(statement)
     assert.lengthOf(ast, 0)
   })
 
@@ -198,7 +205,8 @@ test.group('Template Compiler', (group) => {
       }
     }
 
-    const ast = new Ast(tags, statement).parse()
+    const regExp = new RegExp(`^\\s*\\@(!?)(${_.keys(tags).join('|')})(?:\\((.*)\\))?`)
+    const ast = new Ast(tags, regExp).parse(statement)
     assert.lengthOf(ast, 1)
     assert.equal(ast[0].tag, 'each')
     assert.equal(ast[0].childs[0].body.trim(), '--}}')
@@ -232,7 +240,8 @@ test.group('Template Compiler', (group) => {
       }
     }
 
-    const ast = new Ast(tags, statement).parse()
+    const regExp = new RegExp(`^\\s*\\@(!?)(${_.keys(tags).join('|')})(?:\\((.*)\\))?`)
+    const ast = new Ast(tags, regExp).parse(statement)
     assert.lengthOf(ast, 1)
     assert.equal(ast[0].lineno, 2)
     assert.equal(ast[0].end.lineno, 11)
@@ -255,7 +264,8 @@ test.group('Template Compiler', (group) => {
       }
     }
 
-    const ast = new Ast(tags, statement).parse()
+    const regExp = new RegExp(`^\\s*\\@(!?)(${_.keys(tags).join('|')})(?:\\((.*)\\))?`)
+    const ast = new Ast(tags, regExp).parse(statement)
     assert.equal(ast[0].tag, 'yield')
     assert.deepEqual(ast[0].childs, [])
     assert.equal(ast[0].args, `'foo'`)

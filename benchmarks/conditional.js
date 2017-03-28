@@ -2,7 +2,7 @@
 
 const nunjucks = require('nunjucks')
 const Benchmark = require('benchmark')
-const suite = new Benchmark().Suite
+const suite = new Benchmark.Suite()
 const edge = new (require('../src/Edge'))()
 
 const edgeStatement = `
