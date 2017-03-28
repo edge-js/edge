@@ -13,6 +13,16 @@ const _ = require('lodash')
 const debug = require('debug')('edge:context')
 const escape = require('escape-html')
 
+class Safe {
+  constructor (input) {
+    this._input = input
+  }
+
+  toString () {
+    return this._input
+  }
+}
+
 /**
  * Runtime context used to run the compiled
  * templates. View **locals**, **globals**,
@@ -217,6 +227,10 @@ class Context {
     return _.get(hash, childs)
   }
 
+  safe (input) {
+    return new Safe(input)
+  }
+
   /**
    * Escapes the input by sanitizing HTML.
    *
@@ -227,6 +241,9 @@ class Context {
    * @return {String}
    */
   escape (input) {
+    if (input instanceof Safe) {
+      return input.toString()
+    }
     return escape(input)
   }
 

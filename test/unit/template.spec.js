@@ -425,4 +425,15 @@ test.group('Template Runner', () => {
     raw string
     `)
   })
+
+  test('calling escape after safe should not escape the content', (assert) => {
+    const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
+    const template = new Template(this.tags, {}, {}, loader)
+    const output = template.renderString('{{ someHtml() }}', {
+      someHtml () {
+        return this.safe('<h2> Hello </h2>')
+      }
+    })
+    assert.equal(output.trim(), '<h2> Hello </h2>')
+  })
 })
