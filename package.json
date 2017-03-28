@@ -1,7 +1,7 @@
 {
-  "name": "edge",
+  "name": "edge.js",
   "version": "1.0.0",
-  "description": "",
+  "description": "Node.js logical templating engine with fresh air",
   "main": "index.js",
   "scripts": {
     "test:local": "npm run lint && node bin/tasks test:local",
