@@ -4,7 +4,7 @@ const path = require('path')
 const edge = require('../index')
 const viewsPath = path.join(__dirname, '/views')
 edge.registerViews(viewsPath)
-edge.configure({cache: true})
+edge.configure({cache: false})
 edge.registerPresenters(path.join(__dirname, '/presenters'))
 
 require('http').createServer((req, res) => {

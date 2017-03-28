@@ -167,15 +167,7 @@ class TemplateCompiler {
    * @return {void}
    */
   parsePlainLine ({ body, lineno }) {
-    /**
-     * Adding support of debugger to do runtime debugging
-     * of templates via chrome dev tools.
-     */
-    if (body.trim() === '@debugger') {
-      this.buffer.writeLine('debugger')
-    } else {
-      this.buffer.writeToOutput(this._interpolateMustache(body, lineno))
-    }
+    this.buffer.writeToOutput(this._interpolateMustache(body, lineno))
   }
 
   /**
