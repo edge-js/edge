@@ -20,5 +20,6 @@ module.exports = {
   sectionTag: new (require('./SectionTag'))(),
   yieldTag: new (require('./YieldTag'))(),
   debugger: new (require('./DebuggerTag'))(),
-  raw: new (require('./RawTag'))()
+  raw: new (require('./RawTag'))(),
+  unless: new (require('./UnlessTag'))()
 }
