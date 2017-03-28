@@ -128,7 +128,7 @@ class LayoutTag extends BaseTag {
         inheritParent = true
       }
 
-      const sectionOutput = childs.map((child) => compiler.parseAndReturnLine(child)).join(buffer.EOL)
+      const sectionOutput = childs.map((child) => compiler.parseAndReturnLine(child)).join('\n')
 
       /**
        * Store the output of section inside a key on the

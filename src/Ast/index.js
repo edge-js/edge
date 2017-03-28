@@ -10,7 +10,7 @@
 */
 
 const _ = require('lodash')
-const os = require('os')
+const EOL = require('../../lib/EOL')
 const CE = require('../Exceptions')
 
 /**
@@ -195,7 +195,7 @@ class Ast {
     this
       ._template
       .trim()
-      .split(os.EOL)
+      .split(EOL)
       .forEach((line, index) => {
         /**
          * Do not process anything when inside the block

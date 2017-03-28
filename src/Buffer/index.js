@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
 */
 
-const os = require('os')
+const EOL = require('../../lib/EOL')
 const identString = require('indent-string')
 
 /**
@@ -82,7 +82,7 @@ class Buffer {
    * @return {String}
    */
   get EOL () {
-    return os.EOL
+    return EOL
   }
 
   /**
@@ -172,7 +172,7 @@ class Buffer {
    */
   getLines () {
     const lines = this._lines.concat(this._getEndLines())
-    return lines.join(os.EOL)
+    return lines.join('\n')
   }
 
   /**
