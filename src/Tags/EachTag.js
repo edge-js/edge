@@ -260,10 +260,13 @@ class EachTag extends BaseTag {
       let index = 0
       const total = _.size(data)
       _.each(data, (item, key) => {
+        const isEven = (index + 1) % 2 === 0
         callback(item, {
           key: key,
           index: index,
           first: index === 0,
+          isOdd: !isEven,
+          isEven: isEven,
           last: (index + 1 === total),
           total: total
         })

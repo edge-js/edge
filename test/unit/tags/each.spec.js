@@ -390,4 +390,22 @@ test.group('Tags | Each ', (group) => {
     const template = () => templateInstance.compileString(statement)
     assert.throw(template, `lineno:1 charno:1 E_INVALID_EXPRESSION: Invalid expression <calories, name in veggies, { include: 'includes.veggie' }> passed to (each) block`)
   })
+
+  test('set odd and even on $loop variable', (assert) => {
+    const statement = dedent`
+    @each(user in users)
+      {{ $loop.isOdd }} {{ $loop.isEven }} {{ ($loop.index + 1) }}
+    @endeach
+    `
+    const template = new Template(this.tags).compileString(statement)
+    this.tags.each.run(Context)
+
+    const ctx = new Context('', {
+      users: [{username: 'virk'}, {username: 'nikk'}]
+    })
+    const output = new TemplateRunner(template, {
+      context: ctx
+    }).run()
+    assert.equal(output.trim(), 'true false 1\n  false true 2')
+  })
 })
