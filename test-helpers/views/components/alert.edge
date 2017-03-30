@@ -1,0 +1,11 @@
+@if($slot.main)
+  {{{ $slot.main }}}
+@else
+  <div class="header">
+    {{{ $slot.header }}}
+  </div>
+
+  <div class="body">
+    {{{ $slot.body }}}
+  </div>
+@endif
