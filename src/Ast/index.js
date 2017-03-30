@@ -36,6 +36,17 @@ const closingHtmlComment = /(--}}$)/
  */
 const singleLineComment = /({{--.*?--}})/g
 
+/**
+ * Ast parser generates a syntax tree for the template files.
+ * This is 1st step in the process of compiling a template.
+ * Since this class understands the concepts of edge tags,
+ * it will create a tree with nested tags and their
+ * childs.
+ *
+ * @class Ast
+ * @constructor
+ * @module Compiler
+ */
 class Ast {
   constructor (tags, blockExpression) {
     this._tags = tags
@@ -77,7 +88,7 @@ class Ast {
 
   /**
    * Returns the token for a line. Also it will
-   * parse the inline comments on a given line
+   * reomve the inline comments on a given line
    *
    * @method _tokenForLine
    *
@@ -139,8 +150,6 @@ class Ast {
    *
    * @return {Boolean}
    *
-   * @throws {Error} If there are unclosed block level tags
-   *
    * @private
    */
   _isClosingTag (lastTag, line) {
@@ -191,6 +200,8 @@ class Ast {
    * @method parse
    *
    * @return {Array}
+   *
+   * @throws {InvalidTemplateException} If there are unclosed tags found
    */
   parse (template) {
     template
