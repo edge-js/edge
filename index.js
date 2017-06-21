@@ -11,3 +11,4 @@
 
 exports = module.exports = new (require('./src/Edge'))()
 exports.BasePresenter = require('./src/Presenter')
+exports.BaseTag = require('./src/Tags/BaseTag')

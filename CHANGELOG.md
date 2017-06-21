@@ -1,3 +1,15 @@
+<a name="1.0.1"></a>
+## [1.0.1](https://github.com/poppinss/edge/compare/v1.0.0...v1.0.1) (2017-06-21)
+
+
+### Features
+
+* **globals:** add globals ([7ddbb1e](https://github.com/poppinss/edge/commit/7ddbb1e))
+* **tags:** export BaseTag to be extended by custom tags ([cfdfd04](https://github.com/poppinss/edge/commit/cfdfd04))
+* **template:** edge.share now merges locals ([7402af4](https://github.com/poppinss/edge/commit/7402af4))
+
+
+
 <a name="1.0.0"></a>
 # 1.0.0 (2017-03-30)
 
