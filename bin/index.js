@@ -13,7 +13,7 @@ const semver = require('semver')
 const { spawn } = require('child_process')
 const spawnArgs = []
 
-if (semver.lt(process.version, '8.0.0') && semver.gt(process.version, '6.0.0')) {
+if (semver.lt(process.version, '8.0.0') && semver.gt(process.version, '7.5.99')) {
   spawnArgs.push('--harmony-async-await')
 }
 
