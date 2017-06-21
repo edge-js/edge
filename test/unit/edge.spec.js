@@ -258,4 +258,13 @@ test.group('Edge', (group) => {
     const statement = `{{ size('foo') }}`
     assert.equal(edge.renderString(statement).trim(), '3')
   })
+
+  test('merge locals shared for multiple times', (assert) => {
+    const edge = new Edge()
+    const sharedInstance = edge.share({ foo: 'bar' })
+    sharedInstance.share({ bar: 'baz' })
+
+    const statement = `{{ foo }} {{ bar }}`
+    assert.equal(sharedInstance.renderString(statement).trim(), 'bar baz')
+  })
 })

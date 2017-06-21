@@ -252,7 +252,7 @@ class Template {
    * @chainable
    */
   share (locals) {
-    this._locals = locals
+    _.merge(this._locals, locals)
     return this
   }
 
