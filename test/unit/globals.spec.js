@@ -58,4 +58,34 @@ test.group('Globals', () => {
     const output = Globals.urlEncode('http://foo.com?username=aman virk')
     assert.equal(output, 'http://foo.com?username=aman%20virk')
   })
+
+  test('self should return the entire hash back', (assert) => {
+    const context = {
+      safe (input) {
+        return input
+      }
+    }
+    const output = Globals.el.bind(context)('$self', 'Hello')
+    assert.equal(output, 'Hello')
+  })
+
+  test('render when if value is true', (assert) => {
+    const context = {
+      safe (input) {
+        return input
+      }
+    }
+    const output = Globals.elIf.bind(context)('Hello $name', { name: 'virk' }, true)
+    assert.equal(output, 'Hello virk')
+  })
+
+  test('return empty string when elIf boolean is false', (assert) => {
+    const context = {
+      safe (input) {
+        return input
+      }
+    }
+    const output = Globals.elIf.bind(context)('Hello $name', { name: 'virk' }, false)
+    assert.equal(output, '')
+  })
 })
