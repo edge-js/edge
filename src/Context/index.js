@@ -152,6 +152,7 @@ class Context {
     if (value === undefined) {
       debug('resolving %s key on globals', key)
       value = _.get(this.$globals, key)
+      value = typeof (value) === 'function' ? value.bind(this) : value
     }
 
     return value
