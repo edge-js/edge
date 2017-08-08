@@ -9,3 +9,4 @@ dump.rdb
 benchmarks
 .idea
 bin
+nyc_output
