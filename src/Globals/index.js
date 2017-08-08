@@ -140,7 +140,29 @@ const size = function (input) {
  */
 const el = function (htmlStr, hash) {
   return this.safe(htmlStr.replace(/\$([\w.-]+)/g, (match, group) => {
-    return _.get(hash, _.toPath(group))
+    return group === 'self' ? hash : _.get(hash, _.toPath(group))
+  }))
+}
+
+/**
+ * Return element only when the 3rd param
+ * is true.
+ *
+ * @method elIf
+ *
+ * @param  {String} htmlStr
+ * @param  {Object} hash
+ * @param  {Boolean} ifResult
+ *
+ * @return {String}
+ */
+const elIf = function (htmlStr, hash, ifResult) {
+  if (!ifResult) {
+    return ''
+  }
+
+  return this.safe(htmlStr.replace(/\$([\w.-]+)/g, (match, group) => {
+    return group === 'self' ? hash : _.get(hash, _.toPath(group))
   }))
 }
 
@@ -276,6 +298,7 @@ module.exports = {
   groupBy,
   size,
   el,
+  elIf,
   camelCase,
   upperCase,
   upperFirst,
