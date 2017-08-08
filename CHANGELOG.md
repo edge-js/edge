@@ -1,3 +1,18 @@
+<a name="1.0.2"></a>
+## [1.0.2](https://github.com/poppinss/edge/compare/v1.0.1...v1.0.2) (2017-08-08)
+
+
+### Bug Fixes
+
+* **context:** bind context to global functions ([e0a2685](https://github.com/poppinss/edge/commit/e0a2685))
+
+
+### Features
+
+* **globals:** add elIf ([fb522ce](https://github.com/poppinss/edge/commit/fb522ce))
+
+
+
 <a name="1.0.1"></a>
 ## [1.0.1](https://github.com/poppinss/edge/compare/v1.0.0...v1.0.1) (2017-06-21)
 
