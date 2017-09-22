@@ -54,6 +54,81 @@ class Ast {
     this._ast = []
     this._insideBlockComment = false
     this._openedTags = []
+    this._multilineOpened = null
+  }
+
+  /**
+   * Process all lines as part of the recently opened
+   * tag, when tag is multiline
+   *
+   * @method _waitUntilTagFinishes
+   *
+   * @param  {String}              line
+   *
+   * @return {void}
+   *
+   * @private
+   */
+  _waitUntilTagFinishes (line) {
+    /**
+     * Remove inline comments from the line
+     */
+    line = line.replace(singleLineComment, '')
+
+    /**
+     * Remove trailing spaces from the line,
+     * since they have no value
+     */
+    line = line.trim()
+
+    /**
+     * If line is ending with `)`. We will consider
+     * it the end of the multiline tag
+     */
+    const ending = line.endsWith(')')
+
+    /**
+     * Extract the content from the last
+     * line, since the line can be
+     * just `)` or it can be
+     * the content + `)`
+     */
+    const content = ending ? line.replace(/\)$/, '') : line
+
+    /**
+     * If there was some content next to `args`
+     * then use append to it, otherwise set
+     * the first content
+     */
+    this._multilineOpened.args = this._multilineOpened.args
+    ? `${this._multilineOpened.args} ${content}`
+    : content
+
+    /**
+     * Finally if we are ending, then stop tracking the
+     * tag and start processing new content
+     */
+    if (ending) {
+      this._multilineOpened = null
+    }
+  }
+
+  /**
+   * Returns a boolean telling if a line has more
+   * opening braces than closing braces
+   *
+   * @method _openingBracesAreMore
+   *
+   * @param  {String}              line
+   *
+   * @return {Boolean}
+   *
+   * @private
+   */
+  _openingBracesAreMore (line) {
+    const openingBraces = line.match(/\(/g)
+    const closingBraces = line.match(/\)/g)
+    return (openingBraces ? openingBraces.length : 0) > (closingBraces ? closingBraces.length : 0)
   }
 
   /**
@@ -74,10 +149,11 @@ class Ast {
   _tokenForTag (line, tag, args, index, selfClosing) {
     return {
       tag,
-      args,
+      args: args ? args.replace(/\)$/, '') : undefined,
       selfClosing,
       childs: [],
       body: line,
+      multiline: this._openingBracesAreMore(line),
       lineno: index + 1,
       end: {
         body: null,
@@ -225,6 +301,15 @@ class Ast {
           return
         }
 
+        /**
+         * Wait until the multi line opened tag closes. Till
+         * then everything will be args for that tag.
+         */
+        if (this._multilineOpened) {
+          this._waitUntilTagFinishes(line)
+          return
+        }
+
         const lastTag = _.last(this._openedTags)
 
         /**
@@ -260,6 +345,14 @@ class Ast {
          */
         if (token.tag && this._tags[token.tag].isBlock === true && !token.selfClosing) {
           this._openedTags.push(token)
+        }
+
+        /**
+         * Track the opening of multiline tag opening and push all
+         * upcoming lines as args, unless a closing `)` is found
+         */
+        if (token.tag && token.multiline) {
+          this._multilineOpened = token
         }
 
         /**

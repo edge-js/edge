@@ -128,6 +128,131 @@ test.group('Template Compiler', (group) => {
       assert.equal(error.stack.split('\n')[1].trim(), `at (${loader.getViewPath('includes/bad-partial.edge')}:2:0)`)
     }
   })
+
+  test('parse a template with multiline tags', (assert) => {
+    const statement = dedent`
+    @!component(
+      'components.alert',
+      username = 'virk'
+    )
+    `
+    const template = new Template(this.tags, {})
+    const output = template.compileString(statement)
+
+    assert.equal(output, dedent`
+    return (function templateFn () {
+      let out = new String()
+      this.isolate(function () {
+        out += \`\${this.renderWithContext('components.alert')}\`
+      }.bind(this.newContext({username: 'virk'},{$slot: { main: \`\` } })))
+      return out
+    }).bind(this)()
+    `)
+  })
+
+  test('parse a template with multiline tags with closing bracket net to content', (assert) => {
+    const statement = dedent`
+    @!component(
+      'components.alert',
+      username = 'virk')
+    `
+    const template = new Template(this.tags, {})
+    const output = template.compileString(statement)
+
+    assert.equal(output, dedent`
+    return (function templateFn () {
+      let out = new String()
+      this.isolate(function () {
+        out += \`\${this.renderWithContext('components.alert')}\`
+      }.bind(this.newContext({username: 'virk'},{$slot: { main: \`\` } })))
+      return out
+    }).bind(this)()
+    `)
+  })
+
+  test('parse a template with multiline tags with first line having partial content', (assert) => {
+    const statement = dedent`
+    @!component('components.alert',
+      { username: 'virk' }
+    )
+    `
+    const template = new Template(this.tags, {})
+    const output = template.compileString(statement)
+
+    assert.equal(output, dedent`
+    return (function templateFn () {
+      let out = new String()
+      this.isolate(function () {
+        out += \`\${this.renderWithContext('components.alert')}\`
+      }.bind(this.newContext({username: 'virk'},{$slot: { main: \`\` } })))
+      return out
+    }).bind(this)()
+    `)
+  })
+
+  test('parse a template with multiline tags with comments in between', (assert) => {
+    const statement = dedent`
+    @!component('components.alert',
+      {{-- Data to be passed --}}
+      { username: 'virk' }
+    )
+    `
+    const template = new Template(this.tags, {})
+    const output = template.compileString(statement)
+
+    assert.equal(output, dedent`
+    return (function templateFn () {
+      let out = new String()
+      this.isolate(function () {
+        out += \`\${this.renderWithContext('components.alert')}\`
+      }.bind(this.newContext({username: 'virk'},{$slot: { main: \`\` } })))
+      return out
+    }).bind(this)()
+    `)
+  })
+
+  test('parse a template with multiline tags with comments next to content', (assert) => {
+    const statement = dedent`
+    @!component('components.alert',
+      { username: 'virk' } {{-- Data to be passed --}}
+    )
+    `
+    const template = new Template(this.tags, {})
+    const output = template.compileString(statement)
+
+    assert.equal(output, dedent`
+    return (function templateFn () {
+      let out = new String()
+      this.isolate(function () {
+        out += \`\${this.renderWithContext('components.alert')}\`
+      }.bind(this.newContext({username: 'virk'},{$slot: { main: \`\` } })))
+      return out
+    }).bind(this)()
+    `)
+  })
+
+  test('work fine with multiline if clause', (assert) => {
+    const statement = dedent`
+    @if(
+      username === 'virk'
+      && age === 22
+      && isAdmin
+    )
+      <p> You are super user </p>
+    @endif
+    `
+
+    const inlineStatement = dedent`
+      @if(username === 'virk' && age === 22 && isAdmin)
+        <p> You are super user </p>
+      @endif
+      `
+
+    const template = new Template(this.tags, {})
+    const output = template.compileString(statement)
+    const inlineOutput = template.compileString(inlineStatement)
+    assert.equal(output, inlineOutput)
+  })
 })
 
 test.group('Template Runner', () => {
