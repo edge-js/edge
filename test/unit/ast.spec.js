@@ -273,4 +273,32 @@ test.group('Template Compiler', (group) => {
     assert.equal(ast[0].selfClosing, true)
     assert.equal(ast[0].body, `@!yield('foo')`)
   })
+
+  test('jump line numbers when multi-line tags are detected', (assert) => {
+    const statement = `
+    @component(
+      'user',
+      { username: 'virk' }
+    )
+      {{ user.username }}
+    @endcomponent
+    `
+
+    const tags = {
+      component: {
+        name: 'component',
+        isBlock: true,
+        compile () {}
+      }
+    }
+
+    const regExp = new RegExp(`^\\s*\\@(!?)(${_.keys(tags).join('|')})(?:\\((.*)\\))?`)
+    const ast = new Ast(tags, regExp).parse(statement)
+
+    assert.lengthOf(ast, 1)
+    assert.equal(ast[0].lineno, 1)
+    assert.equal(ast[0].end.lineno, 6)
+    assert.lengthOf(ast[0].childs, 1)
+    assert.equal(ast[0].tag, 'component')
+  })
 })
