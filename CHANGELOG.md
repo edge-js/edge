@@ -1,3 +1,13 @@
+<a name="1.1.1"></a>
+## [1.1.1](https://github.com/poppinss/edge/compare/v1.1.0...v1.1.1) (2017-10-08)
+
+
+### Features
+
+* **tags:** add mustache tag ([d46022e](https://github.com/poppinss/edge/commit/d46022e))
+
+
+
 <a name="1.1.0"></a>
 # [1.1.0](https://github.com/poppinss/edge/compare/v1.0.2...v1.1.0) (2017-09-23)
 
