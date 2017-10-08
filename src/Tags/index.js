@@ -21,5 +21,6 @@ module.exports = {
   yieldTag: new (require('./YieldTag'))(),
   debugger: new (require('./DebuggerTag'))(),
   raw: new (require('./RawTag'))(),
-  unless: new (require('./UnlessTag'))()
+  unless: new (require('./UnlessTag'))(),
+  mustache: new (require('./MustacheTag'))()
 }

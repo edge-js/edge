@@ -1,6 +1,6 @@
 {
   "name": "edge.js",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Node.js logical templating engine with fresh air",
   "main": "index.js",
   "scripts": {
@@ -23,6 +23,7 @@
     "japa": "^1.0.4",
     "japa-cli": "^1.0.1",
     "node-req": "^2.0.1",
+    "nunjucks": "^3.0.1",
     "nyc": "^11.2.1",
     "semver": "^5.4.1",
     "standard": "^10.0.3",
