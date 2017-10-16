@@ -149,7 +149,7 @@ class Ast {
   _tokenForTag (line, tag, args, index, selfClosing) {
     return {
       tag,
-      args: args ? args.replace(/\)$/, '') : undefined,
+      args: args ? args.trim().replace(/\)$/, '') : undefined,
       selfClosing,
       childs: [],
       body: line,
