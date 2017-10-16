@@ -335,4 +335,43 @@ test.group('Tags | Component ', (group) => {
     const $ = cheerio.load(output)
     assert.equal($('h2').text().trim(), 'Hello VIRK')
   })
+
+  test('should have access to globals', (assert) => {
+    const template = new Template(this.tags, {}, {
+      size: function (dict) { return dict.length }
+    }, loader)
+    const statement = dedent`
+    @!component('components.access-globals', users = ['virk'])
+    `
+    this.tags.each.run(Context)
+    const output = template.renderString(statement)
+    const $ = cheerio.load(output)
+    assert.equal($('h2').text().trim(), '1')
+  })
+
+  test('share data from the parent view', (assert) => {
+    const template = new Template(this.tags, {}, {
+      size: function (dict) { return dict.length }
+    }, loader)
+    const statement = dedent`
+    @!component('components.access-globals', shareData = true)
+    `
+    this.tags.each.run(Context)
+    const output = template.renderString(statement, { users: ['virk', 'nikk'] })
+    const $ = cheerio.load(output)
+    assert.equal($('h2').text().trim(), '2')
+  })
+
+  test('should override the parent data view', (assert) => {
+    const template = new Template(this.tags, {}, {
+      size: function (dict) { return dict.length }
+    }, loader)
+    const statement = dedent`
+    @!component('components.access-globals', shareData = true, users = ['virk'])
+    `
+    this.tags.each.run(Context)
+    const output = template.renderString(statement, { users: ['virk', 'nikk'] })
+    const $ = cheerio.load(output)
+    assert.equal($('h2').text().trim(), '1')
+  })
 })
