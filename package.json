@@ -30,7 +30,7 @@
     "zombie": "^5.0.7"
   },
   "dependencies": {
-    "debug": "^3.0.1",
+    "debug": "^3.1.0",
     "encodeurl": "^1.0.1",
     "escape-html": "^1.0.3",
     "esprima": "^4.0.0",
