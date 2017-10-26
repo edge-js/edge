@@ -412,13 +412,10 @@ class Template {
      * Convert props array to data object
      */
     let presenter = null
-    let shareData = false
 
     const data = _.transform(props, (result, prop) => {
       if (prop.presenter) {
         presenter = prop.presenter
-      } else if (prop.shareData) {
-        shareData = true
       } else {
         _.merge(result, prop)
       }
@@ -427,13 +424,8 @@ class Template {
 
     const template = new Template(this._tags, this._options, this._globals, this._loader)
     template.presenter(presenter)
+    template._makeContext(data)
 
-    if (shareData) {
-      debug('sharing parent template data with component')
-      template._makeContext(_.assign({}, this.context.$presenter.$data, data))
-    } else {
-      template._makeContext(data)
-    }
     return template
   }
 
