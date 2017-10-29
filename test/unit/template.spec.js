@@ -253,6 +253,30 @@ test.group('Template Compiler', (group) => {
     const inlineOutput = template.compileString(inlineStatement)
     assert.equal(output, inlineOutput)
   })
+
+  test('trim component name white space', (assert) => {
+    const statement = `
+    <html>
+      <body>
+        @include('content') 
+      </body>
+    </html>
+    `
+    const template = new Template(this.tags, {})
+    const output = template.compileString(statement)
+
+    assert.equal(output, dedent`
+    return (function templateFn () {
+      let out = new String()
+      out += \`<html>\\n\`
+      out += \`      <body>\\n\`
+      out += \`\${this.runTimeRender('content')}\`
+      out += \`      </body>\\n\`
+      out += \`    </html>\\n\`
+      return out
+    }).bind(this)()
+    `)
+  })
 })
 
 test.group('Template Runner', () => {

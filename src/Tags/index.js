@@ -22,5 +22,6 @@ module.exports = {
   debugger: new (require('./DebuggerTag'))(),
   raw: new (require('./RawTag'))(),
   unless: new (require('./UnlessTag'))(),
-  mustache: new (require('./MustacheTag'))()
+  mustache: new (require('./MustacheTag'))(),
+  set: new (require('./SetTag'))()
 }

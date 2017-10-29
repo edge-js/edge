@@ -412,6 +412,7 @@ class Template {
      * Convert props array to data object
      */
     let presenter = null
+
     const data = _.transform(props, (result, prop) => {
       if (prop.presenter) {
         presenter = prop.presenter
@@ -424,6 +425,7 @@ class Template {
     const template = new Template(this._tags, this._options, this._globals, this._loader)
     template.presenter(presenter)
     template._makeContext(data)
+
     return template
   }
 
