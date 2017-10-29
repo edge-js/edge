@@ -1,3 +1,24 @@
+<a name="1.1.2"></a>
+## [1.1.2](https://github.com/poppinss/edge/compare/v1.1.1...v1.1.2) (2017-10-29)
+
+
+### Bug Fixes
+
+* **ast:** trim whitespace in tag end ([2ff8b36](https://github.com/poppinss/edge/commit/2ff8b36)), closes [#3](https://github.com/poppinss/edge/issues/3)
+* **component:** access globals and optionally share data ([5bc9889](https://github.com/poppinss/edge/commit/5bc9889)), closes [#2](https://github.com/poppinss/edge/issues/2)
+
+
+### Features
+
+* **tags:** add set tag ([a6735fc](https://github.com/poppinss/edge/commit/a6735fc))
+
+
+### Reverts
+
+* **component:** remove option to share data with component ([83c57e5](https://github.com/poppinss/edge/commit/83c57e5))
+
+
+
 <a name="1.1.1"></a>
 ## [1.1.1](https://github.com/poppinss/edge/compare/v1.1.0...v1.1.1) (2017-10-08)
 
