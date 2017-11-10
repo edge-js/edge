@@ -277,7 +277,7 @@ test.group('Template Compiler', (group) => {
     const statement = `
     <html>
       <body>
-        @include('content')
+        @include('content') 
       </body>
     </html>
     `
