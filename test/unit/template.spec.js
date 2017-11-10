@@ -56,6 +56,25 @@ test.group('Template Compiler', (group) => {
     `)
   })
 
+  test('parse a simple template string with tags (with space)', (assert) => {
+    const statement = dedent`
+    @if (username)
+      {{ username }}
+    @endif
+    `
+    const template = new Template(this.tags, {})
+    const output = template.compileString(statement)
+    assert.equal(output, dedent`
+    return (function templateFn () {
+      let out = new String()
+      if (this.context.resolve('username')) {
+        out += \`  \${this.context.escape(this.context.resolve('username'))}\\n\`
+      }
+      return out
+    }).bind(this)()
+    `)
+  })
+
   test('report error with correct lineno when string has error', (assert) => {
     const statement = dedent`
     @if(username, age)
@@ -258,7 +277,7 @@ test.group('Template Compiler', (group) => {
     const statement = `
     <html>
       <body>
-        @include('content') 
+        @include('content')
       </body>
     </html>
     `
