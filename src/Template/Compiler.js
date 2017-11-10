@@ -34,7 +34,7 @@ const expressions = {
 class TemplateCompiler {
   constructor (tags, loader, asFunction = false) {
     this._tags = tags
-    this._blockRegExp = new RegExp(`^\\s*\\@(!?)(${_.keys(tags).join('|')})(?:\\((.*)\\)?)?`)
+    this._blockRegExp = new RegExp(`^\\s*\\@(!?)(${_.keys(tags).join('|')})[ ]?(?:\\((.*)\\)?)?`)
     this._loader = loader
     this.buffer = new InternalBuffer(asFunction)
     this._runtimeVarIndex = 0
