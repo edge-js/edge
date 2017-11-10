@@ -164,7 +164,7 @@ class Ast {
 
   /**
    * Returns the token for a line. Also it will
-   * reomve the inline comments on a given line
+   * remove the inline comments on a given line
    *
    * @method _tokenForLine
    *
