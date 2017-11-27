@@ -289,6 +289,19 @@ const urlEncode = function (url) {
   return encodeurl(url)
 }
 
+/**
+ * Order an array using a given property.
+ *
+ * @method orderBy
+ *
+ * @param {Array} collection
+ * @param {String|Array} property
+ * @param {String|Array} order
+ */
+const orderBy = function (collection, property, order) {
+  return _.orderBy(collection, property, order)
+}
+
 module.exports = {
   range,
   batch,
@@ -307,5 +320,6 @@ module.exports = {
   capitalize,
   truncate,
   toAnchor,
-  urlEncode
+  urlEncode,
+  orderBy
 }
