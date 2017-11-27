@@ -1,3 +1,19 @@
+<a name="1.1.3"></a>
+## [1.1.3](https://github.com/poppinss/edge/compare/v1.1.2...v1.1.3) (2017-11-27)
+
+
+### Bug Fixes
+
+* **include:** allow callExpression inside include ([cbbe629](https://github.com/poppinss/edge/commit/cbbe629))
+* **ReDoS:** Regular Expression Denial of Service (#7) ([39777cc](https://github.com/poppinss/edge/commit/39777cc))
+
+
+### Features
+
+* **edge:** add edge.new method to newup isolated template ([5db5710](https://github.com/poppinss/edge/commit/5db5710))
+* **globals:** add orderBy method ([6ad7190](https://github.com/poppinss/edge/commit/6ad7190))
+
+
 <a name="1.1.2"></a>
 ## [1.1.2](https://github.com/poppinss/edge/compare/v1.1.1...v1.1.2) (2017-10-29)
 

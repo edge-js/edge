@@ -52,7 +52,7 @@ class Edge {
    *
    * @method _getTemplate
    *
-   * @return {Object}
+   * @return {Template}
    *
    * @private
    */
@@ -60,6 +60,17 @@ class Edge {
     return new Template(this._tags, {
       cache: this._options.cache
     }, this._globals, this._loader)
+  }
+
+  /**
+   * Returns a fresh instance of template
+   *
+   * @method new
+   *
+   * @returns {Template}
+   */
+  new () {
+    return this._getTemplate()
   }
 
   /**
@@ -164,42 +175,42 @@ class Edge {
    * docblock defined in template renderer
    */
   renderString (...args) {
-    return this._getTemplate().renderString(...args)
+    return this.new().renderString(...args)
   }
 
   /**
    * docblock defined in template renderer
    */
   compileString (...args) {
-    return this._getTemplate().compileString(...args)
+    return this.new().compileString(...args)
   }
 
   /**
    * docblock defined in template renderer
    */
   render (view, ...args) {
-    return this._getTemplate().render(view, ...args)
+    return this.new().render(view, ...args)
   }
 
   /**
    * docblock defined in template renderer
    */
   compile (view, ...args) {
-    return this._getTemplate().compile(view, ...args)
+    return this.new().compile(view, ...args)
   }
 
   /**
    * docblock defined in template renderer
    */
   presenter (...args) {
-    return this._getTemplate().presenter(...args)
+    return this.new().presenter(...args)
   }
 
   /**
    * docblock defined in template renderer
    */
   share (...args) {
-    return this._getTemplate().share(...args)
+    return this.new().share(...args)
   }
 }
 

@@ -267,4 +267,11 @@ test.group('Edge', (group) => {
     const statement = `{{ foo }} {{ bar }}`
     assert.equal(sharedInstance.renderString(statement).trim(), 'bar baz')
   })
+
+  test('edge.new return isolated instance', (assert) => {
+    const edge = new Edge()
+    const templ = edge.new()
+    const templ2 = edge.new()
+    assert.isFalse(templ === templ2)
+  })
 })

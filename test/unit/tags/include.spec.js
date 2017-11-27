@@ -83,4 +83,17 @@ test.group('Tags | Include ', (group) => {
     <h2> Foo </h2>
     `)
   })
+
+  test('call a function inside include', (assert) => {
+    const statement = `@include(getFile('includes.user-profile'))`
+
+    const template = new Template(this.tags, {}, {}, loader)
+    const output = template.renderString(statement, {
+      username: 'Foo',
+      getFile (input) { return input }
+    })
+    assert.equal(output.trim(), dedent`<h1> User Profile </h1>
+    <h2> Foo </h2>
+    `)
+  })
 })

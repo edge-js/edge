@@ -52,7 +52,7 @@ class IncludeTag extends BaseTag {
    * @return {Array}
    */
   get allowedExpressions () {
-    return ['Literal', 'Identifier', 'MemberExpression']
+    return ['Literal', 'Identifier', 'MemberExpression', 'CallExpression']
   }
 
   /**
