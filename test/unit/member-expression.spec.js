@@ -97,4 +97,10 @@ test.group('Member Expression', (group) => {
     this.exp.parse(esprima.parse(statement).body[0].expression)
     assert.equal(this.exp.toStatement(), `this.context.accessChild(this.context.resolve('users'), [this.context.resolve('username'),'age'])`)
   })
+
+  test('should be able to parse a nested computed expression', (assert) => {
+    const statement = `users[username.prop]`
+    this.exp.parse(esprima.parse(statement).body[0].expression)
+    assert.equal(this.exp.toStatement(), `this.context.accessChild(this.context.resolve('users'), [this.context.accessChild(this.context.resolve('username'), ['prop'])])`)
+  })
 })

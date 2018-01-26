@@ -44,7 +44,7 @@ class MemberExpression extends BaseExpression {
     }
 
     this._tokens.members.push({
-      value: this._lexer.parseStatement(member.property),
+      value: this._lexer.parse(member.property),
       computed: member.computed
     })
   }
