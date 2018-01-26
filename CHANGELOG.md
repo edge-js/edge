@@ -1,3 +1,13 @@
+<a name="1.1.4"></a>
+## [1.1.4](https://github.com/poppinss/edge/compare/v1.1.3...v1.1.4) (2018-01-26)
+
+
+### Bug Fixes
+
+* **memberexpression:** parse nested memberexpression ([5aee3ba](https://github.com/poppinss/edge/commit/5aee3ba)), closes [#21](https://github.com/poppinss/edge/issues/21)
+
+
+
 <a name="1.1.3"></a>
 ## [1.1.3](https://github.com/poppinss/edge/compare/v1.1.2...v1.1.3) (2017-11-27)
 
