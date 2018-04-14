@@ -53,7 +53,7 @@ class BinaryExpression extends BaseExpression {
    * @private
    */
   _isArithmeticOperator (operator) {
-    return ['+', '-', '/', '%', '*'].indexOf(operator) > -1
+    return ['+', '-', '/', '%', '*', '**'].indexOf(operator) > -1
   }
 
   /**
