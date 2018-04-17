@@ -293,8 +293,8 @@ test.group('Template Runner', () => {
     const template = new Template(this.tags, {}, {}, loader)
     const filePath = template.renderToFile('./welcome.html', 'welcome', { username: 'virk' })
     const contents = (fs.readFileSync(filePath)).toString().trim()
-    assert.equal(contents, 'virk')
     fs.unlinkSync(filePath)
+    assert.equal(contents, 'virk')
   })
 
   test('render a template from string', (assert) => {
@@ -309,8 +309,8 @@ test.group('Template Runner', () => {
     const template = new Template(this.tags, {}, {}, loader)
     const filePath = template.renderStringToFile('./welcomeFromString.html', '{{ username }}', { username: 'virk' })
     const contents = (fs.readFileSync(filePath)).toString().trim()
-    assert.equal(contents, 'virk')
     fs.unlinkSync(filePath)
+    assert.equal(contents, 'virk')
   })
 
   test('make use of presenter when rendering the view', (assert) => {
