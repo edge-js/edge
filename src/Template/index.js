@@ -16,6 +16,7 @@ const TemplateRunner = require('./Runner')
 const Context = require('../Context')
 const BasePresenter = require('../Presenter')
 const cache = require('../Cache')
+const fs = require('fs')
 
 /**
  * Template class is used to compile and render the
@@ -323,6 +324,23 @@ class Template {
   }
 
   /**
+   * Render a view to a file by loading it from disk
+   *
+   * @method renderToFile
+   *
+   * @param {String} file
+   * @param {String} view
+   * @param {Object} data
+   *
+   * @returns {String}
+   */
+  renderToFile (file, view, data = {}) {
+    const renderedView = this.render(view, data)
+    fs.writeFileSync(file, renderedView)
+    return file
+  }
+
+  /**
    * Render a view via string
    *
    * @method renderString
@@ -336,6 +354,23 @@ class Template {
     const compiledTemplate = this.compileString(statement)
     this._makeContext(data)
     return new TemplateRunner(compiledTemplate, this).run()
+  }
+
+  /**
+   * Render a view to a file via string
+   *
+   * @method renderStringToFile
+   *
+   * @param {String} file
+   * @param {String} statement
+   * @param {Object} data
+   *
+   * @returns {String}
+   */
+  renderStringToFile (file, statement, data = {}) {
+    const renderedString = this.renderString(statement, data)
+    fs.writeFileSync(file, renderedString)
+    return file
   }
 
   /**
