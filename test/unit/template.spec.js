@@ -294,6 +294,7 @@ test.group('Template Runner', () => {
     const filePath = template.renderToFile('./welcome.html', 'welcome', { username: 'virk' })
     const contents = (fs.readFileSync(filePath)).toString().trim()
     assert.equal(contents, 'virk')
+    fs.unlinkSync(filePath)
   })
 
   test('render a template from string', (assert) => {
