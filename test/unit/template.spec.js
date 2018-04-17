@@ -306,7 +306,7 @@ test.group('Template Runner', () => {
   test('render a template to a file from string', (assert) => {
     const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
     const template = new Template(this.tags, {}, {}, loader)
-    const filePath = template.renderStringToFile('/welcomeFromString.html', '{{ username }}', { username: 'virk' })
+    const filePath = template.renderStringToFile('./welcomeFromString.html', '{{ username }}', { username: 'virk' })
     const contents = (fs.readFileSync(filePath)).toString().trim()
     assert.equal(contents, 'virk')
     fs.unlinkSync(filePath)
