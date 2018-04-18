@@ -16,7 +16,9 @@ const TemplateRunner = require('./Runner')
 const Context = require('../Context')
 const BasePresenter = require('../Presenter')
 const cache = require('../Cache')
+const util = require('util')
 const fs = require('fs')
+const writeFile = util.promisify(fs.writeFile)
 
 /**
  * Template class is used to compile and render the
@@ -332,11 +334,11 @@ class Template {
    * @param {String} view
    * @param {Object} data
    *
-   * @returns {String}
+   * @returns {Promise<*>}
    */
-  renderToFile (file, view, data = {}) {
+  async renderToFile (file, view, data = {}) {
     const renderedView = this.render(view, data)
-    fs.writeFileSync(file, renderedView)
+    await writeFile(file, renderedView)
     return file
   }
 
@@ -365,11 +367,11 @@ class Template {
    * @param {String} statement
    * @param {Object} data
    *
-   * @returns {String}
+   * @returns {Promise<*>}
    */
-  renderStringToFile (file, statement, data = {}) {
+  async renderStringToFile (file, statement, data = {}) {
     const renderedString = this.renderString(statement, data)
-    fs.writeFileSync(file, renderedString)
+    await writeFile(file, renderedString)
     return file
   }
 

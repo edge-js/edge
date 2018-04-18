@@ -18,7 +18,9 @@ const TemplateCompiler = require('../../src/Template/Compiler')
 const Loader = require('../../src/Loader')
 const Context = require('../../src/Context')
 const cache = require('../../src/Cache')
+const util = require('util')
 const fs = require('fs')
+const readFile = util.promisify(fs.readFile)
 
 test.group('Template Compiler', (group) => {
   group.before(() => {
@@ -288,11 +290,11 @@ test.group('Template Runner', () => {
     assert.equal(output.trim(), 'virk')
   })
 
-  test('render a template to a file by loading it from file', (assert) => {
+  test('render a template to a file by loading it from file', async (assert) => {
     const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
     const template = new Template(this.tags, {}, {}, loader)
-    const filePath = template.renderToFile('./welcome.html', 'welcome', { username: 'virk' })
-    const contents = (fs.readFileSync(filePath)).toString().trim()
+    const filePath = await template.renderToFile('./welcome.html', 'welcome', { username: 'virk' })
+    const contents = (await readFile(filePath)).toString().trim()
     fs.unlinkSync(filePath)
     assert.equal(contents, 'virk')
   })
@@ -304,11 +306,11 @@ test.group('Template Runner', () => {
     assert.equal(output.trim(), 'virk')
   })
 
-  test('render a template to a file from string', (assert) => {
+  test('render a template to a file from string', async (assert) => {
     const loader = new Loader(path.join(__dirname, '../../test-helpers/views'))
     const template = new Template(this.tags, {}, {}, loader)
-    const filePath = template.renderStringToFile('./welcomeFromString.html', '{{ username }}', { username: 'virk' })
-    const contents = (fs.readFileSync(filePath)).toString().trim()
+    const filePath = await template.renderStringToFile('./welcomeFromString.html', '{{ username }}', { username: 'virk' })
+    const contents = (await readFile(filePath)).toString().trim()
     fs.unlinkSync(filePath)
     assert.equal(contents, 'virk')
   })
