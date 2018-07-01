@@ -1,0 +1,61 @@
+{
+  "name": "edge",
+  "version": "1.0.0",
+  "description": "Template engine",
+  "main": "index.js",
+  "scripts": {
+    "pretest": "npm run lint",
+    "test": "nyc japa",
+    "posttest": "npm run coverage",
+    "mrm": "mrm --preset=@adonisjs/mrm-preset",
+    "commit": "git-cz",
+    "prepublishOnly": "npm run build",
+    "test:win": "./node_modules/japa-cli/index.js",
+    "lint": "tslint --project tsconfig.json",
+    "clean": "del build",
+    "compile": "npm run lint && npm run clean && tsc",
+    "build": "npm run compile",
+    "coverage": "nyc report --reporter=text-lcov | coveralls"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/poppinss/edge.git"
+  },
+  "author": "virk",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/poppinss/edge/issues"
+  },
+  "homepage": "https://github.com/poppinss/edge#readme",
+  "devDependencies": {
+    "@adonisjs/mrm-preset": "^1.0.7",
+    "@types/node": "^10.5.1",
+    "commitizen": "^2.10.1",
+    "coveralls": "^3.0.2",
+    "cz-conventional-changelog": "^2.1.0",
+    "del-cli": "^1.1.0",
+    "japa": "^1.0.6",
+    "japa-cli": "^1.0.1",
+    "mrm": "^1.1.1",
+    "nyc": "^12.0.2",
+    "pkg-ok": "^2.2.0",
+    "ts-node": "^7.0.0",
+    "tslint": "^5.10.0",
+    "tslint-eslint-rules": "^5.3.1",
+    "typescript": "^2.9.2"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  },
+  "nyc": {
+    "exclude": [
+      "test",
+      "japaFile.js"
+    ],
+    "extension": [
+      ".ts"
+    ]
+  }
+}
