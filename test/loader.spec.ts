@@ -36,7 +36,7 @@ test.group('Loader', (group) => {
 
   test('throw exception when resolve path from undefined location', (assert) => {
     const loader = new Loader()
-    const fn = () => loader.resolve('foo')
+    const fn = () => loader.resolve('foo', 'default')
     assert.throw(fn, 'Attempting to resolve foo template for unmounted default location')
   })
 
@@ -46,7 +46,7 @@ test.group('Loader', (group) => {
     const loader = new Loader()
     loader.mount('default', viewsDir)
 
-    const template = loader.resolve('foo')
+    const template = loader.resolve('foo', 'default')
     assert.equal(template.trim(), 'Hello world')
   })
 
@@ -54,8 +54,8 @@ test.group('Loader', (group) => {
     const loader = new Loader()
     loader.mount('default', viewsDir)
 
-    const fn = () => loader.resolve('foo')
-    assert.throw(fn, `Cannot resolve foo.edge. Make sure file exists at ${viewsDir} location.`)
+    const fn = () => loader.resolve('foo', 'default')
+    assert.throw(fn, `Cannot resolve ${join(viewsDir, 'foo.edge')}. Make sure file exists.`)
   })
 
   test('resolve template with extension', async (assert) => {
@@ -64,7 +64,7 @@ test.group('Loader', (group) => {
     const loader = new Loader()
     loader.mount('default', viewsDir)
 
-    const template = loader.resolve('foo.edge')
+    const template = loader.resolve('foo.edge', 'default')
     assert.equal(template.trim(), 'Hello world')
   })
 })

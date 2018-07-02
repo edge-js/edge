@@ -7,10 +7,11 @@
 * file that was distributed with this source code.
 */
 
-import { join } from 'path'
+import { join, isAbsolute } from 'path'
 import { readFileSync } from 'fs'
+import { ILoader } from '../Contracts'
 
-export class Loader {
+export class Loader implements ILoader {
   private mountedDirs: Map<string, string> = new Map()
 
   /**
@@ -27,39 +28,44 @@ export class Loader {
   /**
    * Mount a directory for resolving views
    */
-  public mount (name: string, dirPath: string): void {
-    this.mountedDirs.set(name, dirPath)
+  public mount (diskName: string, dirPath: string): void {
+    this.mountedDirs.set(diskName, dirPath)
   }
 
   /**
    * Remove directory from the list of directories
    * for resolving views
    */
-  public unmount (name: string): void {
-    this.mountedDirs.delete(name)
+  public unmount (diskName: string): void {
+    this.mountedDirs.delete(diskName)
   }
 
-  /**
-   * Resolves a template from disk and returns it as a string
-   */
-  public resolve (template: string, name: string = 'default'): string {
-    const mountedDir = this.mountedDirs.get(name)
+  public makePath (templatePath: string, diskName: string): string {
+    const mountedDir = this.mountedDirs.get(diskName)
     if (!mountedDir) {
-      throw new Error(`Attempting to resolve ${template} template for unmounted ${name} location`)
+      throw new Error(`Attempting to resolve ${templatePath} template for unmounted ${diskName} location`)
     }
 
     /**
      * Normalize template name by adding extension
      */
-    template = `${template.replace(/\.edge$/, '')}.edge`
+    templatePath = `${templatePath.replace(/\.edge$/, '')}.edge`
+    return join(mountedDir, templatePath)
+  }
 
+  /**
+   * Resolves a template from disk and returns it as a string
+   */
+  public resolve (templatePath: string, diskName: string): string {
     try {
-      return readFileSync(join(mountedDir, template), 'utf-8')
+      templatePath = isAbsolute(templatePath) ? templatePath : this.makePath(templatePath, diskName)
+      return readFileSync(templatePath, 'utf-8')
     } catch (error) {
       if (error.code === 'ENOENT') {
-        throw new Error(`Cannot resolve ${template}. Make sure file exists at ${mountedDir} location.`)
+        throw new Error(`Cannot resolve ${templatePath}. Make sure file exists.`)
+      } else {
+        throw error
       }
-      throw error
     }
   }
 }
