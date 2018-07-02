@@ -34,6 +34,7 @@
     "coveralls": "^3.0.2",
     "cz-conventional-changelog": "^2.1.0",
     "del-cli": "^1.1.0",
+    "fs-extra": "^6.0.1",
     "japa": "^1.0.6",
     "japa-cli": "^1.0.1",
     "mrm": "^1.1.1",
@@ -57,5 +58,8 @@
     "extension": [
       ".ts"
     ]
+  },
+  "dependencies": {
+    "edge-parser": "git+https://github.com/poppinss/edge-parser.git#develop"
   }
 }
