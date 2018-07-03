@@ -10,3 +10,4 @@
 export { IfTag as if } from './If'
 export { ElseTag as else } from './Else'
 export { ElseIfTag as elseif } from './ElseIf'
+export { IncludeTag as include } from './Include'

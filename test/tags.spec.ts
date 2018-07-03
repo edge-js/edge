@@ -71,3 +71,33 @@ We are writing a bad if condition
     }
   })
 })
+
+test.group('Include', () => {
+  test('raise errors on correct line with include tag', async (assert) => {
+    assert.plan(1)
+
+    const templateContent = `We are writing a bad include condition
+@include(foo bar)`
+
+    await fs.outputFile(join(viewsDir, 'foo.edge'), templateContent)
+    try {
+      compiler.compile('foo')
+    } catch (error) {
+      assert.equal(error.loc.line, 2)
+    }
+  })
+
+  test('raise errors when using sequence expression', async (assert) => {
+    assert.plan(2)
+
+    const templateContent = `@include('foo', 'bar')`
+
+    await fs.outputFile(join(viewsDir, 'foo.edge'), templateContent)
+    try {
+      compiler.compile('foo')
+    } catch (error) {
+      assert.equal(error.loc.line, 1)
+      assert.equal(error.message, 'E_UNALLOWED_EXPRESSION: SequenceExpression is not allowed for if tag\n> More details: https://err.sh/poppinss/edge-errors/E_UNALLOWED_EXPRESSION')
+    }
+  })
+})

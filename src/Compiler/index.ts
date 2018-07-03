@@ -20,29 +20,29 @@ export class Compiler {
   /**
    * Compiles a given template by loading it using the loader
    */
-  private _compile (templatePath: string, diskName: string): string {
+  private _compile (templatePath: string, diskName: string, inline: boolean = false): string {
     const template = this.loader.resolve(templatePath, diskName)
     const parser = new Parser(this.tags)
-    return parser.parseTemplate(template)
+    return parser.parseTemplate(template, !inline)
   }
 
   /**
    * Compiles a given template by loading it using the loader, also caches
    * the template and returns from the cache (if exists).
    */
-  public compile (templatePath: string, diskName: string = 'default'): string {
+  public compile (templatePath: string, diskName: string = 'default', inline: boolean = false): string {
     templatePath = this.loader.makePath(templatePath, diskName)
 
     /**
      * Compile right away when cache is disabled
      */
     if (!this.shouldCache) {
-      return this._compile(templatePath, diskName)
+      return this._compile(templatePath, diskName, inline)
     }
 
     /* istanbul ignore else */
     if (!this.cache.get(templatePath)) {
-      this.cache.set(templatePath, this._compile(templatePath, diskName))
+      this.cache.set(templatePath, this._compile(templatePath, diskName, inline))
     }
 
     return this.cache.get(templatePath)!

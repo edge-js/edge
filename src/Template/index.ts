@@ -15,6 +15,10 @@ export class Template {
   constructor (private compiler: Compiler, private sharedState: any) {
   }
 
+  public renderInline (template: string): Function {
+    return new Function('template', 'ctx', this.compiler.compile(template, 'default', true))
+  }
+
   public render (template: string, presenter: IPresenter, diskName?: string): string {
     const compiledTemplate = this.compiler.compile(template, diskName)
     const ctx = new Context(presenter, this.sharedState)
