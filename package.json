@@ -64,6 +64,7 @@
     "deep-extend": "^0.6.0",
     "edge-parser": "^1.0.5",
     "he": "^1.1.1",
-    "macroable": "^1.0.0"
+    "macroable": "^1.0.0",
+    "node-exceptions": "^3.0.0"
   }
 }

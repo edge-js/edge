@@ -10,11 +10,20 @@
 import { Parser } from 'edge-parser'
 import { EdgeBuffer } from 'edge-parser/build/src/EdgeBuffer'
 import { IBlockNode, INode } from 'edge-lexer/build/src/Contracts'
+import { BaseTag } from './BaseTag'
 
-export class IfTag {
+export class IfTag extends BaseTag {
   public static block = true
   public static seekable = true
   public static selfclosed = false
+
+  /**
+   * Expressions which are not allowed by the sequence
+   * expression
+   *
+   * @type {Array}
+   */
+  protected bannedExpressions = ['SequenceExpression']
 
   /**
    * Returns a boolean telling whether the node with newline has a parent
@@ -34,6 +43,7 @@ export class IfTag {
    */
   public compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
     const parsed = parser.parseJsArg(token.properties.jsArg, token.lineno)
+    this._validateExpression(parsed, token.lineno)
 
     buffer.writeStatement(`if(${parser.statementToString(parsed)}) {`)
     buffer.indent()
