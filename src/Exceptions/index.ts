@@ -11,17 +11,17 @@ import * as NE from 'node-exceptions'
 const errShLink = 'poppinss/edge-errors'
 
 class BaseException extends NE.LogicalException {
-  public loc: any
-  constructor (message, status, code, link) {
+  public line: number
+  constructor (message: string, status: number, code: string, link: string) {
     super(message, status, code, link)
   }
 }
 
 export class UnAllowedExpressionException extends BaseException {
-  public static invoke (tag, expression, loc) {
+  public static invoke (tag: string, expression: string, line: number) {
     const message = `${expression} is not allowed for ${tag} tag`
     const error = new this(message, 500, 'E_UNALLOWED_EXPRESSION', errShLink)
-    error.loc = loc
+    error.line = line
 
     throw error
   }

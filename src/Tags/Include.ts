@@ -10,9 +10,9 @@
 import { Parser } from 'edge-parser'
 import { EdgeBuffer } from 'edge-parser/build/src/EdgeBuffer'
 import { IBlockNode } from 'edge-lexer/build/src/Contracts'
-import { BaseTag } from './BaseTag'
+import { disAllowExpressions } from '../utils'
 
-export class IncludeTag extends BaseTag {
+export class IncludeTag {
   public static block = false
   public static seekable = true
   public static selfclosed = false
@@ -30,7 +30,13 @@ export class IncludeTag extends BaseTag {
    */
   public compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
     const parsed = parser.parseJsArg(token.properties.jsArg, token.lineno)
-    this._validateExpression(parsed, token.lineno)
+    disAllowExpressions('if', parsed, this.bannedExpressions)
+
+    /**
+     * Include template. Since the partials can be a runtime value, we cannot inline
+     * the content right now and have to defer to runtime to get the value of
+     * the partial and then process it
+     */
     buffer.writeLine(`template.renderInline(${parser.statementToString(parsed)})(template, ctx)`)
   }
 }

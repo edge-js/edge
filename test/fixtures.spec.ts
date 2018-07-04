@@ -10,6 +10,7 @@
 import * as test from 'japa'
 import { readdirSync, readFileSync, statSync } from 'fs'
 import { join } from 'path'
+import { Context } from '../src/Context'
 import { Template } from '../src/Template'
 import { Compiler } from '../src/Compiler'
 import { Loader } from '../src/Loader'
@@ -21,7 +22,15 @@ const loader = new Loader()
 loader.mount('default', basePath)
 const compiler = new Compiler(loader, tags)
 
-test.group('Fixtures', () => {
+test.group('Fixtures', (group) => {
+  group.before(() => {
+    Object.keys(tags).forEach((tag) => {
+      if (tags[tag].run) {
+        tags[tag].run(Context)
+      }
+    })
+  })
+
   const dirs = readdirSync(basePath).filter((file) => {
     return statSync(join(basePath, file)).isDirectory()
   })

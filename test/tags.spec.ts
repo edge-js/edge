@@ -33,7 +33,7 @@ We are writing a bad if condition
     try {
       compiler.compile('foo')
     } catch (error) {
-      assert.equal(error.loc.line, 4)
+      assert.equal(error.line, 4)
     }
   })
 
@@ -50,7 +50,7 @@ We are writing a bad if condition
     try {
       compiler.compile('foo')
     } catch (error) {
-      assert.equal(error.loc.line, 4)
+      assert.equal(error.line, 4)
       assert.equal(error.message, 'E_UNALLOWED_EXPRESSION: SequenceExpression is not allowed for if tag\n> More details: https://err.sh/poppinss/edge-errors/E_UNALLOWED_EXPRESSION')
     }
   })
@@ -83,7 +83,7 @@ test.group('Include', () => {
     try {
       compiler.compile('foo')
     } catch (error) {
-      assert.equal(error.loc.line, 2)
+      assert.equal(error.line, 2)
     }
   })
 
@@ -96,7 +96,7 @@ test.group('Include', () => {
     try {
       compiler.compile('foo')
     } catch (error) {
-      assert.equal(error.loc.line, 1)
+      assert.equal(error.line, 1)
       assert.equal(error.message, 'E_UNALLOWED_EXPRESSION: SequenceExpression is not allowed for if tag\n> More details: https://err.sh/poppinss/edge-errors/E_UNALLOWED_EXPRESSION')
     }
   })

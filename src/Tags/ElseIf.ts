@@ -10,9 +10,9 @@
 import { Parser } from 'edge-parser'
 import { EdgeBuffer } from 'edge-parser/build/src/EdgeBuffer'
 import { IBlockNode } from 'edge-lexer/build/src/Contracts'
-import { BaseTag } from './BaseTag'
+import { disAllowExpressions } from '../utils'
 
-export class ElseIfTag extends BaseTag {
+export class ElseIfTag {
   public static block = false
   public static seekable = true
   public static selfclosed = false
@@ -24,10 +24,21 @@ export class ElseIfTag extends BaseTag {
    */
   public compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
     const parsed = parser.parseJsArg(token.properties.jsArg, token.lineno)
-    this._validateExpression(parsed, token.lineno)
+    disAllowExpressions('elseif', parsed, this.bannedExpressions)
 
+    /**
+     * Dedent block
+     */
     buffer.dedent()
+
+    /**
+     * Start else block
+     */
     buffer.writeStatement(`} else if(${parser.statementToString(parsed)}) {`)
+
+    /**
+     * Indent block again
+     */
     buffer.indent()
   }
 }
