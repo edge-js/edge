@@ -4,8 +4,8 @@
     if(ctx.resolve('age') > 18) {
       out += '    Hello '
       out += `${ctx.escape(ctx.resolve('username'))}`
+      out += '\n'
     }
   }
-  out += '\n'
   return out
 })(template, ctx)
