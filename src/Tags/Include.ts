@@ -30,7 +30,7 @@ export class IncludeTag {
    */
   public compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
     const parsed = parser.parseJsArg(token.properties.jsArg, token.lineno)
-    disAllowExpressions('if', parsed, this.bannedExpressions)
+    disAllowExpressions('include', parsed, this.bannedExpressions)
 
     /**
      * Include template. Since the partials can be a runtime value, we cannot inline
