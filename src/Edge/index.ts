@@ -7,32 +7,126 @@
 * file that was distributed with this source code.
 */
 
+import { merge } from 'lodash'
 import * as Tags from '../Tags'
 import { Compiler } from '../Compiler'
 import { Loader } from '../Loader'
+import { ILoaderConstructor, ILoader, ITag } from '../Contracts'
 import { Template } from '../Template'
-import { Presenter } from '../Presenter'
+
+let loader: null | ILoader = null
+let compiler: null | Compiler = null
+
+type configOptions = {
+  Loader?: ILoaderConstructor,
+  cache?: boolean,
+}
 
 export class Edge {
-  private loader: Loader
-  private compiler: Compiler
+  private static globals: any = {}
+  private locals: any = {}
 
-  constructor () {
-    this.loader = new Loader()
-    this.compiler = new Compiler(this.loader, Tags)
+  /**
+   * Returns the instance of loader in use. Make use of
+   * `configure` method to define a custom loader
+   */
+  public static get loader (): ILoader {
+    return loader!
   }
 
-  public mount (diskName: string, dirPath: string) {
-    this.loader.mount(diskName, dirPath)
+  /**
+   * Returns the instance of compiler in use.
+   */
+  public static get compiler (): Compiler {
+    return compiler!
   }
 
-  public unmount (diskName: string) {
-    this.loader.unmount(diskName)
+  /**
+   * Configure edge
+   */
+  public static configure (options: configOptions) {
+    loader = new (options.Loader || Loader)()
+    compiler = new Compiler(loader!, Tags, options.cache || true)
   }
 
-  public render (template: string, state: any): string {
-    const templateInstance = new Template(this.compiler, {})
-    const presenter = new Presenter(state)
-    return templateInstance.render(template, presenter)
+  public static mount (diskName: string, dirPath: string): void
+  public static mount (dirPath: string): void
+
+  /**
+   * Mount a disk to the loader
+   */
+  public static mount (diskName: string, dirPath?: string): void {
+    if (!this.compiler) {
+      this.configure({})
+    }
+
+    if (!dirPath) {
+      dirPath = diskName
+      diskName = 'default'
+    }
+
+    loader!.mount(diskName, dirPath)
+  }
+
+  /**
+   * Un Mount a disk from the loader
+   */
+  public static unmount (diskName: string): void {
+    loader!.unmount(diskName)
+  }
+
+  /**
+   * Add a new global to the edge globals
+   */
+  public static global (name: string, value: any): void {
+    this.globals[name] = value
+  }
+
+  /**
+   * Add a new tag to the tags list
+   */
+  public static tag (Tag: ITag) {
+    Tags[Tag.tagName] = Tag
+  }
+
+  /**
+   * Shorthand to `new Edge().render()` or `Edge.newUp().render()`
+   */
+  public static render (templatePath: string, state: any): string {
+    return new this().render(templatePath, state)
+  }
+
+  /**
+   * Returns a new instance of edge. The instance
+   * can be used to define locals.
+   */
+  public static newUp (): Edge {
+    return new this()
+  }
+
+  /**
+   * Clears registered globals, loader and
+   * the compiler instance
+   */
+  public static clear () {
+    this.globals = {}
+    loader = null
+    compiler = null
+  }
+
+  /**
+   * Render template with state
+   */
+  public render (templatePath: string, state: any): string {
+    const template = new Template(compiler!, (this.constructor as typeof Edge).globals, this.locals)
+    return template.render(templatePath, state)
+  }
+
+  /**
+   * Share locals with the current view context
+   */
+  public share (data: any): this {
+    merge(this.locals, data)
+    return this
   }
 }

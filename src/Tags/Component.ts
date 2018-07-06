@@ -16,6 +16,7 @@ export class ComponentTag {
   public static block = true
   public static seekable = true
   public static selfclosed = true
+  public static tagName = 'component'
 
   /**
    * Compiles else block node to Javascript else statement

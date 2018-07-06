@@ -16,6 +16,7 @@ export class ElseIfTag {
   public static block = false
   public static seekable = true
   public static selfclosed = false
+  public static tagName = 'elseif'
 
   protected bannedExpressions = ['SequenceExpression']
 

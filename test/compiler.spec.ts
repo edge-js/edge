@@ -20,6 +20,7 @@ const tags = {
     public static block = true
     public static seekable = true
     public static selfclosed = false
+    public static tagName = 'if'
   },
 }
 const viewsDir = join(__dirname, 'views')
@@ -35,7 +36,7 @@ test.group('Compiler', (group) => {
     loader.mount('default', viewsDir)
 
     const compiler = new Compiler(loader, tags)
-    assert.equal(compiler.compile('foo'), `(function (template, ctx) {
+    assert.equal(compiler.compile('foo', false).template, `(function (template, ctx) {
   let out = ''
   out += 'Hello '
   out += \`\${ctx.escape(ctx.resolve('username'))}\`
@@ -50,7 +51,18 @@ test.group('Compiler', (group) => {
     loader.mount('default', viewsDir)
 
     const compiler = new Compiler(loader, tags)
-    assert.equal(compiler.compile('foo'), compiler['cache'].get(join(viewsDir, 'foo.edge')))
+    assert.equal(compiler.compile('foo', false), compiler['cacheStore'].get(join(viewsDir, 'foo.edge')))
+  })
+
+  test('save template and presenter both to the cache', async (assert) => {
+    await fs.outputFile(join(viewsDir, 'foo.edge'), 'Hello {{ username }}')
+    await fs.outputFile(join(viewsDir, 'foo.presenter.js'), 'module.exports = class Foo {}')
+    const loader = new Loader()
+    loader.mount('default', viewsDir)
+
+    const compiler = new Compiler(loader, tags)
+    compiler.compile('foo', false)
+    assert.equal(compiler['cacheStore'].get(join(viewsDir, 'foo.edge'))!.Presenter!['name'], 'Foo')
   })
 
   test('do not cache when disabled', async (assert) => {
@@ -59,7 +71,31 @@ test.group('Compiler', (group) => {
     loader.mount('default', viewsDir)
 
     const compiler = new Compiler(loader, tags, false)
-    compiler.compile('foo')
-    assert.isUndefined(compiler['cache'].get(join(viewsDir, 'foo.edge')))
+    compiler.compile('foo', false)
+    assert.isUndefined(compiler['cacheStore'].get(join(viewsDir, 'foo.edge')))
+  })
+
+  test('compile template as inline', async (assert) => {
+    await fs.outputFile(join(viewsDir, 'foo.edge'), 'Hello {{ username }}')
+    const loader = new Loader()
+    loader.mount('default', viewsDir)
+
+    const compiler = new Compiler(loader, tags)
+    assert.equal(compiler.compile('foo', true).template, `
+  let out = ''
+  out += 'Hello '
+  out += \`\${ctx.escape(ctx.resolve('username'))}\`
+  out += '${EOL === '\n' ? '\\n' : '\\r\\n'}'
+  return out`)
+  })
+
+  test('do not load presenter when inline', async (assert) => {
+    await fs.outputFile(join(viewsDir, 'foo.edge'), 'Hello {{ username }}')
+    await fs.outputFile(join(viewsDir, 'foo.presenter.js'), '')
+    const loader = new Loader()
+    loader.mount('default', viewsDir)
+
+    const compiler = new Compiler(loader, tags)
+    assert.isUndefined(compiler.compile('foo', true).Presenter)
   })
 })

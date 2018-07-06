@@ -16,6 +16,7 @@ export class IncludeTag {
   public static block = false
   public static seekable = true
   public static selfclosed = false
+  public static tagName = 'include'
 
   /**
    * Expressions which are not allowed by the sequence

@@ -9,6 +9,8 @@
 
 import { join, isAbsolute, extname } from 'path'
 import { readFileSync } from 'fs'
+import * as requireUncached from 'require-uncached'
+
 import { ILoader, IPresenterConstructor } from '../Contracts'
 import { extractDiskAndTemplateName } from '../utils'
 
@@ -65,11 +67,11 @@ export class Loader implements ILoader {
   /**
    * Resolves a template from disk and returns it as a string
    */
-  public resolve (templatePath: string): { template: string, Presenter?: IPresenterConstructor } {
+  public resolve (templatePath: string, withPresenter: boolean): { template: string, Presenter?: IPresenterConstructor } {
     try {
       templatePath = isAbsolute(templatePath) ? templatePath : this.makePath(templatePath)
       const template = readFileSync(templatePath, 'utf-8')
-      const Presenter = this._getPresenterForTemplate(templatePath)
+      const Presenter = withPresenter ? this._getPresenterForTemplate(templatePath) : undefined
       return { template, Presenter }
     } catch (error) {
       if (error.code === 'ENOENT') {
@@ -86,9 +88,11 @@ export class Loader implements ILoader {
    */
   private _getPresenterForTemplate (templatePath: string): IPresenterConstructor | undefined {
     try {
-      return require(templatePath.replace(extname(templatePath), '.presenter.js'))
+      return requireUncached(templatePath.replace(extname(templatePath), '.presenter.js'))
     } catch (error) {
-      // ignore if presenter missing
+      if (['ENOENT', 'MODULE_NOT_FOUND'].indexOf(error.code) === -1) {
+        throw error
+      }
     }
   }
 }

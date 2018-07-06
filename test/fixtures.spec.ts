@@ -40,7 +40,7 @@ test.group('Fixtures', (group) => {
     test(dir, (assert) => {
       const template = new Template(compiler, {}, {})
 
-      const compiled = compiler.compile(`${dir}/index.edge`)
+      const { template: compiled } = compiler.compile(`${dir}/index.edge`, false)
       const expectedCompiled = readFileSync(join(dirBasePath, 'compiled.js'), 'utf-8')
       assert.stringEqual(compiled, expectedCompiled)
 

@@ -15,6 +15,7 @@ export class ElseTag {
   public static block = false
   public static seekable = false
   public static selfclosed = false
+  public static tagName = 'else'
 
   /**
    * Compiles else block node to Javascript else statement

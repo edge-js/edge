@@ -16,6 +16,7 @@ export class IfTag {
   public static block = true
   public static seekable = true
   public static selfclosed = false
+  public static tagName = 'if'
 
   /**
    * Expressions which are not allowed by the sequence

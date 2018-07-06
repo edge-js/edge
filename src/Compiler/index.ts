@@ -7,44 +7,63 @@
 * file that was distributed with this source code.
 */
 
-import { ILoader } from '../Contracts'
 import { Parser } from 'edge-parser'
-import { ITag } from 'edge-parser/build/src/Contracts'
+import { ILoader, IPresenterConstructor, ICompiler, Tags } from '../Contracts'
 
-export class Compiler {
-  private cache: Map<string, string> = new Map()
+export class Compiler implements ICompiler {
+  private cacheStore: Map<string, { template: string, Presenter?: IPresenterConstructor }> = new Map()
 
-  constructor (private loader: ILoader, private tags: { [key: string]: ITag }, private shouldCache: boolean = true) {
+  constructor (private loader: ILoader, private tags: Tags, public cache: boolean = true) {
   }
 
   /**
-   * Compiles a given template by loading it using the loader
+   * Returns the template and the presenter class from the
+   * cache. If caching is disabled, then it will
+   * return undefined
    */
-  private _compile (templatePath: string, inline: boolean = false): string {
-    const template = this.loader.resolve(templatePath)
-    const parser = new Parser(this.tags)
-    return parser.parseTemplate(template, !inline)
+  private _getFromCache (templatePath: string): undefined | { template: string, Presenter?: IPresenterConstructor } {
+    if (!this.cache) {
+      return
+    }
+
+    return this.cacheStore.get(templatePath)
+  }
+
+  /**
+   * Set's the template path and the payload to the cache. If
+   * cache is disable, then it will never be set.
+   */
+  private _setInCache (templatePath: string, payload: { template: string, Presenter?: IPresenterConstructor }) {
+    if (!this.cache) {
+      return
+    }
+
+    this.cacheStore.set(templatePath, payload)
   }
 
   /**
    * Compiles a given template by loading it using the loader, also caches
    * the template and returns from the cache (if exists).
+   *
+   * When the `inline` property is set to true, the Presenter resolution
+   * will not happen, since Presenters are tied to the top level
+   * views and not partials.
    */
-  public compile (templatePath: string, inline: boolean = false): string {
+  public compile (templatePath: string, inline: boolean): { template: string, Presenter?: IPresenterConstructor } {
     templatePath = this.loader.makePath(templatePath)
 
-    /**
-     * Compile right away when cache is disabled
-     */
-    if (!this.shouldCache) {
-      return this._compile(templatePath, inline)
+    const cachedResponse = this._getFromCache(templatePath)
+    if (cachedResponse) {
+      return cachedResponse
     }
 
-    /* istanbul ignore else */
-    if (!this.cache.get(templatePath)) {
-      this.cache.set(templatePath, this._compile(templatePath, inline))
+    const { template, Presenter } = this.loader.resolve(templatePath, !inline)
+    const payload = {
+      template: new Parser(this.tags).parseTemplate(template, !inline),
+      Presenter,
     }
 
-    return this.cache.get(templatePath)!
+    this._setInCache(templatePath, payload)
+    return payload
   }
 }

@@ -11,7 +11,6 @@ import { merge } from 'lodash'
 import { Context } from '../Context'
 import { Compiler } from '../Compiler'
 import { Presenter as BasePresenter } from '../Presenter'
-import { IPresenterConstructor } from '../Contracts'
 
 export class Template {
   private sharedState: any
@@ -20,21 +19,32 @@ export class Template {
     this.sharedState = merge({}, globals, locals)
   }
 
+  /**
+   * Render the inline template (aka partials)
+   */
   public renderInline (templatePath: string): Function {
-    return new Function('template', 'ctx', this.compiler.compile(templatePath, true))
+    return new Function('template', 'ctx', this.compiler.compile(templatePath, true).template)
   }
 
+  /**
+   * Renders an inline template, but with isolated state. This is
+   * mainly used by the components
+   */
   public renderWithState (template: string, state: object, slots: object): string {
-    const compiledTemplate = this.compiler.compile(template)
-    const presenter = new BasePresenter(Object.assign(state, { $slots: slots }))
+    const { template: compiledTemplate, Presenter } = this.compiler.compile(template, false)
+    const presenter = new (Presenter || BasePresenter)(Object.assign(state, { $slots: slots }))
     const ctx = new Context(presenter, this.sharedState)
 
     return new Function('template', 'ctx', `return ${compiledTemplate}`)(this, ctx)
   }
 
-  public render (template: string, state: object, Presenter: IPresenterConstructor = BasePresenter): string {
-    const compiledTemplate = this.compiler.compile(template)
-    const presenter = new Presenter(state)
+  /**
+   * Renders the template by using the template path and the state. The presenter
+   * is resolved by the loader itself
+   */
+  public render (template: string, state: object): string {
+    const { template: compiledTemplate, Presenter } = this.compiler.compile(template, false)
+    const presenter = new (Presenter || BasePresenter)(state)
     const ctx = new Context(presenter, this.sharedState)
 
     return new Function('template', 'ctx', `return ${compiledTemplate}`)(this, ctx)

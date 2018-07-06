@@ -15,6 +15,7 @@ export class SlotTag {
   public static block = true
   public static seekable = true
   public static selfclosed = false
+  public static tagName = 'slot'
 
   /**
    * Compiles else block node to Javascript else statement

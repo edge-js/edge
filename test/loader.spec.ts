@@ -36,7 +36,7 @@ test.group('Loader', (group) => {
 
   test('throw exception when resolve path from undefined location', (assert) => {
     const loader = new Loader()
-    const fn = () => loader.resolve('foo')
+    const fn = () => loader.resolve('foo', true)
     assert.throw(fn, 'Attempting to resolve foo.edge template for unmounted default location')
   })
 
@@ -46,7 +46,7 @@ test.group('Loader', (group) => {
     const loader = new Loader()
     loader.mount('default', viewsDir)
 
-    const { template } = loader.resolve('foo')
+    const { template } = loader.resolve('foo', false)
     assert.equal(template.trim(), 'Hello world')
   })
 
@@ -54,7 +54,7 @@ test.group('Loader', (group) => {
     const loader = new Loader()
     loader.mount('default', viewsDir)
 
-    const fn = () => loader.resolve('foo')
+    const fn = () => loader.resolve('foo', false)
     assert.throw(fn, `Cannot resolve ${join(viewsDir, 'foo.edge')}. Make sure file exists.`)
   })
 
@@ -64,7 +64,7 @@ test.group('Loader', (group) => {
     const loader = new Loader()
     loader.mount('default', viewsDir)
 
-    const { template } = loader.resolve('foo.edge')
+    const { template } = loader.resolve('foo.edge', false)
     assert.equal(template.trim(), 'Hello world')
   })
 
@@ -74,7 +74,7 @@ test.group('Loader', (group) => {
     const loader = new Loader()
     loader.mount('users', viewsDir)
 
-    const { template } = loader.resolve('users::foo.edge')
+    const { template } = loader.resolve('users::foo.edge', false)
     assert.equal(template.trim(), 'Hello world')
   })
 
@@ -118,8 +118,21 @@ test.group('Loader', (group) => {
     const loader = new Loader()
     loader.mount('users', viewsDir)
 
-    const { template, Presenter } = loader.resolve('users::foo.edge')
+    const { template, Presenter } = loader.resolve('users::foo.edge', true)
     assert.equal(template.trim(), 'Hello world')
     assert.equal(Presenter!['name'], 'Foo')
+  })
+
+  test('do not resolve presenter if withPresenter is set to false', async (assert) => {
+    await fs.outputFile(join(viewsDir, 'foo.edge'), 'Hello world')
+    await fs.outputFile(join(viewsDir, 'foo.presenter.js'), `module.exports = class Foo {
+    }`)
+
+    const loader = new Loader()
+    loader.mount('users', viewsDir)
+
+    const { template, Presenter } = loader.resolve('users::foo.edge', false)
+    assert.equal(template.trim(), 'Hello world')
+    assert.isUndefined(Presenter)
   })
 })

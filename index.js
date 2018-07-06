@@ -9,6 +9,6 @@
 */
 
 const { Edge } = require('./build/src/Edge')
-const view = new Edge()
 
-module.exports = view
+module.exports = Edge
+module.exports.utils = require('./build/src/utils')

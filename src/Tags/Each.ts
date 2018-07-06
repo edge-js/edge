@@ -17,6 +17,7 @@ export class EachTag {
   public static block = true
   public static seekable = true
   public static selfclosed = true
+  public static tagName = 'each'
 
   private allowedExpressions = ['BinaryExpression']
 

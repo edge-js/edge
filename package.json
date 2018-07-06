@@ -66,6 +66,7 @@
     "edge-parser": "^1.0.9",
     "he": "^1.1.1",
     "macroable": "^1.0.0",
-    "node-exceptions": "^3.0.0"
+    "node-exceptions": "^3.0.0",
+    "require-uncached": "^1.0.3"
   }
 }

@@ -31,7 +31,7 @@ We are writing a bad if condition
 
     await fs.outputFile(join(viewsDir, 'foo.edge'), templateContent)
     try {
-      compiler.compile('foo')
+      compiler.compile('foo', true)
     } catch (error) {
       assert.equal(error.line, 4)
     }
@@ -48,7 +48,7 @@ We are writing a bad if condition
 
     await fs.outputFile(join(viewsDir, 'foo.edge'), templateContent)
     try {
-      compiler.compile('foo')
+      compiler.compile('foo', true)
     } catch (error) {
       assert.equal(error.line, 4)
       assert.equal(error.message, 'E_UNALLOWED_EXPRESSION: SequenceExpression is not allowed for if tag\n> More details: https://err.sh/poppinss/edge-errors/E_UNALLOWED_EXPRESSION')
@@ -65,7 +65,7 @@ We are writing a bad if condition
 
     await fs.outputFile(join(viewsDir, 'foo.edge'), templateContent)
     try {
-      compiler.compile('foo')
+      compiler.compile('foo', true)
     } catch (error) {
       assert.equal(error.message, 'Unclosed tag if')
     }
@@ -81,7 +81,7 @@ test.group('Include', () => {
 
     await fs.outputFile(join(viewsDir, 'foo.edge'), templateContent)
     try {
-      compiler.compile('foo')
+      compiler.compile('foo', true)
     } catch (error) {
       assert.equal(error.line, 2)
     }
@@ -94,7 +94,7 @@ test.group('Include', () => {
 
     await fs.outputFile(join(viewsDir, 'foo.edge'), templateContent)
     try {
-      compiler.compile('foo')
+      compiler.compile('foo', true)
     } catch (error) {
       assert.equal(error.line, 1)
       assert.equal(error.message, 'E_UNALLOWED_EXPRESSION: SequenceExpression is not allowed for if tag\n> More details: https://err.sh/poppinss/edge-errors/E_UNALLOWED_EXPRESSION')

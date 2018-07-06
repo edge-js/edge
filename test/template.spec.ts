@@ -12,7 +12,6 @@ import * as fs from 'fs-extra'
 
 import { join } from 'path'
 
-import { Presenter } from '../src/Presenter'
 import { Template } from '../src/Template'
 import { Compiler } from '../src/Compiler'
 import { Loader } from '../src/Loader'
@@ -23,6 +22,7 @@ const tags = {
     public static block = true
     public static seekable = true
     public static selfclosed = false
+    public static tagName = 'if'
   },
 }
 
@@ -43,26 +43,33 @@ test.group('Template', (group) => {
 
   test('run template with custom presenter', async (assert) => {
     await fs.outputFile(join(viewsDir, 'foo.edge'), 'Hello {{ getUsername() }}')
-    class MyPresenter extends Presenter {
-      public getUsername () {
+    await fs.outputFile(join(viewsDir, 'foo.presenter.js'), `module.exports = class MyPresenter {
+      constructor (state) {
+        this.state = state
+      }
+
+      getUsername () {
         return this.state.username.toUpperCase()
       }
-    }
+    }`)
 
-    const output = new Template(compiler, {}, {}).render('foo', { username: 'virk' }, MyPresenter)
+    const output = new Template(compiler, {}, {}).render('foo', { username: 'virk' })
     assert.equal(output.trim(), 'Hello VIRK')
   })
 
   test('run template with shared state', async (assert) => {
     await fs.outputFile(join(viewsDir, 'foo.edge'), 'Hello {{ getUsername() }}')
+    await fs.outputFile(join(viewsDir, 'foo.presenter.js'), `module.exports = class MyPresenter {
+      constructor (state) {
+        this.state = state
+      }
 
-    class MyPresenter extends Presenter {
-      public getUsername (ctx) {
+      getUsername (ctx) {
         return ctx.resolve('username').toUpperCase()
       }
-    }
+    }`)
 
-    const output = new Template(compiler, { username: 'virk' }, {}).render('foo', {}, MyPresenter)
+    const output = new Template(compiler, { username: 'virk' }, {}).render('foo', {})
     assert.equal(output.trim(), 'Hello VIRK')
   })
 })
