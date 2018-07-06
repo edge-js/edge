@@ -2,7 +2,7 @@ export interface ILoader {
   mounted: object
   mount (diskName: string, dirPath: string): void
   unmount (diskName: string): void
-  resolve (templatePath: string): string
+  resolve (templatePath: string): { template: string, Presenter?: IPresenterConstructor }
   makePath (templatePath: string): string
 }
 

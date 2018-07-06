@@ -46,7 +46,7 @@ test.group('Loader', (group) => {
     const loader = new Loader()
     loader.mount('default', viewsDir)
 
-    const template = loader.resolve('foo')
+    const { template } = loader.resolve('foo')
     assert.equal(template.trim(), 'Hello world')
   })
 
@@ -64,7 +64,7 @@ test.group('Loader', (group) => {
     const loader = new Loader()
     loader.mount('default', viewsDir)
 
-    const template = loader.resolve('foo.edge')
+    const { template } = loader.resolve('foo.edge')
     assert.equal(template.trim(), 'Hello world')
   })
 
@@ -74,7 +74,7 @@ test.group('Loader', (group) => {
     const loader = new Loader()
     loader.mount('users', viewsDir)
 
-    const template = loader.resolve('users::foo.edge')
+    const { template } = loader.resolve('users::foo.edge')
     assert.equal(template.trim(), 'Hello world')
   })
 
@@ -108,5 +108,18 @@ test.group('Loader', (group) => {
 
     const templatePath = loader.makePath('users::partial/edge.edge')
     assert.equal(templatePath, join(viewsDir, 'partial/edge.edge'))
+  })
+
+  test('resolve presenter if exists', async (assert) => {
+    await fs.outputFile(join(viewsDir, 'foo.edge'), 'Hello world')
+    await fs.outputFile(join(viewsDir, 'foo.presenter.js'), `module.exports = class Foo {
+    }`)
+
+    const loader = new Loader()
+    loader.mount('users', viewsDir)
+
+    const { template, Presenter } = loader.resolve('users::foo.edge')
+    assert.equal(template.trim(), 'Hello world')
+    assert.equal(Presenter!['name'], 'Foo')
   })
 })

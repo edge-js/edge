@@ -7,9 +7,9 @@
 * file that was distributed with this source code.
 */
 
-import { join, isAbsolute } from 'path'
+import { join, isAbsolute, extname } from 'path'
 import { readFileSync } from 'fs'
-import { ILoader } from '../Contracts'
+import { ILoader, IPresenterConstructor } from '../Contracts'
 import { extractDiskAndTemplateName } from '../utils'
 
 export class Loader implements ILoader {
@@ -65,16 +65,30 @@ export class Loader implements ILoader {
   /**
    * Resolves a template from disk and returns it as a string
    */
-  public resolve (templatePath: string): string {
+  public resolve (templatePath: string): { template: string, Presenter?: IPresenterConstructor } {
     try {
       templatePath = isAbsolute(templatePath) ? templatePath : this.makePath(templatePath)
-      return readFileSync(templatePath, 'utf-8')
+      const template = readFileSync(templatePath, 'utf-8')
+      const Presenter = this._getPresenterForTemplate(templatePath)
+      return { template, Presenter }
     } catch (error) {
       if (error.code === 'ENOENT') {
         throw new Error(`Cannot resolve ${templatePath}. Make sure file exists.`)
       } else {
         throw error
       }
+    }
+  }
+
+  /**
+   * Attempts to conventionally load the presenter for a given template
+   * using the same basePath.
+   */
+  private _getPresenterForTemplate (templatePath: string): IPresenterConstructor | undefined {
+    try {
+      return require(templatePath.replace(extname(templatePath), '.presenter.js'))
+    } catch (error) {
+      // ignore if presenter missing
     }
   }
 }
