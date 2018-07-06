@@ -37,9 +37,7 @@ test.group('Template', (group) => {
 
   test('run template using the given state', async (assert) => {
     await fs.outputFile(join(viewsDir, 'foo.edge'), 'Hello {{ username }}')
-
-    const presenter = new Presenter({ username: 'virk' })
-    const output = new Template(compiler, {}).render('foo', presenter)
+    const output = new Template(compiler, {}, {}).render('foo', { username: 'virk' })
     assert.equal(output.trim(), 'Hello virk')
   })
 
@@ -51,8 +49,7 @@ test.group('Template', (group) => {
       }
     }
 
-    const presenter = new MyPresenter({ username: 'virk' })
-    const output = new Template(compiler, {}).render('foo', presenter)
+    const output = new Template(compiler, {}, {}).render('foo', { username: 'virk' }, MyPresenter)
     assert.equal(output.trim(), 'Hello VIRK')
   })
 
@@ -65,8 +62,7 @@ test.group('Template', (group) => {
       }
     }
 
-    const presenter = new MyPresenter({})
-    const output = new Template(compiler, { username: 'virk' }).render('foo', presenter)
+    const output = new Template(compiler, { username: 'virk' }, {}).render('foo', {}, MyPresenter)
     assert.equal(output.trim(), 'Hello VIRK')
   })
 })

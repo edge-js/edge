@@ -10,6 +10,7 @@
 import { join, isAbsolute } from 'path'
 import { readFileSync } from 'fs'
 import { ILoader } from '../Contracts'
+import { extractDiskAndTemplateName } from '../utils'
 
 export class Loader implements ILoader {
   private mountedDirs: Map<string, string> = new Map()
@@ -40,25 +41,33 @@ export class Loader implements ILoader {
     this.mountedDirs.delete(diskName)
   }
 
-  public makePath (templatePath: string, diskName: string): string {
+  /**
+   * Makes the path to the template file. This method will extract the
+   * disk name from the templatePath as follows.
+   *
+   * @example
+   * ```
+   * loader.makePath('index')
+   * loader.makePath('users::index')
+   * ```
+   */
+  public makePath (templatePath: string): string {
+    const [diskName, template] = extractDiskAndTemplateName(templatePath)
+
     const mountedDir = this.mountedDirs.get(diskName)
     if (!mountedDir) {
-      throw new Error(`Attempting to resolve ${templatePath} template for unmounted ${diskName} location`)
+      throw new Error(`Attempting to resolve ${template} template for unmounted ${diskName} location`)
     }
 
-    /**
-     * Normalize template name by adding extension
-     */
-    templatePath = `${templatePath.replace(/\.edge$/, '')}.edge`
-    return join(mountedDir, templatePath)
+    return join(mountedDir, template)
   }
 
   /**
    * Resolves a template from disk and returns it as a string
    */
-  public resolve (templatePath: string, diskName: string): string {
+  public resolve (templatePath: string): string {
     try {
-      templatePath = isAbsolute(templatePath) ? templatePath : this.makePath(templatePath, diskName)
+      templatePath = isAbsolute(templatePath) ? templatePath : this.makePath(templatePath)
       return readFileSync(templatePath, 'utf-8')
     } catch (error) {
       if (error.code === 'ENOENT') {

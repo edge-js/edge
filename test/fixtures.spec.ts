@@ -14,7 +14,6 @@ import { Context } from '../src/Context'
 import { Template } from '../src/Template'
 import { Compiler } from '../src/Compiler'
 import { Loader } from '../src/Loader'
-import { Presenter } from '../src/Presenter'
 import * as tags from '../src/Tags'
 
 const basePath = join(__dirname, '../fixtures')
@@ -39,15 +38,14 @@ test.group('Fixtures', (group) => {
     const dirBasePath = join(basePath, dir)
 
     test(dir, (assert) => {
-      const template = new Template(compiler, {})
-      const presenter = new Presenter(JSON.parse(readFileSync(join(dirBasePath, 'index.json'), 'utf-8')))
+      const template = new Template(compiler, {}, {})
 
       const compiled = compiler.compile(`${dir}/index.edge`)
       const expectedCompiled = readFileSync(join(dirBasePath, 'compiled.js'), 'utf-8')
       assert.stringEqual(compiled, expectedCompiled)
 
       const out = readFileSync(join(dirBasePath, 'index.txt'), 'utf-8')
-      const output = template.render(`${dir}/index.edge`, presenter)
+      const output = template.render(`${dir}/index.edge`, JSON.parse(readFileSync(join(dirBasePath, 'index.json'), 'utf-8')))
       assert.equal(output.trim(), out)
     })
   })

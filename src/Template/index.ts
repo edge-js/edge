@@ -7,29 +7,36 @@
 * file that was distributed with this source code.
 */
 
+import { merge } from 'lodash'
 import { Context } from '../Context'
-import { IPresenter } from '../Contracts'
 import { Compiler } from '../Compiler'
-import { Presenter } from '../Presenter'
+import { Presenter as BasePresenter } from '../Presenter'
+import { IPresenterConstructor } from '../Contracts'
 
 export class Template {
-  constructor (private compiler: Compiler, private sharedState: any) {
+  private sharedState: any
+
+  constructor (private compiler: Compiler, globals: any, locals: any) {
+    this.sharedState = merge({}, globals, locals)
   }
 
-  public renderInline (template: string): Function {
-    return new Function('template', 'ctx', this.compiler.compile(template, 'default', true))
+  public renderInline (templatePath: string): Function {
+    return new Function('template', 'ctx', this.compiler.compile(templatePath, true))
   }
 
   public renderWithState (template: string, state: object, slots: object): string {
     const compiledTemplate = this.compiler.compile(template)
-    const presenter = new Presenter(Object.assign(state, { $slots: slots }))
+    const presenter = new BasePresenter(Object.assign(state, { $slots: slots }))
     const ctx = new Context(presenter, this.sharedState)
+
     return new Function('template', 'ctx', `return ${compiledTemplate}`)(this, ctx)
   }
 
-  public render (template: string, presenter: IPresenter, diskName?: string): string {
-    const compiledTemplate = this.compiler.compile(template, diskName)
+  public render (template: string, state: object, Presenter: IPresenterConstructor = BasePresenter): string {
+    const compiledTemplate = this.compiler.compile(template)
+    const presenter = new Presenter(state)
     const ctx = new Context(presenter, this.sharedState)
+
     return new Function('template', 'ctx', `return ${compiledTemplate}`)(this, ctx)
   }
 }

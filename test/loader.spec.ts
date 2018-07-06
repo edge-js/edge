@@ -36,8 +36,8 @@ test.group('Loader', (group) => {
 
   test('throw exception when resolve path from undefined location', (assert) => {
     const loader = new Loader()
-    const fn = () => loader.resolve('foo', 'default')
-    assert.throw(fn, 'Attempting to resolve foo template for unmounted default location')
+    const fn = () => loader.resolve('foo')
+    assert.throw(fn, 'Attempting to resolve foo.edge template for unmounted default location')
   })
 
   test('resolve template for given location', async (assert) => {
@@ -46,7 +46,7 @@ test.group('Loader', (group) => {
     const loader = new Loader()
     loader.mount('default', viewsDir)
 
-    const template = loader.resolve('foo', 'default')
+    const template = loader.resolve('foo')
     assert.equal(template.trim(), 'Hello world')
   })
 
@@ -54,7 +54,7 @@ test.group('Loader', (group) => {
     const loader = new Loader()
     loader.mount('default', viewsDir)
 
-    const fn = () => loader.resolve('foo', 'default')
+    const fn = () => loader.resolve('foo')
     assert.throw(fn, `Cannot resolve ${join(viewsDir, 'foo.edge')}. Make sure file exists.`)
   })
 
@@ -64,7 +64,49 @@ test.group('Loader', (group) => {
     const loader = new Loader()
     loader.mount('default', viewsDir)
 
-    const template = loader.resolve('foo.edge', 'default')
+    const template = loader.resolve('foo.edge')
     assert.equal(template.trim(), 'Hello world')
+  })
+
+  test('resolve template from a named mount path', async (assert) => {
+    await fs.outputFile(join(viewsDir, 'foo.edge'), 'Hello world')
+
+    const loader = new Loader()
+    loader.mount('users', viewsDir)
+
+    const template = loader.resolve('users::foo.edge')
+    assert.equal(template.trim(), 'Hello world')
+  })
+
+  test('do not replace edge within the template path name', async (assert) => {
+    const loader = new Loader()
+    loader.mount('default', viewsDir)
+
+    const templatePath = loader.makePath('edge-partial.edge')
+    assert.equal(templatePath, join(viewsDir, 'edge-partial.edge'))
+  })
+
+  test('do not replace edge within the template path seperator', async (assert) => {
+    const loader = new Loader()
+    loader.mount('default', viewsDir)
+
+    const templatePath = loader.makePath('partial/edge')
+    assert.equal(templatePath, join(viewsDir, 'partial/edge.edge'))
+  })
+
+  test('do not replace edge within the template path seperator with extension', async (assert) => {
+    const loader = new Loader()
+    loader.mount('default', viewsDir)
+
+    const templatePath = loader.makePath('partial/edge.edge')
+    assert.equal(templatePath, join(viewsDir, 'partial/edge.edge'))
+  })
+
+  test('do not replace edge within the template path seperator with named disk', async (assert) => {
+    const loader = new Loader()
+    loader.mount('users', viewsDir)
+
+    const templatePath = loader.makePath('users::partial/edge.edge')
+    assert.equal(templatePath, join(viewsDir, 'partial/edge.edge'))
   })
 })

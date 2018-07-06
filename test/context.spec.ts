@@ -17,18 +17,18 @@ test.group('Context', (group) => {
   })
 
   test('resolve data from presenter state', (assert) => {
-    const globals = {}
+    const sharedState = {}
     const data = {
       username: 'virk',
     }
     const presenter = new Presenter(data)
-    const context = new Context(presenter, globals)
+    const context = new Context(presenter, sharedState)
 
     assert.equal(context.resolve('username'), 'virk')
   })
 
   test('give preference to presenter values over data', (assert) => {
-    const globals = {}
+    const sharedState = {}
     const data = {
       username: 'virk',
     }
@@ -40,19 +40,19 @@ test.group('Context', (group) => {
     }
 
     const presenter = new MyPresenter(data)
-    const context = new Context(presenter, globals)
+    const context = new Context(presenter, sharedState)
 
     assert.equal(context.resolve('fullName'), 'Aman virk')
   })
 
   test('give preferences to frames over presenter', (assert) => {
-    const globals = {}
+    const sharedState = {}
     const data = {
       username: 'virk',
     }
 
     const presenter = new Presenter(data)
-    const context = new Context(presenter, globals)
+    const context = new Context(presenter, sharedState)
 
     context.newFrame()
     context.setOnFrame('username', 'foo')
@@ -61,13 +61,13 @@ test.group('Context', (group) => {
   })
 
   test('allow nested frames', (assert) => {
-    const globals = {}
+    const sharedState = {}
     const data = {
       username: 'virk',
     }
 
     const presenter = new Presenter(data)
-    const context = new Context(presenter, globals)
+    const context = new Context(presenter, sharedState)
 
     context.newFrame()
     context.setOnFrame('user', { username: 'virk' })
@@ -84,8 +84,8 @@ test.group('Context', (group) => {
     assert.isUndefined(context.resolve('user'))
   })
 
-  test('return value from globals when doesnt exists anywhere', (assert) => {
-    const globals = {
+  test('return value from sharedState when doesnt exists anywhere', (assert) => {
+    const sharedState = {
       url: '/',
     }
 
@@ -94,7 +94,7 @@ test.group('Context', (group) => {
     }
 
     const presenter = new Presenter(data)
-    const context = new Context(presenter, globals)
+    const context = new Context(presenter, sharedState)
 
     context.newFrame()
     context.setOnFrame('user', { username: 'virk' })
@@ -102,7 +102,7 @@ test.group('Context', (group) => {
   })
 
   test('escape HTML', (assert) => {
-    const globals = {
+    const sharedState = {
     }
 
     const data = {
@@ -110,19 +110,33 @@ test.group('Context', (group) => {
     }
 
     const presenter = new Presenter(data)
-    const context = new Context(presenter, globals)
+    const context = new Context(presenter, sharedState)
 
     assert.equal(context.escape('<h2> Hello world </h2>'), '&lt;h2&gt; Hello world &lt;/h2&gt;')
   })
 
-  test('give priority to the recent frame', (assert) => {
-    const globals = {}
+  test('do not escape values, which are not string', (assert) => {
+    const sharedState = {
+    }
+
     const data = {
       username: 'virk',
     }
 
     const presenter = new Presenter(data)
-    const context = new Context(presenter, globals)
+    const context = new Context(presenter, sharedState)
+
+    assert.equal(context.escape(22), 22)
+  })
+
+  test('give priority to the recent frame', (assert) => {
+    const sharedState = {}
+    const data = {
+      username: 'virk',
+    }
+
+    const presenter = new Presenter(data)
+    const context = new Context(presenter, sharedState)
 
     context.newFrame()
     context.setOnFrame('user', { username: 'virk' })
@@ -139,7 +153,7 @@ test.group('Context', (group) => {
   })
 
   test('add macros to context', (assert) => {
-    const globals = {}
+    const sharedState = {}
     const data = {
       username: 'virk',
     }
@@ -149,13 +163,13 @@ test.group('Context', (group) => {
     })
 
     const presenter = new Presenter(data)
-    const context = new Context(presenter, globals)
+    const context = new Context(presenter, sharedState)
 
     assert.equal(context['upper']('virk'), 'VIRK')
   })
 
   test('add getters to context', (assert) => {
-    const globals = {}
+    const sharedState = {}
     const data = {
       username: 'virk',
     }
@@ -165,13 +179,13 @@ test.group('Context', (group) => {
     })
 
     const presenter = new Presenter(data)
-    const context = new Context(presenter, globals)
+    const context = new Context(presenter, sharedState)
 
     assert.equal(context['username'], 'virk')
   })
 
   test('functions should retain access to this', (assert) => {
-    const globals = {}
+    const sharedState = {}
     const data = {
       username: 'virk',
     }
@@ -183,13 +197,13 @@ test.group('Context', (group) => {
     }
 
     const presenter = new MyPresenter(data)
-    const context = new Context(presenter, globals)
+    const context = new Context(presenter, sharedState)
 
     assert.equal(context.resolve('getUsername')(), 'virk')
   })
 
   test('functions should retain access to state via this', (assert) => {
-    const globals = {}
+    const sharedState = {}
     const data = {
       username: 'virk',
       getUsername () {
@@ -201,13 +215,13 @@ test.group('Context', (group) => {
     }
 
     const presenter = new MyPresenter(data)
-    const context = new Context(presenter, globals)
+    const context = new Context(presenter, sharedState)
 
     assert.equal(context.resolve('getUsername')(), 'virk')
   })
 
-  test('global functions should retain access to state via this', (assert) => {
-    const globals = {
+  test('shared state functions should retain access to state via this', (assert) => {
+    const sharedState = {
       username: 'virk',
       getUsername () {
         return this.username
@@ -221,8 +235,87 @@ test.group('Context', (group) => {
     }
 
     const presenter = new MyPresenter(data)
-    const context = new Context(presenter, globals)
+    const context = new Context(presenter, sharedState)
 
     assert.equal(context.resolve('getUsername')(), 'virk')
+  })
+
+  test('mutate values inside presenter state', (assert) => {
+    const sharedState = {
+    }
+
+    const data = {
+    }
+
+    class MyPresenter extends Presenter {
+    }
+
+    const presenter = new MyPresenter(data)
+    const context = new Context(presenter, sharedState)
+
+    context.set('username', 'virk')
+    assert.equal(context.presenter.state.username, 'virk')
+  })
+
+  test('mutate nested values inside the presenter state', (assert) => {
+    const sharedState = {
+    }
+
+    const data = {
+    }
+
+    class MyPresenter extends Presenter {
+    }
+
+    const presenter = new MyPresenter(data)
+    const context = new Context(presenter, sharedState)
+
+    context.set('user.username', 'virk')
+    assert.equal(context.presenter.state.user.username, 'virk')
+  })
+
+  test('mutate value inside frame when inside frame context', (assert) => {
+    const sharedState = {
+    }
+
+    const data = {
+    }
+
+    class MyPresenter extends Presenter {
+    }
+
+    const presenter = new MyPresenter(data)
+    const context = new Context(presenter, sharedState)
+
+    context.newFrame()
+    context.set('username', 'virk')
+    assert.equal(context['frames'][0].username, 'virk')
+  })
+
+  test('mutate value to the latest frame', (assert) => {
+    const sharedState = {
+    }
+
+    const data = {
+    }
+
+    class MyPresenter extends Presenter {
+    }
+
+    const presenter = new MyPresenter(data)
+    const context = new Context(presenter, sharedState)
+
+    context.newFrame()
+    context.set('username', 'virk')
+    context.newFrame()
+    context.set('username', 'nikk')
+
+    assert.equal(context.resolve('username'), 'nikk')
+    context.removeFrame()
+
+    assert.equal(context.resolve('username'), 'virk')
+    context.removeFrame()
+
+    assert.isUndefined(context.resolve('username'))
   })
 })

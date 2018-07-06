@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Template engine",
   "main": "index.js",
+  "typings": "./build/src/Edge/index.d.ts",
   "scripts": {
     "pretest": "npm run lint",
     "test": "nyc japa",

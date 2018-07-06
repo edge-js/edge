@@ -9,6 +9,7 @@
 
 import { UnAllowedExpressionException } from '../Exceptions'
 import { Parser } from 'edge-parser'
+import { sep } from 'path'
 
 export class ObjectifyString {
   private obj: string = ''
@@ -60,6 +61,7 @@ export function disAllowExpressions (tag: string, expression: any, expressions: 
  *
  * This helper is heavily used by component tag.
  *
+ * ```
  * ('foo.bar', title = 'hello')
  * // returns ['foo.bar', { title: 'hello' }]
  *
@@ -68,6 +70,7 @@ export function disAllowExpressions (tag: string, expression: any, expressions: 
  *
  * (user.alert, { title: 'hello' })
  * // return [ctx.resolve('user').alert, { title: 'hello' }]
+ * ```
  */
 export function parseSequenceExpression (expression: any, parser: Parser): [string, string] {
   if (expression.type === 'SequenceExpression') {
@@ -93,4 +96,30 @@ export function parseSequenceExpression (expression: any, parser: Parser): [stri
 
   const name = parser.statementToString(expression)
   return [name, `{}`]
+}
+
+/**
+ * Extracts the disk name and the template name from the template
+ * path expression.
+ *
+ * If `diskName` is missing, it will be set to `default`.
+ *
+ * ```
+ * extractDiskAndTemplateName('users::list')
+ * // returns ['users', 'list.edge']
+ *
+ * extractDiskAndTemplateName('list')
+ * // returns ['default', 'list.edge']
+ * ```
+ */
+export function extractDiskAndTemplateName (templatePath: string): [string, string] {
+  let [disk, ...rest] = templatePath.split('::')
+
+  if (!rest.length) {
+    rest = [disk]
+    disk = 'default'
+  }
+
+  const [template, ext] = rest.join('::').split('.edge')
+  return [disk, `${template.replace(/\./, sep)}.${ext || 'edge'}`]
 }

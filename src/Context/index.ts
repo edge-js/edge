@@ -8,8 +8,9 @@
 */
 
 import * as Macroable from 'macroable'
-import { IPresenter } from '../Contracts'
 import * as he from 'he'
+import { set } from 'lodash'
+import { IPresenter } from '../Contracts'
 
 export class Context extends Macroable {
   /* tslint:disable-next-line */
@@ -45,7 +46,7 @@ export class Context extends Macroable {
    * frame and then resolve the value up until the first
    * frame.
    */
-  private frames: object[] = []
+  private frames: any[] = []
 
   constructor (public presenter: IPresenter, public sharedState: object) {
     super()
@@ -68,7 +69,7 @@ export class Context extends Macroable {
       throw new Error('Make sure to call {newFrame} before calling {setOnFrame}')
     }
 
-    recentFrame[key] = value
+    set(recentFrame, key, value)
   }
 
   /**
@@ -81,8 +82,8 @@ export class Context extends Macroable {
   /**
    * Escapes the value to be HTML safe
    */
-  public escape (input: string): string {
-    return he.escape(input)
+  public escape <T> (input: T): T {
+    return typeof (input) === 'string' ? he.escape(input) : input
   }
 
   /**
@@ -127,6 +128,20 @@ export class Context extends Macroable {
      */
     value = this.sharedState[key]
     return typeof (value) === 'function' ? value.bind(this.sharedState) : value
+  }
+
+  /**
+   * Set/update value inside the context. If this method
+   * is called inside the `frame` scope, then value is
+   * created on the frame and not the presenter state
+   */
+  public set (key: string, value: any): void {
+    if (this.frames.length) {
+      this.setOnFrame(key, value)
+      return
+    }
+
+    set(this.presenter.state, key, value)
   }
 
   /**

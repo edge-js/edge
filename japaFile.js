@@ -6,6 +6,7 @@ const os = require('os')
 
 Assertion.use((chai, utils) => {
   chai.assert.stringEqual = function (val, exp, msg) {
+    console.log(val)
     new chai.Assertion(val.split(/\r\n|\n/), msg).to.deep.equal(exp.split(/\r\n|\n/))
   }
 })
