@@ -1,1 +1,5 @@
-<h2> {{ title }} </h2>
+@if($slots.title)
+  {{{ $slots.title({ title }) }}}
+@else
+  <h2> {{ title }} </h2>
+@endif

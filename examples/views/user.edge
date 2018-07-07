@@ -1,2 +1,7 @@
-@!component('alert', title = 'Hey')
+@debugger
+@component('alert', title = 'Hey')
+  @slot('title', props)
+    @include('partial')
+  @endslot
+@endcomponent
 @!component('alert', title = 'Wow')

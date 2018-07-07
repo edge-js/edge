@@ -2,6 +2,9 @@
 
 const edge = require('..')
 const { join } = require('path')
+const http = require('http')
 
-edge.mount(join(__dirname, './views'))
-console.log(edge.render('user', { title: 'Hello' }))
+http.createServer((req, res) => {
+  edge.mount(join(__dirname, './views'))
+  res.end(edge.render('user', { title: 'Hello' }))
+}).listen(3000)
