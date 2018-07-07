@@ -136,12 +136,19 @@ export class Context extends Macroable {
    * created on the frame and not the presenter state
    */
   public set (key: string, value: any): void {
-    if (this.frames.length) {
-      this.setOnFrame(key, value)
+    /**
+     * If value already exists on the presenter
+     * state, then mutate it first
+     */
+    if (this.presenter.state[key] !== undefined || !this.frames.length) {
+      set(this.presenter.state, key, value)
       return
     }
 
-    set(this.presenter.state, key, value)
+    /**
+     * If frames exists, then set it on frame
+     */
+    this.setOnFrame(key, value)
   }
 
   /**

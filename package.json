@@ -30,7 +30,7 @@
   "homepage": "https://github.com/poppinss/edge#readme",
   "devDependencies": {
     "@adonisjs/mrm-preset": "^1.0.7",
-    "@types/node": "^10.5.1",
+    "@types/node": "^10.5.2",
     "commitizen": "^2.10.1",
     "coveralls": "^3.0.2",
     "cz-conventional-changelog": "^2.1.0",
@@ -39,7 +39,7 @@
     "fs-extra": "^6.0.1",
     "japa": "^1.0.6",
     "japa-cli": "^1.0.1",
-    "mrm": "^1.1.1",
+    "mrm": "^1.2.0",
     "nyc": "^12.0.2",
     "pkg-ok": "^2.2.0",
     "ts-node": "^7.0.0",
@@ -63,7 +63,7 @@
   },
   "dependencies": {
     "deep-extend": "^0.6.0",
-    "edge-parser": "^1.0.9",
+    "edge-parser": "^1.0.11",
     "he": "^1.1.1",
     "macroable": "^1.0.0",
     "node-exceptions": "^3.0.0",

@@ -10,4 +10,4 @@ Assertion.use((chai, utils) => {
   }
 })
 
-cli.run('test/edge.spec.ts')
+cli.run('test/*.spec.ts')

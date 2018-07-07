@@ -56,6 +56,7 @@ export class Edge {
    * Mount a disk to the loader
    */
   public static mount (diskName: string, dirPath?: string): void {
+    /* istanbul ignore else  */
     if (!this.compiler) {
       this.configure({})
     }

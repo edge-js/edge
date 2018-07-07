@@ -240,6 +240,25 @@ test.group('Context', (group) => {
     assert.equal(context.resolve('getUsername')(), 'virk')
   })
 
+  test('frame functions should retain access to context', (assert) => {
+    const sharedState = {}
+    const data = {
+      username: 'virk',
+    }
+
+    class MyPresenter extends Presenter {
+    }
+
+    const presenter = new MyPresenter(data)
+    const context = new Context(presenter, sharedState)
+    context.newFrame()
+    context.setOnFrame('getUsername', function () {
+      return this.resolve('username')
+    })
+    assert.equal(context.resolve('getUsername')(), 'virk')
+    context.removeFrame()
+  })
+
   test('mutate values inside presenter state', (assert) => {
     const sharedState = {
     }
@@ -317,5 +336,43 @@ test.group('Context', (group) => {
     context.removeFrame()
 
     assert.isUndefined(context.resolve('username'))
+  })
+
+  test('mutate value inside to the presenter state when value already exists there', (assert) => {
+    const sharedState = {
+    }
+
+    const data = {
+      username: 'virk',
+    }
+
+    class MyPresenter extends Presenter {
+    }
+
+    const presenter = new MyPresenter(data)
+    const context = new Context(presenter, sharedState)
+
+    context.newFrame()
+    context.set('username', 'nikk')
+    assert.deepEqual(context['frames'][0], {})
+    assert.equal(context['presenter'].state.username, 'nikk')
+  })
+
+  test('raise error when trying to call setOnFrame without calling newFrame', (assert) => {
+    const sharedState = {
+    }
+
+    const data = {
+      username: 'virk',
+    }
+
+    class MyPresenter extends Presenter {
+    }
+
+    const presenter = new MyPresenter(data)
+    const context = new Context(presenter, sharedState)
+
+    const fn = () => context.setOnFrame('username', 'nikk')
+    assert.throw(fn, 'Make sure to call {newFrame} before calling {setOnFrame}')
   })
 })

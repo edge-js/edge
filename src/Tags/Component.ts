@@ -33,13 +33,20 @@ export class ComponentTag {
         name = (child as IBlockNode).properties.jsArg
       }
 
-      slots[name] = slots[name] || new EdgeBuffer()
+      if (!slots[name]) {
+        slots[name] = new EdgeBuffer()
+        slots[name].writeStatement('ctx.newFrame()')
+        slots[name].writeStatement(`ctx.setOnFrame('props', props)`)
+      }
+
       parser.processToken(child, slots[name])
     })
 
     const obj = new ObjectifyString()
     Object.keys(slots).forEach((slot) => {
-      obj.add(slot, slots[slot].flush())
+      slots[slot].writeStatement('ctx.removeFrame()')
+      slots[slot].wrap('return function (props) {', '}')
+      obj.add(slot, slots[slot].flush(true))
     })
 
     buffer.writeLine(`template.renderWithState(${name}, ${props}, ${obj.flush()})`)
