@@ -1,15 +1,15 @@
 (function (template, ctx) {
   let out = ''
   out += template.renderWithState('components-slot-props/alert', {}, { 'title': (function (template, ctx) {
-return function (props) {
-  let out = ''
+return function (user) {
+  let slot_0 = ''
   ctx.newFrame()
-  ctx.setOnFrame('props', props)
-  out += '    Hello '
-  out += `${ctx.escape(ctx.resolve('props').username)}`
-  out += '\n'
+  ctx.setOnFrame('user', user)
+  slot_0 += '    Hello '
+  slot_0 += `${ctx.escape(ctx.resolve('user').username)}`
+  slot_0 += '\n'
   ctx.removeFrame()
-  return out
+  return slot_0
 }
 })(template, ctx) })
   return out

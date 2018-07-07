@@ -1,5 +1,5 @@
 @component('components-slot-props/alert')
-  @slot('title')
-    Hello {{ props.username }}
+  @slot('title', user)
+    Hello {{ user.username }}
   @endslot
 @endcomponent

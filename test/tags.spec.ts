@@ -19,7 +19,11 @@ const loader = new Loader()
 loader.mount('default', viewsDir)
 const compiler = new Compiler(loader, tags)
 
-test.group('If tag', () => {
+test.group('If tag', (group) => {
+  group.afterEach(async () => {
+    await fs.remove(viewsDir)
+  })
+
   test('raise errors on correct line with if tag', async (assert) => {
     assert.plan(1)
 
@@ -72,7 +76,11 @@ We are writing a bad if condition
   })
 })
 
-test.group('Include', () => {
+test.group('Include', (group) => {
+  group.afterEach(async () => {
+    await fs.remove(viewsDir)
+  })
+
   test('raise errors on correct line with include tag', async (assert) => {
     assert.plan(1)
 
@@ -98,6 +106,91 @@ test.group('Include', () => {
     } catch (error) {
       assert.equal(error.line, 1)
       assert.equal(error.message, 'E_UNALLOWED_EXPRESSION: SequenceExpression is not allowed for if tag\n> More details: https://err.sh/poppinss/edge-errors/E_UNALLOWED_EXPRESSION')
+    }
+  })
+})
+
+test.group('Component', (group) => {
+  group.afterEach(async () => {
+    await fs.remove(viewsDir)
+  })
+
+   test('raise errors when slot name is not defined as a literal', async (assert) => {
+    assert.plan(2)
+
+    const templateContent = `@component('bar')
+
+    @slot(hello)
+    @endslot
+
+    @endcomponent`
+
+    await fs.outputFile(join(viewsDir, 'foo.edge'), templateContent)
+    try {
+      compiler.compile('foo', true)
+    } catch (error) {
+      assert.equal(error.line, 3)
+      assert.equal(error.message, 'E_UNALLOWED_EXPRESSION: Identifier is not allowed for slot tag\n> More details: https://err.sh/poppinss/edge-errors/E_UNALLOWED_EXPRESSION')
+    }
+  })
+
+   test('raise errors when slot has more than 2 arguments', async (assert) => {
+    assert.plan(2)
+
+    const templateContent = `@component('bar')
+
+    @slot('hello', props, propsAgain)
+    @endslot
+
+    @endcomponent`
+
+    await fs.outputFile(join(viewsDir, 'foo.edge'), templateContent)
+    try {
+      compiler.compile('foo', true)
+    } catch (error) {
+      assert.equal(error.line, 3)
+      assert.equal(error.message, 'E_MAX_ARGUMENTS: Maximum of 2 arguments are allowed for slot tag\n> More details: https://err.sh/poppinss/edge-errors/E_MAX_ARGUMENTS')
+    }
+  })
+
+   test('raise errors when slot first argument is not a literal', async (assert) => {
+    assert.plan(2)
+
+    const templateContent = `@component('bar')
+
+    @slot(hello, props)
+    @endslot
+
+    @endcomponent`
+
+    await fs.outputFile(join(viewsDir, 'foo.edge'), templateContent)
+    try {
+      compiler.compile('foo', true)
+    } catch (error) {
+      assert.equal(error.line, 3)
+      assert.equal(error.message, 'E_UNALLOWED_EXPRESSION: Identifier is not allowed for slot tag\n> More details: https://err.sh/poppinss/edge-errors/E_UNALLOWED_EXPRESSION')
+    }
+  })
+
+   test('raise errors when slot 2nd argument is not an identifier', async (assert) => {
+    assert.plan(2)
+
+    const templateContent = `@component('bar')
+
+    @slot(
+      'hello',
+      'props'
+    )
+    @endslot
+
+    @endcomponent`
+
+    await fs.outputFile(join(viewsDir, 'foo.edge'), templateContent)
+    try {
+      compiler.compile('foo', true)
+    } catch (error) {
+      assert.equal(error.line, 5)
+      assert.equal(error.message, 'E_UNALLOWED_EXPRESSION: Literal is not allowed for slot tag\n> More details: https://err.sh/poppinss/edge-errors/E_UNALLOWED_EXPRESSION')
     }
   })
 })

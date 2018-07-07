@@ -26,3 +26,13 @@ export class UnAllowedExpressionException extends BaseException {
     throw error
   }
 }
+
+export class TooManyArgumentsException extends BaseException {
+  public static invoke (tag: string, limit: number, line: number) {
+    const message = `Maximum of ${limit} arguments are allowed for ${tag} tag`
+    const error = new this(message, 500, 'E_MAX_ARGUMENTS', errShLink)
+    error.line = line
+
+    throw error
+  }
+}
