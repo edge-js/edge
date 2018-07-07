@@ -7,7 +7,7 @@
 * file that was distributed with this source code.
 */
 
-import { UnAllowedExpressionException } from '../Exceptions'
+import { UnAllowedExpressionException, TooManyArgumentsException } from '../Exceptions'
 import { Parser } from 'edge-parser'
 import { sep } from 'path'
 
@@ -38,7 +38,7 @@ export class ObjectifyString {
  */
 export function allowExpressions (tag: string, expression: any, expressions: string[]) {
   if (expressions.indexOf(expression.type) === -1) {
-    throw UnAllowedExpressionException.invoke('if', expression.type, expression.loc.start.line)
+    throw UnAllowedExpressionException.invoke(tag, expression.type, expression.loc.start.line)
   }
 }
 
@@ -48,7 +48,7 @@ export function allowExpressions (tag: string, expression: any, expressions: str
  */
 export function disAllowExpressions (tag: string, expression: any, expressions: string[]) {
   if (expressions.indexOf(expression.type) > -1) {
-    throw UnAllowedExpressionException.invoke('if', expression.type, expression.loc.start.line)
+    throw UnAllowedExpressionException.invoke(tag, expression.type, expression.loc.start.line)
   }
 }
 
@@ -96,6 +96,54 @@ export function parseSequenceExpression (expression: any, parser: Parser): [stri
 
   const name = parser.statementToString(expression)
   return [name, `{}`]
+}
+
+/**
+ * Parses an expression as a key/value pair and has following constraints.
+ *
+ * 1. Top level expression must be `Literal` or `SequenceExpression`.
+ * 2. If `SequenceExpression`, then first child of expression must be `Literal`
+ * 3. Length of `SequenceExpression` childs must be 2 at max.
+ *
+ * Optionally, you can enforce (3rd argument) that value in the key/value pair must be one
+ * of the given expressions.
+ *
+ * ```
+ * // Following are the valid expressions
+ * ('foo', 'bar')
+ * ('foo')
+ * ('foo', bar)
+ * ('foo', { bar: true })
+ * ```
+ */
+export function parseAsKeyValuePair (expression: any, parser: Parser, valueExpressions: string[]): [string, null | string] {
+    allowExpressions('slot', expression, ['Literal', 'SequenceExpression'])
+
+    /**
+     * Return without counting props, value is a literal
+     */
+    if (expression.type === 'Literal') {
+      return [expression.raw, null]
+    }
+
+    /**
+     * Raise error when more than 2 arguments are passed to the slot
+     * expression
+     */
+    if (expression.expressions.length > 2) {
+      throw TooManyArgumentsException.invoke('slot', 2, expression.loc.start.line)
+    }
+
+    allowExpressions('slot', expression.expressions[0], ['Literal'])
+
+    if (valueExpressions.length) {
+      allowExpressions('slot', expression.expressions[1], valueExpressions)
+    }
+
+    /**
+     * Finally return the name and prop name for the slot
+     */
+    return [expression.expressions[0].raw, parser.statementToString(expression.expressions[1])]
 }
 
 /**

@@ -105,7 +105,7 @@ test.group('Include', (group) => {
       compiler.compile('foo', true)
     } catch (error) {
       assert.equal(error.line, 1)
-      assert.equal(error.message, 'E_UNALLOWED_EXPRESSION: SequenceExpression is not allowed for if tag\n> More details: https://err.sh/poppinss/edge-errors/E_UNALLOWED_EXPRESSION')
+      assert.equal(error.message, 'E_UNALLOWED_EXPRESSION: SequenceExpression is not allowed for include tag\n> More details: https://err.sh/poppinss/edge-errors/E_UNALLOWED_EXPRESSION')
     }
   })
 })
@@ -189,7 +189,7 @@ test.group('Component', (group) => {
     try {
       compiler.compile('foo', true)
     } catch (error) {
-      assert.equal(error.line, 5)
+      assert.equal(error.line, 3)
       assert.equal(error.message, 'E_UNALLOWED_EXPRESSION: Literal is not allowed for slot tag\n> More details: https://err.sh/poppinss/edge-errors/E_UNALLOWED_EXPRESSION')
     }
   })
