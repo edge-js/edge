@@ -69,7 +69,7 @@ export class EachTag {
     /**
      * Write the loop statement to the template
      */
-    buffer.writeStatement(`ctx.loop(${rhs}, function (${value}, ${key}) {`)
+    buffer.writeStatement(`ctx.loop(${rhs}, function (${value}, loop) {`)
 
     /**
      * Indent block
@@ -87,7 +87,8 @@ export class EachTag {
      * Set key and value pair on the context
      */
     buffer.writeStatement(`ctx.setOnFrame('${value}', ${value})`)
-    buffer.writeStatement(`ctx.setOnFrame('${key}', ${key})`)
+    buffer.writeStatement(`ctx.setOnFrame('$loop', loop)`)
+    buffer.writeStatement(`ctx.setOnFrame('${key}', loop.key)`)
 
     /**
      * Process all kids
@@ -124,8 +125,23 @@ export class EachTag {
 
   public static run (Context) {
     Context.macro('loop', function loop (source, callback) {
+      let index = 0
+      const total = lodashSize(source)
+
       each(source, (value, key) => {
-        callback(value, key)
+        const isEven = (index + 1) % 2 === 0
+
+        callback(value, {
+          key: key,
+          index: index,
+          first: index === 0,
+          isOdd: !isEven,
+          isEven: isEven,
+          last: (index + 1 === total),
+          total: total,
+        })
+
+        index++
       })
     })
 
