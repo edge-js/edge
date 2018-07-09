@@ -20,7 +20,7 @@ export class ElseTag {
   /**
    * Compiles else block node to Javascript else statement
    */
-  public compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
+  public static compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
     buffer.dedent()
     buffer.writeStatement(`} else {`)
     buffer.indent()

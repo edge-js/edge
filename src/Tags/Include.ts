@@ -24,12 +24,12 @@ export class IncludeTag {
    *
    * @type {Array}
    */
-  protected bannedExpressions = ['SequenceExpression']
+  private static bannedExpressions = ['SequenceExpression']
 
   /**
    * Compiles else block node to Javascript else statement
    */
-  public compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
+  public static compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
     const parsed = parser.parseJsArg(token.properties.jsArg, token.lineno)
     disAllowExpressions('include', parsed, this.bannedExpressions)
 

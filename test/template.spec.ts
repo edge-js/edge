@@ -16,15 +16,22 @@ import { Template } from '../src/Template'
 import { Compiler } from '../src/Compiler'
 import { Loader } from '../src/Loader'
 
-const viewsDir = join(__dirname, 'views')
+import { Parser } from 'edge-parser'
+import { EdgeBuffer } from 'edge-parser/build/src/EdgeBuffer'
+import { IBlockNode } from 'edge-lexer/build/src/Contracts'
+
 const tags = {
   if: class If {
     public static block = true
     public static seekable = true
     public static selfclosed = false
     public static tagName = 'if'
+    public static compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode): void {
+    }
   },
 }
+
+const viewsDir = join(__dirname, 'views')
 
 const loader = new Loader()
 loader.mount('default', viewsDir)

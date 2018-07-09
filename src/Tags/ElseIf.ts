@@ -18,12 +18,12 @@ export class ElseIfTag {
   public static selfclosed = false
   public static tagName = 'elseif'
 
-  protected bannedExpressions = ['SequenceExpression']
+  private static bannedExpressions = ['SequenceExpression']
 
   /**
    * Compiles the else if block node to a Javascript if statement
    */
-  public compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
+  public static compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
     const parsed = parser.parseJsArg(token.properties.jsArg, token.lineno)
     disAllowExpressions('elseif', parsed, this.bannedExpressions)
 

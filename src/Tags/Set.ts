@@ -21,7 +21,7 @@ export class SetTag {
   /**
    * Compiles else block node to Javascript else statement
    */
-  public compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
+  public static compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
     const ast = parser.parseJsArg(token.properties.jsArg, token.lineno)
     const [key, value] = parseAsKeyValuePair(ast, parser, [])
     buffer.writeStatement(`ctx.set(${key}, ${value})`)

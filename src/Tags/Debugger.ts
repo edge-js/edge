@@ -20,7 +20,7 @@ export class DebuggerTag {
   /**
    * Compiles else block node to Javascript else statement
    */
-  public compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
+  public static compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
     buffer.writeStatement('debugger;')
   }
 }

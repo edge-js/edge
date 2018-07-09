@@ -10,8 +10,8 @@
 import { Parser } from 'edge-parser'
 import { EdgeBuffer } from 'edge-parser/build/src/EdgeBuffer'
 import { IBlockNode } from 'edge-lexer/build/src/Contracts'
-import { allowExpressions } from '../utils'
 import { each, size as lodashSize } from 'lodash'
+import { allowExpressions } from '../utils'
 
 export class EachTag {
   public static block = true
@@ -19,12 +19,12 @@ export class EachTag {
   public static selfclosed = true
   public static tagName = 'each'
 
-  private allowedExpressions = ['BinaryExpression']
+  private static allowedExpressions = ['BinaryExpression']
 
   /**
    * Returns the value and key names for the foreach loop
    */
-  private _getLoopKeyValue (expression: any): [string, string] {
+  private static _getLoopKeyValue (expression: any): [string, string] {
     allowExpressions('each', expression, ['SequenceExpression', 'Identifier'])
 
     if (expression.type === 'SequenceExpression') {
@@ -34,14 +34,17 @@ export class EachTag {
     return [expression.name, 'key']
   }
 
-  private _getLoopSource (expression: any, parser: Parser): string {
+  /**
+   * Returns the source on which we should execute the loop
+   */
+  private static _getLoopSource (expression: any, parser: Parser): string {
     return parser.statementToString(parser.parseStatement(expression))
   }
 
   /**
    * Compiles else block node to Javascript else statement
    */
-  public compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
+  public static compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
     const ast = parser.generateAst(token.properties.jsArg, token.lineno)
     const expression = ast.body[0].expression
 
@@ -123,6 +126,9 @@ export class EachTag {
     }
   }
 
+  /**
+   * Add methods to the runtime context for running the loop
+   */
   public static run (Context) {
     Context.macro('loop', function loop (source, callback) {
       let index = 0

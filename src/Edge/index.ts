@@ -13,9 +13,16 @@ import { Compiler } from '../Compiler'
 import { Loader } from '../Loader'
 import { ILoaderConstructor, ILoader, ITag } from '../Contracts'
 import { Template } from '../Template'
+import { Context } from '../Context'
 
 let loader: null | ILoader = null
 let compiler: null | Compiler = null
+
+Object.keys(Tags).forEach((tag) => {
+  if (typeof (Tags[tag].run) === 'function') {
+    Tags[tag].run(Context)
+  }
+})
 
 type configOptions = {
   Loader?: ILoaderConstructor,
@@ -46,7 +53,7 @@ export class Edge {
    */
   public static configure (options: configOptions) {
     loader = new (options.Loader || Loader)()
-    compiler = new Compiler(loader!, Tags, options.cache || true)
+    compiler = new Compiler(loader!, Tags, !!options.cache)
   }
 
   public static mount (diskName: string, dirPath: string): void

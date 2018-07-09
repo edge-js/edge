@@ -24,12 +24,12 @@ export class UnlessTag {
    *
    * @type {Array}
    */
-  protected bannedExpressions = ['SequenceExpression']
+  private static bannedExpressions = ['SequenceExpression']
 
   /**
    * Compiles the if block node to a Javascript if statement
    */
-  public compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
+  public static compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
     const parsed = parser.parseJsArg(token.properties.jsArg, token.lineno)
     disAllowExpressions('unless', parsed, this.bannedExpressions)
 

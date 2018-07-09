@@ -21,13 +21,17 @@ export class ComponentTag {
   /**
    * Compiles else block node to Javascript else statement
    */
-  public compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
+  public static compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
     const parsed = parser.generateAst(token.properties.jsArg, token.lineno)
     const expression = parser.parseStatement(parsed.body[0])
     let [name, props] = parseSequenceExpression(expression, parser)
 
     const slots = {}
 
+    /**
+     * Loop over all the children and set them as part of slots. If no slot
+     * is defined, then it will be main slot.
+     */
     token.children.forEach((child, index) => {
       let slotName: string = `'main'`
       let slotProps: string | null = null
@@ -39,6 +43,9 @@ export class ComponentTag {
         slotProps = parsed[1]
       }
 
+      /**
+       * Create a new slot with buffer to process the childs
+       */
       if (!slots[slotName]) {
         slots[slotName] = { buffer: new EdgeBuffer(`slot_${index}`), props: slotProps }
 

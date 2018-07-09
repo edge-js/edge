@@ -20,7 +20,7 @@ export class SlotTag {
   /**
    * Compiles else block node to Javascript else statement
    */
-  public compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
+  public static compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
     token.children.forEach((child, index) => {
       parser.processToken(child, buffer)
     })

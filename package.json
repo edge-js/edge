@@ -62,9 +62,9 @@
     ]
   },
   "dependencies": {
-    "deep-extend": "^0.6.0",
-    "edge-parser": "^1.0.11",
+    "edge-parser": "^1.0.12",
     "he": "^1.1.1",
+    "lodash": "^4.17.10",
     "macroable": "^1.0.0",
     "node-exceptions": "^3.0.0",
     "require-uncached": "^1.0.3"
