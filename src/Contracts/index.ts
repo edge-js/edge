@@ -10,6 +10,7 @@ export interface ILoader {
   unmount (diskName: string): void
   resolve (templatePath: string, withResolver: boolean): { template: string, Presenter?: IPresenterConstructor }
   makePath (templatePath: string): string
+  register (templatePath: string, contents: { template: string, Presenter?: IPresenterConstructor }): void
 }
 
 export interface ICompiler {

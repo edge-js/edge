@@ -88,4 +88,23 @@ test.group('Template', (group) => {
     assert.equal(tmpl.render('foo', {}).trim(), 'Hello nikk')
     assert.equal(Edge.render('foo', {}).trim(), 'Hello guest')
   })
+
+  test('register a template as a string', async (assert) => {
+    Edge.mount(viewsDir)
+    Edge.register('foo', {
+      template: `Hello {{ username }}`,
+    })
+
+    assert.equal(Edge.render('foo', { username: 'virk' }).trim(), 'Hello virk')
+  })
+
+  test('register a template on a named disk', async (assert) => {
+    Edge.mount('hello', viewsDir)
+
+    Edge.register('hello::foo', {
+      template: `Hello {{ username }}`,
+    })
+
+    assert.equal(Edge.render('hello::foo', { username: 'virk' }).trim(), 'Hello virk')
+  })
 })

@@ -16,6 +16,7 @@ import { extractDiskAndTemplateName } from '../utils'
 
 export class Loader implements ILoader {
   private mountedDirs: Map<string, string> = new Map()
+  private preRegistered: Map<string, { template: string, Presenter?: IPresenterConstructor }> = new Map()
 
   /**
    * Returns an object of mounted directories with their public
@@ -70,6 +71,15 @@ export class Loader implements ILoader {
   public resolve (templatePath: string, withPresenter: boolean): { template: string, Presenter?: IPresenterConstructor } {
     try {
       templatePath = isAbsolute(templatePath) ? templatePath : this.makePath(templatePath)
+
+      /**
+       * Return from pre-registered one's if exists
+       */
+      if (this.preRegistered.get(templatePath)) {
+        const contents = this.preRegistered.get(templatePath)
+        return withPresenter ? contents! : { template: contents!.template }
+      }
+
       const template = readFileSync(templatePath, 'utf-8')
       const Presenter = withPresenter ? this._getPresenterForTemplate(templatePath) : undefined
       return { template, Presenter }
@@ -80,6 +90,19 @@ export class Loader implements ILoader {
         throw error
       }
     }
+  }
+
+  /**
+   * Register a template as a string
+   */
+  public register (templatePath: string, contents: { template: string, Presenter?: IPresenterConstructor }) {
+    templatePath = isAbsolute(templatePath) ? templatePath : this.makePath(templatePath)
+
+    if (!contents.template) {
+      throw new Error('Make sure to define the template content for preRegistered template')
+    }
+
+    this.preRegistered.set(templatePath, contents)
   }
 
   /**

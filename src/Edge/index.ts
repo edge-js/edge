@@ -11,7 +11,7 @@ import { merge } from 'lodash'
 import * as Tags from '../Tags'
 import { Compiler } from '../Compiler'
 import { Loader } from '../Loader'
-import { ILoaderConstructor, ILoader, ITag } from '../Contracts'
+import { ILoaderConstructor, ILoader, ITag, IPresenterConstructor } from '../Contracts'
 import { Template } from '../Template'
 import { Context } from '../Context'
 
@@ -95,6 +95,13 @@ export class Edge {
    */
   public static tag (Tag: ITag) {
     Tags[Tag.tagName] = Tag
+  }
+
+  /**
+   * Register a template as a string
+   */
+  public static register (templatePath: string, contents: { template: string, Presenter?: IPresenterConstructor }) {
+    loader!.register(templatePath, contents)
   }
 
   /**
