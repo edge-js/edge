@@ -1,0 +1,19 @@
+{
+  "items": [
+    {
+      "name": "Burger",
+      "price": 10,
+      "quantity": 2
+    },
+    {
+      "name": "Sandwich",
+      "price": 10.30,
+      "quantity": 4
+    },
+    {
+      "name": "Doughnut",
+      "price": 2.99,
+      "quantity": 4
+    }
+  ]
+}
