@@ -145,7 +145,7 @@ export class Edge {
   /**
    * Render template with state
    */
-  public render (templatePath: string, state: any): string {
+  public render (templatePath: string, state: any = {}): string {
     const template = new Template(compiler!, (this.constructor as typeof Edge).globals, this.locals)
     return template.render(templatePath, state)
   }
