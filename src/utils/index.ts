@@ -10,6 +10,7 @@
 import { UnAllowedExpressionException, TooManyArgumentsException } from '../Exceptions'
 import { Parser } from 'edge-parser'
 import { sep } from 'path'
+import { INode, IBlockNode } from 'edge-lexer/build/src/Contracts'
 
 export class ObjectifyString {
   private obj: string = ''
@@ -170,4 +171,27 @@ export function extractDiskAndTemplateName (templatePath: string): [string, stri
 
   const [template, ext] = rest.join('::').split('.edge')
   return [disk, `${template.replace(/\./, sep)}.${ext || 'edge'}`]
+}
+
+export function mergeSections (base: INode[], extended: INode[], blocks: string[]): INode[] {
+  return base.map((node) => {
+    if (node.type !== 'block') {
+      return node
+    }
+
+    const blockNode = node as IBlockNode
+    if (blocks.indexOf(blockNode.properties.name) === -1) {
+      return node
+    }
+
+    const extendedNode = extended.find((node) => {
+      const extendedBlockNode = node as IBlockNode
+      return extendedBlockNode.properties.name === blockNode.properties.name && extendedBlockNode.properties.jsArg.trim() === blockNode.properties.jsArg.trim()
+    })
+
+    if (extendedNode) {
+    }
+
+    return node
+  })
 }

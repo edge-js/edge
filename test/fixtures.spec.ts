@@ -21,6 +21,8 @@ const loader = new Loader()
 loader.mount('default', basePath)
 const compiler = new Compiler(loader, tags)
 
+test.grep('layout-tag')
+
 test.group('Fixtures', (group) => {
   group.before(() => {
     Object.keys(tags).forEach((tag) => {

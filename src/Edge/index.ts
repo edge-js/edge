@@ -18,12 +18,6 @@ import { Context } from '../Context'
 let loader: null | ILoader = null
 let compiler: null | Compiler = null
 
-Object.keys(Tags).forEach((tag) => {
-  if (typeof (Tags[tag].run) === 'function') {
-    Tags[tag].run(Context)
-  }
-})
-
 type configOptions = {
   Loader?: ILoaderConstructor,
   cache?: boolean,
@@ -54,6 +48,18 @@ export class Edge {
   public static configure (options: configOptions) {
     loader = new (options.Loader || Loader)()
     compiler = new Compiler(loader!, Tags, !!options.cache)
+
+    Object.keys(Tags).forEach((tag) => {
+      if (typeof (Tags[tag].run) === 'function') {
+        Tags[tag].run(Context)
+      }
+
+      /**
+       * Set compiler on each tag, so that they can use the compiler
+       * for advanced operations like merging AST and so on.
+       */
+       Tags[tag].compiler = compiler
+    })
   }
 
   public static mount (diskName: string, dirPath: string): void

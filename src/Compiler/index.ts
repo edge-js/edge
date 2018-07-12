@@ -8,6 +8,7 @@
 */
 
 import { Parser } from 'edge-parser'
+import { INode, IBlockNode } from 'edge-lexer/build/src/Contracts'
 import { ILoader, IPresenterConstructor, ICompiler, Tags } from '../Contracts'
 
 export class Compiler implements ICompiler {
@@ -42,6 +43,15 @@ export class Compiler implements ICompiler {
   }
 
   /**
+   * Returns an array of lexer tokens
+   */
+  public generateTokens (templatePath: string): INode[] {
+    templatePath = this.loader.makePath(templatePath)
+    const { template } = this.loader.resolve(templatePath, false)
+    return new Parser(this.tags).generateTokens(template)
+  }
+
+  /**
    * Compiles a given template by loading it using the loader, also caches
    * the template and returns from the cache (if exists).
    *
@@ -58,6 +68,12 @@ export class Compiler implements ICompiler {
     }
 
     const { template, Presenter } = this.loader.resolve(templatePath, !inline)
+    const parser = new Parser(this.tags)
+
+    const templateTokens = parser.generateTokens(template)
+    if (templateTokens[0].type === 'block' && (templateTokens[0] as IBlockNode).properties.name === 'layout') {
+    }
+
     const payload = {
       template: new Parser(this.tags).parseTemplate(template, !inline),
       Presenter,
