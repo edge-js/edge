@@ -1,4 +1,5 @@
 import { ITag as BaseTag } from 'edge-parser/build/src/Contracts'
+import { INode } from 'edge-lexer/build/src/Contracts'
 
 export interface ILoaderConstructor {
   new (): ILoader
@@ -8,7 +9,7 @@ export interface ILoader {
   mounted: object
   mount (diskName: string, dirPath: string): void
   unmount (diskName: string): void
-  resolve (templatePath: string, withResolver: boolean): { template: string, Presenter?: IPresenterConstructor }
+  resolve (templatePath: string, withPresenter: boolean): { template: string, Presenter?: IPresenterConstructor }
   makePath (templatePath: string): string
   register (templatePath: string, contents: { template: string, Presenter?: IPresenterConstructor }): void
 }

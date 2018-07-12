@@ -63,7 +63,7 @@
   },
   "dependencies": {
     "edge-error": "^1.0.0",
-    "edge-parser": "^1.0.15",
+    "edge-parser": "^1.0.16",
     "he": "^1.1.1",
     "lodash": "^4.17.10",
     "macroable": "^1.0.0",

@@ -1,0 +1,4 @@
+This is the base template
+
+Here goes the content section content
+I will extend the content of my parent

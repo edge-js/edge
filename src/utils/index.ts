@@ -10,6 +10,7 @@
 import { Parser } from 'edge-parser'
 import { sep } from 'path'
 import { EdgeError } from 'edge-error'
+import { INode, IBlockNode } from 'edge-lexer/build/src/Contracts'
 
 export class ObjectifyString {
   private obj: string = ''
@@ -182,4 +183,77 @@ export function extractDiskAndTemplateName (templatePath: string): [string, stri
 
   const [template, ext] = rest.join('::').split('.edge')
   return [disk, `${template.replace(/\./, sep)}.${ext || 'edge'}`]
+}
+
+/**
+ * Finds a section token in the list of tokens.
+ */
+export function isBlock (token: INode, name: string): boolean {
+  return token.type === 'block' && (token as IBlockNode).properties.name === name
+}
+
+/**
+ * Returns a boolean telling if the current token
+ * first children is a super tag
+ */
+export function hasChildSuper (token: IBlockNode): boolean {
+  if (!token.children.length) {
+    return false
+  }
+
+  if (token.children[0].type !== 'block') {
+    return false
+  }
+
+  return (token.children[0] as IBlockNode).properties.name === 'super'
+}
+
+/**
+ * Merges the section tags content of 2 tokens list. The name of the sections
+ * are used for merging.
+ */
+export function mergeSections (base: INode[], extended: INode[]): INode[] {
+  /**
+   * Collection all sections from the extended tokens
+   */
+  const extendedSections = extended
+    .filter((node) => isBlock(node, 'section'))
+    .reduce((sections, node: IBlockNode) => {
+      sections[node.properties.jsArg.trim()] = node
+      return sections
+    }, {})
+
+   /**
+    * We also take the set tag from the list
+    * base template and hoist them to the
+    * top
+    */
+  const extendedSetCalls = extended.filter((node) => isBlock(node, 'set'))
+
+  /**
+   * Replace/extend sections inside base tokens list
+   */
+  const finalNodes = base
+    .map((node) => {
+      if (!isBlock(node, 'section')) {
+        return node
+      }
+
+      const blockNode = node as IBlockNode
+      const extendedNode = extendedSections[blockNode.properties.jsArg]
+      if (!extendedNode) {
+        return blockNode
+      }
+
+      /**
+       * Concat children when super was called
+       */
+      if (hasChildSuper(extendedNode)) {
+        extendedNode.children = blockNode.children.concat(extendedNode.children)
+      }
+
+      return extendedNode
+    })
+
+  return extendedSetCalls.concat(finalNodes)
 }
