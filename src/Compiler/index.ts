@@ -59,7 +59,7 @@ export class Compiler implements ICompiler {
 
     const { template, Presenter } = this.loader.resolve(templatePath, !inline)
     const payload = {
-      template: new Parser(this.tags).parseTemplate(template, !inline),
+      template: new Parser(this.tags, { filename: templatePath }) .parseTemplate(template, !inline),
       Presenter,
     }
 

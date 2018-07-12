@@ -7,9 +7,9 @@
 * file that was distributed with this source code.
 */
 
-import { UnAllowedExpressionException, TooManyArgumentsException } from '../Exceptions'
 import { Parser } from 'edge-parser'
 import { sep } from 'path'
+import { EdgeError } from 'edge-error'
 
 export class ObjectifyString {
   private obj: string = ''
@@ -36,9 +36,13 @@ export class ObjectifyString {
  * Validates the expression type to be part of the allowed
  * expressions only
  */
-export function allowExpressions (tag: string, expression: any, expressions: string[]) {
+export function allowExpressions (tag: string, expression: any, expressions: string[], filename: string) {
   if (expressions.indexOf(expression.type) === -1) {
-    throw UnAllowedExpressionException.invoke(tag, expression.type, expression.loc.start.line)
+    throw new EdgeError(`${expression.type} is not allowed for ${tag} tag.`, 'E_UNALLOWED_EXPRESSION', {
+      line: expression.loc.start.line,
+      col: expression.loc.start.column,
+      filename: filename,
+    })
   }
 }
 
@@ -46,9 +50,13 @@ export function allowExpressions (tag: string, expression: any, expressions: str
  * Validates the expression type to not be part of the black
  * listed expressions.
  */
-export function disAllowExpressions (tag: string, expression: any, expressions: string[]) {
+export function disAllowExpressions (tag: string, expression: any, expressions: string[], filename) {
   if (expressions.indexOf(expression.type) > -1) {
-    throw UnAllowedExpressionException.invoke(tag, expression.type, expression.loc.start.line)
+    throw new EdgeError(`${expression.type} is not allowed for ${tag} tag.`, 'E_UNALLOWED_EXPRESSION', {
+      line: expression.loc.start.line,
+      col: expression.loc.start.column,
+      filename: filename,
+    })
   }
 }
 
@@ -117,7 +125,7 @@ export function parseSequenceExpression (expression: any, parser: Parser): [stri
  * ```
  */
 export function parseAsKeyValuePair (expression: any, parser: Parser, valueExpressions: string[]): [string, null | string] {
-    allowExpressions('slot', expression, ['Literal', 'SequenceExpression'])
+    allowExpressions('slot', expression, ['Literal', 'SequenceExpression'], parser.options.filename)
 
     /**
      * Return without counting props, value is a literal
@@ -131,13 +139,17 @@ export function parseAsKeyValuePair (expression: any, parser: Parser, valueExpre
      * expression
      */
     if (expression.expressions.length > 2) {
-      throw TooManyArgumentsException.invoke('slot', 2, expression.loc.start.line)
+      throw new EdgeError('Maximum of 2 arguments are allowed for slot tag', 'E_MAX_ARGUMENTS', {
+        line: expression.loc.start.line,
+        col: expression.loc.start.column,
+        filename: parser.options.filename,
+      })
     }
 
-    allowExpressions('slot', expression.expressions[0], ['Literal'])
+    allowExpressions('slot', expression.expressions[0], ['Literal'], parser.options.filename)
 
     if (valueExpressions.length) {
-      allowExpressions('slot', expression.expressions[1], valueExpressions)
+      allowExpressions('slot', expression.expressions[1], valueExpressions, parser.options.filename)
     }
 
     /**

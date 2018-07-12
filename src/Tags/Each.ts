@@ -24,8 +24,8 @@ export class EachTag {
   /**
    * Returns the value and key names for the foreach loop
    */
-  private static _getLoopKeyValue (expression: any): [string, string] {
-    allowExpressions('each', expression, ['SequenceExpression', 'Identifier'])
+  private static _getLoopKeyValue (expression: any, filename: string): [string, string] {
+    allowExpressions('each', expression, ['SequenceExpression', 'Identifier'], filename)
 
     if (expression.type === 'SequenceExpression') {
       return [expression.expressions[0].name, expression.expressions[1].name]
@@ -48,9 +48,9 @@ export class EachTag {
     const ast = parser.generateAst(token.properties.jsArg, token.lineno)
     const expression = ast.body[0].expression
 
-    allowExpressions('each', expression, this.allowedExpressions)
+    allowExpressions('each', expression, this.allowedExpressions, parser.options.filename)
 
-    const [value, key] = this._getLoopKeyValue(expression.left)
+    const [value, key] = this._getLoopKeyValue(expression.left, parser.options.filename)
     const rhs = this._getLoopSource(expression.right, parser)
 
     const elseIndex = token

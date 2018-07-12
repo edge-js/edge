@@ -25,7 +25,7 @@ export class ElseIfTag {
    */
   public static compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
     const parsed = parser.parseJsArg(token.properties.jsArg, token.lineno)
-    disAllowExpressions('elseif', parsed, this.bannedExpressions)
+    disAllowExpressions('elseif', parsed, this.bannedExpressions, parser.options.filename)
 
     /**
      * Dedent block

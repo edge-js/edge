@@ -31,7 +31,7 @@ export class UnlessTag {
    */
   public static compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
     const parsed = parser.parseJsArg(token.properties.jsArg, token.lineno)
-    disAllowExpressions('unless', parsed, this.bannedExpressions)
+    disAllowExpressions('unless', parsed, this.bannedExpressions, parser.options.filename)
 
     /**
      * Start if block

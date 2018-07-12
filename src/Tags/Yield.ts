@@ -31,7 +31,7 @@ export class YieldTag {
    */
   public static compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
     const parsed = parser.parseJsArg(token.properties.jsArg, token.lineno)
-    allowExpressions('yield', parsed, this.allowedExpressions)
+    allowExpressions('yield', parsed, this.allowedExpressions, parser.options.filename)
 
     /**
      * Start if block

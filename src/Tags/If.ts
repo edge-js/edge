@@ -31,7 +31,7 @@ export class IfTag {
    */
   public static compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
     const parsed = parser.parseJsArg(token.properties.jsArg, token.lineno)
-    disAllowExpressions('if', parsed, this.bannedExpressions)
+    disAllowExpressions('if', parsed, this.bannedExpressions, parser.options.filename)
 
     /**
      * Start if block

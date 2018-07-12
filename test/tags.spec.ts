@@ -25,7 +25,7 @@ test.group('If tag', (group) => {
   })
 
   test('raise errors on correct line with if tag', async (assert) => {
-    assert.plan(1)
+    assert.plan(2)
 
     const templateContent = `Hello everyone!
 We are writing a bad if condition
@@ -37,6 +37,7 @@ We are writing a bad if condition
     try {
       compiler.compile('foo', true)
     } catch (error) {
+      assert.equal(error.message, 'Unexpected token ')
       assert.equal(error.line, 4)
     }
   })
@@ -55,7 +56,7 @@ We are writing a bad if condition
       compiler.compile('foo', true)
     } catch (error) {
       assert.equal(error.line, 4)
-      assert.equal(error.message, 'E_UNALLOWED_EXPRESSION: SequenceExpression is not allowed for if tag\n> More details: https://err.sh/poppinss/edge-errors/E_UNALLOWED_EXPRESSION')
+      assert.equal(error.message, 'SequenceExpression is not allowed for if tag.')
     }
   })
 
@@ -91,7 +92,7 @@ test.group('Include', (group) => {
     try {
       compiler.compile('foo', true)
     } catch (error) {
-      assert.equal(error.line, 2)
+      assert.equal(error.stack.split('\n')[1], `    at (${join(viewsDir, 'foo.edge')}:2:4)`)
     }
   })
 
@@ -104,8 +105,8 @@ test.group('Include', (group) => {
     try {
       compiler.compile('foo', true)
     } catch (error) {
-      assert.equal(error.line, 1)
-      assert.equal(error.message, 'E_UNALLOWED_EXPRESSION: SequenceExpression is not allowed for include tag\n> More details: https://err.sh/poppinss/edge-errors/E_UNALLOWED_EXPRESSION')
+      assert.equal(error.stack.split('\n')[1], `    at (${join(viewsDir, 'foo.edge')}:1:0)`)
+      assert.equal(error.message, 'SequenceExpression is not allowed for include tag.')
     }
   })
 })
@@ -129,8 +130,8 @@ test.group('Component', (group) => {
     try {
       compiler.compile('foo', true)
     } catch (error) {
-      assert.equal(error.line, 3)
-      assert.equal(error.message, 'E_UNALLOWED_EXPRESSION: Identifier is not allowed for slot tag\n> More details: https://err.sh/poppinss/edge-errors/E_UNALLOWED_EXPRESSION')
+      assert.equal(error.stack.split('\n')[1], `    at (${join(viewsDir, 'foo.edge')}:3:0)`)
+      assert.equal(error.message, 'Identifier is not allowed for slot tag.')
     }
   })
 
@@ -148,8 +149,8 @@ test.group('Component', (group) => {
     try {
       compiler.compile('foo', true)
     } catch (error) {
-      assert.equal(error.line, 3)
-      assert.equal(error.message, 'E_MAX_ARGUMENTS: Maximum of 2 arguments are allowed for slot tag\n> More details: https://err.sh/poppinss/edge-errors/E_MAX_ARGUMENTS')
+      assert.equal(error.stack.split('\n')[1], `    at (${join(viewsDir, 'foo.edge')}:3:0)`)
+      assert.equal(error.message, 'Maximum of 2 arguments are allowed for slot tag')
     }
   })
 
@@ -167,8 +168,8 @@ test.group('Component', (group) => {
     try {
       compiler.compile('foo', true)
     } catch (error) {
-      assert.equal(error.line, 3)
-      assert.equal(error.message, 'E_UNALLOWED_EXPRESSION: Identifier is not allowed for slot tag\n> More details: https://err.sh/poppinss/edge-errors/E_UNALLOWED_EXPRESSION')
+      assert.equal(error.stack.split('\n')[1], `    at (${join(viewsDir, 'foo.edge')}:3:0)`)
+      assert.equal(error.message, 'Identifier is not allowed for slot tag.')
     }
   })
 
@@ -189,8 +190,8 @@ test.group('Component', (group) => {
     try {
       compiler.compile('foo', true)
     } catch (error) {
-      assert.equal(error.line, 3)
-      assert.equal(error.message, 'E_UNALLOWED_EXPRESSION: Literal is not allowed for slot tag\n> More details: https://err.sh/poppinss/edge-errors/E_UNALLOWED_EXPRESSION')
+      assert.equal(error.stack.split('\n')[1], `    at (${join(viewsDir, 'foo.edge')}:5:6)`)
+      assert.equal(error.message, 'Literal is not allowed for slot tag.')
     }
   })
 })
