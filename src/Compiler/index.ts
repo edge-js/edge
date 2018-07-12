@@ -11,6 +11,9 @@ import { Parser } from 'edge-parser'
 import { INode, IBlockNode } from 'edge-lexer/build/src/Contracts'
 import { ILoader, IPresenterConstructor, ICompiler, Tags } from '../Contracts'
 import { mergeSections } from '../utils'
+import * as Debug from 'debug'
+
+const debug = Debug('edge:loader')
 
 export class Compiler implements ICompiler {
   private cacheStore: Map<string, { template: string, Presenter?: IPresenterConstructor }> = new Map()
@@ -40,6 +43,7 @@ export class Compiler implements ICompiler {
       return
     }
 
+    debug('adding to cache %s', templatePath)
     this.cacheStore.set(templatePath, payload)
   }
 
@@ -53,6 +57,8 @@ export class Compiler implements ICompiler {
 
     const firstToken = templateTokens[0] as IBlockNode
     if (firstToken.type === 'block' && firstToken.properties.name === 'layout') {
+      debug('detected layout %s', firstToken.properties.jsArg)
+
       const layoutTokens = this.compileToAst(firstToken.properties.jsArg.replace(/'/g, ''))
       templateTokens = mergeSections(layoutTokens, templateTokens)
     }

@@ -13,6 +13,9 @@ import * as requireUncached from 'require-uncached'
 
 import { ILoader, IPresenterConstructor } from '../Contracts'
 import { extractDiskAndTemplateName } from '../utils'
+import * as Debug from 'debug'
+
+const debug = Debug('edge:loader')
 
 export class Loader implements ILoader {
   private mountedDirs: Map<string, string> = new Map()
@@ -33,6 +36,7 @@ export class Loader implements ILoader {
    * Mount a directory for resolving views
    */
   public mount (diskName: string, dirPath: string): void {
+    debug('mounting dir %s with name %s', dirPath, diskName)
     this.mountedDirs.set(diskName, dirPath)
   }
 
@@ -41,6 +45,7 @@ export class Loader implements ILoader {
    * for resolving views
    */
   public unmount (diskName: string): void {
+    debug('unmount dir with name %s', diskName)
     this.mountedDirs.delete(diskName)
   }
 
@@ -69,6 +74,8 @@ export class Loader implements ILoader {
    * Resolves a template from disk and returns it as a string
    */
   public resolve (templatePath: string, withPresenter: boolean): { template: string, Presenter?: IPresenterConstructor } {
+    debug('attempting to resolve %s', templatePath)
+
     try {
       templatePath = isAbsolute(templatePath) ? templatePath : this.makePath(templatePath)
 
@@ -82,6 +89,9 @@ export class Loader implements ILoader {
 
       const template = readFileSync(templatePath, 'utf-8')
       const Presenter = withPresenter ? this._getPresenterForTemplate(templatePath) : undefined
+
+      debug('has presenter %s', !!Presenter)
+
       return { template, Presenter }
     } catch (error) {
       if (error.code === 'ENOENT') {

@@ -1,5 +1,4 @@
 import { ITag as BaseTag } from 'edge-parser/build/src/Contracts'
-import { INode } from 'edge-lexer/build/src/Contracts'
 
 export interface ILoaderConstructor {
   new (): ILoader

@@ -14,6 +14,9 @@ import { Loader } from '../Loader'
 import { ILoaderConstructor, ILoader, ITag, IPresenterConstructor } from '../Contracts'
 import { Template } from '../Template'
 import { Context } from '../Context'
+import * as Debug from 'debug'
+
+const debug = Debug('edge')
 
 let loader: null | ILoader = null
 let compiler: null | Compiler = null
@@ -46,19 +49,21 @@ export class Edge {
    * Configure edge
    */
   public static configure (options: configOptions) {
-    loader = new (options.Loader || Loader)()
-    compiler = new Compiler(loader!, Tags, !!options.cache)
+    const edgeOptions = Object.assign({
+      Loader: Loader,
+      cache: false,
+    }, options)
+
+    debug('configure %o', edgeOptions)
+
+    loader = new edgeOptions.Loader!()
+    compiler = new Compiler(loader!, Tags, edgeOptions.cache)
 
     Object.keys(Tags).forEach((tag) => {
+      debug('calling run method on %s', tag)
       if (typeof (Tags[tag].run) === 'function') {
         Tags[tag].run(Context)
       }
-
-      /**
-       * Set compiler on each tag, so that they can use the compiler
-       * for advanced operations like merging AST and so on.
-       */
-       Tags[tag].compiler = compiler
     })
   }
 
@@ -100,6 +105,7 @@ export class Edge {
    * Add a new tag to the tags list
    */
   public static tag (Tag: ITag) {
+    debug('defining a new tag %s', Tag.tagName)
     Tags[Tag.tagName] = Tag
   }
 
@@ -107,6 +113,7 @@ export class Edge {
    * Register a template as a string
    */
   public static register (templatePath: string, contents: { template: string, Presenter?: IPresenterConstructor }) {
+    debug('registering dynamic template %s', templatePath)
     loader!.register(templatePath, contents)
   }
 

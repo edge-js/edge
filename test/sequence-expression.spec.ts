@@ -26,7 +26,7 @@ const tags = {
 
 test.group('parseSequenceExpression', () => {
   test('return name and props when using literal', (assert) => {
-    const parser = new Parser(tags)
+    const parser = new Parser(tags, { filename: 'foo.edge' })
     const expression = parser.parseStatement(parser.generateAst(`('partial')`, 1).body[0])
     const [name, props] = parseSequenceExpression(expression, parser)
     assert.equal(name, `'partial'`)
@@ -34,7 +34,7 @@ test.group('parseSequenceExpression', () => {
   })
 
   test('return name and props when using identifier', (assert) => {
-    const parser = new Parser(tags)
+    const parser = new Parser(tags, { filename: 'foo.edge' })
     const expression = parser.parseStatement(parser.generateAst(`(partial)`, 1).body[0])
     const [name, props] = parseSequenceExpression(expression, parser)
     assert.equal(name, `ctx.resolve('partial')`)
@@ -42,7 +42,7 @@ test.group('parseSequenceExpression', () => {
   })
 
   test('return name and props when using callable member expression', (assert) => {
-    const parser = new Parser(tags)
+    const parser = new Parser(tags, { filename: 'foo.edge' })
     const expression = parser.parseStatement(parser.generateAst(`(user.partial)`, 1).body[0])
     const [name, props] = parseSequenceExpression(expression, parser)
     assert.equal(name, `ctx.resolve('user').partial`)
@@ -50,7 +50,7 @@ test.group('parseSequenceExpression', () => {
   })
 
   test('return name and props when using call expression', (assert) => {
-    const parser = new Parser(tags)
+    const parser = new Parser(tags, { filename: 'foo.edge' })
     const expression = parser.parseStatement(parser.generateAst(`(getPartial(user))`, 1).body[0])
     const [name, props] = parseSequenceExpression(expression, parser)
     assert.equal(name, `ctx.resolve('getPartial')(ctx, ctx.resolve('user'))`)
@@ -58,7 +58,7 @@ test.group('parseSequenceExpression', () => {
   })
 
   test('return name and props when using sequence expression', (assert) => {
-    const parser = new Parser(tags)
+    const parser = new Parser(tags, { filename: 'foo.edge' })
     const expression = parser.parseStatement(parser.generateAst(`('partial', { username: 'virk' })`, 1).body[0])
     const [name, props] = parseSequenceExpression(expression, parser)
     assert.equal(name, `'partial'`)
@@ -66,7 +66,7 @@ test.group('parseSequenceExpression', () => {
   })
 
   test('parse props with shorthand obj', (assert) => {
-    const parser = new Parser(tags)
+    const parser = new Parser(tags, { filename: 'foo.edge' })
     const expression = parser.parseStatement(parser.generateAst(`('partial', { username })`, 1).body[0])
     const [name, props] = parseSequenceExpression(expression, parser)
     assert.equal(name, `'partial'`)
@@ -74,7 +74,7 @@ test.group('parseSequenceExpression', () => {
   })
 
   test('parse props with computed obj', (assert) => {
-    const parser = new Parser(tags)
+    const parser = new Parser(tags, { filename: 'foo.edge' })
     const expression = parser.parseStatement(parser.generateAst(`('partial', { [username]: username })`, 1).body[0])
     const [name, props] = parseSequenceExpression(expression, parser)
     assert.equal(name, `'partial'`)
@@ -82,7 +82,7 @@ test.group('parseSequenceExpression', () => {
   })
 
   test('parse props with multiple obj properties', (assert) => {
-    const parser = new Parser(tags)
+    const parser = new Parser(tags, { filename: 'foo.edge' })
     const expression = parser.parseStatement(parser.generateAst(`('partial', { username: 'virk', age: 22 })`, 1).body[0])
     const [name, props] = parseSequenceExpression(expression, parser)
     assert.equal(name, `'partial'`)
@@ -90,7 +90,7 @@ test.group('parseSequenceExpression', () => {
   })
 
   test('parse props with shorthand and full properties', (assert) => {
-    const parser = new Parser(tags)
+    const parser = new Parser(tags, { filename: 'foo.edge' })
     const expression = parser.parseStatement(parser.generateAst(`('partial', { username, age: 22 })`, 1).body[0])
     const [name, props] = parseSequenceExpression(expression, parser)
     assert.equal(name, `'partial'`)
@@ -98,7 +98,7 @@ test.group('parseSequenceExpression', () => {
   })
 
   test('parse props with assignment expression', (assert) => {
-    const parser = new Parser(tags)
+    const parser = new Parser(tags, { filename: 'foo.edge' })
     const expression = parser.parseStatement(parser.generateAst(`('partial', title = 'Hello')`, 1).body[0])
     const [name, props] = parseSequenceExpression(expression, parser)
     assert.equal(name, `'partial'`)
