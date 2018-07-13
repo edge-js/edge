@@ -15,7 +15,7 @@
     "lint": "tslint --project tsconfig.json",
     "clean": "del build",
     "compile": "npm run lint && npm run clean && tsc",
-    "build": "npm run compile",
+    "build": "npm run compile && typedoc",
     "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "repository": {
@@ -29,7 +29,7 @@
   },
   "homepage": "https://github.com/poppinss/edge#readme",
   "devDependencies": {
-    "@adonisjs/mrm-preset": "^1.0.7",
+    "@adonisjs/mrm-preset": "^1.0.8",
     "@types/node": "^10.5.2",
     "commitizen": "^2.10.1",
     "coveralls": "^3.0.2",
@@ -45,6 +45,10 @@
     "ts-node": "^7.0.0",
     "tslint": "^5.10.0",
     "tslint-eslint-rules": "^5.3.1",
+    "typedoc": "^0.11.1",
+    "typedoc-clarity-theme": "^1.1.0",
+    "typedoc-plugin-external-module-name": "^1.1.1",
+    "typedoc-plugin-single-line-tags": "^1.0.0",
     "typescript": "^2.9.2"
   },
   "config": {

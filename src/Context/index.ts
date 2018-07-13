@@ -1,3 +1,7 @@
+/**
+ * @module main
+ */
+
 /*
 * edge.js
 *
@@ -12,6 +16,12 @@ import * as he from 'he'
 import { set } from 'lodash'
 import { IPresenter } from '../Contracts'
 
+/**
+ * Context is used at runtime to resolve values for a given
+ * template.
+ *
+ * Also the context can be extended by tags to add `getters` and `methods`.
+ */
 export class Context extends Macroable {
   /* tslint:disable-next-line */
   private static _macros: object = {}
@@ -27,14 +37,40 @@ export class Context extends Macroable {
   }
 
   /**
-   * Define macro on the context
+   * Define macro on the context.
+   *
+   * ```js
+   * Context.macro('username', function () {
+   *   return 'foo'
+   * })
+   * ```
+   *
+   * Later use it as
+   *
+   * ```js
+   * const context = new Context(presenter, { })
+   * context.username()
+   * ```
    */
   public static macro (name: string, callback: Function) {
     super.macro(name, callback)
   }
 
   /**
-   * Define getter on the context
+   * Define getter on the context.For singletons, pass `true` as the third argument.
+   *
+   * ```js
+   * Context.macro('username', function () {
+   *   return 'foo'
+   * })
+   * ```
+   *
+   * Later use it as
+   *
+   * ```js
+   * const context = new Context(presenter, { })
+   * context.username
+   * ```
    */
   public static getter (name: string, callback: Function, singleton: boolean = false) {
     super.getter(name, callback, singleton)
@@ -53,14 +89,39 @@ export class Context extends Macroable {
   }
 
   /**
-   * Creates a new frame object.
+   * Returns value for a key inside frames. Stops looking for it,
+   * when value is found inside any frame.
+   */
+  private getFromFrame (key: string): any {
+    const frameWithVal = this.frames.find((frame) => frame[key] !== undefined)
+    return frameWithVal ? frameWithVal[key] : undefined
+  }
+
+  /**
+   * Creates a new frame scope. Think of a scope as a Javacript block
+   * scope, where variables defined inside the scope are only available
+   * to that scope.
+   *
+   * ```js
+   * ctx.newFrame()
+   * ```
    */
   public newFrame (): void {
     this.frames.unshift({})
   }
 
   /**
-   * Set key/value pair on the frame object
+   * Set key/value pair on the frame object. The value will only be available until
+   * the `removeFrame` is called.
+   *
+   * ```js
+   * ctx.setOnFrame('username', 'virk')
+   *
+   * // nested values
+   * ctx.setOnFrame('user.username', 'virk')
+   * ```
+   *
+   * @throws Error if no frame scopes exists.
    */
   public setOnFrame (key: string, value: any): void {
     const recentFrame = this.frames[0]
@@ -73,14 +134,16 @@ export class Context extends Macroable {
   }
 
   /**
-   * Removes the most recent frame
+   * Removes the most recent frame/scope. All values set inside the
+   * frame via `setOnFrame` will be removed.
    */
   public removeFrame (): void {
     this.frames.shift()
   }
 
   /**
-   * Escapes the value to be HTML safe
+   * Escapes the value to be HTML safe. Only strings are escaped
+   * and rest all values will be returned as it is.
    */
   public escape <T> (input: T): T {
     return typeof (input) === 'string' ? he.escape(input) : input
@@ -88,12 +151,19 @@ export class Context extends Macroable {
 
   /**
    * Resolves value for a given key. It will look for the value in different
-   * stores and continues till the end if `undefined` is returned.
+   * locations and continues till the end if `undefined` is returned at
+   * each step.
    *
-   * 1. Check for value inside frames
-   * 2. Then on the presenter instance
-   * 3. Then the presenter `state` object
-   * 4. Finally fallback to the sharedState
+   * The following steps are followed in the same order as defined.
+   *
+   * 1. Check for value inside frames.
+   * 2. Then on the presenter instance.
+   * 3. Then the presenter `state` object.
+   * 4. Finally fallback to the sharedState.
+   *
+   * ```
+   * ctx.resolve('username')
+   * ```
    */
   public resolve (key: string): any {
     let value
@@ -131,9 +201,16 @@ export class Context extends Macroable {
   }
 
   /**
-   * Set/update value inside the context. If this method
-   * is called inside the `frame` scope, then value is
-   * created on the frame and not the presenter state
+   * Set/Update the value in the context. The value is defined in the following
+   * order.
+   *
+   * 1. If the value already exists on the presenter state, then it will be updated
+   * 2. If the scope is inside a frame, then will be created/updated on the frame.
+   * 3. At last, the value is created on the presenter state.
+   *
+   * ```js
+   * ctx.set('username', 'virk')
+   * ```
    */
   public set (key: string, value: any): void {
     /**
@@ -149,14 +226,5 @@ export class Context extends Macroable {
      * If frames exists, then set it on frame
      */
     this.setOnFrame(key, value)
-  }
-
-  /**
-   * Returns value for a key inside frames. Stops looking for it,
-   * when value is found inside the first frame
-   */
-  private getFromFrame (key: string): any {
-    const frameWithVal = this.frames.find((frame) => frame[key] !== undefined)
-    return frameWithVal ? frameWithVal[key] : undefined
   }
 }

@@ -1,3 +1,14 @@
+/**
+ * @module utils
+ *
+ * Allow functions and classes are exported individually from the utils module
+ * and use them as follows.
+ *
+ * ```js
+ * import { allowExpressions, parseAsKeyValuePair } from 'edge/build/src/utils'
+ * ```
+ */
+
 /*
 * edge
 *
@@ -12,30 +23,51 @@ import { sep } from 'path'
 import { EdgeError } from 'edge-error'
 import { INode, IBlockNode } from 'edge-lexer/build/src/Contracts'
 
+/**
+ * When passing objects in the template, we cannot pass them as real Javascript
+ * objects, since they will be stringified. This class creates an **Object like**
+ * string, with key/value pairs.
+ */
 export class ObjectifyString {
   private obj: string = ''
 
   /**
-   * Add key/value pair to the object
+   * Add key/value pair to the object.
+   *
+   * ```js
+   * objectifystring.add('username', `'virk'`)
+   * ```
    */
   public add (key: any, value: any) {
     this.obj += this.obj.length ? `, ${key}: ${value}` : `${key}: ${value}`
   }
 
   /**
-   * Returns the object alike string back
+   * Returns the object alike string back.
+   *
+   * ```js
+   * objectifystring.flush()
+   *
+   * // returns
+   * `{ username: 'virk' }`
+   * ```
    */
   public flush (): string {
     const obj = this.obj
     this.obj = ''
-
     return `{ ${obj} }`
   }
 }
 
 /**
  * Validates the expression type to be part of the allowed
- * expressions only
+ * expressions only.
+ *
+ * The filename is required to report errors.
+ *
+ * ```js
+ * allowExpressions('include', 'SequenceExpression', ['Literal', 'Identifier'], 'foo.edge')
+ * ```
  */
 export function allowExpressions (tag: string, expression: any, expressions: string[], filename: string) {
   if (expressions.indexOf(expression.type) === -1) {
@@ -48,8 +80,14 @@ export function allowExpressions (tag: string, expression: any, expressions: str
 }
 
 /**
- * Validates the expression type to not be part of the black
- * listed expressions.
+ * Validates the expression type not to be part of the disallowed
+ * expressions.
+ *
+ * The filename is required to report errors.
+ *
+ * ```js
+ * disAllowExpressions('include', 'SequenceExpression', ['Literal', 'Identifier'], 'foo.edge')
+ * ```
  */
 export function disAllowExpressions (tag: string, expression: any, expressions: string[], filename) {
   if (expressions.indexOf(expression.type) > -1) {
@@ -62,7 +100,7 @@ export function disAllowExpressions (tag: string, expression: any, expressions: 
 }
 
 /**
- * Parses the sequence expression to an array of with first value as a string and
+ * Parses the sequence expression to an array, with first value as a string and
  * other value as a string representation of the object.
  *
  * The idea is to make the sequence expression consumable for callable expressions.
@@ -70,7 +108,7 @@ export function disAllowExpressions (tag: string, expression: any, expressions: 
  *
  * This helper is heavily used by component tag.
  *
- * ```
+ * ```js
  * ('foo.bar', title = 'hello')
  * // returns ['foo.bar', { title: 'hello' }]
  *
@@ -117,7 +155,7 @@ export function parseSequenceExpression (expression: any, parser: Parser): [stri
  * Optionally, you can enforce (3rd argument) that value in the key/value pair must be one
  * of the given expressions.
  *
- * ```
+ * ```js
  * // Following are the valid expressions
  * ('foo', 'bar')
  * ('foo')
@@ -125,7 +163,10 @@ export function parseSequenceExpression (expression: any, parser: Parser): [stri
  * ('foo', { bar: true })
  * ```
  */
-export function parseAsKeyValuePair (expression: any, parser: Parser, valueExpressions: string[]): [string, null | string] {
+export function parseAsKeyValuePair (expression: any, parser: Parser, valueExpressions: string[]): [
+  string,
+  null | string
+] {
     allowExpressions('slot', expression, ['Literal', 'SequenceExpression'], parser.options.filename)
 
     /**
@@ -186,7 +227,8 @@ export function extractDiskAndTemplateName (templatePath: string): [string, stri
 }
 
 /**
- * Finds a section token in the list of tokens.
+ * Returns a boolean, telling whether the lexer node is a block node
+ * or not.
  */
 export function isBlock (token: INode, name: string): boolean {
   return token.type === 'block' && (token as IBlockNode).properties.name === name
@@ -194,7 +236,7 @@ export function isBlock (token: INode, name: string): boolean {
 
 /**
  * Returns a boolean telling if the current token
- * first children is a super tag
+ * first children is a super tag.
  */
 export function hasChildSuper (token: IBlockNode): boolean {
   if (!token.children.length) {
@@ -209,8 +251,8 @@ export function hasChildSuper (token: IBlockNode): boolean {
 }
 
 /**
- * Merges the section tags content of 2 tokens list. The name of the sections
- * are used for merging.
+ * Merges the sections of multiple lexer tokens array together. This is
+ * mainly used to merge sections of layouts.
  */
 export function mergeSections (base: INode[], extended: INode[]): INode[] {
   /**

@@ -1,3 +1,7 @@
+/**
+ * @module main
+ */
+
 /*
 * edge
 *
@@ -17,13 +21,52 @@ import * as Debug from 'debug'
 
 const debug = Debug('edge:loader')
 
+/**
+ * The job of a loader is to load the template and it's presenter for a given path.
+ * The base loader (shipped with edge) looks for files on the file-system.
+ *
+ * However, you are free to add your own loader implementation. Just make sure it implements
+ * the ILoader interface.
+ */
 export class Loader implements ILoader {
   private mountedDirs: Map<string, string> = new Map()
   private preRegistered: Map<string, { template: string, Presenter?: IPresenterConstructor }> = new Map()
 
   /**
+   * Attempts to load the presenter for a given template. If presenter doesn't exists, it
+   * will swallow the error.
+   *
+   * Also this method will **bypass the require cache**, since in product compiled templates and their
+   * presenters are cached anyways.
+   */
+  private _getPresenterForTemplate (templatePath: string): IPresenterConstructor | undefined {
+    try {
+      const presenterPath = templatePath
+        .replace(/^\w/, c => c.toUpperCase())
+        .replace(extname(templatePath), '.presenter.js')
+
+      debug('loading presenter %s', presenterPath)
+      return requireUncached(presenterPath)
+    } catch (error) {
+      if (['ENOENT', 'MODULE_NOT_FOUND'].indexOf(error.code) === -1) {
+        throw error
+      }
+    }
+  }
+
+  /**
    * Returns an object of mounted directories with their public
-   * names
+   * names.
+   *
+   * ```js
+   * loader.mounted
+   * // output
+   *
+   * {
+   *   default: '/users/virk/code/app/views',
+   *   foo: '/users/virk/code/app/foo',
+   * }
+   * ```
    */
   public get mounted (): object {
     return Array.from(this.mountedDirs).reduce((obj, [key, value]) => {
@@ -33,7 +76,16 @@ export class Loader implements ILoader {
   }
 
   /**
-   * Mount a directory for resolving views
+   * Mount a directory with a name for resolving views. If name is set
+   * to `default`, then you can resolve views without prefixing the
+   * disk name.
+   *
+   * ```js
+   * loader.mount('default', join(__dirname, 'views'))
+   *
+   * // mount a named disk
+   * loader.mount('admin', join(__dirname, 'admin/views'))
+   * ```
    */
   public mount (diskName: string, dirPath: string): void {
     debug('mounting dir %s with name %s', dirPath, diskName)
@@ -41,8 +93,11 @@ export class Loader implements ILoader {
   }
 
   /**
-   * Remove directory from the list of directories
-   * for resolving views
+   * Remove the previously mounted dir.
+   *
+   * ```js
+   * loader.unmount('default')
+   * ```
    */
   public unmount (diskName: string): void {
     debug('unmount dir with name %s', diskName)
@@ -50,14 +105,16 @@ export class Loader implements ILoader {
   }
 
   /**
-   * Makes the path to the template file. This method will extract the
-   * disk name from the templatePath as follows.
+   * Make path to a given template. The paths are resolved from the root
+   * of the mounted directory.
    *
-   * @example
+   * ```js
+   * loader.makePath('welcome') // returns {diskRootPath}/welcome.edge
+   * loader.makePath('admin::welcome') // returns {adminRootPath}/welcome.edge
+   * loader.makePath('users.list') // returns {diskRootPath}/users/list.edge
    * ```
-   * loader.makePath('index')
-   * loader.makePath('users::index')
-   * ```
+   *
+   * @throws Error if disk is not mounted and attempting to make path for it.
    */
   public makePath (templatePath: string): string {
     const [diskName, template] = extractDiskAndTemplateName(templatePath)
@@ -71,10 +128,29 @@ export class Loader implements ILoader {
   }
 
   /**
-   * Resolves a template from disk and returns it as a string
+   * Resolves the template for the disk optionally loads the presenter too. The presenter
+   * resolution is based on the convention.
+   *
+   * ## Presenter convention
+   * - View name - welcome
+   * - Presenter name - Welcome.presenter.js
+   *
+   * ```js
+   * loader.resolve('welcome', true)
+   *
+   * // output
+   * {
+   *   template: `<h1> Template content </h1>`,
+   *   Presenter: class Presenter | undefined
+   * }
+   * ```
    */
-  public resolve (templatePath: string, withPresenter: boolean): { template: string, Presenter?: IPresenterConstructor } {
+  public resolve (templatePath: string, withPresenter: boolean): {
+    template: string,
+    Presenter?: IPresenterConstructor,
+  } {
     debug('attempting to resolve %s', templatePath)
+    debug('with presenter %s', withPresenter)
 
     try {
       templatePath = isAbsolute(templatePath) ? templatePath : this.makePath(templatePath)
@@ -103,29 +179,28 @@ export class Loader implements ILoader {
   }
 
   /**
-   * Register a template as a string
+   * Register in memory template and Presenter for a given path. This is super helpful
+   * when distributing components.
+   *
+   * ```js
+   * loader.register('welcome', {
+   *   template: '<h1> Template content </h1>',
+   *   Presenter: class Presenter {
+   *     constructor (state) {
+   *       this.state = state
+   *     }
+   *   }
+   * })
+   * ```
+   *
+   * @throws Error if template content is empty.
    */
   public register (templatePath: string, contents: { template: string, Presenter?: IPresenterConstructor }) {
-    templatePath = isAbsolute(templatePath) ? templatePath : this.makePath(templatePath)
-
     if (!contents.template) {
       throw new Error('Make sure to define the template content for preRegistered template')
     }
 
+    templatePath = isAbsolute(templatePath) ? templatePath : this.makePath(templatePath)
     this.preRegistered.set(templatePath, contents)
-  }
-
-  /**
-   * Attempts to conventionally load the presenter for a given template
-   * using the same basePath.
-   */
-  private _getPresenterForTemplate (templatePath: string): IPresenterConstructor | undefined {
-    try {
-      return requireUncached(templatePath.replace(extname(templatePath), '.presenter.js'))
-    } catch (error) {
-      if (['ENOENT', 'MODULE_NOT_FOUND'].indexOf(error.code) === -1) {
-        throw error
-      }
-    }
   }
 }

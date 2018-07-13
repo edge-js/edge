@@ -1,3 +1,7 @@
+/**
+ * @module main
+ */
+
 /*
 * edge
 *
@@ -12,6 +16,11 @@ import { Context } from '../Context'
 import { Compiler } from '../Compiler'
 import { Presenter as BasePresenter } from '../Presenter'
 
+/**
+ * The template is used to compile and run templates. Also the instance
+ * of template is passed during runtime to render `dynamic partials`
+ * and `dynamic components`.
+ */
 export class Template {
   private sharedState: any
 
@@ -20,15 +29,29 @@ export class Template {
   }
 
   /**
-   * Render the inline template (aka partials)
+   * Render the template inline by sharing the state of the current template.
+   *
+   * ```js
+   * const partialFn = template.renderInline('includes.user')
+   *
+   * // render and use output
+   * partialFn(template, ctx)
+   * ```
    */
   public renderInline (templatePath: string): Function {
     return new Function('template', 'ctx', this.compiler.compile(templatePath, true).template)
   }
 
   /**
-   * Renders an inline template, but with isolated state. This is
-   * mainly used by the components
+   * Renders the template with custom state. The `sharedState` of the template is still
+   * passed to this template.
+   *
+   * Also a set of custom slots can be passed along. The slots uses the state of the current
+   * template.
+   *
+   * ```js
+   * template.renderWithState('components.user', { username: 'virk' }, slotsIfAny)
+   * ```
    */
   public renderWithState (template: string, state: object, slots: object): string {
     const { template: compiledTemplate, Presenter } = this.compiler.compile(template, false)
@@ -39,8 +62,11 @@ export class Template {
   }
 
   /**
-   * Renders the template by using the template path and the state. The presenter
-   * is resolved by the loader itself
+   * Render a template with it's state.
+   *
+   * ```js
+   * template.render('welcome', { key: 'value' })
+   * ```
    */
   public render (template: string, state: object): string {
     const { template: compiledTemplate, Presenter } = this.compiler.compile(template, false)

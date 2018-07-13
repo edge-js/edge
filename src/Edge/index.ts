@@ -1,3 +1,7 @@
+/**
+ * @module main
+ */
+
 /*
 * edge
 *
@@ -26,6 +30,28 @@ type configOptions = {
   cache?: boolean,
 }
 
+/**
+ * This class is the main interface to configure and render
+ * templates.
+ *
+ * ## Basic Setup
+ *
+ * ```js
+ * import edge from 'edge.js'
+ *
+ * edge.configure({
+ *   cache: boolean,
+ *   loader: CustomLoaderIfAny
+ * })
+ * ```
+ *
+ * ```js
+ * edge.mount(join(__dirname, 'views'))
+ *
+ * // or named disk
+ * edge.mount('admin', join(__dirname, 'admin/views'))
+ * ```
+ */
 export class Edge {
   private static globals: any = {}
   private locals: any = {}
@@ -46,7 +72,14 @@ export class Edge {
   }
 
   /**
-   * Configure edge
+   * Configure edge with an optional custom loader and toggle the
+   * caching behavior.
+   *
+   * ```js
+   * edge.configure({
+   *   cache: process.env.NODE_ENV === 'production'
+   * })
+   * ```
    */
   public static configure (options: configOptions) {
     const edgeOptions = Object.assign({
@@ -71,7 +104,14 @@ export class Edge {
   public static mount (dirPath: string): void
 
   /**
-   * Mount a disk to the loader
+   * Mount a disk to the loader.
+   *
+   * ```js
+   * edge.mount(join(__dirname, 'views'))
+   *
+   * // or named disk
+   * edge.mount('admin', join(__dirname, 'admin/views'))
+   * ```
    */
   public static mount (diskName: string, dirPath?: string): void {
     /* istanbul ignore else  */
@@ -88,21 +128,31 @@ export class Edge {
   }
 
   /**
-   * Un Mount a disk from the loader
+   * Un Mount a disk from the loader.
+   *
+   * ```js
+   * edge.unmount('admin')
+   * ```
    */
   public static unmount (diskName: string): void {
     loader!.unmount(diskName)
   }
 
   /**
-   * Add a new global to the edge globals
+   * Add a new global to the edge globals. The globals are available
+   * to all the templates.
+   *
+   * ```js
+   * edge.global('username', 'virk')
+   * edge.global('time', () => new Date().getTime())
+   * ```
    */
   public static global (name: string, value: any): void {
     this.globals[name] = value
   }
 
   /**
-   * Add a new tag to the tags list
+   * Add a new tag to the tags list.
    */
   public static tag (Tag: ITag) {
     debug('defining a new tag %s', Tag.tagName)
@@ -110,7 +160,8 @@ export class Edge {
   }
 
   /**
-   * Register a template as a string
+   * Register an in-memory template as a string. Check [loader.register](main.loader.html#register) for
+   * more info.
    */
   public static register (templatePath: string, contents: { template: string, Presenter?: IPresenterConstructor }) {
     debug('registering dynamic template %s', templatePath)
@@ -134,7 +185,7 @@ export class Edge {
 
   /**
    * Clears registered globals, loader and
-   * the compiler instance
+   * the compiler instance.
    */
   public static clear () {
     this.globals = {}
@@ -143,7 +194,13 @@ export class Edge {
   }
 
   /**
-   * Render template with state
+   * Render template with state. The `newUp` is helpful
+   * when you want to pass locals to the
+   * template
+   *
+   * ```js
+   * edge.newUp().render('welcome', {})
+   * ```
    */
   public render (templatePath: string, state: any = {}): string {
     const template = new Template(compiler!, (this.constructor as typeof Edge).globals, this.locals)
@@ -151,7 +208,16 @@ export class Edge {
   }
 
   /**
-   * Share locals with the current view context
+   * Share locals with the current view context.
+   *
+   * ```js
+   * const view = edge.newUp()
+   *
+   * // local state for the current render
+   * view.share({ foo: 'bar' })
+   *
+   * view.render('welcome')
+   * ```
    */
   public share (data: any): this {
     merge(this.locals, data)

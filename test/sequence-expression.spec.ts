@@ -83,7 +83,8 @@ test.group('parseSequenceExpression', () => {
 
   test('parse props with multiple obj properties', (assert) => {
     const parser = new Parser(tags, { filename: 'foo.edge' })
-    const expression = parser.parseStatement(parser.generateAst(`('partial', { username: 'virk', age: 22 })`, 1).body[0])
+    const ast = parser.generateAst(`('partial', { username: 'virk', age: 22 })`, 1).body[0]
+    const expression = parser.parseStatement(ast)
     const [name, props] = parseSequenceExpression(expression, parser)
     assert.equal(name, `'partial'`)
     assert.equal(props, `{ username: 'virk', age: 22 }`)

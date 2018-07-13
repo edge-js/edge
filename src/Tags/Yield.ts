@@ -1,3 +1,7 @@
+/**
+ * @module tags
+ */
+
 /*
 * edge
 *
@@ -16,7 +20,7 @@ export class YieldTag {
   public static block = true
   public static seekable = true
   public static selfclosed = true
-  public static tagName = 'if'
+  public static tagName = 'yield'
 
   /**
    * Expressions which are not allowed by the sequence

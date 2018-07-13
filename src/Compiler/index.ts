@@ -1,3 +1,7 @@
+/**
+ * @module main
+ */
+
 /*
 * edge
 *
@@ -15,16 +19,23 @@ import * as Debug from 'debug'
 
 const debug = Debug('edge:loader')
 
+/**
+ * Compiler compiles the template to a function, which can be invoked at a later
+ * stage.
+ * Compiler uses [edge-parser](https://npm.im/edge-parser) under the hood and also
+ * handles the layouts.
+ * When caching is set to `true`, the compiled templates will be cached to improve performance.
+ */
 export class Compiler implements ICompiler {
   private cacheStore: Map<string, { template: string, Presenter?: IPresenterConstructor }> = new Map()
 
-  constructor (private loader: ILoader, private tags: Tags, public cache: boolean = true) {
+  constructor (private loader: ILoader, private tags: Tags, private cache: boolean = true) {
   }
 
   /**
    * Returns the template and the presenter class from the
    * cache. If caching is disabled, then it will
-   * return undefined
+   * return undefined.
    */
   private _getFromCache (templatePath: string): undefined | { template: string, Presenter?: IPresenterConstructor } {
     if (!this.cache) {
@@ -48,18 +59,18 @@ export class Compiler implements ICompiler {
   }
 
   /**
-   * Converts the content of a template to AST. If layouts are
-   * used, they will be merged together to form the final
-   * AST
+   * Generates an array of lexer tokens from the template string. Further tokens
+   * are checked for layouts and if layouts are used, their sections will be
+   * merged together.
    */
-  public templateContentToAst (content: string, parser: Parser): INode[] {
+  private _templateContentToTokens (content: string, parser: Parser): INode[] {
     let templateTokens = parser.generateTokens(content)
 
     const firstToken = templateTokens[0] as IBlockNode
     if (firstToken.type === 'block' && firstToken.properties.name === 'layout') {
       debug('detected layout %s', firstToken.properties.jsArg)
 
-      const layoutTokens = this.compileToAst(firstToken.properties.jsArg.replace(/'/g, ''))
+      const layoutTokens = this.generateTokens(firstToken.properties.jsArg.replace(/'/g, ''))
       templateTokens = mergeSections(layoutTokens, templateTokens)
     }
 
@@ -67,22 +78,39 @@ export class Compiler implements ICompiler {
   }
 
   /**
-   * Compiles a template by resolving it from the loader
-   * and then compiling it's contents to AST
+   * Converts the template content to an [array of lexer tokens](https://github.com/poppinss/edge-lexer#nodes). If
+   * layouts detected, their sections will be merged together.
+   *
+   * ```
+   * compiler.generateTokens('<template-path>')
+   * ```
    */
-  public compileToAst (templatePath: string): INode[] {
+  public generateTokens (templatePath: string): INode[] {
     const parser = new Parser(this.tags, { filename: templatePath })
     const { template } = this.loader.resolve(templatePath, false)
-    return this.templateContentToAst(template, parser)
+    return this._templateContentToTokens(template, parser)
   }
 
   /**
-   * Compiles a given template by loading it using the loader, also caches
-   * the template and returns from the cache (if exists).
+   * Compiles the template contents to a function string, which can be invoked
+   * later.
    *
-   * When the `inline` property is set to true, the Presenter resolution
-   * will not happen, since Presenters are tied to the top level
-   * views and not partials.
+   * When `inline` is set to true, the compiled output will not have it's own scope and
+   * neither an attempt to load is made. The `inline` is mainly used for partials.
+   *
+   * ```js
+   * compiler.compile('welcome', false)
+   * // output
+   *
+   * {
+   *   template: `function (template, ctx) {
+   *     let out = ''
+   *     out += ''
+   *     return out
+   *   })(template, ctx)`,
+   *   Presenter: class Presenter | undefined
+   * }
+   * ```
    */
   public compile (templatePath: string, inline: boolean): { template: string, Presenter?: IPresenterConstructor } {
     templatePath = this.loader.makePath(templatePath)
@@ -109,7 +137,7 @@ export class Compiler implements ICompiler {
     /**
      * Convert template to AST. So that we can merge the layout tokens
      */
-    const templateTokens = this.templateContentToAst(template, parser)
+    const templateTokens = this._templateContentToTokens(template, parser)
 
     /**
      * Finally process the ast

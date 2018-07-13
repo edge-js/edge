@@ -45,7 +45,10 @@ test.group('Fixtures', (group) => {
       assert.stringEqual(compiled, expectedCompiled)
 
       const out = readFileSync(join(dirBasePath, 'index.txt'), 'utf-8')
-      const output = template.render(`${dir}/index.edge`, JSON.parse(readFileSync(join(dirBasePath, 'index.json'), 'utf-8')))
+      const output = template.render(
+        `${dir}/index.edge`,
+        JSON.parse(readFileSync(join(dirBasePath, 'index.json'), 'utf-8')),
+      )
       assert.equal(output.trim(), out)
     })
   })
