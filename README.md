@@ -1,10 +1,24 @@
-# edge
+# Edge
+> Template engine for Node.js with a breath of fresh air
 
 [![travis-image]][travis-url]
 [![appveyor-image]][appveyor-url]
 [![coveralls-image]][coveralls-url]
 [![npm-image]][npm-url]
 ![](https://img.shields.io/badge/Uses-Typescript-294E80.svg?style=flat-square&colorA=ddd)
+
+Edge is logical template engine for Node.js and has supports for all [Javascript expressions](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Expressions_and_Operators#Expressions).
+
+## Features
+
+- Minimal core, functionality added via `Tags`.
+- Simple developer API to add your own Tags.
+- Support for **layouts**, **partials** and **components**.
+- Support for all valid Javascript expressions.
+- Identical to Javascript.
+- Small learning curve.
+
+Make sure to read [official docs](edge.adonisjs.com)
 
 ## Change log
 
