@@ -154,9 +154,9 @@ export class Edge {
   /**
    * Add a new tag to the tags list.
    */
-  public static tag (Tag: ITag) {
-    debug('defining a new tag %s', Tag.tagName)
-    Tags[Tag.tagName] = Tag
+  public static tag (tag: ITag) {
+    debug('defining a new tag %s', tag.tagName)
+    Tags[tag.tagName] = tag
   }
 
   /**

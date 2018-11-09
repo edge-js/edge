@@ -21,7 +21,7 @@
 import { Parser } from 'edge-parser'
 import { sep } from 'path'
 import { EdgeError } from 'edge-error'
-import { INode, IBlockNode } from 'edge-lexer/build/src/Contracts'
+import { IToken, TagTypes, ITagToken } from 'edge-lexer/build/src/Contracts'
 
 /**
  * When passing objects in the template, we cannot pass them as real Javascript
@@ -230,37 +230,45 @@ export function extractDiskAndTemplateName (templatePath: string): [string, stri
  * Returns a boolean, telling whether the lexer node is a block node
  * or not.
  */
-export function isBlock (token: INode, name: string): boolean {
-  return token.type === 'block' && (token as IBlockNode).properties.name === name
+export function isBlock (token: IToken, name: string): token is ITagToken {
+  if (token.type === TagTypes.TAG || token.type === TagTypes.ETAG) {
+    return token.properties.name === name
+  }
+
+  return false
 }
 
 /**
  * Returns a boolean telling if the current token
  * first children is a super tag.
  */
-export function hasChildSuper (token: IBlockNode): boolean {
+export function hasChildSuper (token: ITagToken): boolean {
   if (!token.children.length) {
     return false
   }
 
-  if (token.children[0].type !== 'block') {
-    return false
-  }
+  return isBlock(token.children[0], 'super')
+  // const child = token.children[0]
+  // if (child.type === TagTypes.TAG || child.type === TagTypes.ETAG) {
+  // }
+  // if ([TagTypes.TAG, TagTypes.ETAG].indexOf(token.children[0].type) === -1) {
+  //   return false
+  // }
 
-  return (token.children[0] as IBlockNode).properties.name === 'super'
+  // return (token.children[0] as IBlockNode).properties.name === 'super'
 }
 
 /**
  * Merges the sections of multiple lexer tokens array together. This is
  * mainly used to merge sections of layouts.
  */
-export function mergeSections (base: INode[], extended: INode[]): INode[] {
+export function mergeSections (base: IToken[], extended: IToken[]): IToken[] {
   /**
    * Collection all sections from the extended tokens
    */
   const extendedSections = extended
     .filter((node) => isBlock(node, 'section'))
-    .reduce((sections, node: IBlockNode) => {
+    .reduce((sections, node: ITagToken) => {
       sections[node.properties.jsArg.trim()] = node
       return sections
     }, {})
@@ -281,7 +289,7 @@ export function mergeSections (base: INode[], extended: INode[]): INode[] {
         return node
       }
 
-      const blockNode = node as IBlockNode
+      const blockNode = node as ITagToken
       const extendedNode = extendedSections[blockNode.properties.jsArg]
       if (!extendedNode) {
         return blockNode

@@ -12,9 +12,9 @@
 */
 
 import { Parser } from 'edge-parser'
-import { INode, IBlockNode } from 'edge-lexer/build/src/Contracts'
+import { IToken, ITagToken } from 'edge-lexer/build/src/Contracts'
 import { ILoader, IPresenterConstructor, ICompiler, Tags } from '../Contracts'
-import { mergeSections } from '../utils'
+import { mergeSections, isBlock } from '../utils'
 import * as Debug from 'debug'
 
 const debug = Debug('edge:loader')
@@ -63,11 +63,12 @@ export class Compiler implements ICompiler {
    * are checked for layouts and if layouts are used, their sections will be
    * merged together.
    */
-  private _templateContentToTokens (content: string, parser: Parser): INode[] {
+  private _templateContentToTokens (content: string, parser: Parser): IToken[] {
     let templateTokens = parser.generateTokens(content)
 
-    const firstToken = templateTokens[0] as IBlockNode
-    if (firstToken.type === 'block' && firstToken.properties.name === 'layout') {
+    const firstToken = templateTokens[0] as ITagToken
+
+    if (isBlock(firstToken, 'layout')) {
       debug('detected layout %s', firstToken.properties.jsArg)
 
       const layoutTokens = this.generateTokens(firstToken.properties.jsArg.replace(/'/g, ''))
@@ -85,7 +86,7 @@ export class Compiler implements ICompiler {
    * compiler.generateTokens('<template-path>')
    * ```
    */
-  public generateTokens (templatePath: string): INode[] {
+  public generateTokens (templatePath: string): IToken[] {
     const parser = new Parser(this.tags, { filename: templatePath })
     const { template } = this.loader.resolve(templatePath, false)
     return this._templateContentToTokens(template, parser)
@@ -143,7 +144,7 @@ export class Compiler implements ICompiler {
      * Finally process the ast
      */
     const payload = {
-      template: parser.parseTokens(templateTokens, !inline),
+      template: parser.processTokens(templateTokens, !inline),
       Presenter,
     }
 

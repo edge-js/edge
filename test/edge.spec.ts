@@ -16,10 +16,6 @@ import { Edge } from '../src/Edge'
 import { Loader } from '../src/Loader'
 import { Compiler } from '../src/Compiler'
 
-import { Parser } from 'edge-parser'
-import { EdgeBuffer } from 'edge-parser/build/src/EdgeBuffer'
-import { IBlockNode } from 'edge-lexer/build/src/Contracts'
-
 const viewsDir = join(__dirname, 'views')
 
 test.group('Template', (group) => {
@@ -61,7 +57,7 @@ test.group('Template', (group) => {
       public static block = true
       public static seekable = true
       public static selfclosed = true
-      public static compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode): void {
+      public static compile (): void {
       }
     }
 

@@ -13,7 +13,6 @@
     })
   } else {
     out += '  No users found'
-    out += '\n'
   }
   return out
 })(template, ctx)

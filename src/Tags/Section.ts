@@ -13,7 +13,7 @@
 
 import { Parser } from 'edge-parser'
 import { EdgeBuffer } from 'edge-parser/build/src/EdgeBuffer'
-import { IBlockNode } from 'edge-lexer/build/src/Contracts'
+import { ITagToken } from 'edge-lexer/build/src/Contracts'
 
 export class SectionTag {
   public static block = true
@@ -21,7 +21,7 @@ export class SectionTag {
   public static selfclosed = true
   public static tagName = 'section'
 
-  public static compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
+  public static compile (parser: Parser, buffer: EdgeBuffer, token: ITagToken) {
     token.children.forEach((token) => (parser.processToken(token, buffer)))
   }
 }

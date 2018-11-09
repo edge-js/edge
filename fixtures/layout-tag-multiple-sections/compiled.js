@@ -9,6 +9,5 @@
   out += ''
   out += '\n'
   out += 'I will override the content'
-  out += '\n'
   return out
 })(template, ctx)

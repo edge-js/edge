@@ -13,7 +13,7 @@
 
 import { Parser } from 'edge-parser'
 import { EdgeBuffer } from 'edge-parser/build/src/EdgeBuffer'
-import { IBlockNode } from 'edge-lexer/build/src/Contracts'
+import { ITagToken } from 'edge-lexer/build/src/Contracts'
 import { parseAsKeyValuePair } from '../utils'
 
 export class SetTag {
@@ -25,8 +25,8 @@ export class SetTag {
   /**
    * Compiles else block node to Javascript else statement
    */
-  public static compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
-    const ast = parser.parseJsArg(token.properties.jsArg, token.lineno)
+  public static compile (parser: Parser, buffer: EdgeBuffer, token: ITagToken) {
+    const ast = parser.parseJsString(token.properties.jsArg, token.loc)
     const [key, value] = parseAsKeyValuePair(ast, parser, [])
     buffer.writeStatement(`ctx.set(${key}, ${value})`)
   }

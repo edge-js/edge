@@ -164,11 +164,11 @@ export class Loader implements ILoader {
       }
 
       const template = readFileSync(templatePath, 'utf-8')
-      const Presenter = withPresenter ? this._getPresenterForTemplate(templatePath) : undefined
+      const presenter = withPresenter ? this._getPresenterForTemplate(templatePath) : undefined
 
-      debug('has presenter %s', !!Presenter)
+      debug('has presenter %s', !!presenter)
 
-      return { template, Presenter }
+      return { template, Presenter: presenter }
     } catch (error) {
       if (error.code === 'ENOENT') {
         throw new Error(`Cannot resolve ${templatePath}. Make sure file exists.`)

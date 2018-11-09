@@ -13,9 +13,9 @@
 
 import { Parser } from 'edge-parser'
 import { EdgeBuffer } from 'edge-parser/build/src/EdgeBuffer'
-import { IBlockNode } from 'edge-lexer/build/src/Contracts'
+import { ITagToken } from 'edge-lexer/build/src/Contracts'
 import { each, size as lodashSize } from 'lodash'
-import { allowExpressions } from '../utils'
+import { allowExpressions, isBlock } from '../utils'
 
 export class EachTag {
   public static block = true
@@ -42,14 +42,14 @@ export class EachTag {
    * Returns the source on which we should execute the loop
    */
   private static _getLoopSource (expression: any, parser: Parser): string {
-    return parser.statementToString(parser.parseStatement(expression))
+    return parser.statementToString(parser.acornToEdgeExpression(expression))
   }
 
   /**
    * Compiles else block node to Javascript else statement
    */
-  public static compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
-    const ast = parser.generateAst(token.properties.jsArg, token.lineno)
+  public static compile (parser: Parser, buffer: EdgeBuffer, token: ITagToken) {
+    const ast = parser.generateAst(token.properties.jsArg, token.loc)
     const expression = ast.body[0].expression
 
     allowExpressions('each', expression, this.allowedExpressions, parser.options.filename)
@@ -60,7 +60,7 @@ export class EachTag {
     const elseIndex = token
       .children
       .findIndex((child) => {
-        return child.type === 'block' && (child as IBlockNode).properties.name === 'else'
+        return isBlock(child, 'else')
       })
     const elseChild = elseIndex > -1 ? token.children.splice(elseIndex) : []
 
@@ -100,7 +100,7 @@ export class EachTag {
     /**
      * Process all kids
      */
-    token.children.forEach((child, index) => {
+    token.children.forEach((child) => {
       parser.processToken(child, buffer)
     })
 
@@ -133,8 +133,8 @@ export class EachTag {
   /**
    * Add methods to the runtime context for running the loop
    */
-  public static run (Context) {
-    Context.macro('loop', function loop (source, callback) {
+  public static run (context) {
+    context.macro('loop', function loop (source, callback) {
       let index = 0
       const total = lodashSize(source)
 
@@ -155,7 +155,7 @@ export class EachTag {
       })
     })
 
-    Context.macro('size', function size (source) {
+    context.macro('size', function size (source) {
       return lodashSize(source)
     })
   }

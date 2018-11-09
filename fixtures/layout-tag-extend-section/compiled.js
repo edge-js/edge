@@ -5,8 +5,8 @@
   out += ''
   out += '\n'
   out += 'Here goes the content section content'
+  out += ''
   out += '\n'
   out += 'I will extend the content of my parent'
-  out += '\n'
   return out
 })(template, ctx)

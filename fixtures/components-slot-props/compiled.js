@@ -7,7 +7,6 @@ return function (user) {
   ctx.setOnFrame('user', user)
   slot_0 += '    Hello '
   slot_0 += `${ctx.escape(ctx.resolve('user').username)}`
-  slot_0 += '\n'
   ctx.removeFrame()
   return slot_0
 }

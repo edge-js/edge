@@ -7,7 +7,6 @@
     ctx.setOnFrame('index', loop.key)
     out += '  - Hello '
     out += `${ctx.escape(ctx.resolve('user').username)}`
-    out += '\n'
     ctx.removeFrame()
   })
   return out

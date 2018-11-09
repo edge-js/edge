@@ -1,3 +1,1 @@
-<div class="success">    Hello world
-
-</div>
+<div class="success">    Hello world</div>

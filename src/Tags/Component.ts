@@ -13,8 +13,8 @@
 
 import { Parser } from 'edge-parser'
 import { EdgeBuffer } from 'edge-parser/build/src/EdgeBuffer'
-import { IBlockNode } from 'edge-lexer/build/src/Contracts'
-import { parseSequenceExpression, ObjectifyString, parseAsKeyValuePair } from '../utils'
+import { ITagToken } from 'edge-lexer/build/src/Contracts'
+import { parseSequenceExpression, ObjectifyString, parseAsKeyValuePair, isBlock } from '../utils'
 
 export class ComponentTag {
   public static block = true
@@ -25,9 +25,9 @@ export class ComponentTag {
   /**
    * Compiles else block node to Javascript else statement
    */
-  public static compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
-    const parsed = parser.generateAst(token.properties.jsArg, token.lineno)
-    const expression = parser.parseStatement(parsed.body[0])
+  public static compile (parser: Parser, buffer: EdgeBuffer, token: ITagToken) {
+    const parsed = parser.generateAst(token.properties.jsArg, token.loc)
+    const expression = parser.acornToEdgeExpression(parsed.body[0])
     let [name, props] = parseSequenceExpression(expression, parser)
 
     const slots = {}
@@ -40,8 +40,8 @@ export class ComponentTag {
       let slotName: string = `'main'`
       let slotProps: string | null = null
 
-      if (child.type === 'block' && (child as IBlockNode).properties.name === 'slot') {
-        const statement = parser.generateAst((child as IBlockNode).properties.jsArg, child.lineno)
+      if (isBlock(child, 'slot')) {
+        const statement = parser.generateAst(child.properties.jsArg, child.loc)
         const parsed = parseAsKeyValuePair(statement.body[0].expression, parser, ['Identifier'])
         slotName = parsed[0]
         slotProps = parsed[1]

@@ -6,17 +6,17 @@
   "typings": "./build/src/Edge/index.d.ts",
   "scripts": {
     "pretest": "npm run lint",
-    "test": "nyc japa",
+    "test": "nyc node japaFile.js",
     "posttest": "npm run coverage",
     "mrm": "mrm --preset=@adonisjs/mrm-preset",
     "commit": "git-cz",
     "prepublishOnly": "npm run build",
     "test:win": "./node_modules/japa-cli/index.js",
-    "lint": "tslint --project tsconfig.json",
     "clean": "del build",
     "compile": "npm run lint && npm run clean && tsc",
-    "build": "npm run compile && typedoc",
-    "coverage": "nyc report --reporter=text-lcov | coveralls"
+    "build": "npm run compile",
+    "coverage": "nyc report --reporter=text-lcov | coveralls",
+    "lint": "tslint --project tsconfig.json"
   },
   "repository": {
     "type": "git",
@@ -29,27 +29,28 @@
   },
   "homepage": "https://github.com/poppinss/edge#readme",
   "devDependencies": {
-    "@adonisjs/mrm-preset": "^1.0.8",
-    "@types/node": "^10.5.2",
-    "commitizen": "^2.10.1",
+    "@adonisjs/mrm-preset": "^1.0.14",
+    "@types/node": "^10.12.3",
+    "commitizen": "^3.0.4",
     "coveralls": "^3.0.2",
     "cz-conventional-changelog": "^2.1.0",
     "dedent": "^0.7.0",
     "del-cli": "^1.1.0",
-    "fs-extra": "^6.0.1",
-    "japa": "^1.0.6",
+    "fs-extra": "^7.0.1",
+    "japa": "^2.0.6",
     "japa-cli": "^1.0.1",
     "mrm": "^1.2.1",
-    "nyc": "^12.0.2",
-    "pkg-ok": "^2.2.0",
-    "ts-node": "^7.0.0",
-    "tslint": "^5.10.0",
-    "tslint-eslint-rules": "^5.3.1",
-    "typedoc": "^0.11.1",
+    "nyc": "^13.1.0",
+    "pkg-ok": "^2.3.1",
+    "ts-node": "^7.0.1",
+    "tslint": "^5.11.0",
+    "tslint-eslint-rules": "^5.4.0",
+    "typedoc": "^0.13.0",
     "typedoc-clarity-theme": "^1.1.0",
-    "typedoc-plugin-external-module-name": "^1.1.1",
+    "typedoc-plugin-external-module-name": "^1.1.3",
     "typedoc-plugin-single-line-tags": "^1.0.0",
-    "typescript": "^2.9.2"
+    "typescript": "^3.1.6",
+    "yorkie": "^2.0.0"
   },
   "config": {
     "commitizen": {
@@ -58,21 +59,23 @@
   },
   "nyc": {
     "exclude": [
-      "test",
-      "japaFile.js"
+      "test"
     ],
     "extension": [
       ".ts"
     ]
   },
   "dependencies": {
-    "debug": "^3.1.0",
-    "edge-error": "^1.0.0",
-    "edge-parser": "^1.0.16",
-    "he": "^1.1.1",
-    "lodash": "^4.17.10",
-    "macroable": "^1.0.0",
-    "node-exceptions": "^3.0.0",
-    "require-uncached": "^1.0.3"
+    "debug": "^4.1.0",
+    "edge-error": "^1.0.1",
+    "edge-parser": "^2.0.3",
+    "he": "^1.2.0",
+    "lodash": "^4.17.11",
+    "macroable": "^2.0.0",
+    "node-exceptions": "^4.0.1",
+    "require-uncached": "^2.0.0"
+  },
+  "gitHooks": {
+    "commit-msg": "node ./node_modules/@adonisjs/mrm-preset/validateCommit/conventional/validate.js"
   }
 }

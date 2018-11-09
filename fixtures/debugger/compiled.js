@@ -1,7 +1,8 @@
 (function (template, ctx) {
   let out = ''
   debugger;
-  out += 'Hello'
+  out += ''
   out += '\n'
+  out += 'Hello'
   return out
 })(template, ctx)

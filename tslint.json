@@ -1,9 +1,5 @@
 {
   "extends": [
     "@adonisjs/mrm-preset/_tslint"
-  ],
-  "rules": {
-    "variable-name": [true, "allow-pascal-case"],
-    "max-line-length": [true, 120]
-  }
+  ]
 }

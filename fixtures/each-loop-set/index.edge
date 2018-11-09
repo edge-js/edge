@@ -2,6 +2,7 @@
 @each(item in items)
   @set('grossPrice', item.price * item.quantity)
   @set('total', total + grossPrice)
+
 - {{ item.name }} x {{ item.quantity }} = {{ grossPrice }}
 @endeach
 Total price = {{ total }}

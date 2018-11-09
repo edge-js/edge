@@ -13,7 +13,6 @@
 
 import { Parser } from 'edge-parser'
 import { EdgeBuffer } from 'edge-parser/build/src/EdgeBuffer'
-import { IBlockNode } from 'edge-lexer/build/src/Contracts'
 
 export class ElseTag {
   public static block = false
@@ -24,7 +23,7 @@ export class ElseTag {
   /**
    * Compiles else block node to Javascript else statement
    */
-  public static compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
+  public static compile (_parser: Parser, buffer: EdgeBuffer) {
     buffer.dedent()
     buffer.writeStatement(`} else {`)
     buffer.indent()

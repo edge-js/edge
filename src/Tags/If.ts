@@ -13,7 +13,7 @@
 
 import { Parser } from 'edge-parser'
 import { EdgeBuffer } from 'edge-parser/build/src/EdgeBuffer'
-import { IBlockNode } from 'edge-lexer/build/src/Contracts'
+import { ITagToken } from 'edge-lexer/build/src/Contracts'
 import { disAllowExpressions } from '../utils'
 
 export class IfTag {
@@ -33,8 +33,8 @@ export class IfTag {
   /**
    * Compiles the if block node to a Javascript if statement
    */
-  public static compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
-    const parsed = parser.parseJsArg(token.properties.jsArg, token.lineno)
+  public static compile (parser: Parser, buffer: EdgeBuffer, token: ITagToken) {
+    const parsed = parser.parseJsString(token.properties.jsArg, token.loc)
     disAllowExpressions('if', parsed, this.bannedExpressions, parser.options.filename)
 
     /**
@@ -50,7 +50,7 @@ export class IfTag {
     /**
      * Process of all kids recursively
      */
-    token.children.forEach((child, index) => {
+    token.children.forEach((child) => {
       parser.processToken(child, buffer)
     })
 

@@ -3,7 +3,7 @@
  */
 
 import { ITag as BaseTag } from 'edge-parser/build/src/Contracts'
-import { INode } from 'edge-lexer/build/src/Contracts'
+import { IToken } from 'edge-lexer/build/src/Contracts'
 
 export interface ILoaderConstructor {
   new (): ILoader
@@ -41,7 +41,7 @@ export interface ICompiler {
   /**
    * Return an array of edge-lexer tokens
    */
-  generateTokens (templatePath: string): INode[]
+  generateTokens (templatePath: string): IToken[]
 
   /**
    * Compile template to a function string

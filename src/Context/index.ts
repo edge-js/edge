@@ -11,7 +11,7 @@
 * file that was distributed with this source code.
 */
 
-import * as Macroable from 'macroable'
+import { Macroable } from 'macroable'
 import * as he from 'he'
 import { set } from 'lodash'
 import { IPresenter } from '../Contracts'
@@ -23,57 +23,15 @@ import { IPresenter } from '../Contracts'
  * Also the context can be extended by tags to add `getters` and `methods`.
  */
 export class Context extends Macroable {
-  /* tslint:disable-next-line */
-  private static _macros: object = {}
+  protected static _macros = {}
 
-  /* tslint:disable-next-line */
-  private static _getters: object = {}
+  protected static _getters = {}
 
   /**
    * Remove all macros and getters
    */
   public static hydrate () {
     super.hydrate()
-  }
-
-  /**
-   * Define macro on the context.
-   *
-   * ```js
-   * Context.macro('username', function () {
-   *   return 'foo'
-   * })
-   * ```
-   *
-   * Later use it as
-   *
-   * ```js
-   * const context = new Context(presenter, { })
-   * context.username()
-   * ```
-   */
-  public static macro (name: string, callback: Function) {
-    super.macro(name, callback)
-  }
-
-  /**
-   * Define getter on the context.For singletons, pass `true` as the third argument.
-   *
-   * ```js
-   * Context.macro('username', function () {
-   *   return 'foo'
-   * })
-   * ```
-   *
-   * Later use it as
-   *
-   * ```js
-   * const context = new Context(presenter, { })
-   * context.username
-   * ```
-   */
-  public static getter (name: string, callback: Function, singleton: boolean = false) {
-    super.getter(name, callback, singleton)
   }
 
   /**

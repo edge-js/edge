@@ -13,7 +13,7 @@
 
 import { Parser } from 'edge-parser'
 import { EdgeBuffer } from 'edge-parser/build/src/EdgeBuffer'
-import { IBlockNode } from 'edge-lexer/build/src/Contracts'
+import { ITagToken } from 'edge-lexer/build/src/Contracts'
 
 export class SlotTag {
   public static block = true
@@ -21,11 +21,8 @@ export class SlotTag {
   public static selfclosed = false
   public static tagName = 'slot'
 
-  /**
-   * Compiles else block node to Javascript else statement
-   */
-  public static compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode) {
-    token.children.forEach((child, index) => {
+  public static compile (parser: Parser, buffer: EdgeBuffer, token: ITagToken) {
+    token.children.forEach((child) => {
       parser.processToken(child, buffer)
     })
   }

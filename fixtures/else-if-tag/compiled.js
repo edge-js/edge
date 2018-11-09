@@ -9,7 +9,6 @@
     out += '\n'
   } else {
     out += '  Hello Guest!'
-    out += '\n'
   }
   return out
 })(template, ctx)

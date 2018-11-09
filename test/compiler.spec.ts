@@ -9,14 +9,10 @@
 
 import * as test from 'japa'
 import * as fs from 'fs-extra'
-import { EOL } from 'os'
 
 import { join } from 'path'
 import { Loader } from '../src/Loader'
 import { Compiler } from '../src/Compiler'
-import { Parser } from 'edge-parser'
-import { EdgeBuffer } from 'edge-parser/build/src/EdgeBuffer'
-import { IBlockNode } from 'edge-lexer/build/src/Contracts'
 
 const tags = {
   if: class If {
@@ -24,7 +20,7 @@ const tags = {
     public static seekable = true
     public static selfclosed = false
     public static tagName = 'if'
-    public static compile (parser: Parser, buffer: EdgeBuffer, token: IBlockNode): void {
+    public static compile (): void {
     }
   },
 }
@@ -46,7 +42,6 @@ test.group('Compiler', (group) => {
   let out = ''
   out += 'Hello '
   out += \`\${ctx.escape(ctx.resolve('username'))}\`
-  out += '${EOL === '\n' ? '\\n' : '\\r\\n'}'
   return out
 })(template, ctx)`)
   })
@@ -91,7 +86,6 @@ test.group('Compiler', (group) => {
   let out = ''
   out += 'Hello '
   out += \`\${ctx.escape(ctx.resolve('username'))}\`
-  out += '${EOL === '\n' ? '\\n' : '\\r\\n'}'
   return out`)
   })
 

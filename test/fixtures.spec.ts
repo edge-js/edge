@@ -15,6 +15,7 @@ import { Template } from '../src/Template'
 import { Compiler } from '../src/Compiler'
 import { Loader } from '../src/Loader'
 import * as tags from '../src/Tags'
+import './assert-extend'
 
 const basePath = join(__dirname, '../fixtures')
 const loader = new Loader()
@@ -42,6 +43,7 @@ test.group('Fixtures', (group) => {
 
       const { template: compiled } = compiler.compile(`${dir}/index.edge`, false)
       const expectedCompiled = readFileSync(join(dirBasePath, 'compiled.js'), 'utf-8')
+
       assert.stringEqual(compiled, expectedCompiled)
 
       const out = readFileSync(join(dirBasePath, 'index.txt'), 'utf-8')
