@@ -53,9 +53,9 @@ export class ObjectifyString {
    * ```
    */
   public flush (): string {
-    const obj = this.obj
+    const obj = `{ ${this.obj} }`
     this.obj = ''
-    return `{ ${obj} }`
+    return obj
   }
 }
 
@@ -248,14 +248,6 @@ export function hasChildSuper (token: ITagToken): boolean {
   }
 
   return isBlock(token.children[0], 'super')
-  // const child = token.children[0]
-  // if (child.type === TagTypes.TAG || child.type === TagTypes.ETAG) {
-  // }
-  // if ([TagTypes.TAG, TagTypes.ETAG].indexOf(token.children[0].type) === -1) {
-  //   return false
-  // }
-
-  // return (token.children[0] as IBlockNode).properties.name === 'super'
 }
 
 /**
@@ -289,17 +281,16 @@ export function mergeSections (base: IToken[], extended: IToken[]): IToken[] {
         return node
       }
 
-      const blockNode = node as ITagToken
-      const extendedNode = extendedSections[blockNode.properties.jsArg]
+      const extendedNode = extendedSections[node.properties.jsArg.trim()]
       if (!extendedNode) {
-        return blockNode
+        return node
       }
 
       /**
        * Concat children when super was called
        */
       if (hasChildSuper(extendedNode)) {
-        extendedNode.children = blockNode.children.concat(extendedNode.children)
+        extendedNode.children = node.children.concat(extendedNode.children)
       }
 
       return extendedNode
