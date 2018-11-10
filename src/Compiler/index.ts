@@ -12,8 +12,8 @@
 */
 
 import { Parser } from 'edge-parser'
-import { IToken, ITagToken } from 'edge-lexer/build/src/Contracts'
-import { ILoader, IPresenterConstructor, ICompiler, Tags } from '../Contracts'
+import { IToken } from 'edge-lexer/build/src/Contracts'
+import { ILoader, ICompiler, Tags, ILoaderTemplate } from '../Contracts'
 import { mergeSections, isBlock } from '../utils'
 import * as Debug from 'debug'
 
@@ -22,12 +22,14 @@ const debug = Debug('edge:loader')
 /**
  * Compiler compiles the template to a function, which can be invoked at a later
  * stage.
+ *
  * Compiler uses [edge-parser](https://npm.im/edge-parser) under the hood and also
  * handles the layouts.
+ *
  * When caching is set to `true`, the compiled templates will be cached to improve performance.
  */
 export class Compiler implements ICompiler {
-  private cacheStore: Map<string, { template: string, Presenter?: IPresenterConstructor }> = new Map()
+  private cacheStore: Map<string, ILoaderTemplate> = new Map()
 
   constructor (private loader: ILoader, private tags: Tags, private cache: boolean = true) {
   }
@@ -37,7 +39,7 @@ export class Compiler implements ICompiler {
    * cache. If caching is disabled, then it will
    * return undefined.
    */
-  private _getFromCache (templatePath: string): undefined | { template: string, Presenter?: IPresenterConstructor } {
+  private _getFromCache (templatePath: string): undefined | ILoaderTemplate {
     if (!this.cache) {
       return
     }
@@ -47,9 +49,9 @@ export class Compiler implements ICompiler {
 
   /**
    * Set's the template path and the payload to the cache. If
-   * cache is disable, then it will never be set.
+   * cache is disabled, then it will never be set.
    */
-  private _setInCache (templatePath: string, payload: { template: string, Presenter?: IPresenterConstructor }) {
+  private _setInCache (templatePath: string, payload: ILoaderTemplate) {
     if (!this.cache) {
       return
     }
@@ -66,7 +68,7 @@ export class Compiler implements ICompiler {
   private _templateContentToTokens (content: string, parser: Parser): IToken[] {
     let templateTokens = parser.generateTokens(content)
 
-    const firstToken = templateTokens[0] as ITagToken
+    const firstToken = templateTokens[0]
 
     if (isBlock(firstToken, 'layout')) {
       debug('detected layout %s', firstToken.properties.jsArg)
@@ -97,7 +99,7 @@ export class Compiler implements ICompiler {
    * later.
    *
    * When `inline` is set to true, the compiled output will not have it's own scope and
-   * neither an attempt to load is made. The `inline` is mainly used for partials.
+   * neither an attempt to load the presenter is made. The `inline` is mainly used for partials.
    *
    * ```js
    * compiler.compile('welcome', false)
@@ -113,7 +115,7 @@ export class Compiler implements ICompiler {
    * }
    * ```
    */
-  public compile (templatePath: string, inline: boolean): { template: string, Presenter?: IPresenterConstructor } {
+  public compile (templatePath: string, inline: boolean): ILoaderTemplate {
     templatePath = this.loader.makePath(templatePath)
 
     /**

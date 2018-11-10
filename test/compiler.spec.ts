@@ -18,7 +18,6 @@ const tags = {
   if: class If {
     public static block = true
     public static seekable = true
-    public static selfclosed = false
     public static tagName = 'if'
     public static compile (): void {
     }

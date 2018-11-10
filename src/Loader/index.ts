@@ -2,20 +2,20 @@
  * @module main
  */
 
-/*
-* edge
-*
-* (c) Harminder Virk <virk@adonisjs.com>
-*
-* For the full copyright and license information, please view the LICENSE
-* file that was distributed with this source code.
-*/
+/**
+ * edge
+ *
+ * (c) Harminder Virk <virk@adonisjs.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 import { join, isAbsolute, extname } from 'path'
 import { readFileSync } from 'fs'
 import * as requireUncached from 'require-uncached'
 
-import { ILoader, IPresenterConstructor } from '../Contracts'
+import { ILoader, IPresenterConstructor, ILoaderTemplate } from '../Contracts'
 import { extractDiskAndTemplateName } from '../utils'
 import * as Debug from 'debug'
 
@@ -23,21 +23,21 @@ const debug = Debug('edge:loader')
 
 /**
  * The job of a loader is to load the template and it's presenter for a given path.
- * The base loader (shipped with edge) looks for files on the file-system.
+ * The base loader (shipped with edge) looks for files on the file-system and
+ * reads them synchronously.
  *
- * However, you are free to add your own loader implementation. Just make sure it implements
- * the ILoader interface.
+ * You are free to define your own loaders that implements the [[ILoader]] interface
  */
 export class Loader implements ILoader {
   private mountedDirs: Map<string, string> = new Map()
-  private preRegistered: Map<string, { template: string, Presenter?: IPresenterConstructor }> = new Map()
+  private preRegistered: Map<string, ILoaderTemplate> = new Map()
 
   /**
    * Attempts to load the presenter for a given template. If presenter doesn't exists, it
    * will swallow the error.
    *
-   * Also this method will **bypass the require cache**, since in product compiled templates and their
-   * presenters are cached anyways.
+   * Also this method will **bypass the require cache**, since in production compiled templates
+   * and their presenters are cached anyways.
    */
   private _getPresenterForTemplate (templatePath: string): IPresenterConstructor | undefined {
     try {
@@ -46,6 +46,7 @@ export class Loader implements ILoader {
         .replace(extname(templatePath), '.presenter.js')
 
       debug('loading presenter %s', presenterPath)
+
       return requireUncached(presenterPath)
     } catch (error) {
       if (['ENOENT', 'MODULE_NOT_FOUND'].indexOf(error.code) === -1) {
@@ -68,7 +69,7 @@ export class Loader implements ILoader {
    * }
    * ```
    */
-  public get mounted (): object {
+  public get mounted (): { [key: string]: string } {
     return Array.from(this.mountedDirs).reduce((obj, [key, value]) => {
       obj[key] = value
       return obj
@@ -117,6 +118,10 @@ export class Loader implements ILoader {
    * @throws Error if disk is not mounted and attempting to make path for it.
    */
   public makePath (templatePath: string): string {
+    if (this.preRegistered.has(templatePath)) {
+      return templatePath
+    }
+
     const [diskName, template] = extractDiskAndTemplateName(templatePath)
 
     const mountedDir = this.mountedDirs.get(diskName)
@@ -128,8 +133,9 @@ export class Loader implements ILoader {
   }
 
   /**
-   * Resolves the template for the disk optionally loads the presenter too. The presenter
-   * resolution is based on the convention.
+   * Resolves the template from the disk, optionally loads the presenter too. The presenter
+   * resolution is based on the convention and resolved from the same directory
+   * as the template.
    *
    * ## Presenter convention
    * - View name - welcome
@@ -145,29 +151,25 @@ export class Loader implements ILoader {
    * }
    * ```
    */
-  public resolve (templatePath: string, withPresenter: boolean): {
-    template: string,
-    Presenter?: IPresenterConstructor,
-  } {
+  public resolve (templatePath: string, withPresenter: boolean): ILoaderTemplate {
     debug('attempting to resolve %s', templatePath)
-    debug('with presenter %s', withPresenter)
+    debug('with presenter %s', String(withPresenter))
+
+    /**
+     * Return from pre-registered one's if exists
+     */
+    if (this.preRegistered.has(templatePath)) {
+      const contents = this.preRegistered.get(templatePath)
+      return withPresenter ? contents! : { template: contents!.template }
+    }
 
     try {
       templatePath = isAbsolute(templatePath) ? templatePath : this.makePath(templatePath)
-
-      /**
-       * Return from pre-registered one's if exists
-       */
-      if (this.preRegistered.get(templatePath)) {
-        const contents = this.preRegistered.get(templatePath)
-        return withPresenter ? contents! : { template: contents!.template }
-      }
 
       const template = readFileSync(templatePath, 'utf-8')
       const presenter = withPresenter ? this._getPresenterForTemplate(templatePath) : undefined
 
       debug('has presenter %s', !!presenter)
-
       return { template, Presenter: presenter }
     } catch (error) {
       if (error.code === 'ENOENT') {
@@ -195,12 +197,15 @@ export class Loader implements ILoader {
    *
    * @throws Error if template content is empty.
    */
-  public register (templatePath: string, contents: { template: string, Presenter?: IPresenterConstructor }) {
+  public register (templatePath: string, contents: ILoaderTemplate) {
     if (!contents.template) {
       throw new Error('Make sure to define the template content for preRegistered template')
     }
 
-    templatePath = isAbsolute(templatePath) ? templatePath : this.makePath(templatePath)
+    if (this.preRegistered.has(templatePath)) {
+      throw new Error(`Cannot override previously registered ${templatePath} template`)
+    }
+
     this.preRegistered.set(templatePath, contents)
   }
 }

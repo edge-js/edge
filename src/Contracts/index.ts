@@ -2,15 +2,30 @@
  * @module main
  */
 
+/**
+ * edge
+ *
+ * (c) Harminder Virk <virk@adonisjs.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 import { ITag as BaseTag } from 'edge-parser/build/src/Contracts'
 import { IToken } from 'edge-lexer/build/src/Contracts'
+
+export type ILoaderTemplate = {
+  template: string,
+  Presenter?: IPresenterConstructor,
+}
 
 export interface ILoaderConstructor {
   new (): ILoader
 }
 
 export interface ILoader {
-  mounted: object
+  mounted: { [key: string]: string }
+
   /**
    * Save disk name and dirPath to resolve views
    */
@@ -24,7 +39,7 @@ export interface ILoader {
   /**
    * Resolve template contents and optionally the Presenter
    */
-  resolve (templatePath: string, withPresenter: boolean): { template: string, Presenter?: IPresenterConstructor }
+  resolve (templatePath: string, withPresenter: boolean): ILoaderTemplate
 
   /**
    * Make absolute path to a template
@@ -34,7 +49,7 @@ export interface ILoader {
   /**
    * Register in memory template and presenter
    */
-  register (templatePath: string, contents: { template: string, Presenter?: IPresenterConstructor }): void
+  register (templatePath: string, contents: ILoaderTemplate): void
 }
 
 export interface ICompiler {
@@ -46,7 +61,7 @@ export interface ICompiler {
   /**
    * Compile template to a function string
    */
-  compile (templatePath: string, inline: boolean): { template: string, Presenter?: IPresenterConstructor }
+  compile (templatePath: string, inline: boolean): ILoaderTemplate
 }
 
 export interface ITag extends BaseTag {

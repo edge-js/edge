@@ -34,13 +34,13 @@ test.group('Loader', (group) => {
     assert.deepEqual(loader.mounted, {})
   })
 
-  test('throw exception when resolve path from undefined location', (assert) => {
+  test('throw exception when resolving path from undefined location', (assert) => {
     const loader = new Loader()
     const fn = () => loader.resolve('foo', true)
     assert.throw(fn, 'Attempting to resolve foo.edge template for unmounted default location')
   })
 
-  test('resolve template for given location', async (assert) => {
+  test('resolve template for default location', async (assert) => {
     await fs.outputFile(join(viewsDir, 'foo.edge'), 'Hello world')
 
     const loader = new Loader()
@@ -134,5 +134,24 @@ test.group('Loader', (group) => {
     const { template, Presenter } = loader.resolve('users::foo.edge', false)
     assert.equal(template.trim(), 'Hello world')
     assert.isUndefined(Presenter)
+  })
+
+  test('pre register templates with a key', async (assert) => {
+    const loader = new Loader()
+    loader.register('my-view', {
+      template: 'Hello world',
+    })
+
+    const { template, Presenter } = loader.resolve('my-view', true)
+    assert.equal(template.trim(), 'Hello world')
+    assert.isUndefined(Presenter)
+  })
+
+  test('pre registering duplicate templates must raise an error', async (assert) => {
+    const loader = new Loader()
+    loader.register('my-view', { template: 'Hello world' })
+    const fn = () => loader.register('my-view', { template: 'Hello world' })
+
+    assert.throw(fn, 'Cannot override previously registered my-view template')
   })
 })

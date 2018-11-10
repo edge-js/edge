@@ -20,19 +20,13 @@ import { IPresenter } from '../Contracts'
  * Context is used at runtime to resolve values for a given
  * template.
  *
- * Also the context can be extended by tags to add `getters` and `methods`.
+ * Also the context can be extended to add `getters` and `methods`. Checkout
+ * [macroable](https://github.com/poppinss/macroable) for same.
  */
 export class Context extends Macroable {
   protected static _macros = {}
 
   protected static _getters = {}
-
-  /**
-   * Remove all macros and getters
-   */
-  public static hydrate () {
-    super.hydrate()
-  }
 
   /**
    * Frames are used to define a inner scope in which values will
@@ -119,7 +113,8 @@ export class Context extends Macroable {
    * 3. Then the presenter `state` object.
    * 4. Finally fallback to the sharedState.
    *
-   * ```
+   * @example
+   * ```js
    * ctx.resolve('username')
    * ```
    */

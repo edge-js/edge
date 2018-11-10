@@ -18,7 +18,7 @@ import { Compiler } from '../src/Compiler'
 
 const viewsDir = join(__dirname, 'views')
 
-test.group('Template', (group) => {
+test.group('Edge', (group) => {
   group.afterEach(async () => {
     Edge.clear()
     await fs.remove(viewsDir)
@@ -86,7 +86,8 @@ test.group('Template', (group) => {
   })
 
   test('register a template as a string', async (assert) => {
-    Edge.mount(viewsDir)
+    Edge.configure({})
+
     Edge.register('foo', {
       template: `Hello {{ username }}`,
     })
