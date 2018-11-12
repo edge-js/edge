@@ -47,4 +47,4 @@ MIT License, see the included [MIT](LICENSE.md) file.
 [coveralls-url]: https://coveralls.io/github/poppinss/edge "coveralls"
 
 [npm-image]: https://img.shields.io/npm/v/edge.svg?style=flat-square&logo=npm
-[npm-url]: https://npmjs.org/package/edge "npm"
+[npm-url]: https://www.npmjs.com/package/edge.js "npm"
