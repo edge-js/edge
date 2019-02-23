@@ -18,7 +18,7 @@ Edge is logical template engine for Node.js and has supports for all [Javascript
 - Identical to Javascript.
 - Small learning curve.
 
-Make sure to read [official docs](edge.adonisjs.com)
+Make sure to read [official docs](https://edge.adonisjs.com)
 
 ## Change log
 
