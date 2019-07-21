@@ -92,7 +92,7 @@ test.group('Include', (group) => {
     try {
       compiler.compile('foo', true)
     } catch (error) {
-      assert.equal(error.stack.split('\n')[1], `    at (${join(viewsDir, 'foo.edge')}:2:13)`)
+      assert.equal(error.stack.split('\n')[1], `    at (foo:2:13)`)
     }
   })
 
@@ -105,7 +105,7 @@ test.group('Include', (group) => {
     try {
       compiler.compile('foo', true)
     } catch (error) {
-      assert.equal(error.stack.split('\n')[1], `    at (${join(viewsDir, 'foo.edge')}:1:9)`)
+      assert.equal(error.stack.split('\n')[1], `    at (foo:1:9)`)
       assert.equal(error.message, 'SequenceExpression is not allowed for include tag.')
     }
   })
@@ -130,7 +130,7 @@ test.group('Component', (group) => {
     try {
       compiler.compile('foo', true)
     } catch (error) {
-      assert.equal(error.stack.split('\n')[1], `    at (${join(viewsDir, 'foo.edge')}:3:0)`)
+      assert.equal(error.stack.split('\n')[1], `    at (foo:3:0)`)
       assert.equal(error.message, 'Identifier is not allowed for slot tag.')
     }
   })
@@ -149,7 +149,7 @@ test.group('Component', (group) => {
     try {
       compiler.compile('foo', true)
     } catch (error) {
-      assert.equal(error.stack.split('\n')[1], `    at (${join(viewsDir, 'foo.edge')}:3:0)`)
+      assert.equal(error.stack.split('\n')[1], `    at (foo:3:0)`)
       assert.equal(error.message, 'Maximum of 2 arguments are allowed for slot tag')
     }
   })
@@ -168,7 +168,7 @@ test.group('Component', (group) => {
     try {
       compiler.compile('foo', true)
     } catch (error) {
-      assert.equal(error.stack.split('\n')[1], `    at (${join(viewsDir, 'foo.edge')}:3:0)`)
+      assert.equal(error.stack.split('\n')[1], `    at (foo:3:0)`)
       assert.equal(error.message, 'Identifier is not allowed for slot tag.')
     }
   })
@@ -190,7 +190,7 @@ test.group('Component', (group) => {
     try {
       compiler.compile('foo', true)
     } catch (error) {
-      assert.equal(error.stack.split('\n')[1], `    at (${join(viewsDir, 'foo.edge')}:5:6)`)
+      assert.equal(error.stack.split('\n')[1], `    at (foo:5:6)`)
       assert.equal(error.message, 'Literal is not allowed for slot tag.')
     }
   })

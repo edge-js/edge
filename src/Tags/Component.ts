@@ -1,5 +1,5 @@
 /**
- * @module tags
+ * @module edge
  */
 
 /*
@@ -11,9 +11,8 @@
 * file that was distributed with this source code.
 */
 
-import { Parser } from 'edge-parser'
-import { EdgeBuffer } from 'edge-parser/build/src/EdgeBuffer'
-import { TagToken } from 'edge-lexer/build/src/Contracts'
+import { TagToken } from 'edge-lexer'
+import { Parser, EdgeBuffer } from 'edge-parser'
 import { parseSequenceExpression, ObjectifyString, parseAsKeyValuePair, isBlock } from '../utils'
 
 export class ComponentTag {
@@ -22,9 +21,6 @@ export class ComponentTag {
   public static selfclosed = true
   public static tagName = 'component'
 
-  /**
-   * Compiles else block node to Javascript else statement
-   */
   public static compile (parser: Parser, buffer: EdgeBuffer, token: TagToken) {
     const parsed = parser.generateAst(token.properties.jsArg, token.loc)
     const expression = parser.acornToEdgeExpression(parsed.body[0])

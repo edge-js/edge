@@ -1,5 +1,5 @@
 /**
- * @module main
+ * @module edge
  */
 
 /*
@@ -11,13 +11,12 @@
 * file that was distributed with this source code.
 */
 
+import { Token } from 'edge-lexer'
 import { Parser } from 'edge-parser'
-import { Token } from 'edge-lexer/build'
-import { LoaderContract, CompilerContract, Tags, LoaderTemplate } from '../Contracts'
-import { mergeSections, isBlock } from '../utils'
-import * as Debug from 'debug'
 
-const debug = Debug('edge:loader')
+import { LoaderContract, Tags, LoaderTemplate } from '../Contracts'
+import { mergeSections, isBlock } from '../utils'
+import { CacheManager } from '../CacheManager'
 
 /**
  * Compiler compiles the template to a function, which can be invoked at a later
@@ -26,43 +25,17 @@ const debug = Debug('edge:loader')
  * Compiler uses [edge-parser](https://npm.im/edge-parser) under the hood and also
  * handles the layouts.
  *
- * When caching is set to `true`, the compiled templates will be cached to improve performance.
+ * When caching is set to `true`, the compiled templates will be cached in-memory
+ * to improve performance.
  */
-export class Compiler implements CompilerContract {
-  private cacheStore: Map<string, LoaderTemplate> = new Map()
+export class Compiler {
+  private _cacheManager = new CacheManager(this._cache)
 
   constructor (
-    private loader: LoaderContract,
-    private tags: Tags,
-    private cache: boolean = true,
-  ) {
-  }
-
-  /**
-   * Returns the template and the presenter class from the
-   * cache. If caching is disabled, then it will
-   * return undefined.
-   */
-  private _getFromCache (templatePath: string): undefined | LoaderTemplate {
-    if (!this.cache) {
-      return
-    }
-
-    return this.cacheStore.get(templatePath)
-  }
-
-  /**
-   * Set's the template path and the payload to the cache. If
-   * cache is disabled, then it will never be set.
-   */
-  private _setInCache (templatePath: string, payload: LoaderTemplate) {
-    if (!this.cache) {
-      return
-    }
-
-    debug('adding to cache %s', templatePath)
-    this.cacheStore.set(templatePath, payload)
-  }
+    private _loader: LoaderContract,
+    private _tags: Tags,
+    private _cache: boolean = true,
+  ) {}
 
   /**
    * Generates an array of lexer tokens from the template string. Further tokens
@@ -74,9 +47,11 @@ export class Compiler implements CompilerContract {
 
     const firstToken = templateTokens[0]
 
+    /**
+     * The `layout` is inbuilt feature from core, where we merge the layout
+     * and parent template sections together
+     */
     if (isBlock(firstToken, 'layout')) {
-      debug('detected layout %s', firstToken.properties.jsArg)
-
       const layoutTokens = this.generateTokens(firstToken.properties.jsArg.replace(/'/g, ''))
       templateTokens = mergeSections(layoutTokens, templateTokens)
     }
@@ -85,7 +60,7 @@ export class Compiler implements CompilerContract {
   }
 
   /**
-   * Converts the template content to an [array of lexer tokens](https://github.com/poppinss/edge-lexer#nodes). If
+   * Converts the template content to an [array of lexer tokens](https://github.com/edge-js/edge-lexer#nodes). If
    * layouts detected, their sections will be merged together.
    *
    * ```
@@ -93,8 +68,9 @@ export class Compiler implements CompilerContract {
    * ```
    */
   public generateTokens (templatePath: string): Token[] {
-    const parser = new Parser(this.tags, { filename: templatePath })
-    const { template } = this.loader.resolve(templatePath, false)
+    const { template } = this._loader.resolve(templatePath, false)
+
+    const parser = new Parser(this._tags, { filename: templatePath })
     return this._templateContentToTokens(template, parser)
   }
 
@@ -102,7 +78,7 @@ export class Compiler implements CompilerContract {
    * Compiles the template contents to a function string, which can be invoked
    * later.
    *
-   * When `inline` is set to true, the compiled output will not have it's own scope and
+   * When `inline` is set to true, the compiled output **will not have it's own scope** and
    * neither an attempt to load the presenter is made. The `inline` is mainly used for partials.
    *
    * ```js
@@ -120,29 +96,42 @@ export class Compiler implements CompilerContract {
    * ```
    */
   public compile (templatePath: string, inline: boolean): LoaderTemplate {
-    templatePath = this.loader.makePath(templatePath)
+    const absPath = this._loader.makePath(templatePath)
 
     /**
      * If template is in the cache, then return it without
      * further processing
      */
-    const cachedResponse = this._getFromCache(templatePath)
+    const cachedResponse = this._cacheManager.get(absPath)
     if (cachedResponse) {
       return cachedResponse
     }
 
     /**
-     * Get a new instance of the parser
+     * Do not load presenter in inline mode
      */
-    const parser = new Parser(this.tags, { filename: templatePath })
+    const loadPresenter = !inline
 
     /**
-     * Resolve the base template from loader
+     * Inline templates are not wrapped inside a function
+     * call. They share the parent template scope
      */
-    const { template, Presenter } = this.loader.resolve(templatePath, !inline)
+    const wrapAsFunction = !inline
 
     /**
-     * Convert template to AST. So that we can merge the layout tokens
+     * Get a new instance of the parser. We use the `templatePath` as the filename
+     * instead of the `absPath`, since `templatePath` are relative and readable.
+     */
+    const parser = new Parser(this._tags, { filename: templatePath })
+
+    /**
+     * Resolve the template and Presenter using the given loader
+     */
+    const { template, Presenter } = this._loader.resolve(absPath, loadPresenter)
+
+    /**
+     * Convert template to AST. The AST will have the layout actions merged (if layout)
+     * is used.
      */
     const templateTokens = this._templateContentToTokens(template, parser)
 
@@ -150,11 +139,11 @@ export class Compiler implements CompilerContract {
      * Finally process the ast
      */
     const payload = {
-      template: parser.processTokens(templateTokens, !inline),
+      template: parser.processTokens(templateTokens, wrapAsFunction),
       Presenter,
     }
 
-    this._setInCache(templatePath, payload)
+    this._cacheManager.set(absPath, payload)
     return payload
   }
 }

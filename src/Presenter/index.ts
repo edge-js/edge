@@ -1,5 +1,5 @@
 /**
- * @module main
+ * @module edge
  */
 
 /*
@@ -11,8 +11,6 @@
 * file that was distributed with this source code.
 */
 
-import { PresenterContract } from '../Contracts'
-
 /**
  * The Base presenter is passed to context for reading
  * the state values.
@@ -20,7 +18,7 @@ import { PresenterContract } from '../Contracts'
  * However, a custom presenter a do a lot by defining
  * custom properties and methods.
  */
-export class Presenter implements PresenterContract {
+export class Presenter {
   constructor (public state: any) {
   }
 }

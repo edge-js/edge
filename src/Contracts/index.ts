@@ -1,5 +1,5 @@
 /**
- * @module main
+ * @module edge
  */
 
 /**
@@ -11,14 +11,21 @@
  * file that was distributed with this source code.
  */
 
-import { Token } from 'edge-lexer'
 import { ParseTagDefininationContract } from 'edge-parser'
 
+/**
+ * The shape in which the loader must resolve the template
+ */
 export type LoaderTemplate = {
   template: string,
-  Presenter?: PresenterConstructorContract,
+  Presenter?: {
+    new (state: any): any,
+  },
 }
 
+/**
+ * Loader contract that every loader must adheres to.
+ */
 export interface LoaderContract {
   /**
    * List of mounted disks
@@ -52,38 +59,16 @@ export interface LoaderContract {
 }
 
 /**
- * Compiler
- */
-export interface CompilerContract {
-  /**
-   * Returns an array of edge-lexer tokens
-   */
-  generateTokens (templatePath: string): Token[]
-
-  /**
-   * Compile template to a function string
-   */
-  compile (templatePath: string, inline: boolean): LoaderTemplate
-}
-
-/**
- * Presenter
- */
-export interface PresenterConstructorContract {
-  new (state: any): PresenterContract
-}
-
-export interface PresenterContract {
-  state: any
-}
-
-/**
- * Tags
+ * The final tag must have a tagName along with other properties
+ * required by lexer and parser
  */
 export interface TagContract extends ParseTagDefininationContract {
   tagName: string
 }
 
+/**
+ * Shape of required tags
+ */
 export type Tags = {
-  [key: string]: TagContract,
+  [tagName: string]: TagContract,
 }

@@ -8,7 +8,7 @@
 */
 
 import * as test from 'japa'
-import * as fs from 'fs-extra'
+import { Filesystem } from '@poppinss/dev-utils'
 
 import { join } from 'path'
 import { Loader } from '../src/Loader'
@@ -24,17 +24,18 @@ const tags = {
   },
 }
 
-const viewsDir = join(__dirname, 'views')
+const fs = new Filesystem(join(__dirname, 'views'))
 
 test.group('Compiler', (group) => {
   group.afterEach(async () => {
-    await fs.remove(viewsDir)
+    await fs.cleanup()
   })
 
   test('compile template', async (assert) => {
-    await fs.outputFile(join(viewsDir, 'foo.edge'), 'Hello {{ username }}')
+    await fs.add('foo.edge', 'Hello {{ username }}')
+
     const loader = new Loader()
-    loader.mount('default', viewsDir)
+    loader.mount('default', fs.basePath)
 
     const compiler = new Compiler(loader, tags)
     assert.equal(compiler.compile('foo', false).template, `(function (template, ctx) {
@@ -46,39 +47,48 @@ test.group('Compiler', (group) => {
   })
 
   test('save template to cache', async (assert) => {
-    await fs.outputFile(join(viewsDir, 'foo.edge'), 'Hello {{ username }}')
+    await fs.add('foo.edge', 'Hello {{ username }}')
+
     const loader = new Loader()
-    loader.mount('default', viewsDir)
+    loader.mount('default', fs.basePath)
 
     const compiler = new Compiler(loader, tags)
-    assert.equal(compiler.compile('foo', false), compiler['cacheStore'].get(join(viewsDir, 'foo.edge')))
+    assert.equal(
+      compiler.compile('foo', false),
+      compiler['_cacheManager'].get(join(fs.basePath, 'foo.edge')),
+    )
   })
 
   test('save template and presenter both to the cache', async (assert) => {
-    await fs.outputFile(join(viewsDir, 'foo.edge'), 'Hello {{ username }}')
-    await fs.outputFile(join(viewsDir, 'foo.presenter.js'), 'module.exports = class Foo {}')
+    await fs.add('foo.edge', 'Hello {{ username }}')
+    await fs.add('foo.presenter.js', 'module.exports = class Foo {}')
+
     const loader = new Loader()
-    loader.mount('default', viewsDir)
+    loader.mount('default', fs.basePath)
 
     const compiler = new Compiler(loader, tags)
     compiler.compile('foo', false)
-    assert.equal(compiler['cacheStore'].get(join(viewsDir, 'foo.edge'))!.Presenter!['name'], 'Foo')
+    assert.equal(
+      compiler['_cacheManager'].get(join(fs.basePath, 'foo.edge'))!.Presenter!['name'],
+      'Foo',
+    )
   })
 
-  test('do not cache when disabled', async (assert) => {
-    await fs.outputFile(join(viewsDir, 'foo.edge'), 'Hello {{ username }}')
+  test('do not cache template when caching is disabled', async (assert) => {
+    await fs.add('foo.edge', 'Hello {{ username }}')
+
     const loader = new Loader()
-    loader.mount('default', viewsDir)
+    loader.mount('default', fs.basePath)
 
     const compiler = new Compiler(loader, tags, false)
     compiler.compile('foo', false)
-    assert.isUndefined(compiler['cacheStore'].get(join(viewsDir, 'foo.edge')))
+    assert.isUndefined(compiler['_cacheManager'].get(join(fs.basePath, 'foo.edge')))
   })
 
-  test('compile template as inline', async (assert) => {
-    await fs.outputFile(join(viewsDir, 'foo.edge'), 'Hello {{ username }}')
+  test('do not wrap inline templates to a function', async (assert) => {
+    await fs.add('foo.edge', 'Hello {{ username }}')
     const loader = new Loader()
-    loader.mount('default', viewsDir)
+    loader.mount('default', fs.basePath)
 
     const compiler = new Compiler(loader, tags)
     assert.equal(compiler.compile('foo', true).template, `
@@ -88,11 +98,12 @@ test.group('Compiler', (group) => {
   return out`)
   })
 
-  test('do not load presenter when inline', async (assert) => {
-    await fs.outputFile(join(viewsDir, 'foo.edge'), 'Hello {{ username }}')
-    await fs.outputFile(join(viewsDir, 'foo.presenter.js'), '')
+  test('do not load presenter for inline templates', async (assert) => {
+    await fs.add('foo.edge', 'Hello {{ username }}')
+    await fs.add('foo.presenter.js', '')
+
     const loader = new Loader()
-    loader.mount('default', viewsDir)
+    loader.mount('default', fs.basePath)
 
     const compiler = new Compiler(loader, tags)
     assert.isUndefined(compiler.compile('foo', true).Presenter)

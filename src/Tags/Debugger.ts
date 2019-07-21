@@ -1,5 +1,5 @@
 /**
- * @module tags
+ * @module edge
  */
 
 /*
@@ -11,8 +11,7 @@
 * file that was distributed with this source code.
 */
 
-import { Parser } from 'edge-parser'
-import { EdgeBuffer } from 'edge-parser/build/src/EdgeBuffer'
+import { Parser, EdgeBuffer } from 'edge-parser'
 
 export class DebuggerTag {
   public static block = false

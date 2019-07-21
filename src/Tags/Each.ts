@@ -1,5 +1,5 @@
 /**
- * @module tags
+ * @module edge
  */
 
 /*
@@ -11,10 +11,10 @@
 * file that was distributed with this source code.
 */
 
-import { Parser } from 'edge-parser'
-import { EdgeBuffer } from 'edge-parser/build/src/EdgeBuffer'
-import { TagToken } from 'edge-lexer/build/src/Contracts'
+import { TagToken } from 'edge-lexer'
+import { Parser, EdgeBuffer } from 'edge-parser'
 import { each, size as lodashSize } from 'lodash'
+
 import { allowExpressions, isBlock } from '../utils'
 
 export class EachTag {

@@ -1,5 +1,5 @@
 /**
- * @module tags
+ * @module edge
  */
 
 /*

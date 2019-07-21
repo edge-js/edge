@@ -18,10 +18,10 @@
 * file that was distributed with this source code.
 */
 
-import { Parser } from 'edge-parser'
 import { sep } from 'path'
+import { Parser } from 'edge-parser'
 import { EdgeError } from 'edge-error'
-import { Token, TagTypes, TagToken } from 'edge-lexer/build/src/Contracts'
+import { Token, TagTypes, TagToken } from 'edge-lexer'
 
 /**
  * When passing objects in the template, we cannot pass them as real Javascript
@@ -150,9 +150,9 @@ export function parseSequenceExpression (expression: any, parser: Parser): [stri
  *
  * 1. Top level expression must be `Literal` or `SequenceExpression`.
  * 2. If `SequenceExpression`, then first child of expression must be `Literal`
- * 3. Length of `SequenceExpression` childs must be 2 at max.
+ * 3. Length of `SequenceExpression` children must be 2 at max.
  *
- * Optionally, you can enforce (3rd argument) that value in the key/value pair must be one
+ * Optionally, you can enforce (3rd argument) that value the key/value pair must be one
  * of the given expressions.
  *
  * ```js
@@ -163,41 +163,42 @@ export function parseSequenceExpression (expression: any, parser: Parser): [stri
  * ('foo', { bar: true })
  * ```
  */
-export function parseAsKeyValuePair (expression: any, parser: Parser, valueExpressions: string[]): [
-  string,
-  null | string
-] {
-    allowExpressions('slot', expression, ['Literal', 'SequenceExpression'], parser.options.filename)
+export function parseAsKeyValuePair (
+  expression: any,
+  parser: Parser,
+  valueExpressions: string[],
+): [string, null | string] {
+  allowExpressions('slot', expression, ['Literal', 'SequenceExpression'], parser.options.filename)
 
-    /**
-     * Return without counting props, value is a literal
-     */
-    if (expression.type === 'Literal') {
-      return [expression.raw, null]
-    }
+  /**
+   * Return without counting props, value is a literal
+   */
+  if (expression.type === 'Literal') {
+    return [expression.raw, null]
+  }
 
-    /**
-     * Raise error when more than 2 arguments are passed to the slot
-     * expression
-     */
-    if (expression.expressions.length > 2) {
-      throw new EdgeError('Maximum of 2 arguments are allowed for slot tag', 'E_MAX_ARGUMENTS', {
-        line: expression.loc.start.line,
-        col: expression.loc.start.column,
-        filename: parser.options.filename,
-      })
-    }
+  /**
+   * Raise error when more than 2 arguments are passed to the slot
+   * expression
+   */
+  if (expression.expressions.length > 2) {
+    throw new EdgeError('Maximum of 2 arguments are allowed for slot tag', 'E_MAX_ARGUMENTS', {
+      line: expression.loc.start.line,
+      col: expression.loc.start.column,
+      filename: parser.options.filename,
+    })
+  }
 
-    allowExpressions('slot', expression.expressions[0], ['Literal'], parser.options.filename)
+  allowExpressions('slot', expression.expressions[0], ['Literal'], parser.options.filename)
 
-    if (valueExpressions.length) {
-      allowExpressions('slot', expression.expressions[1], valueExpressions, parser.options.filename)
-    }
+  if (valueExpressions.length) {
+    allowExpressions('slot', expression.expressions[1], valueExpressions, parser.options.filename)
+  }
 
-    /**
-     * Finally return the name and prop name for the slot
-     */
-    return [expression.expressions[0].raw, parser.statementToString(expression.expressions[1])]
+  /**
+   * Finally return the name and prop name for the slot
+   */
+  return [expression.expressions[0].raw, parser.statementToString(expression.expressions[1])]
 }
 
 /**
@@ -252,11 +253,11 @@ export function hasChildSuper (token: TagToken): boolean {
 
 /**
  * Merges the sections of multiple lexer tokens array together. This is
- * mainly used to merge sections of layouts.
+ * used to merge sections of layouts.
  */
 export function mergeSections (base: Token[], extended: Token[]): Token[] {
   /**
-   * Collection all sections from the extended tokens
+   * Collection of all sections from the extended tokens
    */
   const extendedSections = extended
     .filter((node) => isBlock(node, 'section'))

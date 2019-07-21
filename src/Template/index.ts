@@ -1,5 +1,5 @@
 /**
- * @module main
+ * @module edge
  */
 
 /*
@@ -22,10 +22,14 @@ import { Presenter as BasePresenter } from '../Presenter'
  * and `dynamic components`.
  */
 export class Template {
-  private sharedState: any
+  /**
+   * The shared state is used to hold the globals and locals,
+   * since it is shared with components too.
+   */
+  private _sharedState: any
 
-  constructor (private compiler: Compiler, globals: any, locals: any) {
-    this.sharedState = merge({}, globals, locals)
+  constructor (private _compiler: Compiler, globals: any, locals: any) {
+    this._sharedState = merge({}, globals, locals)
   }
 
   /**
@@ -39,24 +43,24 @@ export class Template {
    * ```
    */
   public renderInline (templatePath: string): Function {
-    return new Function('template', 'ctx', this.compiler.compile(templatePath, true).template)
+    return new Function('template', 'ctx', this._compiler.compile(templatePath, true).template)
   }
 
   /**
    * Renders the template with custom state. The `sharedState` of the template is still
    * passed to this template.
    *
-   * Also a set of custom slots can be passed along. The slots uses the state of the current
+   * Also a set of custom slots can be passed along. The slots uses the state of the parent
    * template.
    *
    * ```js
    * template.renderWithState('components.user', { username: 'virk' }, slotsIfAny)
    * ```
    */
-  public renderWithState (template: string, state: object, slots: object): string {
-    const { template: compiledTemplate, Presenter } = this.compiler.compile(template, false)
-    const presenter = new (Presenter || BasePresenter)(Object.assign(state, { $slots: slots }))
-    const ctx = new Context(presenter, this.sharedState)
+  public renderWithState (template: string, state: any, slots: any): string {
+    const { template: compiledTemplate, Presenter } = this._compiler.compile(template, false)
+    const presenter = new (Presenter || BasePresenter)(merge(state, { $slots: slots }))
+    const ctx = new Context(presenter, this._sharedState)
 
     return new Function('template', 'ctx', `return ${compiledTemplate}`)(this, ctx)
   }
@@ -68,10 +72,10 @@ export class Template {
    * template.render('welcome', { key: 'value' })
    * ```
    */
-  public render (template: string, state: object): string {
-    const { template: compiledTemplate, Presenter } = this.compiler.compile(template, false)
+  public render (template: string, state: any): string {
+    const { template: compiledTemplate, Presenter } = this._compiler.compile(template, false)
     const presenter = new (Presenter || BasePresenter)(state)
-    const ctx = new Context(presenter, this.sharedState)
+    const ctx = new Context(presenter, this._sharedState)
 
     return new Function('template', 'ctx', `return ${compiledTemplate}`)(this, ctx)
   }

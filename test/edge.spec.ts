@@ -64,7 +64,7 @@ test.group('Edge', (group) => {
     Edge.tag(MyTag)
 
     Edge.configure({})
-    assert.deepEqual(Edge.compiler['tags'].mytag, MyTag)
+    assert.deepEqual(Edge.compiler['_tags'].mytag, MyTag)
   })
 
   test('render a view using the static render method', async (assert) => {

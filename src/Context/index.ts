@@ -1,5 +1,5 @@
 /**
- * @module main
+ * @module edge
  */
 
 /*
@@ -11,10 +11,9 @@
 * file that was distributed with this source code.
 */
 
-import { Macroable } from 'macroable'
 import * as he from 'he'
 import { set } from 'lodash'
-import { PresenterContract } from '../Contracts'
+import { Macroable } from 'macroable'
 
 /**
  * Context is used at runtime to resolve values for a given
@@ -25,7 +24,6 @@ import { PresenterContract } from '../Contracts'
  */
 export class Context extends Macroable {
   protected static _macros = {}
-
   protected static _getters = {}
 
   /**
@@ -36,7 +34,7 @@ export class Context extends Macroable {
    */
   private frames: any[] = []
 
-  constructor (public presenter: PresenterContract, public sharedState: object) {
+  constructor (public presenter: any, public sharedState: any) {
     super()
   }
 
@@ -64,7 +62,7 @@ export class Context extends Macroable {
 
   /**
    * Set key/value pair on the frame object. The value will only be available until
-   * the `removeFrame` is called.
+   * the `removeFrame` is not called.
    *
    * ```js
    * ctx.setOnFrame('username', 'virk')

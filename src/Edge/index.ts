@@ -1,5 +1,5 @@
 /**
- * @module main
+ * @module edge
  */
 
 /*
@@ -12,15 +12,13 @@
 */
 
 import { merge } from 'lodash'
-import * as Tags from '../Tags'
-import { Compiler } from '../Compiler'
-import { Loader } from '../Loader'
-import { LoaderContract, TagContract, PresenterConstructorContract } from '../Contracts'
-import { Template } from '../Template'
-import { Context } from '../Context'
-import * as Debug from 'debug'
 
-const debug = Debug('edge')
+import * as Tags from '../Tags'
+import { Loader } from '../Loader'
+import { Context } from '../Context'
+import { Template } from '../Template'
+import { Compiler } from '../Compiler'
+import { LoaderContract, TagContract, LoaderTemplate } from '../Contracts'
 
 let loader: null | LoaderContract = null
 let compiler: null | Compiler = null
@@ -87,13 +85,10 @@ export class Edge {
       cache: false,
     }, options)
 
-    debug('configure %o', edgeOptions)
-
     loader = new edgeOptions.Loader!()
     compiler = new Compiler(loader!, Tags, edgeOptions.cache)
 
     Object.keys(Tags).forEach((tag) => {
-      debug('calling run method on %s', tag)
       if (typeof (Tags[tag].run) === 'function') {
         Tags[tag].run(Context)
       }
@@ -155,7 +150,6 @@ export class Edge {
    * Add a new tag to the tags list.
    */
   public static tag (tag: TagContract) {
-    debug('defining a new tag %s', tag.tagName)
     Tags[tag.tagName] = tag
   }
 
@@ -163,11 +157,7 @@ export class Edge {
    * Register an in-memory template as a string. Check [loader.register](main.loader.html#register) for
    * more info.
    */
-  public static register (
-    templatePath: string,
-    contents: { template: string, Presenter?: PresenterConstructorContract },
-  ) {
-    debug('registering dynamic template %s', templatePath)
+  public static register (templatePath: string, contents: LoaderTemplate) {
     loader!.register(templatePath, contents)
   }
 

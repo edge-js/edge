@@ -1,5 +1,5 @@
 /**
- * @module main
+ * @module edge
  */
 
 /**
@@ -11,45 +11,68 @@
  * file that was distributed with this source code.
  */
 
-import { join, isAbsolute, extname } from 'path'
 import { readFileSync } from 'fs'
+import { Exception } from '@poppinss/utils'
 import requireUncached = require('import-fresh')
+import { join, isAbsolute, extname } from 'path'
 
-import { LoaderContract, PresenterConstructorContract, LoaderTemplate } from '../Contracts'
 import { extractDiskAndTemplateName } from '../utils'
-import * as Debug from 'debug'
-
-const debug = Debug('edge:loader')
+import { LoaderContract, LoaderTemplate } from '../Contracts'
 
 /**
  * The job of a loader is to load the template and it's presenter for a given path.
  * The base loader (shipped with edge) looks for files on the file-system and
  * reads them synchronously.
  *
- * You are free to define your own loaders that implements the [[ILoader]] interface
+ * You are free to define your own loaders that implements the [[LoaderContract]] interface.
  */
 export class Loader implements LoaderContract {
-  private mountedDirs: Map<string, string> = new Map()
-  private preRegistered: Map<string, LoaderTemplate> = new Map()
+  /**
+   * List of mounted directories
+   */
+  private _mountedDirs: Map<string, string> = new Map()
+
+  /**
+   * List of pre-registered (in-memory) templates
+   */
+  private _preRegistered: Map<string, LoaderTemplate> = new Map()
 
   /**
    * Attempts to load the presenter for a given template. If presenter doesn't exists, it
    * will swallow the error.
    *
-   * Also this method will **bypass the require cache**, since in production compiled templates
+   * Also this method will **bypass the `require` cache**, since in production compiled templates
    * and their presenters are cached anyways.
    */
-  private _getPresenterForTemplate (templatePath: string): PresenterConstructorContract | undefined {
+  private _getPresenterForTemplate (templatePath: string): LoaderTemplate['Presenter'] | undefined {
+    const presenterPath = templatePath
+      .replace(/^\w/, c => c.toUpperCase())
+      .replace(extname(templatePath), '.presenter.js')
+
     try {
-      const presenterPath = templatePath
-        .replace(/^\w/, c => c.toUpperCase())
-        .replace(extname(templatePath), '.presenter.js')
-
-      debug('loading presenter %s', presenterPath)
-
-      return requireUncached(presenterPath) as PresenterConstructorContract
+      return requireUncached(presenterPath) as LoaderTemplate['Presenter']
     } catch (error) {
       if (['ENOENT', 'MODULE_NOT_FOUND'].indexOf(error.code) === -1) {
+        throw error
+      }
+    }
+  }
+
+  /**
+   * Reads the content of a template from the disk. An exception is raised
+   * when file is missing or if `readFileSync` returns an error.
+   */
+  private _readTemplateContents (absPath: string): string {
+    try {
+      return readFileSync(absPath, 'utf-8')
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        throw new Exception(
+          `Cannot resolve ${absPath}. Make sure the file exists`,
+          500,
+          'E_MISSING_TEMPLATE_FILE',
+        )
+      } else {
         throw error
       }
     }
@@ -70,7 +93,7 @@ export class Loader implements LoaderContract {
    * ```
    */
   public get mounted (): { [key: string]: string } {
-    return Array.from(this.mountedDirs).reduce((obj, [key, value]) => {
+    return Array.from(this._mountedDirs).reduce((obj, [key, value]) => {
       obj[key] = value
       return obj
     }, {})
@@ -89,8 +112,7 @@ export class Loader implements LoaderContract {
    * ```
    */
   public mount (diskName: string, dirPath: string): void {
-    debug('mounting dir %s with name %s', dirPath, diskName)
-    this.mountedDirs.set(diskName, dirPath)
+    this._mountedDirs.set(diskName, dirPath)
   }
 
   /**
@@ -101,8 +123,7 @@ export class Loader implements LoaderContract {
    * ```
    */
   public unmount (diskName: string): void {
-    debug('unmount dir with name %s', diskName)
-    this.mountedDirs.delete(diskName)
+    this._mountedDirs.delete(diskName)
   }
 
   /**
@@ -118,15 +139,18 @@ export class Loader implements LoaderContract {
    * @throws Error if disk is not mounted and attempting to make path for it.
    */
   public makePath (templatePath: string): string {
-    if (this.preRegistered.has(templatePath)) {
+    if (this._preRegistered.has(templatePath)) {
       return templatePath
     }
 
-    const [diskName, template] = extractDiskAndTemplateName(templatePath)
+    const [ diskName, template ] = extractDiskAndTemplateName(templatePath)
 
-    const mountedDir = this.mountedDirs.get(diskName)
+    /**
+     * Raise exception when disk name is not defined
+     */
+    const mountedDir = this._mountedDirs.get(diskName)
     if (!mountedDir) {
-      throw new Error(`Attempting to resolve ${template} template for unmounted ${diskName} location`)
+      throw new Exception(`{${diskName}} namespace is not mounted`, 500, 'E_UNMOUNTED_DISK_NAME')
     }
 
     return join(mountedDir, template)
@@ -138,7 +162,7 @@ export class Loader implements LoaderContract {
    * as the template.
    *
    * ## Presenter convention
-   * - View name - welcome
+   * - View name - welcome.edge
    * - Presenter name - Welcome.presenter.js
    *
    * ```js
@@ -152,31 +176,22 @@ export class Loader implements LoaderContract {
    * ```
    */
   public resolve (templatePath: string, withPresenter: boolean): LoaderTemplate {
-    debug('attempting to resolve %s', templatePath)
-    debug('with presenter %s', String(withPresenter))
-
     /**
      * Return from pre-registered one's if exists
      */
-    if (this.preRegistered.has(templatePath)) {
-      const contents = this.preRegistered.get(templatePath)
+    if (this._preRegistered.has(templatePath)) {
+      const contents = this._preRegistered.get(templatePath)
       return withPresenter ? contents! : { template: contents!.template }
     }
 
-    try {
-      templatePath = isAbsolute(templatePath) ? templatePath : this.makePath(templatePath)
+    /**
+     * Make absolute to the file on the disk
+     */
+    templatePath = isAbsolute(templatePath) ? templatePath : this.makePath(templatePath)
 
-      const template = readFileSync(templatePath, 'utf-8')
-      const presenter = withPresenter ? this._getPresenterForTemplate(templatePath) : undefined
-
-      debug('has presenter %s', !!presenter)
-      return { template, Presenter: presenter }
-    } catch (error) {
-      if (error.code === 'ENOENT') {
-        throw new Error(`Cannot resolve ${templatePath}. Make sure file exists.`)
-      } else {
-        throw error
-      }
+    return {
+      template: this._readTemplateContents(templatePath),
+      Presenter: withPresenter ? this._getPresenterForTemplate(templatePath) : undefined,
     }
   }
 
@@ -198,14 +213,28 @@ export class Loader implements LoaderContract {
    * @throws Error if template content is empty.
    */
   public register (templatePath: string, contents: LoaderTemplate) {
-    if (!contents.template) {
-      throw new Error('Make sure to define the template content for preRegistered template')
+    /**
+     * Ensure template content is defined as a string
+     */
+    if (typeof (contents.template) !== 'string') {
+      throw new Exception(
+        'Make sure to define the template content as a string',
+        500,
+        'E_MISSING_TEMPLATE_CONTENTS',
+      )
     }
 
-    if (this.preRegistered.has(templatePath)) {
-      throw new Error(`Cannot override previously registered ${templatePath} template`)
+    /**
+     * Do not overwrite existing template with same template path
+     */
+    if (this._preRegistered.has(templatePath)) {
+      throw new Exception(
+        `Cannot override previously registered {${templatePath}} template`,
+        500,
+        'E_DUPLICATE_TEMPLATE_PATH',
+      )
     }
 
-    this.preRegistered.set(templatePath, contents)
+    this._preRegistered.set(templatePath, contents)
   }
 }
