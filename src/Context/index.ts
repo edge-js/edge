@@ -14,7 +14,7 @@
 import { Macroable } from 'macroable'
 import * as he from 'he'
 import { set } from 'lodash'
-import { IPresenter } from '../Contracts'
+import { PresenterContract } from '../Contracts'
 
 /**
  * Context is used at runtime to resolve values for a given
@@ -36,7 +36,7 @@ export class Context extends Macroable {
    */
   private frames: any[] = []
 
-  constructor (public presenter: IPresenter, public sharedState: object) {
+  constructor (public presenter: PresenterContract, public sharedState: object) {
     super()
   }
 

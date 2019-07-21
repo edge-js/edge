@@ -13,7 +13,7 @@
 
 import { Parser } from 'edge-parser'
 import { EdgeBuffer } from 'edge-parser/build/src/EdgeBuffer'
-import { ITagToken } from 'edge-lexer/build/src/Contracts'
+import { TagToken } from 'edge-lexer/build/src/Contracts'
 import { each, size as lodashSize } from 'lodash'
 import { allowExpressions, isBlock } from '../utils'
 
@@ -48,7 +48,7 @@ export class EachTag {
   /**
    * Compiles else block node to Javascript else statement
    */
-  public static compile (parser: Parser, buffer: EdgeBuffer, token: ITagToken) {
+  public static compile (parser: Parser, buffer: EdgeBuffer, token: TagToken) {
     const ast = parser.generateAst(token.properties.jsArg, token.loc)
     const expression = ast.body[0].expression
 

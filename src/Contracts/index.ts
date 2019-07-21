@@ -11,20 +11,19 @@
  * file that was distributed with this source code.
  */
 
-import { ITag as BaseTag } from 'edge-parser/build/src/Contracts'
-import { IToken } from 'edge-lexer/build/src/Contracts'
+import { Token } from 'edge-lexer'
+import { ParseTagDefininationContract } from 'edge-parser'
 
-export type ILoaderTemplate = {
+export type LoaderTemplate = {
   template: string,
-  Presenter?: IPresenterConstructor,
+  Presenter?: PresenterConstructorContract,
 }
 
-export interface ILoaderConstructor {
-  new (): ILoader
-}
-
-export interface ILoader {
-  mounted: { [key: string]: string }
+export interface LoaderContract {
+  /**
+   * List of mounted disks
+   */
+  mounted: { [diskName: string]: string }
 
   /**
    * Save disk name and dirPath to resolve views
@@ -39,7 +38,7 @@ export interface ILoader {
   /**
    * Resolve template contents and optionally the Presenter
    */
-  resolve (templatePath: string, withPresenter: boolean): ILoaderTemplate
+  resolve (templatePath: string, withPresenter: boolean): LoaderTemplate
 
   /**
    * Make absolute path to a template
@@ -49,33 +48,42 @@ export interface ILoader {
   /**
    * Register in memory template and presenter
    */
-  register (templatePath: string, contents: ILoaderTemplate): void
+  register (templatePath: string, contents: LoaderTemplate): void
 }
 
-export interface ICompiler {
+/**
+ * Compiler
+ */
+export interface CompilerContract {
   /**
-   * Return an array of edge-lexer tokens
+   * Returns an array of edge-lexer tokens
    */
-  generateTokens (templatePath: string): IToken[]
+  generateTokens (templatePath: string): Token[]
 
   /**
    * Compile template to a function string
    */
-  compile (templatePath: string, inline: boolean): ILoaderTemplate
+  compile (templatePath: string, inline: boolean): LoaderTemplate
 }
 
-export interface ITag extends BaseTag {
+/**
+ * Presenter
+ */
+export interface PresenterConstructorContract {
+  new (state: any): PresenterContract
+}
+
+export interface PresenterContract {
+  state: any
+}
+
+/**
+ * Tags
+ */
+export interface TagContract extends ParseTagDefininationContract {
   tagName: string
 }
 
 export type Tags = {
-  [key: string]: ITag,
-}
-
-export interface IPresenterConstructor {
-  new (state: any): IPresenter
-}
-
-export interface IPresenter {
-  state: any
+  [key: string]: TagContract,
 }

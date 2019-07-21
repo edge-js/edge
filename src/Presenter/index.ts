@@ -11,7 +11,7 @@
 * file that was distributed with this source code.
 */
 
-import { IPresenter } from '../Contracts'
+import { PresenterContract } from '../Contracts'
 
 /**
  * The Base presenter is passed to context for reading
@@ -20,7 +20,7 @@ import { IPresenter } from '../Contracts'
  * However, a custom presenter a do a lot by defining
  * custom properties and methods.
  */
-export class Presenter implements IPresenter {
+export class Presenter implements PresenterContract {
   constructor (public state: any) {
   }
 }

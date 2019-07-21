@@ -13,7 +13,7 @@
 
 import { Parser } from 'edge-parser'
 import { EdgeBuffer } from 'edge-parser/build/src/EdgeBuffer'
-import { ITagToken } from 'edge-lexer/build/src/Contracts'
+import { TagToken } from 'edge-lexer/build/src/Contracts'
 
 export class SlotTag {
   public static block = true
@@ -21,7 +21,7 @@ export class SlotTag {
   public static selfclosed = false
   public static tagName = 'slot'
 
-  public static compile (parser: Parser, buffer: EdgeBuffer, token: ITagToken) {
+  public static compile (parser: Parser, buffer: EdgeBuffer, token: TagToken) {
     token.children.forEach((child) => {
       parser.processToken(child, buffer)
     })

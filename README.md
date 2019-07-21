@@ -1,3 +1,15 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+## Table of contents
+
+- [Edge](#edge)
+  - [Features](#features)
+  - [Change log](#change-log)
+  - [Contributing](#contributing)
+  - [Authors & License](#authors--license)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Edge
 > Template engine for Node.js with a breath of fresh air
 

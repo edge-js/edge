@@ -15,18 +15,18 @@ import { merge } from 'lodash'
 import * as Tags from '../Tags'
 import { Compiler } from '../Compiler'
 import { Loader } from '../Loader'
-import { ILoaderConstructor, ILoader, ITag, IPresenterConstructor } from '../Contracts'
+import { LoaderContract, TagContract, PresenterConstructorContract } from '../Contracts'
 import { Template } from '../Template'
 import { Context } from '../Context'
 import * as Debug from 'debug'
 
 const debug = Debug('edge')
 
-let loader: null | ILoader = null
+let loader: null | LoaderContract = null
 let compiler: null | Compiler = null
 
 type configOptions = {
-  Loader?: ILoaderConstructor,
+  Loader?: { new(): LoaderContract },
   cache?: boolean,
 }
 
@@ -60,7 +60,7 @@ export class Edge {
    * Returns the instance of loader in use. Make use of
    * `configure` method to define a custom loader
    */
-  public static get loader (): ILoader {
+  public static get loader (): LoaderContract {
     return loader!
   }
 
@@ -154,7 +154,7 @@ export class Edge {
   /**
    * Add a new tag to the tags list.
    */
-  public static tag (tag: ITag) {
+  public static tag (tag: TagContract) {
     debug('defining a new tag %s', tag.tagName)
     Tags[tag.tagName] = tag
   }
@@ -163,7 +163,10 @@ export class Edge {
    * Register an in-memory template as a string. Check [loader.register](main.loader.html#register) for
    * more info.
    */
-  public static register (templatePath: string, contents: { template: string, Presenter?: IPresenterConstructor }) {
+  public static register (
+    templatePath: string,
+    contents: { template: string, Presenter?: PresenterConstructorContract },
+  ) {
     debug('registering dynamic template %s', templatePath)
     loader!.register(templatePath, contents)
   }

@@ -13,7 +13,7 @@
 
 import { Parser } from 'edge-parser'
 import { EdgeBuffer } from 'edge-parser/build/src/EdgeBuffer'
-import { ITagToken } from 'edge-lexer/build/src/Contracts'
+import { TagToken } from 'edge-lexer/build/src/Contracts'
 import { parseSequenceExpression, ObjectifyString, parseAsKeyValuePair, isBlock } from '../utils'
 
 export class ComponentTag {
@@ -25,7 +25,7 @@ export class ComponentTag {
   /**
    * Compiles else block node to Javascript else statement
    */
-  public static compile (parser: Parser, buffer: EdgeBuffer, token: ITagToken) {
+  public static compile (parser: Parser, buffer: EdgeBuffer, token: TagToken) {
     const parsed = parser.generateAst(token.properties.jsArg, token.loc)
     const expression = parser.acornToEdgeExpression(parsed.body[0])
     let [name, props] = parseSequenceExpression(expression, parser)

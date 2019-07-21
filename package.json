@@ -2,12 +2,10 @@
   "name": "edge",
   "version": "1.0.0",
   "description": "Template engine",
-  "main": "index.js",
   "typings": "./build/src/Edge/index.d.ts",
   "scripts": {
     "pretest": "npm run lint",
-    "test": "nyc node japaFile.js",
-    "posttest": "npm run coverage",
+    "test": "node japaFile.js",
     "mrm": "mrm --preset=@adonisjs/mrm-preset",
     "commit": "git-cz",
     "prepublishOnly": "npm run build",
@@ -15,7 +13,6 @@
     "clean": "del build",
     "compile": "npm run lint && npm run clean && tsc",
     "build": "npm run compile",
-    "coverage": "nyc report --reporter=text-lcov | coveralls",
     "lint": "tslint --project tsconfig.json"
   },
   "repository": {
@@ -29,27 +26,25 @@
   },
   "homepage": "https://github.com/poppinss/edge#readme",
   "devDependencies": {
-    "@adonisjs/mrm-preset": "^1.0.14",
-    "@types/node": "^10.12.3",
-    "commitizen": "^3.0.4",
-    "coveralls": "^3.0.2",
-    "cz-conventional-changelog": "^2.1.0",
+    "@adonisjs/mrm-preset": "^2.0.3",
+    "@types/node": "^12.6.8",
+    "commitizen": "^4.0.3",
+    "cz-conventional-changelog": "^3.0.2",
     "dedent": "^0.7.0",
-    "del-cli": "^1.1.0",
-    "fs-extra": "^7.0.1",
-    "japa": "^2.0.6",
-    "japa-cli": "^1.0.1",
-    "mrm": "^1.2.1",
-    "nyc": "^13.1.0",
+    "del-cli": "^2.0.0",
+    "doctoc": "^1.4.0",
+    "fs-extra": "^8.1.0",
+    "husky": "^3.0.1",
+    "japa": "^2.0.10",
+    "mrm": "^1.2.2",
     "pkg-ok": "^2.3.1",
-    "ts-node": "^7.0.1",
-    "tslint": "^5.11.0",
+    "ts-node": "^8.3.0",
+    "tslint": "^5.18.0",
     "tslint-eslint-rules": "^5.4.0",
-    "typedoc": "^0.13.0",
+    "typedoc": "^0.14.2",
     "typedoc-clarity-theme": "^1.1.0",
-    "typedoc-plugin-external-module-name": "^1.1.3",
-    "typedoc-plugin-single-line-tags": "^1.0.0",
-    "typescript": "^3.1.6",
+    "typedoc-plugin-external-module-name": "^2.1.0",
+    "typescript": "^3.5.3",
     "yorkie": "^2.0.0"
   },
   "config": {
@@ -66,16 +61,28 @@
     ]
   },
   "dependencies": {
-    "debug": "^4.1.0",
-    "edge-error": "^1.0.1",
-    "edge-parser": "^2.0.3",
+    "debug": "^4.1.1",
+    "edge-error": "^1.0.2",
+    "edge-parser": "^2.0.5",
     "he": "^1.2.0",
-    "lodash": "^4.17.11",
-    "macroable": "^2.0.0",
-    "node-exceptions": "^4.0.1",
-    "require-uncached": "^2.0.0"
+    "import-fresh": "^3.1.0",
+    "lodash": "^4.17.15",
+    "macroable": "^2.0.2",
+    "node-exceptions": "^4.0.1"
   },
   "gitHooks": {
     "commit-msg": "node ./node_modules/@adonisjs/mrm-preset/validateCommit/conventional/validate.js"
+  },
+  "main": "build/index.js",
+  "files": [
+    "build/src",
+    "build/index.d.ts",
+    "build/index.js"
+  ],
+  "husky": {
+    "hooks": {
+      "pre-commit": "doctoc README.md --title='## Table of contents' && git add README.md",
+      "commit-msg": "node ./node_modules/@adonisjs/mrm-preset/validateCommit/conventional/validate.js"
+    }
   }
 }

@@ -13,9 +13,9 @@
 
 import { join, isAbsolute, extname } from 'path'
 import { readFileSync } from 'fs'
-import * as requireUncached from 'require-uncached'
+import requireUncached = require('import-fresh')
 
-import { ILoader, IPresenterConstructor, ILoaderTemplate } from '../Contracts'
+import { LoaderContract, PresenterConstructorContract, LoaderTemplate } from '../Contracts'
 import { extractDiskAndTemplateName } from '../utils'
 import * as Debug from 'debug'
 
@@ -28,9 +28,9 @@ const debug = Debug('edge:loader')
  *
  * You are free to define your own loaders that implements the [[ILoader]] interface
  */
-export class Loader implements ILoader {
+export class Loader implements LoaderContract {
   private mountedDirs: Map<string, string> = new Map()
-  private preRegistered: Map<string, ILoaderTemplate> = new Map()
+  private preRegistered: Map<string, LoaderTemplate> = new Map()
 
   /**
    * Attempts to load the presenter for a given template. If presenter doesn't exists, it
@@ -39,7 +39,7 @@ export class Loader implements ILoader {
    * Also this method will **bypass the require cache**, since in production compiled templates
    * and their presenters are cached anyways.
    */
-  private _getPresenterForTemplate (templatePath: string): IPresenterConstructor | undefined {
+  private _getPresenterForTemplate (templatePath: string): PresenterConstructorContract | undefined {
     try {
       const presenterPath = templatePath
         .replace(/^\w/, c => c.toUpperCase())
@@ -47,7 +47,7 @@ export class Loader implements ILoader {
 
       debug('loading presenter %s', presenterPath)
 
-      return requireUncached(presenterPath)
+      return requireUncached(presenterPath) as PresenterConstructorContract
     } catch (error) {
       if (['ENOENT', 'MODULE_NOT_FOUND'].indexOf(error.code) === -1) {
         throw error
@@ -151,7 +151,7 @@ export class Loader implements ILoader {
    * }
    * ```
    */
-  public resolve (templatePath: string, withPresenter: boolean): ILoaderTemplate {
+  public resolve (templatePath: string, withPresenter: boolean): LoaderTemplate {
     debug('attempting to resolve %s', templatePath)
     debug('with presenter %s', String(withPresenter))
 
@@ -197,7 +197,7 @@ export class Loader implements ILoader {
    *
    * @throws Error if template content is empty.
    */
-  public register (templatePath: string, contents: ILoaderTemplate) {
+  public register (templatePath: string, contents: LoaderTemplate) {
     if (!contents.template) {
       throw new Error('Make sure to define the template content for preRegistered template')
     }

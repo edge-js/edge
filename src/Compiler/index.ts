@@ -12,8 +12,8 @@
 */
 
 import { Parser } from 'edge-parser'
-import { IToken } from 'edge-lexer/build/src/Contracts'
-import { ILoader, ICompiler, Tags, ILoaderTemplate } from '../Contracts'
+import { Token } from 'edge-lexer/build'
+import { LoaderContract, CompilerContract, Tags, LoaderTemplate } from '../Contracts'
 import { mergeSections, isBlock } from '../utils'
 import * as Debug from 'debug'
 
@@ -28,10 +28,14 @@ const debug = Debug('edge:loader')
  *
  * When caching is set to `true`, the compiled templates will be cached to improve performance.
  */
-export class Compiler implements ICompiler {
-  private cacheStore: Map<string, ILoaderTemplate> = new Map()
+export class Compiler implements CompilerContract {
+  private cacheStore: Map<string, LoaderTemplate> = new Map()
 
-  constructor (private loader: ILoader, private tags: Tags, private cache: boolean = true) {
+  constructor (
+    private loader: LoaderContract,
+    private tags: Tags,
+    private cache: boolean = true,
+  ) {
   }
 
   /**
@@ -39,7 +43,7 @@ export class Compiler implements ICompiler {
    * cache. If caching is disabled, then it will
    * return undefined.
    */
-  private _getFromCache (templatePath: string): undefined | ILoaderTemplate {
+  private _getFromCache (templatePath: string): undefined | LoaderTemplate {
     if (!this.cache) {
       return
     }
@@ -51,7 +55,7 @@ export class Compiler implements ICompiler {
    * Set's the template path and the payload to the cache. If
    * cache is disabled, then it will never be set.
    */
-  private _setInCache (templatePath: string, payload: ILoaderTemplate) {
+  private _setInCache (templatePath: string, payload: LoaderTemplate) {
     if (!this.cache) {
       return
     }
@@ -65,7 +69,7 @@ export class Compiler implements ICompiler {
    * are checked for layouts and if layouts are used, their sections will be
    * merged together.
    */
-  private _templateContentToTokens (content: string, parser: Parser): IToken[] {
+  private _templateContentToTokens (content: string, parser: Parser): Token[] {
     let templateTokens = parser.generateTokens(content)
 
     const firstToken = templateTokens[0]
@@ -88,7 +92,7 @@ export class Compiler implements ICompiler {
    * compiler.generateTokens('<template-path>')
    * ```
    */
-  public generateTokens (templatePath: string): IToken[] {
+  public generateTokens (templatePath: string): Token[] {
     const parser = new Parser(this.tags, { filename: templatePath })
     const { template } = this.loader.resolve(templatePath, false)
     return this._templateContentToTokens(template, parser)
@@ -115,7 +119,7 @@ export class Compiler implements ICompiler {
    * }
    * ```
    */
-  public compile (templatePath: string, inline: boolean): ILoaderTemplate {
+  public compile (templatePath: string, inline: boolean): LoaderTemplate {
     templatePath = this.loader.makePath(templatePath)
 
     /**

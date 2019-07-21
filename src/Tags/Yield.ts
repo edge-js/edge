@@ -13,7 +13,7 @@
 
 import { Parser } from 'edge-parser'
 import { EdgeBuffer } from 'edge-parser/build/src/EdgeBuffer'
-import { ITagToken } from 'edge-lexer/build/src/Contracts'
+import { TagToken } from 'edge-lexer/build/src/Contracts'
 import { allowExpressions } from '../utils'
 
 export class YieldTag {
@@ -33,7 +33,7 @@ export class YieldTag {
   /**
    * Compiles the if block node to a Javascript if statement
    */
-  public static compile (parser: Parser, buffer: EdgeBuffer, token: ITagToken) {
+  public static compile (parser: Parser, buffer: EdgeBuffer, token: TagToken) {
     const parsed = parser.parseJsString(token.properties.jsArg, token.loc)
     allowExpressions('yield', parsed, this.allowedExpressions, parser.options.filename)
 
