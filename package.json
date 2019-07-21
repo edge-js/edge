@@ -8,12 +8,13 @@
     "test": "node japaFile.js",
     "mrm": "mrm --preset=@adonisjs/mrm-preset",
     "commit": "git-cz",
-    "prepublishOnly": "npm run build",
     "test:win": "./node_modules/japa-cli/index.js",
     "clean": "del build",
     "compile": "npm run lint && npm run clean && tsc",
     "build": "npm run compile",
-    "lint": "tslint --project tsconfig.json"
+    "lint": "tslint --project tsconfig.json",
+    "release": "np",
+    "version": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -38,7 +39,7 @@
     "husky": "^3.0.1",
     "japa": "^2.0.10",
     "mrm": "^1.2.2",
-    "pkg-ok": "^2.3.1",
+    "np": "^5.0.3",
     "ts-node": "^8.3.0",
     "tslint": "^5.18.0",
     "tslint-eslint-rules": "^5.4.0",
@@ -95,5 +96,9 @@
     "template",
     "mustache",
     "edge"
-  ]
+  ],
+  "np": {
+    "contents": ".",
+    "anyBranch": false
+  }
 }
