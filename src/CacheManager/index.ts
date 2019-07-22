@@ -14,7 +14,7 @@
 import { LoaderTemplate } from '../Contracts'
 
 /**
- * In memory cache manager to parsed pre-compiled templates
+ * In memory cache manager to cache pre-compiled templates
  */
 export class CacheManager {
   private _cacheStore: Map<string, LoaderTemplate> = new Map()
@@ -27,23 +27,23 @@ export class CacheManager {
    * cache. If caching is disabled, then it will
    * return undefined.
    */
-  public get (templatePath: string): undefined | LoaderTemplate {
+  public get (absPath: string): undefined | LoaderTemplate {
     if (!this._enabled) {
       return
     }
 
-    return this._cacheStore.get(templatePath)
+    return this._cacheStore.get(absPath)
   }
 
   /**
    * Set's the template path and the payload to the cache. If
    * cache is disabled, then this function returns in noop.
    */
-  public set (templatePath: string, payload: LoaderTemplate) {
+  public set (absPath: string, payload: LoaderTemplate) {
     if (!this._enabled) {
       return
     }
 
-    this._cacheStore.set(templatePath, payload)
+    this._cacheStore.set(absPath, payload)
   }
 }

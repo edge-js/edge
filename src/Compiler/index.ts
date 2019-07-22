@@ -20,13 +20,11 @@ import { CacheManager } from '../CacheManager'
 
 /**
  * Compiler compiles the template to a function, which can be invoked at a later
- * stage.
+ * stage using the [[Context]]. [edge-parser](https://npm.im/edge-parser) is
+ * used under the hood to parse the templates.
  *
- * Compiler uses [edge-parser](https://npm.im/edge-parser) under the hood and also
- * handles the layouts.
- *
- * When caching is set to `true`, the compiled templates will be cached in-memory
- * to improve performance.
+ * Also, the `layouts` are handled natively by the compiler. Before starting
+ * the parsing process, it will merge the layout sections.
  */
 export class Compiler {
   private _cacheManager = new CacheManager(this._cache)
@@ -122,7 +120,9 @@ export class Compiler {
      * Get a new instance of the parser. We use the `templatePath` as the filename
      * instead of the `absPath`, since `templatePath` are relative and readable.
      */
-    const parser = new Parser(this._tags, { filename: templatePath })
+    const parser = new Parser(this._tags, {
+      filename: `${templatePath.replace(/\.edge$/, '')}.edge`,
+    })
 
     /**
      * Resolve the template and Presenter using the given loader
