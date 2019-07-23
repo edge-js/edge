@@ -16,8 +16,8 @@ import { EdgeError } from 'edge-error'
 import { Token, TagToken } from 'edge-lexer'
 
 import { CacheManager } from '../CacheManager'
-import { isBlock, getLineAndColumn } from '../utils'
-import { LoaderContract, TagsContract, LoaderTemplate } from '../Contracts'
+import { isBlockToken, getLineAndColumnForToken } from '../utils'
+import { LoaderContract, TagsContract, LoaderTemplate, CompilerContract } from '../Contracts'
 
 /**
  * Compiler compiles the template to a function, which can be invoked at a later
@@ -27,7 +27,7 @@ import { LoaderContract, TagsContract, LoaderTemplate } from '../Contracts'
  * Also, the `layouts` are handled natively by the compiler. Before starting
  * the parsing process, it will merge the layout sections.
  */
-export class Compiler {
+export class Compiler implements CompilerContract {
   private _cacheManager = new CacheManager(this._cache)
 
   constructor (
@@ -58,7 +58,7 @@ export class Compiler {
          * template
          */
         if (
-          isBlock(node, 'layout') ||
+          isBlockToken(node, 'layout') ||
           node.type === 'newline' ||
           (node.type === 'raw' && !node.value.trim())
         ) {
@@ -68,7 +68,7 @@ export class Compiler {
         /**
          * Collect parent template sections
          */
-        if (isBlock(node, 'section')) {
+        if (isBlockToken(node, 'section')) {
           extendedSections[node.properties.jsArg.trim()] = node
           return
         }
@@ -76,7 +76,7 @@ export class Compiler {
         /**
          * Collect set calls inside parent templates
          */
-        if (isBlock(node, 'set')) {
+        if (isBlockToken(node, 'set')) {
           extendedSetCalls.push(node)
           return
         }
@@ -84,7 +84,7 @@ export class Compiler {
         /**
          * Everything else if not allowed as top level nodes
          */
-        const [line, col] = getLineAndColumn(node)
+        const [line, col] = getLineAndColumnForToken(node)
         throw new EdgeError(
           `Template extending the layout can only define @sections as top level nodes`,
           'E_UNALLOWED_EXPRESSION',
@@ -97,7 +97,7 @@ export class Compiler {
      */
     const finalNodes = base
       .map((node) => {
-        if (!isBlock(node, 'section')) {
+        if (!isBlockToken(node, 'section')) {
           return node
         }
 
@@ -109,7 +109,7 @@ export class Compiler {
         /**
          * Concat children when super was called
          */
-        if (extendedNode.children.length && isBlock(extendedNode.children[0], 'super')) {
+        if (extendedNode.children.length && isBlockToken(extendedNode.children[0], 'super')) {
           extendedNode.children = node.children.concat(extendedNode.children)
         }
 
@@ -136,7 +136,7 @@ export class Compiler {
      * The `layout` is inbuilt feature from core, where we merge the layout
      * and parent template sections together
      */
-    if (isBlock(firstToken, 'layout')) {
+    if (isBlockToken(firstToken, 'layout')) {
       const layoutTokens = this.generateTokens(firstToken.properties.jsArg.replace(/'/g, ''))
       templateTokens = this._mergeSections(layoutTokens, templateTokens, parser.options.filename)
     }

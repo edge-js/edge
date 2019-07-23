@@ -33,7 +33,7 @@ export class Context extends Macroable implements ContextContract {
    * frame and then resolve the value up until the first
    * frame.
    */
-  private frames: any[] = []
+  private _frames: any[] = []
 
   constructor (public presenter: any, public sharedState: any) {
     super()
@@ -43,8 +43,8 @@ export class Context extends Macroable implements ContextContract {
    * Returns value for a key inside frames. Stops looking for it,
    * when value is found inside any frame.
    */
-  private getFromFrame (key: string): any {
-    const frameWithVal = this.frames.find((frame) => frame[key] !== undefined)
+  private _getFromFrame (key: string): any {
+    const frameWithVal = this._frames.find((frame) => frame[key] !== undefined)
     return frameWithVal ? frameWithVal[key] : undefined
   }
 
@@ -58,7 +58,7 @@ export class Context extends Macroable implements ContextContract {
    * ```
    */
   public newFrame (): void {
-    this.frames.unshift({})
+    this._frames.unshift({})
   }
 
   /**
@@ -75,7 +75,7 @@ export class Context extends Macroable implements ContextContract {
    * @throws Error if no frame scopes exists.
    */
   public setOnFrame (key: string, value: any): void {
-    const recentFrame = this.frames[0]
+    const recentFrame = this._frames[0]
 
     if (!recentFrame) {
       throw new Error('Make sure to call {newFrame} before calling {setOnFrame}')
@@ -89,7 +89,7 @@ export class Context extends Macroable implements ContextContract {
    * frame via `setOnFrame` will be removed.
    */
   public removeFrame (): void {
-    this.frames.shift()
+    this._frames.shift()
   }
 
   /**
@@ -123,7 +123,7 @@ export class Context extends Macroable implements ContextContract {
     /**
      * Pull from one of the nested frames
      */
-    value = this.getFromFrame(key)
+    value = this._getFromFrame(key)
     if (value !== undefined) {
       return typeof (value) === 'function' ? value.bind(this) : value
     }
@@ -169,7 +169,7 @@ export class Context extends Macroable implements ContextContract {
      * If value already exists on the presenter
      * state, then mutate it first
      */
-    if (this.presenter.state[key] !== undefined || !this.frames.length) {
+    if (this.presenter.state[key] !== undefined || !this._frames.length) {
       set(this.presenter.state, key, value)
       return
     }

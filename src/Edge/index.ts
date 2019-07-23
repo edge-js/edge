@@ -11,115 +11,69 @@
 * file that was distributed with this source code.
 */
 
-import { merge } from 'lodash'
-
 import * as Tags from '../Tags'
 import { Loader } from '../Loader'
-import { Context } from '../Context'
-import { Template } from '../Template'
 import { Compiler } from '../Compiler'
-import { LoaderContract, TagContract, LoaderTemplate } from '../Contracts'
+import { EdgeRenderer } from '../Renderer'
 
-let loader: null | LoaderContract = null
-let compiler: null | Compiler = null
+import {
+  LoaderContract,
+  TagContract,
+  LoaderTemplate,
+  EdgeContract,
+  EdgeRendererContract,
+} from '../Contracts'
 
-type configOptions = {
-  Loader?: { new(): LoaderContract },
-  cache?: boolean,
-}
-
-/**
- * This class is the main interface to configure and render
- * templates.
- *
- * ## Basic Setup
- *
- * ```js
- * import edge from 'edge.js'
- *
- * edge.configure({
- *   cache: boolean,
- *   loader: CustomLoaderIfAny
- * })
- * ```
- *
- * ```js
- * edge.mount(join(__dirname, 'views'))
- *
- * // or named disk
- * edge.mount('admin', join(__dirname, 'admin/views'))
- * ```
- */
-export class Edge {
-  private static globals: any = {}
-  private locals: any = {}
+export class Edge implements EdgeContract {
+  /**
+   * Globals are shared with all rendered templates
+   */
+  private _globals: any = {}
 
   /**
-   * Returns the instance of loader in use. Make use of
-   * `configure` method to define a custom loader
+   * List of registered tags. Adding new tags will only impact
+   * this list
    */
-  public static get loader (): LoaderContract {
-    return loader!
+  private _tags = Object.assign({}, Tags)
+
+  /**
+   * The underlying compiler in use
+   */
+  public compiler = new Compiler(this.loader, this._tags, false)
+
+  constructor (public loader: LoaderContract = new Loader()) {
   }
 
   /**
-   * Returns the instance of compiler in use.
-   */
-  public static get compiler (): Compiler {
-    return compiler!
-  }
-
-  /**
-   * Configure edge with an optional custom loader and toggle the
-   * caching behavior.
+   * Mount named directory to use views. Later you can reference
+   * the views from a named disk as follows.
    *
-   * ```js
-   * edge.configure({
-   *   cache: process.env.NODE_ENV === 'production'
-   * })
+   * ```
+   * edge.mount('admin', join(__dirname, 'admin'))
+   *
+   * edge.render('admin::filename')
    * ```
    */
-  public static configure (options: configOptions) {
-    const edgeOptions = Object.assign({
-      Loader: Loader,
-      cache: false,
-    }, options)
-
-    loader = new edgeOptions.Loader!()
-    compiler = new Compiler(loader!, Tags, edgeOptions.cache)
-
-    Object.keys(Tags).forEach((tag) => {
-      if (typeof (Tags[tag].run) === 'function') {
-        Tags[tag].run(Context)
-      }
-    })
-  }
-
-  public static mount (diskName: string, dirPath: string): void
-  public static mount (dirPath: string): void
+  public mount (diskName: string, dirPath: string): this
 
   /**
-   * Mount a disk to the loader.
+   * Mount defaults views directory.
    *
-   * ```js
-   * edge.mount(join(__dirname, 'views'))
-   *
-   * // or named disk
-   * edge.mount('admin', join(__dirname, 'admin/views'))
+   * ```
+   * edge.mount(join(__dirname, 'admin'))
+   * edge.render('filename')
    * ```
    */
-  public static mount (diskName: string, dirPath?: string): void {
-    /* istanbul ignore else  */
-    if (!this.compiler) {
-      this.configure({})
-    }
+  public mount (dirPath: string): this
 
+  public mount (diskName: string, dirPath?: string): this {
     if (!dirPath) {
       dirPath = diskName
       diskName = 'default'
     }
 
-    loader!.mount(diskName, dirPath)
+    this.loader.mount(diskName, dirPath)
+    return this
   }
 
   /**
@@ -129,8 +83,9 @@ export class Edge {
    * edge.unmount('admin')
    * ```
    */
-  public static unmount (diskName: string): void {
-    loader!.unmount(diskName)
+  public unmount (diskName: string): this {
+    this.loader.unmount(diskName)
+    return this
   }
 
   /**
@@ -142,69 +97,79 @@ export class Edge {
    * edge.global('time', () => new Date().getTime())
    * ```
    */
-  public static global (name: string, value: any): void {
-    this.globals[name] = value
+  public global (name: string, value: any): this {
+    this._globals[name] = value
+    return this
   }
 
   /**
    * Add a new tag to the tags list.
+   *
+   * ```ts
+   * edge.registerTag('svg', {
+   *   block: false,
+   *   seekable: true,
+   *
+   *   compile (parser, buffer, token) {
+   *     const fileName = token.properties.jsArg.trim()
+   *     buffer.writeRaw(fs.readFileSync(__dirname, 'assets', `${fileName}.svg`), 'utf-8')
+   *   }
+   * })
+   * ```
    */
-  public static tag (tag: TagContract) {
-    Tags[tag.tagName] = tag
+  public registerTag (tag: TagContract): this {
+    this._tags[tag.tagName] = tag
+    return this
   }
 
   /**
-   * Register an in-memory template as a string. Check [loader.register](main.loader.html#register) for
-   * more info.
+   * Register an in-memory template.
+   *
+   * ```ts
+   * edge.registerTemplate('button', {
+   *   template: `<button class="{{ this.type || 'primary' }}">
+   *     @!yield($slots.main())
+   *   </button>`,
+   * })
+   * ```
+   *
+   * Later you can use this template
+   *
+   * ```edge
+   * @component('button', type = 'primary')
+   *   Get started
+   * @endcomponent
+   * ```
    */
-  public static register (templatePath: string, contents: LoaderTemplate) {
-    loader!.register(templatePath, contents)
+  public registerTemplate (templatePath: string, contents: LoaderTemplate): this {
+    this.loader.register(templatePath, contents)
+    return this
   }
 
   /**
-   * Shorthand to `new Edge().render()` or `Edge.newUp().render()`
+   * Render a template with optional state
+   *
+   * ```ts
+   * edge.render('welcome', { greeting: 'Hello world' })
+   * ```
    */
-  public static render (templatePath: string, state: any): string {
-    return new this().render(templatePath, state)
+  public render (templatePath: string, state?: any): string {
+    return this.getRenderer().render(templatePath, state)
   }
 
   /**
    * Returns a new instance of edge. The instance
    * can be used to define locals.
    */
-  public static newUp (): Edge {
-    return new this()
-  }
-
-  /**
-   * Clears registered globals, loader and
-   * the compiler instance.
-   */
-  public static clear () {
-    this.globals = {}
-    loader = null
-    compiler = null
-  }
-
-  /**
-   * Render template with state. The `newUp` is helpful
-   * when you want to pass locals to the
-   * template
-   *
-   * ```js
-   * edge.newUp().render('welcome', {})
-   * ```
-   */
-  public render (templatePath: string, state: any = {}): string {
-    const template = new Template(compiler!, (this.constructor as typeof Edge).globals, this.locals)
-    return template.render(templatePath, state)
+  public getRenderer (): EdgeRendererContract {
+    return new EdgeRenderer(this.compiler, this._globals)
   }
 
   /**
    * Share locals with the current view context.
    *
    * ```js
-   * const view = edge.newUp()
+   * const view = edge.getRenderer()
    *
    * // local state for the current render
    * view.share({ foo: 'bar' })
@@ -212,8 +177,7 @@ export class Edge {
    * view.render('welcome')
    * ```
    */
-  public share (data: any): this {
-    merge(this.locals, data)
-    return this
+  public share (data: any): EdgeRendererContract {
+    return this.getRenderer().share(data)
   }
 }

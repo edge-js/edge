@@ -13,7 +13,7 @@
 
 import { merge } from 'lodash'
 import { Context } from '../Context'
-import { Compiler } from '../Compiler'
+import { CompilerContract } from '../Contracts'
 import { Presenter as BasePresenter } from '../Presenter'
 
 /**
@@ -28,7 +28,7 @@ export class Template {
    */
   private _sharedState: any
 
-  constructor (private _compiler: Compiler, globals: any, locals: any) {
+  constructor (private _compiler: CompilerContract, globals: any, locals: any) {
     this._sharedState = merge({}, globals, locals)
   }
 

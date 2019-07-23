@@ -11,6 +11,7 @@
  * file that was distributed with this source code.
  */
 
+import { Token } from 'edge-lexer'
 import { MacroableConstructorContract } from 'macroable'
 import { ParseTagDefininationContract } from 'edge-parser'
 
@@ -92,4 +93,39 @@ export interface TagContract extends ParseTagDefininationContract {
  */
 export type TagsContract = {
   [tagName: string]: TagContract,
+}
+
+/**
+ * Shape of the compiler
+ */
+export interface CompilerContract {
+  compile (templatePath: string, inline: boolean): LoaderTemplate,
+  generateTokens (templatePath: string): Token[],
+}
+
+/**
+ * Shape of the renderer that renders the edge templates
+ */
+export interface EdgeRendererContract {
+  share (locals: any): this,
+  render (templatePath: string, state?: any): string,
+}
+
+/**
+ * Shape of the main module
+ */
+export interface EdgeContract {
+  loader: LoaderContract,
+
+  registerTag (tag: TagContract): this,
+  registerTemplate (templatePath: string, contents: LoaderTemplate): this,
+  global (key: string, value: any): this,
+
+  mount (diskName: string): this,
+  mount (diskName: string, dirPath: string): this,
+  unmount (diskName: string): this,
+
+  getRenderer (): EdgeRendererContract,
+  share (locals: any): EdgeRendererContract,
+  render (templatePath: string, state?: any): string,
 }

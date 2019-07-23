@@ -132,7 +132,7 @@ export function extractDiskAndTemplateName (templatePath: string): [string, stri
  * Returns a boolean, telling whether the lexer node is a block node
  * or not.
  */
-export function isBlock (token: Token, name: string): token is TagToken {
+export function isBlockToken (token: Token, name: string): token is TagToken {
   if (token.type === TagTypes.TAG || token.type === TagTypes.ETAG) {
     return token.properties.name === name
   }
@@ -143,7 +143,7 @@ export function isBlock (token: Token, name: string): token is TagToken {
 /**
  * Returns line and number for a given AST token
  */
-export function getLineAndColumn (token: Token): [number, number] {
+export function getLineAndColumnForToken (token: Token): [number, number] {
   if (token.type === 'newline' || token.type === 'raw') {
     return [token.line, 0]
   }

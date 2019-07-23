@@ -16,7 +16,7 @@ import { EdgeBuffer, expressions, Parser } from 'edge-parser'
 
 import { TagContract } from '../Contracts'
 import { StringifiedObject } from '../StringifiedObject'
-import { expressionsToStringifyObject, isBlock, allowExpressions } from '../utils'
+import { expressionsToStringifyObject, isBlockToken, allowExpressions } from '../utils'
 
 /**
  * A list of allowed expressions for the component name
@@ -184,7 +184,7 @@ export const componentTag: TagContract = {
       /**
        * Update the slot name and props when a new slot is detected
        */
-      if (isBlock(child, 'slot')) {
+      if (isBlockToken(child, 'slot')) {
         [slotName, slotProps] = getSlotNameAndProps(child, parser)
       }
 
@@ -208,7 +208,7 @@ export const componentTag: TagContract = {
        * process it. This way, we can disallow slots appearing outside the component
        * tag
        */
-      if (isBlock(child, 'slot')) {
+      if (isBlockToken(child, 'slot')) {
         child.children.forEach((token) => parser.processToken(token, slots[slotName].buffer))
       } else {
         parser.processToken(child, slots[slotName].buffer)

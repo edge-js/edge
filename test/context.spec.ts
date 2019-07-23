@@ -308,7 +308,7 @@ test.group('Context', (group) => {
 
     context.newFrame()
     context.set('username', 'virk')
-    assert.equal(context['frames'][0].username, 'virk')
+    assert.equal(context['_frames'][0].username, 'virk')
   })
 
   test('mutate value to the latest frame', (assert) => {
@@ -354,7 +354,7 @@ test.group('Context', (group) => {
 
     context.newFrame()
     context.set('username', 'nikk')
-    assert.deepEqual(context['frames'][0], {})
+    assert.deepEqual(context['_frames'][0], {})
     assert.equal(context['presenter'].state.username, 'nikk')
   })
 

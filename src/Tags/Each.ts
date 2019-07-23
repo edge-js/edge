@@ -15,7 +15,7 @@ import { Parser, expressions } from 'edge-parser'
 import { each, size } from 'lodash'
 
 import { TagContract } from '../Contracts'
-import { allowExpressions, isBlock } from '../utils'
+import { allowExpressions, isBlockToken } from '../utils'
 
 /**
  * Returns the list to loop over for the each expression
@@ -92,7 +92,7 @@ export const eachTag: TagContract = {
     /**
      * Finding if an else child exists inside the each tag
      */
-    const elseIndex = token.children.findIndex((child) => isBlock(child, 'else'))
+    const elseIndex = token.children.findIndex((child) => isBlockToken(child, 'else'))
     const elseChild = elseIndex > -1 ? token.children.splice(elseIndex) : []
 
     /**
