@@ -1,8 +1,10 @@
 // @ts-check
 
-const edge = require('..')
+const Edge = require('..')
 const { join } = require('path')
 const http = require('http')
+
+const edge = new Edge()
 
 http.createServer((req, res) => {
   edge.mount(join(__dirname, './views'))
