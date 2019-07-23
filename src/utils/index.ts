@@ -1,12 +1,5 @@
 /**
- * @module utils
- *
- * Allow functions and classes are exported individually from the utils module
- * and use them as follows.
- *
- * ```js
- * import { allowExpressions, parseAsKeyValuePair } from 'edge/build/src/utils'
- * ```
+ * @module edge
  */
 
 /*
@@ -19,45 +12,10 @@
 */
 
 import { sep } from 'path'
-import { Parser } from 'edge-parser'
 import { EdgeError } from 'edge-error'
 import { Token, TagTypes, TagToken } from 'edge-lexer'
-
-/**
- * When passing objects in the template, we cannot pass them as real Javascript
- * objects, since they will be stringified. This class creates an **Object like**
- * string, with key/value pairs.
- */
-export class ObjectifyString {
-  private obj: string = ''
-
-  /**
-   * Add key/value pair to the object.
-   *
-   * ```js
-   * objectifystring.add('username', `'virk'`)
-   * ```
-   */
-  public add (key: any, value: any) {
-    this.obj += this.obj.length ? `, ${key}: ${value}` : `${key}: ${value}`
-  }
-
-  /**
-   * Returns the object alike string back.
-   *
-   * ```js
-   * objectifystring.flush()
-   *
-   * // returns
-   * `{ username: 'virk' }`
-   * ```
-   */
-  public flush (): string {
-    const obj = `{ ${this.obj} }`
-    this.obj = ''
-    return obj
-  }
-}
+import { Parser, expressions as expressionsList } from 'edge-parser'
+import { StringifiedObject } from '../StringifiedObject'
 
 /**
  * Validates the expression type to be part of the allowed
@@ -69,9 +27,14 @@ export class ObjectifyString {
  * allowExpressions('include', 'SequenceExpression', ['Literal', 'Identifier'], 'foo.edge')
  * ```
  */
-export function allowExpressions (tag: string, expression: any, expressions: string[], filename: string) {
-  if (expressions.indexOf(expression.type) === -1) {
-    throw new EdgeError(`${expression.type} is not allowed for ${tag} tag.`, 'E_UNALLOWED_EXPRESSION', {
+export function allowExpressions (
+  expression: any,
+  expressions: (keyof typeof expressionsList)[],
+  filename: string,
+  message: string,
+) {
+  if (!expressions.includes(expression.type)) {
+    throw new EdgeError(message, 'E_UNALLOWED_EXPRESSION', {
       line: expression.loc.start.line,
       col: expression.loc.start.column,
       filename: filename,
@@ -89,9 +52,14 @@ export function allowExpressions (tag: string, expression: any, expressions: str
  * disAllowExpressions('include', 'SequenceExpression', ['Literal', 'Identifier'], 'foo.edge')
  * ```
  */
-export function disAllowExpressions (tag: string, expression: any, expressions: string[], filename) {
-  if (expressions.indexOf(expression.type) > -1) {
-    throw new EdgeError(`${expression.type} is not allowed for ${tag} tag.`, 'E_UNALLOWED_EXPRESSION', {
+export function disAllowExpressions (
+  expression: any,
+  expressions: (keyof typeof expressionsList)[],
+  filename: string,
+  message: string,
+) {
+  if (expressions.includes(expression.type)) {
+    throw new EdgeError(message, 'E_UNALLOWED_EXPRESSION', {
       line: expression.loc.start.line,
       col: expression.loc.start.column,
       filename: filename,
@@ -100,105 +68,38 @@ export function disAllowExpressions (tag: string, expression: any, expressions: 
 }
 
 /**
- * Parses the sequence expression to an array, with first value as a string and
- * other value as a string representation of the object.
- *
- * The idea is to make the sequence expression consumable for callable expressions.
- * Check the following examples carefully.
- *
- * This helper is heavily used by component tag.
+ * Parses an array of expressions to form an object. Each expression inside the array must
+ * be `ObjectExpression` or an `AssignmentExpression`, otherwise it will be ignored.
  *
  * ```js
- * ('foo.bar', title = 'hello')
- * // returns ['foo.bar', { title: 'hello' }]
+ * (title = 'hello')
+ * // returns { title: 'hello' }
  *
- * ('foo.bar', { title: 'hello' })
- * // returns ['foo.bar', { title: 'hello' }]
+ * ({ title: 'hello' })
+ * // returns { title: 'hello' }
  *
- * (user.alert, { title: 'hello' })
- * // return [ctx.resolve('user').alert, { title: 'hello' }]
+ * ({ title: 'hello' }, username = 'virk')
+ * // returns { title: 'hello', username: 'virk' }
  * ```
  */
-export function parseSequenceExpression (expression: any, parser: Parser): [string, string] {
-  if (expression.type === 'SequenceExpression') {
-    const objectifyString = new ObjectifyString()
-    const name = parser.statementToString(expression.expressions.shift())
+export function expressionsToStringifyObject (expressions: any[], parser: Parser): string {
+  const objectifyString = new StringifiedObject()
 
-    expression.expressions.forEach((arg) => {
-      if (arg.type === 'ObjectExpression') {
-        arg.properties.forEach((prop) => {
-          const key = parser.statementToString(prop.key)
-          const value = parser.statementToString(prop.value)
-          objectifyString.add(key, value)
-        })
-      }
+  expressions.forEach((arg) => {
+    if (arg.type === 'ObjectExpression') {
+      arg.properties.forEach((prop) => {
+        const key = parser.statementToString(prop.key)
+        const value = parser.statementToString(prop.value)
+        objectifyString.add(key, value)
+      })
+    }
 
-      if (arg.type === 'AssignmentExpression') {
-        objectifyString.add(arg.left.name, parser.statementToString(arg.right))
-      }
-    })
+    if (arg.type === 'AssignmentExpression') {
+      objectifyString.add(arg.left.name, parser.statementToString(arg.right))
+    }
+  })
 
-    return [name, objectifyString.flush()]
-  }
-
-  const name = parser.statementToString(expression)
-  return [name, `{}`]
-}
-
-/**
- * Parses an expression as a key/value pair and has following constraints.
- *
- * 1. Top level expression must be `Literal` or `SequenceExpression`.
- * 2. If `SequenceExpression`, then first child of expression must be `Literal`
- * 3. Length of `SequenceExpression` children must be 2 at max.
- *
- * Optionally, you can enforce (3rd argument) that value the key/value pair must be one
- * of the given expressions.
- *
- * ```js
- * // Following are the valid expressions
- * ('foo', 'bar')
- * ('foo')
- * ('foo', bar)
- * ('foo', { bar: true })
- * ```
- */
-export function parseAsKeyValuePair (
-  expression: any,
-  parser: Parser,
-  valueExpressions: string[],
-): [string, null | string] {
-  allowExpressions('slot', expression, ['Literal', 'SequenceExpression'], parser.options.filename)
-
-  /**
-   * Return without counting props, value is a literal
-   */
-  if (expression.type === 'Literal') {
-    return [expression.raw, null]
-  }
-
-  /**
-   * Raise error when more than 2 arguments are passed to the slot
-   * expression
-   */
-  if (expression.expressions.length > 2) {
-    throw new EdgeError('Maximum of 2 arguments are allowed for slot tag', 'E_MAX_ARGUMENTS', {
-      line: expression.loc.start.line,
-      col: expression.loc.start.column,
-      filename: parser.options.filename,
-    })
-  }
-
-  allowExpressions('slot', expression.expressions[0], ['Literal'], parser.options.filename)
-
-  if (valueExpressions.length) {
-    allowExpressions('slot', expression.expressions[1], valueExpressions, parser.options.filename)
-  }
-
-  /**
-   * Finally return the name and prop name for the slot
-   */
-  return [expression.expressions[0].raw, parser.statementToString(expression.expressions[1])]
+  return objectifyString.flush()
 }
 
 /**
@@ -240,62 +141,12 @@ export function isBlock (token: Token, name: string): token is TagToken {
 }
 
 /**
- * Returns a boolean telling if the current token
- * first children is a super tag.
+ * Returns line and number for a given AST token
  */
-export function hasChildSuper (token: TagToken): boolean {
-  if (!token.children.length) {
-    return false
+export function getLineAndColumn (token: Token): [number, number] {
+  if (token.type === 'newline' || token.type === 'raw') {
+    return [token.line, 0]
   }
 
-  return isBlock(token.children[0], 'super')
-}
-
-/**
- * Merges the sections of multiple lexer tokens array together. This is
- * used to merge sections of layouts.
- */
-export function mergeSections (base: Token[], extended: Token[]): Token[] {
-  /**
-   * Collection of all sections from the extended tokens
-   */
-  const extendedSections = extended
-    .filter((node) => isBlock(node, 'section'))
-    .reduce((sections, node: TagToken) => {
-      sections[node.properties.jsArg.trim()] = node
-      return sections
-    }, {})
-
-   /**
-    * We also take the set tag from the list
-    * base template and hoist them to the
-    * top
-    */
-  const extendedSetCalls = extended.filter((node) => isBlock(node, 'set'))
-
-  /**
-   * Replace/extend sections inside base tokens list
-   */
-  const finalNodes = base
-    .map((node) => {
-      if (!isBlock(node, 'section')) {
-        return node
-      }
-
-      const extendedNode = extendedSections[node.properties.jsArg.trim()]
-      if (!extendedNode) {
-        return node
-      }
-
-      /**
-       * Concat children when super was called
-       */
-      if (hasChildSuper(extendedNode)) {
-        extendedNode.children = node.children.concat(extendedNode.children)
-      }
-
-      return extendedNode
-    })
-
-  return extendedSetCalls.concat(finalNodes)
+  return [token.loc.start.line, token.loc.start.col]
 }

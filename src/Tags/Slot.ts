@@ -11,18 +11,27 @@
 * file that was distributed with this source code.
 */
 
-import { TagToken } from 'edge-lexer'
-import { Parser, EdgeBuffer } from 'edge-parser'
+import { EdgeError } from 'edge-error'
+import { TagContract } from '../Contracts'
 
-export class SlotTag {
-  public static block = true
-  public static seekable = true
-  public static selfclosed = false
-  public static tagName = 'slot'
+/**
+ * Slot tag is used to define the slots of a given component. Slots cannot be
+ * nested and must appear as top level children inside a component.
+ */
+export const slotTag: TagContract = {
+  block: true,
+  seekable: true,
+  tagName: 'slot',
 
-  public static compile (parser: Parser, buffer: EdgeBuffer, token: TagToken) {
-    token.children.forEach((child) => {
-      parser.processToken(child, buffer)
-    })
-  }
+  compile (parser, _buffer, token) {
+    throw new EdgeError(
+      `@slot tag must appear as top level tag inside the @component tag`,
+      'E_ORPHAN_SLOT_TAG',
+      {
+        line: token.loc.start.line,
+        col: token.loc.start.col,
+        filename: parser.options.filename,
+      },
+    )
+  },
 }

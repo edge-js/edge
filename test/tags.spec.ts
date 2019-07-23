@@ -7,21 +7,23 @@
 * file that was distributed with this source code.
 */
 
-import * as test from 'japa'
-import * as fs from 'fs-extra'
 import { join } from 'path'
+import * as test from 'japa'
+import { Filesystem } from '@poppinss/dev-utils'
 import { Compiler } from '../src/Compiler'
 import { Loader } from '../src/Loader'
 import * as tags from '../src/Tags'
 
-const viewsDir = join(__dirname, 'views')
+const fs = new Filesystem(join(__dirname, 'views'))
+
 const loader = new Loader()
-loader.mount('default', viewsDir)
+loader.mount('default', fs.basePath)
+
 const compiler = new Compiler(loader, tags)
 
 test.group('If tag', (group) => {
   group.afterEach(async () => {
-    await fs.remove(viewsDir)
+    await fs.cleanup()
   })
 
   test('raise errors on correct line with if tag', async (assert) => {
@@ -33,7 +35,7 @@ We are writing a bad if condition
 @if(foo bar)
 @endif`
 
-    await fs.outputFile(join(viewsDir, 'foo.edge'), templateContent)
+    await fs.add('foo.edge', templateContent)
     try {
       compiler.compile('foo', true)
     } catch (error) {
@@ -51,12 +53,12 @@ We are writing a bad if condition
 @if(foo, bar)
 @endif`
 
-    await fs.outputFile(join(viewsDir, 'foo.edge'), templateContent)
+    await fs.add('foo.edge', templateContent)
     try {
       compiler.compile('foo', true)
     } catch (error) {
       assert.equal(error.line, 4)
-      assert.equal(error.message, 'SequenceExpression is not allowed for if tag.')
+      assert.equal(error.message, '{foo, bar} is not a valid argument type for the @if tag')
     }
   })
 
@@ -68,7 +70,7 @@ We are writing a bad if condition
 
 @if(foo, bar)`
 
-    await fs.outputFile(join(viewsDir, 'foo.edge'), templateContent)
+    await fs.add('foo.edge', templateContent)
     try {
       compiler.compile('foo', true)
     } catch (error) {
@@ -79,7 +81,7 @@ We are writing a bad if condition
 
 test.group('Include', (group) => {
   group.afterEach(async () => {
-    await fs.remove(viewsDir)
+    await fs.cleanup()
   })
 
   test('raise errors on correct line with include tag', async (assert) => {
@@ -88,7 +90,7 @@ test.group('Include', (group) => {
     const templateContent = `We are writing a bad include condition
 @include(foo bar)`
 
-    await fs.outputFile(join(viewsDir, 'foo.edge'), templateContent)
+    await fs.add('foo.edge', templateContent)
     try {
       compiler.compile('foo', true)
     } catch (error) {
@@ -101,19 +103,19 @@ test.group('Include', (group) => {
 
     const templateContent = `@include('foo', 'bar')`
 
-    await fs.outputFile(join(viewsDir, 'foo.edge'), templateContent)
+    await fs.add('foo.edge', templateContent)
     try {
       compiler.compile('foo', true)
     } catch (error) {
       assert.equal(error.stack.split('\n')[1], `    at (foo.edge:1:9)`)
-      assert.equal(error.message, 'SequenceExpression is not allowed for include tag.')
+      assert.equal(error.message, `{'foo', 'bar'} is not a valid argument type for the @include tag`)
     }
   })
 })
 
 test.group('Component', (group) => {
   group.afterEach(async () => {
-    await fs.remove(viewsDir)
+    await fs.cleanup()
   })
 
    test('raise errors when slot name is not defined as a literal', async (assert) => {
@@ -126,12 +128,12 @@ test.group('Component', (group) => {
 
     @endcomponent`
 
-    await fs.outputFile(join(viewsDir, 'foo.edge'), templateContent)
+    await fs.add('foo.edge', templateContent)
     try {
       compiler.compile('foo', true)
     } catch (error) {
       assert.equal(error.stack.split('\n')[1], `    at (foo.edge:3:0)`)
-      assert.equal(error.message, 'Identifier is not allowed for slot tag.')
+      assert.equal(error.message, '{hello} is not a valid argument type for the @slot tag')
     }
   })
 
@@ -145,12 +147,12 @@ test.group('Component', (group) => {
 
     @endcomponent`
 
-    await fs.outputFile(join(viewsDir, 'foo.edge'), templateContent)
+    await fs.add('foo.edge', templateContent)
     try {
       compiler.compile('foo', true)
     } catch (error) {
       assert.equal(error.stack.split('\n')[1], `    at (foo.edge:3:0)`)
-      assert.equal(error.message, 'Maximum of 2 arguments are allowed for slot tag')
+      assert.equal(error.message, 'maximum of 2 arguments are allowed for @slot tag')
     }
   })
 
@@ -164,12 +166,12 @@ test.group('Component', (group) => {
 
     @endcomponent`
 
-    await fs.outputFile(join(viewsDir, 'foo.edge'), templateContent)
+    await fs.add('foo.edge', templateContent)
     try {
       compiler.compile('foo', true)
     } catch (error) {
       assert.equal(error.stack.split('\n')[1], `    at (foo.edge:3:0)`)
-      assert.equal(error.message, 'Identifier is not allowed for slot tag.')
+      assert.equal(error.message, 'slot name must be a valid string literal')
     }
   })
 
@@ -186,12 +188,101 @@ test.group('Component', (group) => {
 
     @endcomponent`
 
-    await fs.outputFile(join(viewsDir, 'foo.edge'), templateContent)
+    await fs.add('foo.edge', templateContent)
     try {
       compiler.compile('foo', true)
     } catch (error) {
       assert.equal(error.stack.split('\n')[1], `    at (foo.edge:5:6)`)
-      assert.equal(error.message, 'Literal is not allowed for slot tag.')
+      assert.equal(error.message, `{'props'} is not valid prop identifier for @slot tag`)
+    }
+  })
+
+   test('raise error when slot is inside a conditional block', async (assert) => {
+    assert.plan(2)
+
+    const templateContent = `@component('bar')
+
+    @if(username)
+      @slot('header')
+      @endslot
+    @endif
+
+    @endcomponent`
+
+    await fs.add('foo.edge', templateContent)
+    try {
+      compiler.compile('foo', true)
+    } catch (error) {
+      assert.equal(error.stack.split('\n')[1], `    at (foo.edge:4:12)`)
+      assert.equal(error.message, `@slot tag must appear as top level tag inside the @component tag`)
+    }
+  })
+})
+
+test.group('Layouts', (group) => {
+  group.afterEach(async () => {
+    await fs.cleanup()
+  })
+
+  test('raise error when section is nested inside conditional block', async (assert) => {
+    assert.plan(2)
+
+    const templateContent = `@layout('master')
+
+    @if(username)
+      @section('body')
+        <p> Hello world </p>
+      @endsection
+    @endif`
+
+    await fs.add('foo.edge', templateContent)
+    await fs.add('master.edge', `@!section('body')`)
+
+    try {
+      compiler.compile('foo', true)
+    } catch (error) {
+      assert.equal(error.stack.split('\n')[1], `    at (foo.edge:3:8)`)
+      assert.equal(error.message, `Template extending the layout can only define @sections as top level nodes`)
+    }
+  })
+
+  test('raise error when section is not a top level tag inside nested layouts', async (assert) => {
+    assert.plan(2)
+
+    const templateContent = `@layout('master')
+
+    @if(username)
+      @section('body')
+        <p> Hello world </p>
+      @endsection
+    @endif`
+
+    await fs.add('foo.edge', templateContent)
+    await fs.add('master.edge', `@layout('super')`)
+    await fs.add('super.edge', `@!section('body')`)
+
+    try {
+      compiler.compile('foo', true)
+    } catch (error) {
+      assert.equal(error.stack.split('\n')[1], `    at (foo.edge:3:8)`)
+      assert.equal(error.message, `Template extending the layout can only define @sections as top level nodes`)
+    }
+  })
+
+  test('raise error when there are raw content outside sections', async (assert) => {
+    assert.plan(2)
+
+    const templateContent = `@layout('master')
+    <p> Hello world </p>`
+
+    await fs.add('foo.edge', templateContent)
+    await fs.add('master.edge', `@!section('body')`)
+
+    try {
+      compiler.compile('foo', true)
+    } catch (error) {
+      assert.equal(error.stack.split('\n')[1], `    at (foo.edge:2:0)`)
+      assert.equal(error.message, `Template extending the layout can only define @sections as top level nodes`)
     }
   })
 })

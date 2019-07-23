@@ -11,12 +11,13 @@
 * file that was distributed with this source code.
 */
 
-import { Token } from 'edge-lexer'
 import { Parser } from 'edge-parser'
+import { EdgeError } from 'edge-error'
+import { Token, TagToken } from 'edge-lexer'
 
-import { LoaderContract, Tags, LoaderTemplate } from '../Contracts'
-import { mergeSections, isBlock } from '../utils'
 import { CacheManager } from '../CacheManager'
+import { isBlock, getLineAndColumn } from '../utils'
+import { LoaderContract, TagsContract, LoaderTemplate } from '../Contracts'
 
 /**
  * Compiler compiles the template to a function, which can be invoked at a later
@@ -31,9 +32,95 @@ export class Compiler {
 
   constructor (
     private _loader: LoaderContract,
-    private _tags: Tags,
+    private _tags: TagsContract,
     private _cache: boolean = true,
   ) {}
+
+  /**
+   * Merges sections of base template and parent template tokens
+   */
+  private _mergeSections (base: Token[], extended: Token[], filename: string): Token[] {
+    /**
+     * Collection of all sections from the extended tokens
+     */
+    const extendedSections: { [key: string]: TagToken } = {}
+
+    /**
+     * Collection of extended set calls as top level nodes. Now since they are hanging
+     * up in the air, they will be hoisted like `var` statements in Javascript
+     */
+    const extendedSetCalls: TagToken[] = []
+
+    extended
+      .forEach((node) => {
+        /**
+         * Ignore new lines, layout tag and empty raw nodes inside the parent
+         * template
+         */
+        if (
+          isBlock(node, 'layout') ||
+          node.type === 'newline' ||
+          (node.type === 'raw' && !node.value.trim())
+        ) {
+          return
+        }
+
+        /**
+         * Collect parent template sections
+         */
+        if (isBlock(node, 'section')) {
+          extendedSections[node.properties.jsArg.trim()] = node
+          return
+        }
+
+        /**
+         * Collect set calls inside parent templates
+         */
+        if (isBlock(node, 'set')) {
+          extendedSetCalls.push(node)
+          return
+        }
+
+        /**
+         * Everything else if not allowed as top level nodes
+         */
+        const [line, col] = getLineAndColumn(node)
+        throw new EdgeError(
+          `Template extending the layout can only define @sections as top level nodes`,
+          'E_UNALLOWED_EXPRESSION',
+          { line, col, filename },
+        )
+      })
+
+    /**
+     * Replace/extend sections inside base tokens list
+     */
+    const finalNodes = base
+      .map((node) => {
+        if (!isBlock(node, 'section')) {
+          return node
+        }
+
+        const extendedNode = extendedSections[node.properties.jsArg.trim()]
+        if (!extendedNode) {
+          return node
+        }
+
+        /**
+         * Concat children when super was called
+         */
+        if (extendedNode.children.length && isBlock(extendedNode.children[0], 'super')) {
+          extendedNode.children = node.children.concat(extendedNode.children)
+        }
+
+        return extendedNode
+      })
+
+    /**
+     * Set calls are hoisted to the top
+     */
+    return ([] as Token[]).concat(extendedSetCalls).concat(finalNodes)
+  }
 
   /**
    * Generates an array of lexer tokens from the template string. Further tokens
@@ -51,7 +138,7 @@ export class Compiler {
      */
     if (isBlock(firstToken, 'layout')) {
       const layoutTokens = this.generateTokens(firstToken.properties.jsArg.replace(/'/g, ''))
-      templateTokens = mergeSections(layoutTokens, templateTokens)
+      templateTokens = this._mergeSections(layoutTokens, templateTokens, parser.options.filename)
     }
 
     return templateTokens

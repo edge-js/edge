@@ -11,14 +11,19 @@
 * file that was distributed with this source code.
 */
 
-export class LayoutTag {
-  public static block = false
-  public static seekable = true
-  public static selfclosed = false
-  public static tagName = 'layout'
+import { TagContract } from '../Contracts'
 
-  public static compile () {
+/**
+ * Layout tag is used to define parent layout for a given template. The layout
+ * must appear in the first line of the template itself.
+ */
+export const layoutTag: TagContract = {
+  block: false,
+  seekable: true,
+  tagName: 'layout',
+
+  compile () {
     // The layouts are handled by the template itself. I am just a way to
     // tell lexer to parse me as a block node
-  }
+  },
 }

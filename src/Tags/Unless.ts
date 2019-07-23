@@ -11,30 +11,37 @@
 * file that was distributed with this source code.
 */
 
-import { TagToken } from 'edge-lexer'
-import { Parser, EdgeBuffer } from 'edge-parser'
+import { expressions } from 'edge-parser'
+
+import { TagContract } from '../Contracts'
 import { disAllowExpressions } from '../utils'
 
-export class UnlessTag {
-  public static block = true
-  public static seekable = true
-  public static selfclosed = false
-  public static tagName = 'unless'
-
-  /**
-   * Expressions which are not allowed by the sequence
-   * expression
-   *
-   * @type {Array}
-   */
-  private static bannedExpressions = ['SequenceExpression']
+/**
+ * Inverse of the `if` condition. The term `unless` is more readable and logical
+ * vs using `@if(!expression)`.
+ *
+ * ```edge
+ * @unless(auth.user)
+ *   <a href="/login"> Login </a>
+ * @endunless
+ * ```
+ */
+export const unlessTag: TagContract = {
+  block: true,
+  seekable: true,
+  tagName: 'unless',
 
   /**
    * Compiles the if block node to a Javascript if statement
    */
-  public static compile (parser: Parser, buffer: EdgeBuffer, token: TagToken) {
+  compile (parser, buffer, token) {
     const parsed = parser.parseJsString(token.properties.jsArg, token.loc)
-    disAllowExpressions('unless', parsed, this.bannedExpressions, parser.options.filename)
+    disAllowExpressions(
+      parsed,
+      [expressions.SequenceExpression],
+      parser.options.filename,
+      `{${token.properties.jsArg}} is not a valid argument type for the @unless tag`,
+    )
 
     /**
      * Start if block
@@ -62,5 +69,5 @@ export class UnlessTag {
      * Close if block
      */
     buffer.writeStatement('}')
-  }
+  },
 }

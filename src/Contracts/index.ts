@@ -11,6 +11,7 @@
  * file that was distributed with this source code.
  */
 
+import { MacroableConstructorContract } from 'macroable'
 import { ParseTagDefininationContract } from 'edge-parser'
 
 /**
@@ -59,16 +60,36 @@ export interface LoaderContract {
 }
 
 /**
+ * Shape of runtime context
+ */
+export interface ContextContract {
+  newFrame (): void,
+  setOnFrame (key: string, value: any): void,
+  removeFrame (): void,
+  escape <T> (input: T): T,
+  resolve (key: string): any,
+  set (key: string, value: any): void,
+}
+
+/**
+ * Shape of context constructor
+ */
+export interface ContextConstructorContract extends MacroableConstructorContract {
+  new (presenter: any, sharedState: any): ContextContract,
+}
+
+/**
  * The final tag must have a tagName along with other properties
  * required by lexer and parser
  */
 export interface TagContract extends ParseTagDefininationContract {
-  tagName: string
+  tagName: string,
+  run? (context: ContextConstructorContract): void,
 }
 
 /**
  * Shape of required tags
  */
-export type Tags = {
+export type TagsContract = {
   [tagName: string]: TagContract,
 }

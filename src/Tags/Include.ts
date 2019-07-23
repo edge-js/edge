@@ -11,30 +11,43 @@
 * file that was distributed with this source code.
 */
 
-import { TagToken } from 'edge-lexer'
-import { Parser, EdgeBuffer } from 'edge-parser'
-import { disAllowExpressions } from '../utils'
+import { expressions } from 'edge-parser'
 
-export class IncludeTag {
-  public static block = false
-  public static seekable = true
-  public static selfclosed = false
-  public static tagName = 'include'
+import { TagContract } from '../Contracts'
+import { allowExpressions } from '../utils'
 
-  /**
-   * Expressions which are not allowed by the sequence
-   * expression
-   *
-   * @type {Array}
-   */
-  private static bannedExpressions = ['SequenceExpression']
+/**
+ * Include tag is used to include partials in the same scope of the parent
+ * template.
+ *
+ * ```edge
+ * @include('partials.header')
+ * ```
+ */
+export const includeTag: TagContract = {
+  block: false,
+  seekable: true,
+  tagName: 'include',
 
   /**
    * Compiles else block node to Javascript else statement
    */
-  public static compile (parser: Parser, buffer: EdgeBuffer, token: TagToken) {
+  compile (parser, buffer, token) {
     const parsed = parser.parseJsString(token.properties.jsArg, token.loc)
-    disAllowExpressions('include', parsed, this.bannedExpressions, parser.options.filename)
+    allowExpressions(
+      parsed,
+      [
+        expressions.Identifier,
+        expressions.Literal,
+        expressions.LogicalExpression,
+        expressions.MemberExpression,
+        expressions.ConditionalExpression,
+        expressions.CallExpression,
+        expressions.TemplateLiteral,
+      ],
+      parser.options.filename,
+      `{${token.properties.jsArg}} is not a valid argument type for the @include tag`,
+    )
 
     /**
      * Include template. Since the partials can be a runtime value, we cannot inline
@@ -42,5 +55,5 @@ export class IncludeTag {
      * the partial and then process it
      */
     buffer.writeLine(`template.renderInline(${parser.statementToString(parsed)})(template, ctx)`)
-  }
+  },
 }

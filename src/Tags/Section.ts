@@ -11,16 +11,18 @@
 * file that was distributed with this source code.
 */
 
-import { TagToken } from 'edge-lexer'
-import { Parser, EdgeBuffer } from 'edge-parser'
+import { TagContract } from '../Contracts'
 
-export class SectionTag {
-  public static block = true
-  public static seekable = true
-  public static selfclosed = true
-  public static tagName = 'section'
+/**
+ * Section tag is used to define the sections on a given template. Sections cannot be
+ * nested and must appear as top level children inside a component.
+ */
+export const sectionTag: TagContract = {
+  block: true,
+  seekable: true,
+  tagName: 'section',
 
-  public static compile (parser: Parser, buffer: EdgeBuffer, token: TagToken) {
-    token.children.forEach((token) => (parser.processToken(token, buffer)))
-  }
+  compile (parser, buffer, token) {
+    token.children.forEach((token) => parser.processToken(token, buffer))
+  },
 }

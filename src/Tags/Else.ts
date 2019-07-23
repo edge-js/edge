@@ -11,20 +11,19 @@
 * file that was distributed with this source code.
 */
 
-import { Parser, EdgeBuffer } from 'edge-parser'
+import { TagContract } from '../Contracts'
 
-export class ElseTag {
-  public static block = false
-  public static seekable = false
-  public static selfclosed = false
-  public static tagName = 'else'
+export const elseTag: TagContract = {
+  block: false,
+  seekable: false,
+  tagName: 'else',
 
   /**
    * Compiles else block node to Javascript else statement
    */
-  public static compile (_parser: Parser, buffer: EdgeBuffer) {
+  compile (_parser, buffer) {
     buffer.dedent()
     buffer.writeStatement(`} else {`)
     buffer.indent()
-  }
+  },
 }

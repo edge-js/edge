@@ -14,6 +14,7 @@
 import * as he from 'he'
 import { set } from 'lodash'
 import { Macroable } from 'macroable'
+import { ContextContract } from '../Contracts'
 
 /**
  * Context is used at runtime to resolve values for a given
@@ -22,7 +23,7 @@ import { Macroable } from 'macroable'
  * Also the context can be extended to add `getters` and `methods`. Checkout
  * [macroable](https://github.com/poppinss/macroable) for same.
  */
-export class Context extends Macroable {
+export class Context extends Macroable implements ContextContract {
   protected static _macros = {}
   protected static _getters = {}
 

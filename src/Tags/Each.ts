@@ -11,72 +11,109 @@
 * file that was distributed with this source code.
 */
 
-import { TagToken } from 'edge-lexer'
-import { Parser, EdgeBuffer } from 'edge-parser'
-import { each, size as lodashSize } from 'lodash'
+import { Parser, expressions } from 'edge-parser'
+import { each, size } from 'lodash'
 
+import { TagContract } from '../Contracts'
 import { allowExpressions, isBlock } from '../utils'
 
-export class EachTag {
-  public static block = true
-  public static seekable = true
-  public static selfclosed = true
-  public static tagName = 'each'
+/**
+ * Returns the list to loop over for the each expression
+ */
+function getLoopList (expression: any, parser: Parser): string {
+  return parser.statementToString(parser.acornToEdgeExpression(expression))
+}
 
-  private static allowedExpressions = ['BinaryExpression']
+/**
+ * Returns loop item and the index for the each expression
+ */
+function getLoopItemAndIndex (expression: any, filename: string): [string, string] {
+  allowExpressions(
+    expression,
+    [expressions.SequenceExpression, expressions.Identifier],
+    filename,
+    `invalid left hand side expression for the @each tag`,
+  )
 
   /**
-   * Returns the value and key names for the foreach loop
+   * Return list index from the sequence expression
    */
-  private static _getLoopKeyValue (expression: any, filename: string): [string, string] {
-    allowExpressions('each', expression, ['SequenceExpression', 'Identifier'], filename)
+  if (expression.type === 'SequenceExpression') {
+    allowExpressions(
+      expression.expressions[0],
+      [expressions.Identifier],
+      filename,
+      `invalid expression for {value} identifier for the @each tag`,
+    )
 
-    if (expression.type === 'SequenceExpression') {
-      return [expression.expressions[0].name, expression.expressions[1].name]
-    }
-
-    return [expression.name, 'key']
+    allowExpressions(
+      expression.expressions[1],
+      [expressions.SequenceExpression, expressions.Identifier],
+      filename,
+      `invalid expression for {key} identifier for the @each tag`,
+    )
+    return [expression.expressions[0].name, expression.expressions[1].name]
   }
 
-  /**
-   * Returns the source on which we should execute the loop
-   */
-  private static _getLoopSource (expression: any, parser: Parser): string {
-    return parser.statementToString(parser.acornToEdgeExpression(expression))
-  }
+  return [expression.name, 'key']
+}
+
+/**
+ * Each tag is used to run a foreach loop on arrays and even objects.
+ *
+ * ```edge
+ * @each(user in users)
+ *   {{ user }} {{ $loop.index }}
+ * @endeach
+ * ```
+ */
+export const eachTag: TagContract = {
+  block: true,
+  seekable: true,
+  tagName: 'each',
 
   /**
-   * Compiles else block node to Javascript else statement
+   * Compile the template
    */
-  public static compile (parser: Parser, buffer: EdgeBuffer, token: TagToken) {
-    const ast = parser.generateAst(token.properties.jsArg, token.loc)
-    const expression = ast.body[0].expression
+  compile (parser, buffer, token) {
+    /**
+     * Instead of using `parser.parseJsString`, we make use of `generateAst`, since
+     * we do not want to process `Indentifer` expressions as per the normal
+     * parsing logic and just want to extract their names.
+     */
+    const parsed = parser.generateAst(token.properties.jsArg, token.loc).body[0].expression
+    allowExpressions(
+      parsed,
+      [expressions.BinaryExpression],
+      parser.options.filename,
+      `{${token.properties.jsArg}} is not a valid binary expression for the @each tag`,
+    )
 
-    allowExpressions('each', expression, this.allowedExpressions, parser.options.filename)
-
-    const [value, key] = this._getLoopKeyValue(expression.left, parser.options.filename)
-    const rhs = this._getLoopSource(expression.right, parser)
-
-    const elseIndex = token
-      .children
-      .findIndex((child) => {
-        return isBlock(child, 'else')
-      })
+    /**
+     * Finding if an else child exists inside the each tag
+     */
+    const elseIndex = token.children.findIndex((child) => isBlock(child, 'else'))
     const elseChild = elseIndex > -1 ? token.children.splice(elseIndex) : []
+
+    /**
+     * Fetching the item,index and list for the each loop
+     */
+    const [item, index] = getLoopItemAndIndex(parsed.left, parser.options.filename)
+    const list = getLoopList(parsed.right, parser)
 
     /**
      * If there is an else statement, then wrap the loop
      * inside the `if` statement first
      */
     if (elseIndex > -1) {
-      buffer.writeStatement(`if(ctx.size(${rhs})) {`)
+      buffer.writeStatement(`if(ctx.size(${list})) {`)
       buffer.indent()
     }
 
     /**
      * Write the loop statement to the template
      */
-    buffer.writeStatement(`ctx.loop(${rhs}, function (${value}, loop) {`)
+    buffer.writeStatement(`ctx.loop(${list}, function (${item}, loop) {`)
 
     /**
      * Indent block
@@ -93,9 +130,9 @@ export class EachTag {
     /**
      * Set key and value pair on the context
      */
-    buffer.writeStatement(`ctx.setOnFrame('${value}', ${value})`)
+    buffer.writeStatement(`ctx.setOnFrame('${item}', ${item})`)
     buffer.writeStatement(`ctx.setOnFrame('$loop', loop)`)
-    buffer.writeStatement(`ctx.setOnFrame('${key}', loop.key)`)
+    buffer.writeStatement(`ctx.setOnFrame('${index}', loop.key)`)
 
     /**
      * Process all kids
@@ -128,15 +165,15 @@ export class EachTag {
       buffer.dedent()
       buffer.writeStatement(`}`)
     }
-  }
+  },
 
   /**
    * Add methods to the runtime context for running the loop
    */
-  public static run (context) {
+  run (context) {
     context.macro('loop', function loop (source, callback) {
       let index = 0
-      const total = lodashSize(source)
+      const total = size(source)
 
       each(source, (value, key) => {
         const isEven = (index + 1) % 2 === 0
@@ -155,8 +192,6 @@ export class EachTag {
       })
     })
 
-    context.macro('size', function size (source) {
-      return lodashSize(source)
-    })
-  }
+    context.macro('size', size)
+  },
 }

@@ -11,14 +11,22 @@
 * file that was distributed with this source code.
 */
 
-export class SuperTag {
-  public static block = false
-  public static seekable = false
-  public static selfclosed = false
-  public static tagName = 'super'
+import { TagContract } from '../Contracts'
 
-  public static compile () {
+/**
+ * Super tag is used inside sections to inherit the parent section
+ * content.
+ *
+ * The implementation of super tag is handled by the compiler itself, but we need
+ * the tag to exists, so that the lexer can parse it as a tag.
+ */
+export const superTag: TagContract = {
+  block: false,
+  seekable: false,
+  tagName: 'super',
+
+  compile () {
     // The super tag is handled by the compiler itself. I am just a way to
     // tell lexer to parse me as an inline node
-  }
+  },
 }

@@ -11,30 +11,35 @@
 * file that was distributed with this source code.
 */
 
-import { TagToken } from 'edge-lexer'
-import { Parser, EdgeBuffer } from 'edge-parser'
+import { expressions } from 'edge-parser'
+
+import { TagContract } from '../Contracts'
 import { disAllowExpressions } from '../utils'
 
-export class IfTag {
-  public static block = true
-  public static seekable = true
-  public static selfclosed = false
-  public static tagName = 'if'
-
-  /**
-   * Expressions which are not allowed by the sequence
-   * expression
-   *
-   * @type {Array}
-   */
-  private static bannedExpressions = ['SequenceExpression']
+/**
+ * If tag is used to define conditional blocks.
+ *
+ * ```edge
+ * @if(username)
+ * @endif
+ * ```
+ */
+export const ifTag: TagContract = {
+  block: true,
+  seekable: true,
+  tagName: 'if',
 
   /**
    * Compiles the if block node to a Javascript if statement
    */
-  public static compile (parser: Parser, buffer: EdgeBuffer, token: TagToken) {
+  compile (parser, buffer, token) {
     const parsed = parser.parseJsString(token.properties.jsArg, token.loc)
-    disAllowExpressions('if', parsed, this.bannedExpressions, parser.options.filename)
+    disAllowExpressions(
+      parsed,
+      [expressions.SequenceExpression],
+      parser.options.filename,
+      `{${token.properties.jsArg}} is not a valid argument type for the @if tag`,
+    )
 
     /**
      * Start if block
@@ -49,9 +54,7 @@ export class IfTag {
     /**
      * Process of all kids recursively
      */
-    token.children.forEach((child) => {
-      parser.processToken(child, buffer)
-    })
+    token.children.forEach((child) => parser.processToken(child, buffer))
 
     /**
      * Remove identation
@@ -62,5 +65,5 @@ export class IfTag {
      * Close if block
      */
     buffer.writeStatement('}')
-  }
+  },
 }
