@@ -64,6 +64,8 @@ export interface LoaderContract {
  * Shape of runtime context
  */
 export interface ContextContract {
+  presenter: { state: any },
+  sharedState: any,
   newFrame (): void,
   setOnFrame (key: string, value: any): void,
   removeFrame (): void,

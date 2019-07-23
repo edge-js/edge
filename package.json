@@ -2,7 +2,12 @@
   "name": "edge",
   "version": "1.0.0",
   "description": "Template engine",
-  "typings": "./build/src/Edge/index.d.ts",
+  "main": "build/index.js",
+  "files": [
+    "build/src",
+    "build/index.d.ts",
+    "build/index.js"
+  ],
   "scripts": {
     "pretest": "npm run lint",
     "test": "node japaFile.js",
@@ -76,12 +81,6 @@
   "gitHooks": {
     "commit-msg": "node ./node_modules/@adonisjs/mrm-preset/validateCommit/conventional/validate.js"
   },
-  "main": "build/index.js",
-  "files": [
-    "build/src",
-    "build/index.d.ts",
-    "build/index.js"
-  ],
   "husky": {
     "hooks": {
       "pre-commit": "doctoc README.md --title='## Table of contents' && git add README.md",
