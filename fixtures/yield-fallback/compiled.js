@@ -1,9 +1,9 @@
 (function (template, ctx) {
-  let out = ''
+  let out = '';
   if(ctx.resolve('username')) {
-    out += ctx.resolve('username')
+    out += ctx.resolve('username');
   } else {
-    out += '  Hello guest'
+    out += '  Hello guest';
   }
-  return out
+  return out;
 })(template, ctx)

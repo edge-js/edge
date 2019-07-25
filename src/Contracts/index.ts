@@ -102,7 +102,7 @@ export type TagsContract = {
  */
 export interface CompilerContract {
   compile (templatePath: string, inline: boolean): LoaderTemplate,
-  generateTokens (templatePath: string): Token[],
+  generateLexerTokens (templatePath: string): Token[],
 }
 
 /**

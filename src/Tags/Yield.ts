@@ -43,7 +43,7 @@ export const yieldTag: TagContract = {
    * Compiles the if block node to a Javascript if statement
    */
   compile (parser, buffer, token) {
-    const parsed = parser.parseJsString(token.properties.jsArg, token.loc)
+    const parsed = parser.generateEdgeExpression(token.properties.jsArg, token.loc)
     disAllowExpressions(
       parsed,
       [expressions.SequenceExpression],
@@ -51,7 +51,7 @@ export const yieldTag: TagContract = {
       `{${token.properties.jsArg}} is not a valid argument type for the @yield tag`,
     )
 
-    const parsedString = parser.statementToString(parsed)
+    const parsedString = parser.stringifyExpression(parsed)
 
     /**
      * Write main content when it's truthy
@@ -60,14 +60,17 @@ export const yieldTag: TagContract = {
     buffer.indent()
     buffer.writeLine(parsedString)
     buffer.dedent()
-    buffer.writeStatement('} else {')
 
     /**
      * Else write fallback
      */
-    buffer.indent()
-    token.children.forEach((child) => (parser.processToken(child, buffer)))
-    buffer.dedent()
+    if (!token.properties.selfclosed) {
+      buffer.writeStatement('} else {')
+      buffer.indent()
+      token.children.forEach((child) => (parser.processLexerToken(child, buffer)))
+      buffer.dedent()
+    }
+
     buffer.writeStatement('}')
   },
 }

@@ -23,6 +23,6 @@ export const sectionTag: TagContract = {
   tagName: 'section',
 
   compile (parser, buffer, token) {
-    token.children.forEach((token) => parser.processToken(token, buffer))
+    token.children.forEach((token) => parser.processLexerToken(token, buffer))
   },
 }

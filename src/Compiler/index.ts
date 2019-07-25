@@ -11,9 +11,9 @@
 * file that was distributed with this source code.
 */
 
-import { Parser } from 'edge-parser'
 import { EdgeError } from 'edge-error'
 import { Token, TagToken } from 'edge-lexer'
+import { Parser, EdgeBuffer } from 'edge-parser'
 
 import { CacheManager } from '../CacheManager'
 import { isBlockToken, getLineAndColumnForToken } from '../utils'
@@ -25,7 +25,7 @@ import { LoaderContract, TagsContract, LoaderTemplate, CompilerContract } from '
  * used under the hood to parse the templates.
  *
  * Also, the `layouts` are handled natively by the compiler. Before starting
- * the parsing process, it will merge the layout sections.
+ * the parsing process, it will recursively merge the layout sections.
  */
 export class Compiler implements CompilerContract {
   private _cacheManager = new CacheManager(this._cache)
@@ -128,8 +128,7 @@ export class Compiler implements CompilerContract {
    * merged together.
    */
   private _templateContentToTokens (content: string, parser: Parser): Token[] {
-    let templateTokens = parser.generateTokens(content)
-
+    let templateTokens = parser.generateLexerTokens(content)
     const firstToken = templateTokens[0]
 
     /**
@@ -137,7 +136,7 @@ export class Compiler implements CompilerContract {
      * and parent template sections together
      */
     if (isBlockToken(firstToken, 'layout')) {
-      const layoutTokens = this.generateTokens(firstToken.properties.jsArg.replace(/'/g, ''))
+      const layoutTokens = this.generateLexerTokens(firstToken.properties.jsArg.replace(/'/g, ''))
       templateTokens = this._mergeSections(layoutTokens, templateTokens, parser.options.filename)
     }
 
@@ -145,14 +144,15 @@ export class Compiler implements CompilerContract {
   }
 
   /**
-   * Converts the template content to an [array of lexer tokens](https://github.com/edge-js/edge-lexer#nodes). If
-   * layouts detected, their sections will be merged together.
+   * Converts the template content to an [array of lexer tokens]. The method is
+   * same as the `parser.generateLexerTokens`, plus it will handle the layouts
+   * and it's sections.
    *
    * ```
-   * compiler.generateTokens('<template-path>')
+   * compiler.generateLexerTokens('<template-path>')
    * ```
    */
-  public generateTokens (templatePath: string): Token[] {
+  public generateLexerTokens (templatePath: string): Token[] {
     const { template } = this._loader.resolve(templatePath, false)
 
     const parser = new Parser(this._tags, { filename: templatePath })
@@ -205,7 +205,7 @@ export class Compiler implements CompilerContract {
 
     /**
      * Get a new instance of the parser. We use the `templatePath` as the filename
-     * instead of the `absPath`, since `templatePath` are relative and readable.
+     * instead of the `absPath`, since `templatePath` is relative and readable.
      */
     const parser = new Parser(this._tags, {
       filename: `${templatePath.replace(/\.edge$/, '')}.edge`,
@@ -225,8 +225,11 @@ export class Compiler implements CompilerContract {
     /**
      * Finally process the ast
      */
+    const buffer = new EdgeBuffer()
+    templateTokens.forEach((token) => parser.processLexerToken(token, buffer))
+
     const payload = {
-      template: parser.processTokens(templateTokens, wrapAsFunction),
+      template: buffer.flush(wrapAsFunction),
       Presenter,
     }
 

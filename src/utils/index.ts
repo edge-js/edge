@@ -88,14 +88,14 @@ export function expressionsToStringifyObject (expressions: any[], parser: Parser
   expressions.forEach((arg) => {
     if (arg.type === 'ObjectExpression') {
       arg.properties.forEach((prop) => {
-        const key = parser.statementToString(prop.key)
-        const value = parser.statementToString(prop.value)
+        const key = parser.stringifyExpression(prop.key)
+        const value = parser.stringifyExpression(prop.value)
         objectifyString.add(key, value)
       })
     }
 
     if (arg.type === 'AssignmentExpression') {
-      objectifyString.add(arg.left.name, parser.statementToString(arg.right))
+      objectifyString.add(arg.left.name, parser.stringifyExpression(arg.right))
     }
   })
 

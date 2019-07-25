@@ -55,7 +55,7 @@ function getComponentNameAndProps (expression: any, parser: Parser): [string, st
     name,
     componentNameAllowedExpressions,
     parser.options.filename,
-    `{${parser.statementToString(name)}} is not a valid argument for component name`,
+    `{${parser.stringifyExpression(name)}} is not a valid argument for component name`,
   )
 
   /**
@@ -63,7 +63,7 @@ function getComponentNameAndProps (expression: any, parser: Parser): [string, st
    */
   if (expression.type === expressions.SequenceExpression) {
     return [
-      parser.statementToString(name),
+      parser.stringifyExpression(name),
       expressionsToStringifyObject(expression.expressions, parser),
     ]
   }
@@ -72,7 +72,7 @@ function getComponentNameAndProps (expression: any, parser: Parser): [string, st
    * When top level expression is not a sequence expression, then we assume props
    * as empty stringified object.
    */
-  return [parser.statementToString(name), '{}']
+  return [parser.stringifyExpression(name), '{}']
 }
 
 /**
@@ -80,10 +80,11 @@ function getComponentNameAndProps (expression: any, parser: Parser): [string, st
  */
 function getSlotNameAndProps (expression: any, parser: Parser): [string, null | string] {
   /**
-   * We just generate AST only, since we don't want parser to transform ast to edge statements
-   * for a `@slot` tag.
+   * We just generate the acorn AST only, since we don't want parser to transform
+   * ast to edge statements for a `@slot` tag.
    */
-  const parsed = parser.generateAst(expression.properties.jsArg, expression.loc).body[0].expression
+  const parsed = parser.generateAcornExpression(expression.properties.jsArg, expression.loc).expression
+
   allowExpressions(
     parsed,
     [expressions.Literal, expressions.SequenceExpression],
@@ -135,7 +136,7 @@ function getSlotNameAndProps (expression: any, parser: Parser): [string, null | 
     parsed.expressions[1],
     [expressions.Identifier],
     parser.options.filename,
-    `{${parser.statementToString(parsed.expressions[1])}} is not valid prop identifier for @slot tag`,
+    `{${parser.stringifyExpression(parsed.expressions[1])}} is not valid prop identifier for @slot tag`,
   )
 
   /**
@@ -154,7 +155,7 @@ export const componentTag: TagContract = {
   tagName: 'component',
 
   compile (parser, buffer, token) {
-    const parsed = parser.parseJsString(token.properties.jsArg, token.loc)
+    const parsed = parser.generateEdgeExpression(token.properties.jsArg, token.loc)
 
     /**
      * Check component js props for allowed expressions
@@ -198,8 +199,8 @@ export const componentTag: TagContract = {
          * Only start the frame, when there are props in use for a given slot.
          */
         if (slotProps) {
-          slots[slotName].buffer.writeStatement('ctx.newFrame()')
-          slots[slotName].buffer.writeStatement(`ctx.setOnFrame('${slotProps}', ${slotProps})`)
+          slots[slotName].buffer.writeStatement('ctx.newFrame();')
+          slots[slotName].buffer.writeStatement(`ctx.setOnFrame('${slotProps}', ${slotProps});`)
         }
       }
 
@@ -209,9 +210,9 @@ export const componentTag: TagContract = {
        * tag
        */
       if (isBlockToken(child, 'slot')) {
-        child.children.forEach((token) => parser.processToken(token, slots[slotName].buffer))
+        child.children.forEach((token) => parser.processLexerToken(token, slots[slotName].buffer))
       } else {
-        parser.processToken(child, slots[slotName].buffer)
+        parser.processLexerToken(child, slots[slotName].buffer)
       }
     })
 
@@ -225,11 +226,11 @@ export const componentTag: TagContract = {
        * Cleanup the previously started frame scope
        */
       if (slots[slot].props) {
-        slots[slot].buffer.writeStatement('ctx.removeFrame()')
+        slots[slot].buffer.writeStatement('ctx.removeFrame();')
       }
 
       const fnCall = slots[slot].props ? `return function (${slots[slot].props}) {` : 'return function () {'
-      slots[slot].buffer.wrap(fnCall, '}')
+      slots[slot].buffer.wrap(fnCall, '};')
       obj.add(slot, slots[slot].buffer.flush(true))
     })
 

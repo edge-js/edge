@@ -1,8 +1,7 @@
 (function (template, ctx) {
-  let out = ''
+  let out = '';
   if(ctx.resolve('greeting')) {
-    out += ctx.resolve('greeting')
-  } else {
+    out += ctx.resolve('greeting');
   }
-  return out
+  return out;
 })(template, ctx)

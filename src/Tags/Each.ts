@@ -21,7 +21,7 @@ import { allowExpressions, isBlockToken } from '../utils'
  * Returns the list to loop over for the each expression
  */
 function getLoopList (expression: any, parser: Parser): string {
-  return parser.statementToString(parser.acornToEdgeExpression(expression))
+  return parser.stringifyExpression(parser.acornToEdgeExpression(expression))
 }
 
 /**
@@ -77,11 +77,12 @@ export const eachTag: TagContract = {
    */
   compile (parser, buffer, token) {
     /**
-     * Instead of using `parser.parseJsString`, we make use of `generateAst`, since
-     * we do not want to process `Indentifer` expressions as per the normal
-     * parsing logic and just want to extract their names.
+     * Instead of using `parser.generateEdgeExpression`, we make use of
+     * `generateAcornExpression`, since we do not want to process
+     * `Indentifer` expressions as per the normal parsing logic
+     * and just want to extract it's name.
      */
-    const parsed = parser.generateAst(token.properties.jsArg, token.loc).body[0].expression
+    const parsed = parser.generateAcornExpression(token.properties.jsArg, token.loc).expression
     allowExpressions(
       parsed,
       [expressions.BinaryExpression],
@@ -125,26 +126,26 @@ export const eachTag: TagContract = {
      * the loop is given priority over top level values. Think
      * of it as a Javascript block scope.
      */
-    buffer.writeStatement('ctx.newFrame()')
+    buffer.writeStatement('ctx.newFrame();')
 
     /**
      * Set key and value pair on the context
      */
-    buffer.writeStatement(`ctx.setOnFrame('${item}', ${item})`)
-    buffer.writeStatement(`ctx.setOnFrame('$loop', loop)`)
-    buffer.writeStatement(`ctx.setOnFrame('${index}', loop.key)`)
+    buffer.writeStatement(`ctx.setOnFrame('${item}', ${item});`)
+    buffer.writeStatement(`ctx.setOnFrame('$loop', loop);`)
+    buffer.writeStatement(`ctx.setOnFrame('${index}', loop.key);`)
 
     /**
      * Process all kids
      */
     token.children.forEach((child) => {
-      parser.processToken(child, buffer)
+      parser.processLexerToken(child, buffer)
     })
 
     /**
      * Remove the frame
      */
-    buffer.writeStatement('ctx.removeFrame()')
+    buffer.writeStatement('ctx.removeFrame();')
 
     /**
      * Dedent block
@@ -154,14 +155,14 @@ export const eachTag: TagContract = {
     /**
      * Close each loop
      */
-    buffer.writeStatement('})')
+    buffer.writeStatement('});')
 
     /**
      * If there is an else statement, then process
      * else childs and close the if block
      */
     if (elseIndex > -1) {
-      elseChild.forEach((child) => parser.processToken(child, buffer))
+      elseChild.forEach((child) => parser.processLexerToken(child, buffer))
       buffer.dedent()
       buffer.writeStatement(`}`)
     }

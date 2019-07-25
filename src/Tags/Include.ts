@@ -33,7 +33,7 @@ export const includeTag: TagContract = {
    * Compiles else block node to Javascript else statement
    */
   compile (parser, buffer, token) {
-    const parsed = parser.parseJsString(token.properties.jsArg, token.loc)
+    const parsed = parser.generateEdgeExpression(token.properties.jsArg, token.loc)
     allowExpressions(
       parsed,
       [
@@ -54,6 +54,6 @@ export const includeTag: TagContract = {
      * the content right now and have to defer to runtime to get the value of
      * the partial and then process it
      */
-    buffer.writeLine(`template.renderInline(${parser.statementToString(parsed)})(template, ctx)`)
+    buffer.writeLine(`template.renderInline(${parser.stringifyExpression(parsed)})(template, ctx)`)
   },
 }

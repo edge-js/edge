@@ -31,10 +31,10 @@ test.group('Compiler', (group) => {
 
     const compiler = new Compiler(loader, tags)
     assert.equal(compiler.compile('foo', false).template, `(function (template, ctx) {
-  let out = ''
-  out += 'Hello '
-  out += \`\${ctx.escape(ctx.resolve('username'))}\`
-  return out
+  let out = '';
+  out += 'Hello ';
+  out += \`\${ctx.escape(ctx.resolve('username'))}\`;
+  return out;
 })(template, ctx)`)
   })
 
@@ -84,10 +84,10 @@ test.group('Compiler', (group) => {
 
     const compiler = new Compiler(loader, tags)
     assert.equal(compiler.compile('foo', true).template, `
-  let out = ''
-  out += 'Hello '
-  out += \`\${ctx.escape(ctx.resolve('username'))}\`
-  return out`)
+  let out = '';
+  out += 'Hello ';
+  out += \`\${ctx.escape(ctx.resolve('username'))}\`;
+  return out;`)
   })
 
   test('do not load presenter for inline templates', async (assert) => {

@@ -1,11 +1,11 @@
 (function (template, ctx) {
-  let out = ''
+  let out = '';
   if(ctx.resolve('username')) {
-    out += '  Hello '
-    out += `${ctx.escape(ctx.resolve('username'))}`
-    out += '\n'
+    out += '  Hello ';
+    out += `${ctx.escape(ctx.resolve('username'))}`;
+    out += '\n';
   } else {
-    out += '  Hello guest!'
+    out += '  Hello guest!';
   }
-  return out
+  return out;
 })(template, ctx)

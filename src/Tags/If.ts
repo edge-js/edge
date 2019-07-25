@@ -33,7 +33,7 @@ export const ifTag: TagContract = {
    * Compiles the if block node to a Javascript if statement
    */
   compile (parser, buffer, token) {
-    const parsed = parser.parseJsString(token.properties.jsArg, token.loc)
+    const parsed = parser.generateEdgeExpression(token.properties.jsArg, token.loc)
     disAllowExpressions(
       parsed,
       [expressions.SequenceExpression],
@@ -44,7 +44,7 @@ export const ifTag: TagContract = {
     /**
      * Start if block
      */
-    buffer.writeStatement(`if(${parser.statementToString(parsed)}) {`)
+    buffer.writeStatement(`if(${parser.stringifyExpression(parsed)}) {`)
 
     /**
      * Indent upcoming code
@@ -54,7 +54,7 @@ export const ifTag: TagContract = {
     /**
      * Process of all kids recursively
      */
-    token.children.forEach((child) => parser.processToken(child, buffer))
+    token.children.forEach((child) => parser.processLexerToken(child, buffer))
 
     /**
      * Remove identation

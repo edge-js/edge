@@ -40,7 +40,7 @@ test.group('expressionsToStringifyObject', () => {
   test('stringify object expression', (assert) => {
     const parser = new Parser(tags, { filename: 'foo.edge' })
     const expression = parser.acornToEdgeExpression(
-      parser.generateAst(`({ username: 'virk' })`, loc).body[0],
+      parser.generateAcornExpression(`({ username: 'virk' })`, loc),
     )
 
     const props = expressionsToStringifyObject([expression], parser)
@@ -50,7 +50,7 @@ test.group('expressionsToStringifyObject', () => {
   test('parse props with shorthand obj', (assert) => {
     const parser = new Parser(tags, { filename: 'foo.edge' })
     const expression = parser.acornToEdgeExpression(
-      parser.generateAst(`({ username })`, loc).body[0],
+      parser.generateAcornExpression(`({ username })`, loc),
     )
 
     const props = expressionsToStringifyObject([expression], parser)
@@ -60,7 +60,7 @@ test.group('expressionsToStringifyObject', () => {
   test('parse props with computed obj', (assert) => {
     const parser = new Parser(tags, { filename: 'foo.edge' })
     const expression = parser.acornToEdgeExpression(
-      parser.generateAst(`({ [username]: username })`, loc).body[0],
+      parser.generateAcornExpression(`({ [username]: username })`, loc),
     )
 
     const props = expressionsToStringifyObject([expression], parser)
@@ -70,7 +70,7 @@ test.group('expressionsToStringifyObject', () => {
   test('parse props with multiple obj properties', (assert) => {
     const parser = new Parser(tags, { filename: 'foo.edge' })
     const expression = parser.acornToEdgeExpression(
-      parser.generateAst(`({ username: 'virk', age: 22 })`, loc).body[0],
+      parser.generateAcornExpression(`({ username: 'virk', age: 22 })`, loc),
     )
 
     const props = expressionsToStringifyObject([expression], parser)
@@ -81,7 +81,7 @@ test.group('expressionsToStringifyObject', () => {
   test('parse props with shorthand and full properties', (assert) => {
     const parser = new Parser(tags, { filename: 'foo.edge' })
     const expression = parser.acornToEdgeExpression(
-      parser.generateAst(`({ username, age: 22 })`, loc).body[0],
+      parser.generateAcornExpression(`({ username, age: 22 })`, loc),
     )
 
     const props = expressionsToStringifyObject([expression], parser)
@@ -91,7 +91,7 @@ test.group('expressionsToStringifyObject', () => {
   test('parse props with assignment expression', (assert) => {
     const parser = new Parser(tags, { filename: 'foo.edge' })
     const expression = parser.acornToEdgeExpression(
-      parser.generateAst(`(title = 'Hello')`, loc).body[0],
+      parser.generateAcornExpression(`(title = 'Hello')`, loc),
     )
 
     const props = expressionsToStringifyObject([expression], parser)
@@ -101,7 +101,7 @@ test.group('expressionsToStringifyObject', () => {
   test('parse props with more than one assignment expression', (assert) => {
     const parser = new Parser(tags, { filename: 'foo.edge' })
     const expression = parser.acornToEdgeExpression(
-      parser.generateAst(`(title = 'Hello', body = 'Some content')`, loc).body[0],
+      parser.generateAcornExpression(`(title = 'Hello', body = 'Some content')`, loc),
     )
 
     const props = expressionsToStringifyObject(expression.expressions, parser)
@@ -127,7 +127,7 @@ test.group('isBlockToken', () => {
   test('return true if token is block level matching token', (assert) => {
     const parser = new Parser(tags, { filename: 'foo.edge' })
 
-    const tokens = parser.generateTokens(dedent`@if()
+    const tokens = parser.generateLexerTokens(dedent`@if()
       @endif
     `)
 
@@ -138,7 +138,7 @@ test.group('isBlockToken', () => {
   test('return false if token is not block level matching token', (assert) => {
     const parser = new Parser(tags, { filename: 'foo.edge' })
 
-    const tokens = parser.generateTokens(dedent`{{ username }}`)
+    const tokens = parser.generateLexerTokens(dedent`{{ username }}`)
     assert.isFalse(isBlockToken(tokens[0], 'if'))
   })
 })
@@ -147,7 +147,7 @@ test.group('getLineAndColumnForToken', () => {
   test('return line no for different style of tokens', (assert) => {
     const parser = new Parser(tags, { filename: 'foo.edge' })
 
-    const tokens = parser.generateTokens(dedent`
+    const tokens = parser.generateLexerTokens(dedent`
       Hello world
 
       {{ username }}

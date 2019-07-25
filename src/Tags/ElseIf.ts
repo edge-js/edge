@@ -35,7 +35,7 @@ export const elseIfTag: TagContract = {
    * Compiles the else if block node to a Javascript if statement
    */
   compile (parser, buffer, token) {
-    const parsed = parser.parseJsString(token.properties.jsArg, token.loc)
+    const parsed = parser.generateEdgeExpression(token.properties.jsArg, token.loc)
     disAllowExpressions(
       parsed,
       [expressions.SequenceExpression],
@@ -51,7 +51,7 @@ export const elseIfTag: TagContract = {
     /**
      * Start else block
      */
-    buffer.writeStatement(`} else if(${parser.statementToString(parsed)}) {`)
+    buffer.writeStatement(`} else if(${parser.stringifyExpression(parsed)}) {`)
 
     /**
      * Indent block again

@@ -1,7 +1,7 @@
 (function (template, ctx) {
-  let out = ''
+  let out = '';
   if(!ctx.resolve('username')) {
-    out += '  Hello Guest'
+    out += '  Hello Guest';
   }
-  return out
+  return out;
 })(template, ctx)

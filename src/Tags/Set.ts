@@ -44,7 +44,7 @@ export const setTag: TagContract = {
    * Compiles else block node to Javascript else statement
    */
   compile (parser, buffer, token) {
-    const parsed = parser.parseJsString(token.properties.jsArg, token.loc)
+    const parsed = parser.generateEdgeExpression(token.properties.jsArg, token.loc)
 
     /**
      * The set tag only accepts a sequence expression.
@@ -82,6 +82,6 @@ export const setTag: TagContract = {
     /**
      * Write statement to mutate the key
      */
-    buffer.writeStatement(`ctx.set(${key.raw}, ${parser.statementToString(value)})`)
+    buffer.writeStatement(`ctx.set(${key.raw}, ${parser.stringifyExpression(value)});`)
   },
 }
