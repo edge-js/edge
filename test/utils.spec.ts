@@ -7,8 +7,8 @@
 * file that was distributed with this source code.
 */
 
-import * as dedent from 'dedent'
-import * as test from 'japa'
+import dedent from 'dedent'
+import test from 'japa'
 import { Parser } from 'edge-parser'
 import {
   expressionsToStringifyObject,

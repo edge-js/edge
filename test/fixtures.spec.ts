@@ -7,7 +7,7 @@
 * file that was distributed with this source code.
 */
 
-import * as test from 'japa'
+import test from 'japa'
 import { readdirSync, readFileSync, statSync } from 'fs'
 import { join } from 'path'
 import { Context } from '../src/Context'

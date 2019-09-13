@@ -8,7 +8,7 @@
 */
 
 import { join } from 'path'
-import * as test from 'japa'
+import test from 'japa'
 import { Filesystem } from '@poppinss/dev-utils'
 
 import { Loader } from '../src/Loader'

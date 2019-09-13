@@ -7,8 +7,8 @@
 * file that was distributed with this source code.
 */
 
+import test from 'japa'
 import { join } from 'path'
-import * as test from 'japa'
 import { Filesystem } from '@poppinss/dev-utils'
 import { Compiler } from '../src/Compiler'
 import { Loader } from '../src/Loader'

@@ -7,7 +7,7 @@
 * file that was distributed with this source code.
 */
 
-import * as test from 'japa'
+import test from 'japa'
 import { Context } from '../src/Context'
 import { Presenter } from '../src/Presenter'
 

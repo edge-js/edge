@@ -11,7 +11,7 @@
 * file that was distributed with this source code.
 */
 
-import * as he from 'he'
+import he from 'he'
 import { set } from 'lodash'
 import { Macroable } from 'macroable'
 import { ContextContract } from '../Contracts'
