@@ -12,7 +12,6 @@ import { join } from 'path'
 import { Filesystem } from '@poppinss/dev-utils'
 
 import { Edge } from '../src/Edge'
-import { Loader } from '../src/Loader'
 
 const fs = new Filesystem(join(__dirname, 'views'))
 
@@ -22,32 +21,32 @@ test.group('Edge', (group) => {
   })
 
   test('mount default disk', (assert) => {
-    const edge = new Edge(new Loader())
+    const edge = new Edge()
     edge.mount(fs.basePath)
     assert.deepEqual(edge.loader.mounted, { default: fs.basePath })
   })
 
   test('mount named disk', (assert) => {
-    const edge = new Edge(new Loader())
+    const edge = new Edge()
     edge.mount('foo', fs.basePath)
     assert.deepEqual(edge.loader.mounted, { foo: fs.basePath })
   })
 
   test('unmount named disk', (assert) => {
-    const edge = new Edge(new Loader())
+    const edge = new Edge()
     edge.mount('foo', fs.basePath)
     edge.unmount('foo')
     assert.deepEqual(edge.loader.mounted, {})
   })
 
   test('register globals', (assert) => {
-    const edge = new Edge(new Loader())
+    const edge = new Edge()
     edge.global('foo', 'bar')
     assert.deepEqual(edge['_globals'].foo, 'bar')
   })
 
   test('add a custom tag to the tags list', (assert) => {
-    const edge = new Edge(new Loader())
+    const edge = new Edge()
 
     class MyTag {
       public static tagName = 'mytag'
@@ -62,7 +61,7 @@ test.group('Edge', (group) => {
   })
 
   test('render a view using the render method', async (assert) => {
-    const edge = new Edge(new Loader())
+    const edge = new Edge()
     await fs.add('foo.edge', 'Hello {{ username }}')
 
     edge.mount(fs.basePath)
@@ -70,7 +69,7 @@ test.group('Edge', (group) => {
   })
 
   test('pass locals to the view context', async (assert) => {
-    const edge = new Edge(new Loader())
+    const edge = new Edge()
     await fs.add('foo.edge', `Hello {{ username || 'guest' }}`)
 
     edge.mount(fs.basePath)
@@ -83,7 +82,7 @@ test.group('Edge', (group) => {
   })
 
   test('register a template as a string', async (assert) => {
-    const edge = new Edge(new Loader())
+    const edge = new Edge()
 
     edge.registerTemplate('foo', {
       template: `Hello {{ username }}`,
@@ -93,7 +92,7 @@ test.group('Edge', (group) => {
   })
 
   test('register a template on a named disk', async (assert) => {
-    const edge = new Edge(new Loader())
+    const edge = new Edge()
     edge.mount('hello', fs.basePath)
 
     edge.registerTemplate('hello::foo', {
@@ -107,10 +106,7 @@ test.group('Edge', (group) => {
     assert.plan(1)
     await fs.add('foo.edge', '@if(1 + 1)')
 
-    const loader = new Loader()
-    loader.mount('default', fs.basePath)
-
-    const edge = new Edge(new Loader())
+    const edge = new Edge()
     edge.mount(fs.basePath)
 
     try {
@@ -124,10 +120,7 @@ test.group('Edge', (group) => {
     assert.plan(1)
     await fs.add('foo.edge', 'Hello {{ a,:b }}')
 
-    const loader = new Loader()
-    loader.mount('default', fs.basePath)
-
-    const edge = new Edge(new Loader())
+    const edge = new Edge()
     edge.mount(fs.basePath)
 
     try {
@@ -142,10 +135,7 @@ test.group('Edge', (group) => {
     await fs.add('foo.edge', `@layout('bar')`)
     await fs.add('bar.edge', `@if(username)`)
 
-    const loader = new Loader()
-    loader.mount('default', fs.basePath)
-
-    const edge = new Edge(new Loader())
+    const edge = new Edge()
     edge.mount(fs.basePath)
 
     try {
@@ -160,10 +150,7 @@ test.group('Edge', (group) => {
     await fs.add('foo.edge', `@layout('bar')`)
     await fs.add('bar.edge', `{{ a:b }}`)
 
-    const loader = new Loader()
-    loader.mount('default', fs.basePath)
-
-    const edge = new Edge(new Loader())
+    const edge = new Edge()
     edge.mount(fs.basePath)
 
     try {
@@ -178,10 +165,7 @@ test.group('Edge', (group) => {
     await fs.add('foo.edge', `@include('bar')`)
     await fs.add('bar.edge', `@if(username)`)
 
-    const loader = new Loader()
-    loader.mount('default', fs.basePath)
-
-    const edge = new Edge(new Loader())
+    const edge = new Edge()
     edge.mount(fs.basePath)
 
     try {
@@ -196,10 +180,7 @@ test.group('Edge', (group) => {
     await fs.add('foo.edge', `@include('bar')`)
     await fs.add('bar.edge', `{{ a:b }}`)
 
-    const loader = new Loader()
-    loader.mount('default', fs.basePath)
-
-    const edge = new Edge(new Loader())
+    const edge = new Edge()
     edge.mount(fs.basePath)
 
     try {
@@ -214,10 +195,7 @@ test.group('Edge', (group) => {
     await fs.add('foo.edge', `@!component('bar')`)
     await fs.add('bar.edge', `@if(username)`)
 
-    const loader = new Loader()
-    loader.mount('default', fs.basePath)
-
-    const edge = new Edge(new Loader())
+    const edge = new Edge()
     edge.mount(fs.basePath)
 
     try {
@@ -232,10 +210,7 @@ test.group('Edge', (group) => {
     await fs.add('foo.edge', `@!component('bar')`)
     await fs.add('bar.edge', `{{ a:b }}`)
 
-    const loader = new Loader()
-    loader.mount('default', fs.basePath)
-
-    const edge = new Edge(new Loader())
+    const edge = new Edge()
     edge.mount(fs.basePath)
 
     try {

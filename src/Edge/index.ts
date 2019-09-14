@@ -17,10 +17,10 @@ import { Compiler } from '../Compiler'
 import { EdgeRenderer } from '../Renderer'
 
 import {
-  LoaderContract,
   TagContract,
-  LoaderTemplate,
+  EdgeOptions,
   EdgeContract,
+  LoaderTemplate,
   EdgeRendererContract,
 } from '../Contracts'
 
@@ -37,11 +37,18 @@ export class Edge implements EdgeContract {
   private _tags = Object.assign({}, Tags)
 
   /**
+   * The loader to load templates. A loader can read and return
+   * templates from anywhere. The default loader reads files
+   * from the disk
+   */
+  public loader = this._options.loader || new Loader()
+
+  /**
    * The underlying compiler in use
    */
-  public compiler = new Compiler(this.loader, this._tags, false)
+  public compiler = new Compiler(this.loader, this._tags, !!this._options.cache)
 
-  constructor (public loader: LoaderContract = new Loader()) {
+  constructor (private _options: EdgeOptions = {}) {
   }
 
   /**

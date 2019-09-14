@@ -7,7 +7,6 @@
  * file that was distributed with this source code.
 */
 
-import { Loader } from './src/Loader'
 import { Edge } from './src/Edge'
 
 export {
@@ -29,5 +28,5 @@ export {
 
 export { Edge }
 
-const edge = new Edge(new Loader())
+const edge = new Edge()
 export default edge

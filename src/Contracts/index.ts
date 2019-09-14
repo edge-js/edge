@@ -114,10 +114,20 @@ export interface EdgeRendererContract {
 }
 
 /**
+ * Shape of options that can be passed to the
+ * edge constructor
+ */
+export type EdgeOptions = {
+  loader?: LoaderContract,
+  cache?: boolean,
+}
+
+/**
  * Shape of the main module
  */
 export interface EdgeContract {
   loader: LoaderContract,
+  compiler: CompilerContract,
 
   registerTag (tag: TagContract): this,
   registerTemplate (templatePath: string, contents: LoaderTemplate): this,
