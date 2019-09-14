@@ -155,10 +155,7 @@ test.group('Edge', (group) => {
     }
   })
 
-  /**
-   * Will fix it later
-   */
-  test.skip('pass absolute path of layout to parser errors', async (assert) => {
+  test('pass absolute path of layout to parser errors', async (assert) => {
     assert.plan(1)
     await fs.add('foo.edge', `@layout('bar')`)
     await fs.add('bar.edge', `{{ a:b }}`)
@@ -172,7 +169,7 @@ test.group('Edge', (group) => {
     try {
       edge.render('foo', false)
     } catch ({ stack }) {
-      assert.equal(stack.split('\n')[1].trim(), `at (${join(fs.basePath, 'bar.edge')}:1:4)`)
+      assert.equal(stack.split('\n')[1].trim(), `at (${join(fs.basePath, 'bar.edge')}:1:3)`)
     }
   })
 

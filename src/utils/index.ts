@@ -13,8 +13,8 @@
 
 import { sep } from 'path'
 import { EdgeError } from 'edge-error'
-import { Token, TagTypes, TagToken } from 'edge-lexer'
-import { Parser, expressions as expressionsList } from 'edge-parser'
+import { TagTypes } from 'edge-lexer'
+import { Parser, expressions as expressionsList, ParserToken, ParserTagToken } from 'edge-parser'
 import { StringifiedObject } from '../StringifiedObject'
 
 /**
@@ -132,7 +132,7 @@ export function extractDiskAndTemplateName (templatePath: string): [string, stri
  * Returns a boolean, telling whether the lexer node is a block node
  * or not.
  */
-export function isBlockToken (token: Token, name: string): token is TagToken {
+export function isBlockToken (token: ParserToken, name: string): token is ParserTagToken {
   if (token.type === TagTypes.TAG || token.type === TagTypes.ETAG) {
     return token.properties.name === name
   }
@@ -143,7 +143,7 @@ export function isBlockToken (token: Token, name: string): token is TagToken {
 /**
  * Returns line and number for a given AST token
  */
-export function getLineAndColumnForToken (token: Token): [number, number] {
+export function getLineAndColumnForToken (token: ParserToken): [number, number] {
   if (token.type === 'newline' || token.type === 'raw') {
     return [token.line, 0]
   }

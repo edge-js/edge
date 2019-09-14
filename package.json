@@ -71,7 +71,7 @@
     "@poppinss/utils": "^2.0.0",
     "debug": "^4.1.1",
     "edge-error": "^1.0.3",
-    "edge-parser": "^2.0.10",
+    "edge-parser": "^2.1.0",
     "he": "^1.2.0",
     "import-fresh": "^3.1.0",
     "lodash": "^4.17.15",
