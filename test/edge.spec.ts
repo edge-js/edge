@@ -112,7 +112,7 @@ test.group('Edge', (group) => {
     try {
       edge.render('foo', false)
     } catch ({ stack }) {
-      assert.equal(stack.split('\n')[1].trim(), `at (${join(fs.basePath, 'foo.edge')}:1:4)`)
+      assert.equal(stack.split('\n')[1].trim(), `at anonymous (${join(fs.basePath, 'foo.edge')}:1:4)`)
     }
   })
 
@@ -126,7 +126,7 @@ test.group('Edge', (group) => {
     try {
       edge.render('foo', false)
     } catch ({ stack }) {
-      assert.equal(stack.split('\n')[1].trim(), `at (${join(fs.basePath, 'foo.edge')}:1:11)`)
+      assert.equal(stack.split('\n')[1].trim(), `at anonymous (${join(fs.basePath, 'foo.edge')}:1:11)`)
     }
   })
 
@@ -141,7 +141,7 @@ test.group('Edge', (group) => {
     try {
       edge.render('foo', false)
     } catch ({ stack }) {
-      assert.equal(stack.split('\n')[1].trim(), `at (${join(fs.basePath, 'bar.edge')}:1:4)`)
+      assert.equal(stack.split('\n')[1].trim(), `at anonymous (${join(fs.basePath, 'bar.edge')}:1:4)`)
     }
   })
 
@@ -156,7 +156,7 @@ test.group('Edge', (group) => {
     try {
       edge.render('foo', false)
     } catch ({ stack }) {
-      assert.equal(stack.split('\n')[1].trim(), `at (${join(fs.basePath, 'bar.edge')}:1:3)`)
+      assert.equal(stack.split('\n')[1].trim(), `at anonymous (${join(fs.basePath, 'bar.edge')}:1:3)`)
     }
   })
 
@@ -171,7 +171,7 @@ test.group('Edge', (group) => {
     try {
       edge.render('foo', false)
     } catch ({ stack }) {
-      assert.equal(stack.split('\n')[1].trim(), `at (${join(fs.basePath, 'bar.edge')}:1:4)`)
+      assert.equal(stack.split('\n')[1].trim(), `at anonymous (${join(fs.basePath, 'bar.edge')}:1:4)`)
     }
   })
 
@@ -186,7 +186,7 @@ test.group('Edge', (group) => {
     try {
       edge.render('foo', false)
     } catch ({ stack }) {
-      assert.equal(stack.split('\n')[1].trim(), `at (${join(fs.basePath, 'bar.edge')}:1:3)`)
+      assert.equal(stack.split('\n')[1].trim(), `at anonymous (${join(fs.basePath, 'bar.edge')}:1:3)`)
     }
   })
 
@@ -201,7 +201,7 @@ test.group('Edge', (group) => {
     try {
       edge.render('foo', false)
     } catch ({ stack }) {
-      assert.equal(stack.split('\n')[1].trim(), `at (${join(fs.basePath, 'bar.edge')}:1:4)`)
+      assert.equal(stack.split('\n')[1].trim(), `at anonymous (${join(fs.basePath, 'bar.edge')}:1:4)`)
     }
   })
 
@@ -216,7 +216,7 @@ test.group('Edge', (group) => {
     try {
       edge.render('foo', false)
     } catch ({ stack }) {
-      assert.equal(stack.split('\n')[1].trim(), `at (${join(fs.basePath, 'bar.edge')}:1:3)`)
+      assert.equal(stack.split('\n')[1].trim(), `at anonymous (${join(fs.basePath, 'bar.edge')}:1:3)`)
     }
   })
 })

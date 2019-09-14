@@ -94,7 +94,7 @@ test.group('Include', (group) => {
     try {
       compiler.compile('foo', true)
     } catch (error) {
-      assert.equal(error.stack.split('\n')[1], `    at (${join(fs.basePath, 'foo.edge')}:2:13)`)
+      assert.equal(error.stack.split('\n')[1], `    at anonymous (${join(fs.basePath, 'foo.edge')}:2:13)`)
     }
   })
 
@@ -107,7 +107,7 @@ test.group('Include', (group) => {
     try {
       compiler.compile('foo', true)
     } catch (error) {
-      assert.equal(error.stack.split('\n')[1], `    at (${join(fs.basePath, 'foo.edge')}:1:9)`)
+      assert.equal(error.stack.split('\n')[1], `    at anonymous (${join(fs.basePath, 'foo.edge')}:1:9)`)
       assert.equal(error.message, `{'foo', 'bar'} is not a valid argument type for the @include tag`)
     }
   })
@@ -132,7 +132,7 @@ test.group('Component', (group) => {
     try {
       compiler.compile('foo', true)
     } catch (error) {
-      assert.equal(error.stack.split('\n')[1], `    at (${join(fs.basePath, 'foo.edge')}:3:0)`)
+      assert.equal(error.stack.split('\n')[1], `    at anonymous (${join(fs.basePath, 'foo.edge')}:3:0)`)
       assert.equal(error.message, '{hello} is not a valid argument type for the @slot tag')
     }
   })
@@ -151,7 +151,7 @@ test.group('Component', (group) => {
     try {
       compiler.compile('foo', true)
     } catch (error) {
-      assert.equal(error.stack.split('\n')[1], `    at (${join(fs.basePath, 'foo.edge')}:3:0)`)
+      assert.equal(error.stack.split('\n')[1], `    at anonymous (${join(fs.basePath, 'foo.edge')}:3:0)`)
       assert.equal(error.message, 'maximum of 2 arguments are allowed for @slot tag')
     }
   })
@@ -170,7 +170,7 @@ test.group('Component', (group) => {
     try {
       compiler.compile('foo', true)
     } catch (error) {
-      assert.equal(error.stack.split('\n')[1], `    at (${join(fs.basePath, 'foo.edge')}:3:0)`)
+      assert.equal(error.stack.split('\n')[1], `    at anonymous (${join(fs.basePath, 'foo.edge')}:3:0)`)
       assert.equal(error.message, 'slot name must be a valid string literal')
     }
   })
@@ -192,7 +192,7 @@ test.group('Component', (group) => {
     try {
       compiler.compile('foo', true)
     } catch (error) {
-      assert.equal(error.stack.split('\n')[1], `    at (${join(fs.basePath, 'foo.edge')}:5:6)`)
+      assert.equal(error.stack.split('\n')[1], `    at anonymous (${join(fs.basePath, 'foo.edge')}:5:6)`)
       assert.equal(error.message, `{'props'} is not valid prop identifier for @slot tag`)
     }
   })
@@ -213,7 +213,7 @@ test.group('Component', (group) => {
     try {
       compiler.compile('foo', true)
     } catch (error) {
-      assert.equal(error.stack.split('\n')[1], `    at (${join(fs.basePath, 'foo.edge')}:4:12)`)
+      assert.equal(error.stack.split('\n')[1], `    at anonymous (${join(fs.basePath, 'foo.edge')}:4:12)`)
       assert.equal(error.message, `@slot tag must appear as top level tag inside the @component tag`)
     }
   })
@@ -241,7 +241,7 @@ test.group('Layouts', (group) => {
     try {
       compiler.compile('foo', true)
     } catch (error) {
-      assert.equal(error.stack.split('\n')[1], `    at (${join(fs.basePath, 'foo.edge')}:3:8)`)
+      assert.equal(error.stack.split('\n')[1], `    at anonymous (${join(fs.basePath, 'foo.edge')}:3:8)`)
       assert.equal(error.message, `Template extending the layout can only define @sections as top level nodes`)
     }
   })
@@ -264,7 +264,7 @@ test.group('Layouts', (group) => {
     try {
       compiler.compile('foo', true)
     } catch (error) {
-      assert.equal(error.stack.split('\n')[1], `    at (${join(fs.basePath, 'foo.edge')}:3:8)`)
+      assert.equal(error.stack.split('\n')[1], `    at anonymous (${join(fs.basePath, 'foo.edge')}:3:8)`)
       assert.equal(error.message, `Template extending the layout can only define @sections as top level nodes`)
     }
   })
@@ -281,7 +281,7 @@ test.group('Layouts', (group) => {
     try {
       compiler.compile('foo', true)
     } catch (error) {
-      assert.equal(error.stack.split('\n')[1], `    at (${join(fs.basePath, 'foo.edge')}:2:0)`)
+      assert.equal(error.stack.split('\n')[1], `    at anonymous (${join(fs.basePath, 'foo.edge')}:2:0)`)
       assert.equal(error.message, `Template extending the layout can only define @sections as top level nodes`)
     }
   })
