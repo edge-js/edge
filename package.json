@@ -52,7 +52,8 @@
     "typedoc-clarity-theme": "^1.1.0",
     "typedoc-plugin-external-module-name": "^2.1.0",
     "typescript": "^3.6.3",
-    "yorkie": "^2.0.0"
+    "yorkie": "^2.0.0",
+    "youch": "^2.0.10"
   },
   "config": {
     "commitizen": {
