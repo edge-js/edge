@@ -136,7 +136,13 @@ export class Compiler implements CompilerContract {
      * and parent template sections together
      */
     if (isBlockToken(firstToken, 'layout')) {
-      const layoutTokens = this.generateLexerTokens(firstToken.properties.jsArg.replace(/'/g, ''))
+      const layoutName = firstToken.properties.jsArg.replace(/'/g, '')
+      /**
+       * Making absolute path, so that lexer errors must point to the
+       * absolute file path
+       */
+      const absPath = this._loader.makePath(layoutName)
+      const layoutTokens = this.generateLexerTokens(absPath)
       templateTokens = this._mergeSections(layoutTokens, templateTokens, parser.options.filename)
     }
 
@@ -208,7 +214,7 @@ export class Compiler implements CompilerContract {
      * instead of the `absPath`, since `templatePath` is relative and readable.
      */
     const parser = new Parser(this._tags, {
-      filename: `${templatePath.replace(/\.edge$/, '')}.edge`,
+      filename: `${absPath.replace(/\.edge$/, '')}.edge`,
     })
 
     /**

@@ -102,4 +102,149 @@ test.group('Edge', (group) => {
 
     assert.equal(edge.render('hello::foo', { username: 'virk' }).trim(), 'Hello virk')
   })
+
+  test('pass absolute path of template to lexer errors', async (assert) => {
+    assert.plan(1)
+    await fs.add('foo.edge', '@if(1 + 1)')
+
+    const loader = new Loader()
+    loader.mount('default', fs.basePath)
+
+    const edge = new Edge(new Loader())
+    edge.mount(fs.basePath)
+
+    try {
+      edge.render('foo', false)
+    } catch ({ stack }) {
+      assert.equal(stack.split('\n')[1].trim(), `at (${join(fs.basePath, 'foo.edge')}:1:4)`)
+    }
+  })
+
+  test('pass absolute path of template to parser errors', async (assert) => {
+    assert.plan(1)
+    await fs.add('foo.edge', 'Hello {{ a,:b }}')
+
+    const loader = new Loader()
+    loader.mount('default', fs.basePath)
+
+    const edge = new Edge(new Loader())
+    edge.mount(fs.basePath)
+
+    try {
+      edge.render('foo', false)
+    } catch ({ stack }) {
+      assert.equal(stack.split('\n')[1].trim(), `at (${join(fs.basePath, 'foo.edge')}:1:11)`)
+    }
+  })
+
+  test('pass absolute path of layout to lexer errors', async (assert) => {
+    assert.plan(1)
+    await fs.add('foo.edge', `@layout('bar')`)
+    await fs.add('bar.edge', `@if(username)`)
+
+    const loader = new Loader()
+    loader.mount('default', fs.basePath)
+
+    const edge = new Edge(new Loader())
+    edge.mount(fs.basePath)
+
+    try {
+      edge.render('foo', false)
+    } catch ({ stack }) {
+      assert.equal(stack.split('\n')[1].trim(), `at (${join(fs.basePath, 'bar.edge')}:1:4)`)
+    }
+  })
+
+  /**
+   * Will fix it later
+   */
+  test.skip('pass absolute path of layout to parser errors', async (assert) => {
+    assert.plan(1)
+    await fs.add('foo.edge', `@layout('bar')`)
+    await fs.add('bar.edge', `{{ a:b }}`)
+
+    const loader = new Loader()
+    loader.mount('default', fs.basePath)
+
+    const edge = new Edge(new Loader())
+    edge.mount(fs.basePath)
+
+    try {
+      edge.render('foo', false)
+    } catch ({ stack }) {
+      assert.equal(stack.split('\n')[1].trim(), `at (${join(fs.basePath, 'bar.edge')}:1:4)`)
+    }
+  })
+
+  test('pass absolute path of partial to lexer errors', async (assert) => {
+    assert.plan(1)
+    await fs.add('foo.edge', `@include('bar')`)
+    await fs.add('bar.edge', `@if(username)`)
+
+    const loader = new Loader()
+    loader.mount('default', fs.basePath)
+
+    const edge = new Edge(new Loader())
+    edge.mount(fs.basePath)
+
+    try {
+      edge.render('foo', false)
+    } catch ({ stack }) {
+      assert.equal(stack.split('\n')[1].trim(), `at (${join(fs.basePath, 'bar.edge')}:1:4)`)
+    }
+  })
+
+  test('pass absolute path of partial to parser errors', async (assert) => {
+    assert.plan(1)
+    await fs.add('foo.edge', `@include('bar')`)
+    await fs.add('bar.edge', `{{ a:b }}`)
+
+    const loader = new Loader()
+    loader.mount('default', fs.basePath)
+
+    const edge = new Edge(new Loader())
+    edge.mount(fs.basePath)
+
+    try {
+      edge.render('foo', false)
+    } catch ({ stack }) {
+      assert.equal(stack.split('\n')[1].trim(), `at (${join(fs.basePath, 'bar.edge')}:1:3)`)
+    }
+  })
+
+  test('pass absolute path of component to lexer errors', async (assert) => {
+    assert.plan(1)
+    await fs.add('foo.edge', `@!component('bar')`)
+    await fs.add('bar.edge', `@if(username)`)
+
+    const loader = new Loader()
+    loader.mount('default', fs.basePath)
+
+    const edge = new Edge(new Loader())
+    edge.mount(fs.basePath)
+
+    try {
+      edge.render('foo', false)
+    } catch ({ stack }) {
+      assert.equal(stack.split('\n')[1].trim(), `at (${join(fs.basePath, 'bar.edge')}:1:4)`)
+    }
+  })
+
+  test('pass absolute path of component to parser errors', async (assert) => {
+    assert.plan(1)
+    await fs.add('foo.edge', `@!component('bar')`)
+    await fs.add('bar.edge', `{{ a:b }}`)
+
+    const loader = new Loader()
+    loader.mount('default', fs.basePath)
+
+    const edge = new Edge(new Loader())
+    edge.mount(fs.basePath)
+
+    try {
+      edge.render('foo', false)
+    } catch ({ stack }) {
+      assert.equal(stack.split('\n')[1].trim(), `at (${join(fs.basePath, 'bar.edge')}:1:3)`)
+    }
+  })
 })
