@@ -1,6 +1,6 @@
 // @ts-check
 
-const Edge = require('..')
+const { Edge } = require('..')
 const { join } = require('path')
 const http = require('http')
 
