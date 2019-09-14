@@ -1,5 +1,5 @@
 {
-  "name": "edge",
+  "name": "edge.js",
   "version": "1.0.0",
   "description": "Template engine",
   "main": "build/index.js",
@@ -96,6 +96,10 @@
     "mustache",
     "edge"
   ],
+  "publishConfig": {
+    "access": "public",
+    "tag": "next"
+  },
   "np": {
     "contents": ".",
     "anyBranch": false
