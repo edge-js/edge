@@ -12,7 +12,7 @@
  */
 
 import { readFileSync } from 'fs'
-import { Exception } from '@poppinss/utils'
+import { Exception, esmResolver } from '@poppinss/utils'
 import requireUncached = require('import-fresh')
 import { join, isAbsolute, extname } from 'path'
 
@@ -50,7 +50,7 @@ export class Loader implements LoaderContract {
       .replace(extname(templatePath), '.presenter.js')
 
     try {
-      return requireUncached(presenterPath) as LoaderTemplate['Presenter']
+      return esmResolver(requireUncached(presenterPath)) as LoaderTemplate['Presenter']
     } catch (error) {
       if (['ENOENT', 'MODULE_NOT_FOUND'].indexOf(error.code) === -1) {
         throw error
