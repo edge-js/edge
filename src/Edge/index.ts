@@ -15,6 +15,7 @@ import * as Tags from '../Tags'
 import { Loader } from '../Loader'
 import { Compiler } from '../Compiler'
 import { EdgeRenderer } from '../Renderer'
+import { Context } from '../Context'
 
 import {
   TagContract,
@@ -34,7 +35,7 @@ export class Edge implements EdgeContract {
    * List of registered tags. Adding new tags will only impact
    * this list
    */
-  private _tags = Object.assign({}, Tags)
+  private _tags = {}
 
   /**
    * The loader to load templates. A loader can read and return
@@ -49,6 +50,7 @@ export class Edge implements EdgeContract {
   public compiler = new Compiler(this.loader, this._tags, !!this._options.cache)
 
   constructor (private _options: EdgeOptions = {}) {
+    Object.keys(Tags).forEach((name) => this.registerTag(Tags[name]))
   }
 
   /**
@@ -125,6 +127,10 @@ export class Edge implements EdgeContract {
    * ```
    */
   public registerTag (tag: TagContract): this {
+    if (typeof (tag.run) === 'function') {
+      tag.run(Context)
+    }
+
     this._tags[tag.tagName] = tag
     return this
   }

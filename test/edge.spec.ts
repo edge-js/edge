@@ -60,6 +60,27 @@ test.group('Edge', (group) => {
     assert.deepEqual(edge.compiler['_tags'].mytag, MyTag)
   })
 
+  test('invoke tag run method when registering the tag', (assert) => {
+    assert.plan(2)
+
+    const edge = new Edge()
+
+    class MyTag {
+      public static tagName = 'mytag'
+      public static block = true
+      public static seekable = true
+      public static compile (): void {
+      }
+
+      public static run (): void {
+        assert.isTrue(true)
+      }
+    }
+
+    edge.registerTag(MyTag)
+    assert.deepEqual(edge.compiler['_tags'].mytag, MyTag)
+  })
+
   test('render a view using the render method', async (assert) => {
     const edge = new Edge()
     await fs.add('foo.edge', 'Hello {{ username }}')
