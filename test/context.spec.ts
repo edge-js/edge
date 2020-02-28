@@ -375,4 +375,79 @@ test.group('Context', (group) => {
     const fn = () => context.setOnFrame('username', 'nikk')
     assert.throw(fn, 'Make sure to call {newFrame} before calling {setOnFrame}')
   })
+
+  test('return template state', (assert) => {
+    const sharedState = {}
+    const data = {
+      username: 'virk',
+    }
+
+    const presenter = new Presenter(data)
+    const context = new Context(presenter, sharedState)
+
+    assert.deepEqual(context.resolve('$state'), {
+      username: 'virk',
+    })
+  })
+
+  test('return template state when frames are presenter', (assert) => {
+    const sharedState = {}
+    const data = {
+      username: 'virk',
+    }
+
+    const presenter = new Presenter(data)
+    const context = new Context(presenter, sharedState)
+
+    context.newFrame()
+    context.setOnFrame('username', 'foo')
+    assert.deepEqual(context.resolve('$state'), {
+      username: 'foo',
+    })
+  })
+
+  test('return template state when shared state is presenter', (assert) => {
+    const sharedState = {
+      username: 'nikk',
+      age: 22,
+    }
+
+    const data = {
+      username: 'virk',
+    }
+
+    const presenter = new Presenter(data)
+    const context = new Context(presenter, sharedState)
+
+    assert.deepEqual(context.resolve('$state'), {
+      username: 'virk',
+      age: 22,
+    })
+  })
+
+  test('return template state nested frames are present', (assert) => {
+    const sharedState = {}
+    const data = {
+      username: 'virk',
+    }
+
+    const presenter = new Presenter(data)
+    const context = new Context(presenter, sharedState)
+
+    context.newFrame()
+    context.setOnFrame('user', { username: 'virk' })
+
+    context.newFrame()
+    context.setOnFrame('post', { title: 'Adonis 101' })
+
+    assert.deepEqual(context.resolve('$state'), {
+      username: 'virk',
+      user: {
+        username: 'virk',
+      },
+      post: {
+        title: 'Adonis 101',
+      },
+    })
+  })
 })

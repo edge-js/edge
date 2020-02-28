@@ -49,6 +49,19 @@ export class Context extends Macroable implements ContextContract {
   }
 
   /**
+   * Returns a merged copy of the current state. The objects are merged
+   * in the same order as they are resolved.
+   */
+  private getCurrentState () {
+    return Object.assign(
+      {},
+      this.sharedState,
+      this.presenter.state,
+      ...this._frames,
+    )
+  }
+
+  /**
    * Creates a new frame scope. Think of a scope as a Javacript block
    * scope, where variables defined inside the scope are only available
    * to that scope.
@@ -118,7 +131,11 @@ export class Context extends Macroable implements ContextContract {
    * ```
    */
   public resolve (key: string): any {
-    let value
+    if (key === '$state') {
+      return this.getCurrentState()
+    }
+
+    let value: any
 
     /**
      * Pull from one of the nested frames
