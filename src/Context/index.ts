@@ -16,6 +16,10 @@ import { set } from 'lodash'
 import { Macroable } from 'macroable'
 import { ContextContract } from '../Contracts'
 
+class SafeValue {
+  constructor (public value: any) {}
+}
+
 /**
  * Context is used at runtime to resolve values for a given
  * template.
@@ -106,11 +110,20 @@ export class Context extends Macroable implements ContextContract {
   }
 
   /**
+   * Mark output as safe
+   */
+  public safe <T extends any> (value: T) {
+    return new SafeValue(value)
+  }
+
+  /**
    * Escapes the value to be HTML safe. Only strings are escaped
    * and rest all values will be returned as it is.
    */
   public escape <T> (input: T): T {
-    return typeof (input) === 'string' ? he.escape(input) : input
+    return typeof (input) === 'string'
+      ? he.escape(input)
+      : (input instanceof SafeValue ? input.value : input)
   }
 
   /**

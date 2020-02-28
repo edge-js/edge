@@ -66,6 +66,7 @@ export interface LoaderContract {
 export interface ContextContract {
   presenter: { state: any },
   sharedState: any,
+  safe <T extends any> (value: T): { value: T },
   newFrame (): void,
   setOnFrame (key: string, value: any): void,
   removeFrame (): void,
