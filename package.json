@@ -71,7 +71,7 @@
   "dependencies": {
     "@poppinss/utils": "^2.1.2",
     "edge-error": "^1.0.4",
-    "edge-parser": "^2.1.1",
+    "edge-parser": "^2.1.2",
     "he": "^1.2.0",
     "import-fresh": "^3.2.1",
     "lodash": "^4.17.15",
