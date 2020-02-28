@@ -18,11 +18,24 @@ import { EdgeContract, ContextContract } from '../../Contracts'
  * Inspect value.
  */
 function inspect (ctx: ContextContract, valueToInspect: any, depth: number = 1) {
-  return ctx.safe(`<pre style="background: #000; color: #fff; padding: 20px;">${utilInspect(valueToInspect, {
+  const inspectedString = `<pre>${utilInspect(valueToInspect, {
     showHidden: true,
     compact: false,
     depth: depth,
-  })}</pre>`)
+  })}</pre>`
+
+  const filename = `<span style="color: #999; position: absolute; right: 20px; top: 10px;">
+    ${ctx.resolve('$filename')}
+  </span>`
+
+  return ctx.safe(`<div class="__inspect_output" style="background: #000; color: #fff; padding: 20px; position: relative;">${inspectedString}${filename}</div>`)
+}
+
+/**
+ * Compacting the inspect output of self
+ */
+inspect[Symbol.for('nodejs.util.inspect.custom')] = function customInspect () {
+  return '[inspect]'
 }
 
 export default function globals (edge: EdgeContract) {

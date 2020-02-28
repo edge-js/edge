@@ -35,7 +35,7 @@ const componentNameAllowedExpressions: (keyof typeof expressions)[] = [
  * Returns the component name and props by parsing the component jsArg expression
  */
 function getComponentNameAndProps (expression: any, parser: Parser): [string, string] {
-  let name
+  let name: string
 
   /**
    * Use the first expression inside the sequence expression as the name

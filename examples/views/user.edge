@@ -6,12 +6,23 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title></title>
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
 
+    .__inspect_output {
+      margin-bottom: 20px;
+    }
   </style>
 </head>
 <body>
-  @set('user', { username: 'virk' })
-
   {{ inspect($state, 1) }}
+
+  @component('alert', { title: 'hello world' })
+    @slot('title', props)
+      @include('partial')
+    @endslot
+  @endcomponent
 </body>
 </html>

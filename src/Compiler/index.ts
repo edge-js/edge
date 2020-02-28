@@ -230,12 +230,9 @@ export class Compiler implements CompilerContract {
     const wrapAsFunction = !inline
 
     /**
-     * Get a new instance of the parser. We use the `templatePath` as the filename
-     * instead of the `absPath`, since `templatePath` is relative and readable.
+     * Get a new instance of the parser.
      */
-    const parser = new Parser(this._tags, {
-      filename: `${absPath.replace(/\.edge$/, '')}.edge`,
-    })
+    const parser = new Parser(this._tags, { filename: absPath })
 
     /**
      * Resolve the template and Presenter using the given loader
@@ -252,6 +249,7 @@ export class Compiler implements CompilerContract {
      * Finally process the ast
      */
     const buffer = new EdgeBuffer()
+    buffer.writeStatement(`ctx.set('$filename', '${templatePath.replace(/\.edge$/, '')}.edge')`)
     templateTokens.forEach((token) => parser.processLexerToken(token, buffer))
 
     const payload = {
