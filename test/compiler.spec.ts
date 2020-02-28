@@ -32,6 +32,7 @@ test.group('Compiler', (group) => {
     const compiler = new Compiler(loader, tags)
     assert.equal(compiler.compile('foo', false).template, `(function (template, ctx) {
   let out = '';
+  ctx.set('$filename', 'foo.edge');
   out += 'Hello ';
   out += \`\${ctx.escape(ctx.resolve('username'))}\`;
   return out;
@@ -85,6 +86,7 @@ test.group('Compiler', (group) => {
     const compiler = new Compiler(loader, tags)
     assert.equal(compiler.compile('foo', true).template, `
   let out = '';
+  ctx.set('$filename', 'foo.edge');
   out += 'Hello ';
   out += \`\${ctx.escape(ctx.resolve('username'))}\`;
   return out;`)

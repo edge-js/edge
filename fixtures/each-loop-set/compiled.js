@@ -1,5 +1,6 @@
 (function (template, ctx) {
   let out = '';
+  ctx.set('$filename', 'each-loop-set/index.edge');
   ctx.set('total', 0);
   ctx.loop(ctx.resolve('items'), function (item, loop) {
     ctx.newFrame();

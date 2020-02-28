@@ -1,5 +1,6 @@
 (function (template, ctx) {
   let out = '';
+  ctx.set('$filename', 'each-tag-index/index.edge');
   ctx.loop(ctx.resolve('users'), function (user, loop) {
     ctx.newFrame();
     ctx.setOnFrame('user', user);

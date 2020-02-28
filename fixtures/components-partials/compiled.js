@@ -1,5 +1,6 @@
 (function (template, ctx) {
   let out = '';
+  ctx.set('$filename', 'components-partials/index.edge');
   out += template.renderWithState('components-partials/alert', { username: 'virk' }, { 'main': (function (template, ctx) {
 return function () {
   let slot_0 = '';

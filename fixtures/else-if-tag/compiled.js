@@ -1,5 +1,6 @@
 (function (template, ctx) {
   let out = '';
+  ctx.set('$filename', 'else-if-tag/index.edge');
   if(ctx.resolve('username') === 'virk') {
     out += '  Hello VK';
     out += '\n';

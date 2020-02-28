@@ -1,5 +1,6 @@
 (function (template, ctx) {
   let out = '';
+  ctx.set('$filename', 'layout-tag-override-sections/index.edge');
   out += 'This is the base template';
   out += '\n';
   out += '';

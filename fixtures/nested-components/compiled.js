@@ -1,5 +1,6 @@
 (function (template, ctx) {
   let out = '';
+  ctx.set('$filename', 'nested-components/index.edge');
   out += template.renderWithState('nested-components/alert', {}, { 'main': (function (template, ctx) {
 return function () {
   let slot_0 = '';

@@ -1,5 +1,6 @@
 (function (template, ctx) {
   let out = '';
+  ctx.set('$filename', 'components-slot-props/index.edge');
   out += template.renderWithState('components-slot-props/alert', {}, { 'title': (function (template, ctx) {
 return function (user) {
   let slot_0 = '';

@@ -249,7 +249,7 @@ export class Compiler implements CompilerContract {
      * Finally process the ast
      */
     const buffer = new EdgeBuffer()
-    buffer.writeStatement(`ctx.set('$filename', '${templatePath.replace(/\.edge$/, '')}.edge')`)
+    buffer.writeStatement(`ctx.set('$filename', '${templatePath.replace(/\.edge$/, '')}.edge');`)
     templateTokens.forEach((token) => parser.processLexerToken(token, buffer))
 
     const payload = {

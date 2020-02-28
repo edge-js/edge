@@ -1,5 +1,6 @@
 (function (template, ctx) {
   let out = '';
+  ctx.set('$filename', 'layout-allow-set-calls/index.edge');
   ctx.set('username', 'virk');
   out += 'This is the base template';
   out += '\n';

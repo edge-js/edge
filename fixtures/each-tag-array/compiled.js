@@ -1,5 +1,6 @@
 (function (template, ctx) {
   let out = '';
+  ctx.set('$filename', 'each-tag-array/index.edge');
   ctx.loop([{
   username: 'virk'
 }], function (user, loop) {
