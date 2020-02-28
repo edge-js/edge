@@ -176,7 +176,7 @@ export const eachTag: TagContract = {
       let index = 0
       const total = size(source)
 
-      each(source, (value, key) => {
+      each(source, (value: any, key: any) => {
         const isEven = (index + 1) % 2 === 0
 
         callback(value, {

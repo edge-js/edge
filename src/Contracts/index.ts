@@ -77,7 +77,7 @@ export interface ContextContract {
 /**
  * Shape of context constructor
  */
-export interface ContextConstructorContract extends MacroableConstructorContract {
+export interface ContextConstructorContract extends MacroableConstructorContract<ContextContract> {
   new (presenter: any, sharedState: any): ContextContract,
 }
 

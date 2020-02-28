@@ -24,8 +24,8 @@ import { ContextContract } from '../Contracts'
  * [macroable](https://github.com/poppinss/macroable) for same.
  */
 export class Context extends Macroable implements ContextContract {
-  protected static _macros = {}
-  protected static _getters = {}
+  protected static macros = {}
+  protected static getters = {}
 
   /**
    * Frames are used to define a inner scope in which values will
