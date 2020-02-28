@@ -8,6 +8,7 @@
 */
 
 import { Edge } from './src/Edge'
+import globals from './src/Edge/globals'
 
 export {
   LoaderContract,
@@ -29,4 +30,6 @@ export {
 export { Edge }
 
 const edge = new Edge()
+globals(edge)
+
 export default edge
