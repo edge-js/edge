@@ -34,7 +34,7 @@
   "devDependencies": {
     "@adonisjs/mrm-preset": "^2.2.4",
     "@poppinss/dev-utils": "^1.0.4",
-    "@types/node": "^13.7.6",
+    "@types/node": "^13.9.0",
     "commitizen": "^4.0.3",
     "cz-conventional-changelog": "^3.1.0",
     "dedent": "^0.7.0",
@@ -71,7 +71,7 @@
   "dependencies": {
     "@poppinss/utils": "^2.1.2",
     "edge-error": "^1.0.4",
-    "edge-parser": "^2.1.2",
+    "edge-parser": "^3.0.0",
     "he": "^1.2.0",
     "import-fresh": "^3.2.1",
     "lodash": "^4.17.15",
