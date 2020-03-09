@@ -1,7 +1,3 @@
-/**
- * @module edge
- */
-
 /*
 * edge.js
 *
@@ -12,11 +8,17 @@
 */
 
 import he from 'he'
-import { set } from 'lodash'
+import { set, get } from 'lodash'
 import { Macroable } from 'macroable'
+import { EdgeError } from 'edge-error'
 import { ContextContract } from '../Contracts'
 
-class SafeValue {
+/**
+ * An instance of this class passed to the escape
+ * method ensures that underlying value is never
+ * escaped.
+ */
+export class SafeValue {
   constructor (public value: any) {}
 }
 
@@ -28,16 +30,31 @@ class SafeValue {
  * [macroable](https://github.com/poppinss/macroable) for same.
  */
 export class Context extends Macroable implements ContextContract {
-  protected static macros = {}
-  protected static getters = {}
-
   /**
    * Frames are used to define a inner scope in which values will
    * be resolved. The resolve function starts with the deepest
    * frame and then resolve the value up until the first
    * frame.
    */
-  private _frames: any[] = []
+  private frames: any[] = []
+
+  /**
+   * We keep a reference to the last resolved key and use it inside
+   * the `reThrow` method.
+   */
+  private lastResolvedKey = ''
+
+  /**
+   * Required by Macroable
+   */
+  protected static macros = {}
+  protected static getters = {}
+
+  /**
+   * Added by compiler
+   */
+  public $filename = ''
+  public $lineNumber = 0
 
   constructor (public presenter: any, public sharedState: any) {
     super()
@@ -47,8 +64,8 @@ export class Context extends Macroable implements ContextContract {
    * Returns value for a key inside frames. Stops looking for it,
    * when value is found inside any frame.
    */
-  private _getFromFrame (key: string): any {
-    const frameWithVal = this._frames.find((frame) => frame[key] !== undefined)
+  private getFromFrame (key: string): any {
+    const frameWithVal = this.frames.find((frame) => frame[key] !== undefined)
     return frameWithVal ? frameWithVal[key] : undefined
   }
 
@@ -61,7 +78,7 @@ export class Context extends Macroable implements ContextContract {
       {},
       this.sharedState,
       this.presenter.state,
-      ...this._frames,
+      ...this.frames,
     )
   }
 
@@ -75,11 +92,11 @@ export class Context extends Macroable implements ContextContract {
    * ```
    */
   public newFrame (): void {
-    this._frames.unshift({})
+    this.frames.unshift({})
   }
 
   /**
-   * Set key/value pair on the frame object. The value will only be available until
+   * Set key/value pair on the frame object. The value will only be available til
    * the `removeFrame` is not called.
    *
    * ```js
@@ -92,10 +109,10 @@ export class Context extends Macroable implements ContextContract {
    * @throws Error if no frame scopes exists.
    */
   public setOnFrame (key: string, value: any): void {
-    const recentFrame = this._frames[0]
+    const recentFrame = this.frames[0]
 
     if (!recentFrame) {
-      throw new Error('Make sure to call {newFrame} before calling {setOnFrame}')
+      throw new Error('Make sure to call "newFrame" before calling "setOnFrame"')
     }
 
     set(recentFrame, key, value)
@@ -106,7 +123,14 @@ export class Context extends Macroable implements ContextContract {
    * frame via `setOnFrame` will be removed.
    */
   public removeFrame (): void {
-    this._frames.shift()
+    this.frames.shift()
+  }
+
+  /**
+   * Returns all the frames
+   */
+  public getFrames () {
+    return this.frames
   }
 
   /**
@@ -144,8 +168,29 @@ export class Context extends Macroable implements ContextContract {
    * ```
    */
   public resolve (key: string): any {
+    this.lastResolvedKey = key
+
+    /**
+     * A special key to return the template current state
+     */
     if (key === '$state') {
       return this.getCurrentState()
+    }
+
+    /**
+     * A special key to return the filename of the current execution
+     * scope.
+     */
+    if (key === '$filename') {
+      return this.$filename
+    }
+
+    /**
+     * A special key to return the current execution line number pointing
+     * fowards the original template file.
+     */
+    if (key === '$lineNumber') {
+      return this.$lineNumber
     }
 
     let value: any
@@ -153,7 +198,7 @@ export class Context extends Macroable implements ContextContract {
     /**
      * Pull from one of the nested frames
      */
-    value = this._getFromFrame(key)
+    value = this.getFromFrame(key)
     if (value !== undefined) {
       return typeof (value) === 'function' ? value.bind(this) : value
     }
@@ -186,27 +231,47 @@ export class Context extends Macroable implements ContextContract {
    * Set/Update the value in the context. The value is defined in the following
    * order.
    *
-   * 1. If the value already exists on the presenter state, then it will be updated
-   * 2. If the scope is inside a frame, then will be created/updated on the frame.
-   * 3. At last, the value is created on the presenter state.
+   * 1. If the scope is inside a frame, then will be created/updated on the frame.
+   * 2. Otherwise, the value is created on the presenter state.
    *
    * ```js
    * ctx.set('username', 'virk')
    * ```
    */
-  public set (key: string, value: any): void {
+  public set (key: string, value: any, isolated: boolean = false): void {
     /**
-     * If value already exists on the presenter
-     * state, then mutate it first
+     * Set value on the presenter state if it already exists and user
+     * doesn't want an isolated state for the current frame scope
      */
-    if (this.presenter.state[key] !== undefined || !this._frames.length) {
+    if (get(this.presenter.state, key) !== undefined && !isolated) {
       set(this.presenter.state, key, value)
       return
     }
 
     /**
-     * If frames exists, then set it on frame
+     * If frames exists, then set the value on the framework
      */
-    this.setOnFrame(key, value)
+    if (this.frames.length) {
+      this.setOnFrame(key, value)
+      return
+    }
+
+    /**
+     * Otherwise set on presenter
+     */
+    set(this.presenter.state, key, value)
+  }
+
+  /**
+   * Rethrows the runtime exception by re-constructing the error message
+   * to point back to the original filename
+   */
+  public reThrow (error: any) {
+    const message = error.message.replace(/ctx\.resolve\(\.\.\.\)/, this.lastResolvedKey)
+    throw new EdgeError(message, 'E_RUNTIME_EXCEPTION', {
+      filename: this.$filename,
+      line: this.$lineNumber,
+      col: 0,
+    })
   }
 }

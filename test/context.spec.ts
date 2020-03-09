@@ -293,7 +293,7 @@ test.group('Context', (group) => {
     assert.equal(context.presenter.state.user.username, 'virk')
   })
 
-  test('mutate value inside frame when inside frame context', (assert) => {
+  test('mutate value inside frame when inside frame scope', (assert) => {
     const sharedState = {
     }
 
@@ -308,10 +308,10 @@ test.group('Context', (group) => {
 
     context.newFrame()
     context.set('username', 'virk')
-    assert.equal(context['_frames'][0].username, 'virk')
+    assert.equal(context.getFrames()[0].username, 'virk')
   })
 
-  test('mutate value to the latest frame', (assert) => {
+  test('mutate value of the latest frame', (assert) => {
     const sharedState = {
     }
 
@@ -338,12 +338,12 @@ test.group('Context', (group) => {
     assert.isUndefined(context.resolve('username'))
   })
 
-  test('mutate value inside to the presenter state when value already exists there', (assert) => {
+  test('set value on presenter state when its already defined', (assert) => {
     const sharedState = {
     }
 
     const data = {
-      username: 'virk',
+      username: 'virk'
     }
 
     class MyPresenter extends Presenter {
@@ -354,8 +354,34 @@ test.group('Context', (group) => {
 
     context.newFrame()
     context.set('username', 'nikk')
-    assert.deepEqual(context['_frames'][0], {})
-    assert.equal(context['presenter'].state.username, 'nikk')
+
+    assert.equal(context.resolve('username'), 'nikk')
+    context.removeFrame()
+
+    assert.equal(context.resolve('username'), 'nikk')
+  })
+
+  test('do not set value on presenter state when isolated is set to true', (assert) => {
+    const sharedState = {
+    }
+
+    const data = {
+      username: 'virk'
+    }
+
+    class MyPresenter extends Presenter {
+    }
+
+    const presenter = new MyPresenter(data)
+    const context = new Context(presenter, sharedState)
+
+    context.newFrame()
+    context.set('username', 'nikk', true)
+
+    assert.equal(context.resolve('username'), 'nikk')
+    context.removeFrame()
+
+    assert.equal(context.resolve('username'), 'virk')
   })
 
   test('raise error when trying to call setOnFrame without calling newFrame', (assert) => {
@@ -373,7 +399,7 @@ test.group('Context', (group) => {
     const context = new Context(presenter, sharedState)
 
     const fn = () => context.setOnFrame('username', 'nikk')
-    assert.throw(fn, 'Make sure to call {newFrame} before calling {setOnFrame}')
+    assert.throw(fn, 'Make sure to call "newFrame" before calling "setOnFrame"')
   })
 
   test('return template state', (assert) => {
@@ -449,5 +475,20 @@ test.group('Context', (group) => {
         title: 'Adonis 101',
       },
     })
+  })
+
+  test('transform ctx.resolve errors before rethrowing them', (assert) => {
+    const presenter = new Presenter({})
+    const ctx = new Context(presenter, {})
+
+    try {
+      ctx.resolve('getUser')()
+    } catch (error) {
+      try {
+        ctx.reThrow(error)
+      } catch (newError) {
+        assert.equal(newError.message, 'getUser is not a function')
+      }
+    }
   })
 })
