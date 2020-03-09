@@ -7,8 +7,8 @@
 * file that was distributed with this source code.
 */
 
-import { join } from 'path'
 import test from 'japa'
+import { join } from 'path'
 import { Filesystem } from '@poppinss/dev-utils'
 
 import { Loader } from '../src/Loader'
@@ -37,10 +37,10 @@ test.group('Loader', (group) => {
   test('throw exception when resolving path from undefined location', (assert) => {
     const loader = new Loader()
     const fn = () => loader.resolve('foo', true)
-    assert.throw(fn, 'E_UNMOUNTED_DISK_NAME: {default} namespace is not mounted')
+    assert.throw(fn, 'E_UNMOUNTED_DISK_NAME: "default" namespace is not mounted')
   })
 
-  test('resolve template for default location', async (assert) => {
+  test('resolve template for the default disk', async (assert) => {
     await fs.add('foo.edge', 'Hello world')
 
     const loader = new Loader()
@@ -55,7 +55,7 @@ test.group('Loader', (group) => {
     loader.mount('default', fs.basePath)
 
     const fn = () => loader.resolve('foo', false)
-    assert.throw(fn, `Cannot resolve ${join(fs.basePath, 'foo.edge')}. Make sure the file exists`)
+    assert.throw(fn, `Cannot resolve "${join(fs.basePath, 'foo.edge')}". Make sure the file exists`)
   })
 
   test('resolve template with extension', async (assert) => {
@@ -68,7 +68,7 @@ test.group('Loader', (group) => {
     assert.equal(template.trim(), 'Hello world')
   })
 
-  test('resolve template from a named mount path', async (assert) => {
+  test('resolve template from a named disk', async (assert) => {
     await fs.add('foo.edge', 'Hello world')
 
     const loader = new Loader()
@@ -152,6 +152,6 @@ test.group('Loader', (group) => {
     loader.register('my-view', { template: 'Hello world' })
     const fn = () => loader.register('my-view', { template: 'Hello world' })
 
-    assert.throw(fn, 'Cannot override previously registered {my-view} template')
+    assert.throw(fn, 'Cannot override previously registered "my-view" template')
   })
 })
