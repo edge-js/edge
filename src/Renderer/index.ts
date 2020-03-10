@@ -15,16 +15,16 @@ import { EdgeRendererContract, CompilerContract } from '../Contracts'
  * Renders a given template with it's shared state
  */
 export class EdgeRenderer implements EdgeRendererContract {
-  private _locals: any = {}
+  private locals: any = {}
 
-  constructor (private _compiler: CompilerContract, private _globals: any) {}
+  constructor (private compiler: CompilerContract, private globals: any) {}
 
   /**
    * Share local variables with the template. They will overwrite the
    * globals
    */
   public share (data: any): this {
-    merge(this._locals, data)
+    merge(this.locals, data)
     return this
   }
 
@@ -32,7 +32,7 @@ export class EdgeRenderer implements EdgeRendererContract {
    * Render the template
    */
   public render (templatePath: string, state: any = {}): string {
-    const template = new Template(this._compiler, this._globals, this._locals)
+    const template = new Template(this.compiler, this.globals, this.locals)
     return template.render(templatePath, state)
   }
 }

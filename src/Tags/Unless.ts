@@ -1,7 +1,3 @@
-/**
- * @module edge
- */
-
 /*
 * edge
 *
@@ -14,7 +10,7 @@
 import { expressions } from 'edge-parser'
 
 import { TagContract } from '../Contracts'
-import { disAllowExpressions } from '../utils'
+import { isNotSubsetOf, unallowedExpression } from '../utils'
 
 /**
  * Inverse of the `if` condition. The term `unless` is more readable and logical
@@ -35,39 +31,36 @@ export const unlessTag: TagContract = {
    * Compiles the if block node to a Javascript if statement
    */
   compile (parser, buffer, token) {
-    const parsed = parser.generateEdgeExpression(token.properties.jsArg, token.loc)
-    disAllowExpressions(
+    const parsed = parser.utils.transformAst(
+      parser.utils.generateAST(token.properties.jsArg, token.loc, token.filename),
+      token.filename,
+    )
+
+    isNotSubsetOf(
       parsed,
       [expressions.SequenceExpression],
-      parser.options.filename,
-      `{${token.properties.jsArg}} is not a valid argument type for the @unless tag`,
+      () => {
+        unallowedExpression(
+          `"${token.properties.jsArg}" is not a valid argument type for the @unless tag`,
+          parsed,
+          token.filename,
+        )
+      },
     )
 
     /**
      * Start if block
      */
-    buffer.writeStatement(`if(!${parser.stringifyExpression(parsed)}) {`)
-
-    /**
-     * Indent upcoming code
-     */
-    buffer.indent()
+    buffer.writeStatement(`if (!${parser.utils.stringify(parsed)}) {`, token.filename, token.loc.start.line)
 
     /**
      * Process of all kids recursively
      */
-    token.children.forEach((child) => {
-      parser.processLexerToken(child, buffer)
-    })
-
-    /**
-     * Remove identation
-     */
-    buffer.dedent()
+    token.children.forEach((child) => parser.processToken(child, buffer))
 
     /**
      * Close if block
      */
-    buffer.writeStatement('}')
+    buffer.writeStatement('}', token.filename, -1)
   },
 }

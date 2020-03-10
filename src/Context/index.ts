@@ -268,6 +268,10 @@ export class Context extends Macroable implements ContextContract {
    * to point back to the original filename
    */
   public reThrow (error: any) {
+    if (error instanceof EdgeError) {
+      throw error
+    }
+
     const message = error.message.replace(/ctx\.resolve\(\.\.\.\)/, this.lastResolvedKey)
     throw new EdgeError(message, 'E_RUNTIME_EXCEPTION', {
       filename: this.$filename,

@@ -1,7 +1,3 @@
-/**
- * @module edge
- */
-
 /*
 * edge
 *
@@ -12,16 +8,17 @@
 */
 
 import { EdgeError } from 'edge-error'
+import { TagToken, utils as lexerUtils } from 'edge-lexer'
 import { EdgeBuffer, expressions, Parser } from 'edge-parser'
 
 import { TagContract } from '../Contracts'
 import { StringifiedObject } from '../StringifiedObject'
-import { expressionsToStringifyObject, isBlockToken, allowExpressions } from '../utils'
+import { isSubsetOf, unallowedExpression } from '../utils'
 
 /**
  * A list of allowed expressions for the component name
  */
-const componentNameAllowedExpressions: (keyof typeof expressions)[] = [
+const ALLOWED_EXPRESSION_FOR_COMPONENT_NAME = [
   expressions.Identifier,
   expressions.Literal,
   expressions.LogicalExpression,
@@ -29,12 +26,26 @@ const componentNameAllowedExpressions: (keyof typeof expressions)[] = [
   expressions.ConditionalExpression,
   expressions.CallExpression,
   expressions.TemplateLiteral,
-]
+] as const
+
+/**
+ * Shape of a slot
+ */
+type Slot = {
+  props: any,
+  buffer: EdgeBuffer,
+  line: number,
+  filename: string,
+}
 
 /**
  * Returns the component name and props by parsing the component jsArg expression
  */
-function getComponentNameAndProps (expression: any, parser: Parser): [string, string] {
+function getComponentNameAndProps (
+  expression: any,
+  parser: Parser,
+  filename: string,
+): [string, string] {
   let name: string
 
   /**
@@ -51,11 +62,16 @@ function getComponentNameAndProps (expression: any, parser: Parser): [string, st
    * Ensure the component name is a literal value or an expression that
    * outputs a literal value
    */
-  allowExpressions(
+  isSubsetOf(
     name,
-    componentNameAllowedExpressions,
-    parser.options.filename,
-    `{${parser.stringifyExpression(name)}} is not a valid argument for component name`,
+    ALLOWED_EXPRESSION_FOR_COMPONENT_NAME,
+    () => {
+      unallowedExpression(
+        `"${parser.utils.stringify(name)}" is not a valid argument for component name`,
+        name,
+        filename,
+      )
+    },
   )
 
   /**
@@ -63,8 +79,8 @@ function getComponentNameAndProps (expression: any, parser: Parser): [string, st
    */
   if (expression.type === expressions.SequenceExpression) {
     return [
-      parser.stringifyExpression(name),
-      expressionsToStringifyObject(expression.expressions, parser),
+      parser.utils.stringify(name),
+      StringifiedObject.fromAcornExpressions(expression.expressions, parser),
     ]
   }
 
@@ -72,24 +88,32 @@ function getComponentNameAndProps (expression: any, parser: Parser): [string, st
    * When top level expression is not a sequence expression, then we assume props
    * as empty stringified object.
    */
-  return [parser.stringifyExpression(name), '{}']
+  return [parser.utils.stringify(name), '{}']
 }
 
 /**
  * Parses the slot component to fetch it's name and props
  */
-function getSlotNameAndProps (expression: any, parser: Parser): [string, null | string] {
+function getSlotNameAndProps (
+  token: TagToken,
+  parser: Parser,
+): [string, null | string] {
   /**
    * We just generate the acorn AST only, since we don't want parser to transform
    * ast to edge statements for a `@slot` tag.
    */
-  const parsed = parser.generateAcornExpression(expression.properties.jsArg, expression.loc).expression
+  const parsed = parser.utils.generateAST(token.properties.jsArg, token.loc, token.filename).expression
 
-  allowExpressions(
+  isSubsetOf(
     parsed,
     [expressions.Literal, expressions.SequenceExpression],
-    parser.options.filename,
-    `{${expression.properties.jsArg}} is not a valid argument type for the @slot tag`,
+    () => {
+      unallowedExpression(
+        `"${token.properties.jsArg}" is not a valid argument type for the @slot tag`,
+        parsed,
+        token.filename,
+      )
+    },
   )
 
   /**
@@ -105,11 +129,16 @@ function getSlotNameAndProps (expression: any, parser: Parser): [string, null | 
   /**
    * Validating the slot name to be a literal value, since slot names cannot be dynamic
    */
-  allowExpressions(
+  isSubsetOf(
     name,
     [expressions.Literal],
-    parser.options.filename,
-    'slot name must be a valid string literal',
+    () => {
+      unallowedExpression(
+        'slot name must be a valid string literal',
+        name,
+        token.filename,
+      )
+    },
   )
 
   /**
@@ -128,15 +157,20 @@ function getSlotNameAndProps (expression: any, parser: Parser): [string, null | 
     throw new EdgeError('maximum of 2 arguments are allowed for @slot tag', 'E_MAX_ARGUMENTS', {
       line: parsed.loc.start.line,
       col: parsed.loc.start.column,
-      filename: parser.options.filename,
+      filename: token.filename,
     })
   }
 
-  allowExpressions(
+  isSubsetOf(
     parsed.expressions[1],
     [expressions.Identifier],
-    parser.options.filename,
-    `{${parser.stringifyExpression(parsed.expressions[1])}} is not valid prop identifier for @slot tag`,
+    () => {
+      unallowedExpression(
+        `"${parser.utils.stringify(parsed.expressions[1])}" is not valid prop identifier for @slot tag`,
+        parsed.expressions[1],
+        token.filename,
+      )
+    }
   )
 
   /**
@@ -155,88 +189,148 @@ export const componentTag: TagContract = {
   tagName: 'component',
 
   compile (parser, buffer, token) {
-    const parsed = parser.generateEdgeExpression(token.properties.jsArg, token.loc)
+    const parsed = parser.utils.transformAst(
+      parser.utils.generateAST(token.properties.jsArg, token.loc, token.filename),
+      token.filename,
+    )
 
     /**
-     * Check component js props for allowed expressions
+     * Check component jsProps for allowed expressions
      */
-    allowExpressions(
+    isSubsetOf(
       parsed,
-      componentNameAllowedExpressions.concat(expressions.SequenceExpression),
-      parser.options.filename,
-      `{${token.properties.jsArg}} is not a valid argument type for the @component tag`,
+      ALLOWED_EXPRESSION_FOR_COMPONENT_NAME.concat(expressions.SequenceExpression as any),
+      () => {
+        unallowedExpression(
+          `"${token.properties.jsArg}" is not a valid argument type for the @component tag`,
+          parsed,
+          token.filename,
+        )
+      },
     )
 
     /**
      * Pulling the name and props for the component. The underlying method will
      * ensure that the arguments passed to component tag are valid
      */
-    const [name, props] = getComponentNameAndProps(parsed, parser)
+    const [name, props] = getComponentNameAndProps(parsed, parser, token.filename)
 
     /**
      * Loop over all the children and set them as part of slots. If no slot
      * is defined, then the content will be part of the main slot
      */
-    const slots = {}
+    const slots: { [slotName: string]: Slot } = {}
+
+    /**
+     * Main slot collects everything that is out of the named slots
+     * inside a component
+     */
+    const mainSlot: Slot = {
+      props: {},
+      buffer: new EdgeBuffer(token.filename, false, { outputVar: 'slot_main' }),
+      line: -1,
+      filename: token.filename,
+    }
+
+    /**
+     * Loop over all the component children
+     */
     token.children.forEach((child, index) => {
-      let slotName: string = `'main'`
-      let slotProps: string | null = null
+      /**
+       * If children is not a slot, then add it to the main slot
+       */
+      if (!lexerUtils.isTag(child, 'slot')) {
+        parser.processToken(child, mainSlot.buffer)
+        return
+      }
 
       /**
-       * Update the slot name and props when a new slot is detected
+       * Fetch slot and props
        */
-      if (isBlockToken(child, 'slot')) {
-        [slotName, slotProps] = getSlotNameAndProps(child, parser)
-      }
+      const [slotName, slotProps] = getSlotNameAndProps(child, parser)
 
       /**
        * Create a new slot with buffer to process the childs
        */
       if (!slots[slotName]) {
-        slots[slotName] = { buffer: new EdgeBuffer(`slot_${index}`), props: slotProps }
+        /**
+         * Slot buffer points to the component file name, since slots doesn't
+         * have their own file names.
+         */
+        slots[slotName] = {
+          buffer: new EdgeBuffer(token.filename, false, { outputVar: `slot_${index}` }),
+          props: slotProps,
+          line: -1,
+          filename: token.filename,
+        }
 
         /**
          * Only start the frame, when there are props in use for a given slot.
          */
         if (slotProps) {
-          slots[slotName].buffer.writeStatement('ctx.newFrame();')
-          slots[slotName].buffer.writeStatement(`ctx.setOnFrame('${slotProps}', ${slotProps});`)
+          slots[slotName].buffer.writeExpression(
+            'ctx.newFrame()',
+            slots[slotName].filename,
+            slots[slotName].line,
+          )
+          slots[slotName].buffer.writeExpression(
+            `ctx.setOnFrame('${slotProps}', ${slotProps})`,
+            slots[slotName].filename,
+            slots[slotName].line,
+          )
         }
       }
 
       /**
-       * We must process slot of a component by ourselves (instead of making slot tag)
-       * process it. This way, we can disallow slots appearing outside the component
-       * tag
+       * Self process the slot children.
        */
-      if (isBlockToken(child, 'slot')) {
-        child.children.forEach((token) => parser.processLexerToken(token, slots[slotName].buffer))
-      } else {
-        parser.processLexerToken(child, slots[slotName].buffer)
+      child.children.forEach((grandChildren) => parser.processToken(grandChildren, slots[slotName].buffer))
+
+      /**
+       * Close the frame after process the slot children
+       */
+      if (slotProps) {
+        slots[slotName].buffer.writeExpression('ctx.removeFrame()', slots[slotName].filename, slots[slotName].line)
       }
     })
+
+    const obj = new StringifiedObject()
+
+    /**
+     * Add main slot to the stringified object, when main slot
+     * is not defined otherwise.
+     */
+    if (!slots['main']) {
+      if (mainSlot.buffer.size) {
+        mainSlot.buffer.wrap('function () {', '}')
+        obj.add('main', mainSlot.buffer.flush())
+      } else {
+        obj.add('main', 'function () { return \'\' }')
+      }
+    }
 
     /**
      * We convert the slots to an objectified string, that is passed to `template.renderWithState`,
      * which will pass it to the component as it's local state.
      */
-    const obj = new StringifiedObject()
-    Object.keys(slots).forEach((slot) => {
-      /**
-       * Cleanup the previously started frame scope
-       */
-      if (slots[slot].props) {
-        slots[slot].buffer.writeStatement('ctx.removeFrame();')
+    Object.keys(slots).forEach((slotName) => {
+      if (slots[slotName].buffer.size) {
+        const fnCall = slots[slotName].props ? `function (${slots[slotName].props}) {` : 'function () {'
+        slots[slotName].buffer.wrap(fnCall, '}')
+        obj.add(slotName, slots[slotName].buffer.flush())
+      } else {
+        obj.add(slotName, 'function () { return \'\' }')
       }
-
-      const fnCall = slots[slot].props ? `return function (${slots[slot].props}) {` : 'return function () {'
-      slots[slot].buffer.wrap(fnCall, '};')
-      obj.add(slot, slots[slot].buffer.flush(true))
     })
 
     /**
      * Write the line to render the component with it's own state
      */
-    buffer.writeLine(`template.renderWithState(${name}, ${props}, ${obj.flush()})`)
+    buffer.outputExpression(
+      `template.renderWithState(${name}, ${props}, ${obj.flush()})`,
+      token.filename,
+      token.loc.start.line,
+      false,
+    )
   },
 }

@@ -1,7 +1,3 @@
-/**
- * @module edge
- */
-
 /*
 * edge
 *
@@ -13,9 +9,9 @@
 
 import * as Tags from '../Tags'
 import { Loader } from '../Loader'
+import { Context } from '../Context'
 import { Compiler } from '../Compiler'
 import { EdgeRenderer } from '../Renderer'
-import { Context } from '../Context'
 
 import {
   TagContract,
@@ -29,27 +25,27 @@ export class Edge implements EdgeContract {
   /**
    * Globals are shared with all rendered templates
    */
-  private _globals: any = {}
+  private globals: any = {}
 
   /**
    * List of registered tags. Adding new tags will only impact
    * this list
    */
-  private _tags = {}
+  private tags = {}
 
   /**
    * The loader to load templates. A loader can read and return
    * templates from anywhere. The default loader reads files
    * from the disk
    */
-  public loader = this._options.loader || new Loader()
+  public loader = this.options.loader || new Loader()
 
   /**
    * The underlying compiler in use
    */
-  public compiler = new Compiler(this.loader, this._tags, !!this._options.cache)
+  public compiler = new Compiler(this.loader, this.tags, !!this.options.cache)
 
-  constructor (private _options: EdgeOptions = {}) {
+  constructor (private options: EdgeOptions = {}) {
     Object.keys(Tags).forEach((name) => this.registerTag(Tags[name]))
   }
 
@@ -63,18 +59,6 @@ export class Edge implements EdgeContract {
    * edge.render('admin::filename')
    * ```
    */
-  public mount (diskName: string, dirPath: string): this
-
-  /**
-   * Mount defaults views directory.
-   *
-   * ```
-   * edge.mount(join(__dirname, 'admin'))
-   * edge.render('filename')
-   * ```
-   */
-  public mount (dirPath: string): this
-
   public mount (diskName: string, dirPath?: string): this {
     if (!dirPath) {
       dirPath = diskName
@@ -107,7 +91,7 @@ export class Edge implements EdgeContract {
    * ```
    */
   public global (name: string, value: any): this {
-    this._globals[name] = value
+    this.globals[name] = value
     return this
   }
 
@@ -131,7 +115,7 @@ export class Edge implements EdgeContract {
       tag.run(Context)
     }
 
-    this._tags[tag.tagName] = tag
+    this.tags[tag.tagName] = tag
     return this
   }
 
@@ -175,7 +159,7 @@ export class Edge implements EdgeContract {
    * can be used to define locals.
    */
   public getRenderer (): EdgeRendererContract {
-    return new EdgeRenderer(this.compiler, this._globals)
+    return new EdgeRenderer(this.compiler, this.globals)
   }
 
   /**

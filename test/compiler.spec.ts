@@ -146,7 +146,7 @@ test.group('Compiler | Tokenize', (group) => {
       {
         type: TagTypes.TAG,
         filename: join(fs.basePath, 'index.edge'),
-        properties: { name: 'section', jsArg: `'content'`, selfclosed: false },
+        properties: { name: 'section', jsArg: '\'content\'', selfclosed: false },
         loc: {
           start: { line: 2, col: 9 },
           end: { line: 2, col: 19 },
@@ -190,7 +190,7 @@ test.group('Compiler | Tokenize', (group) => {
       {
         type: TagTypes.TAG,
         filename: join(fs.basePath, 'index.edge'),
-        properties: { name: 'set', jsArg: `'username', 'virk'`, selfclosed: false },
+        properties: { name: 'set', jsArg: '\'username\', \'virk\'', selfclosed: false },
         loc: {
           start: { line: 2, col: 5 },
           end: { line: 2, col: 24 },
@@ -211,7 +211,7 @@ test.group('Compiler | Tokenize', (group) => {
       {
         type: TagTypes.TAG,
         filename: join(fs.basePath, 'index.edge'),
-        properties: { name: 'section', jsArg: `'content'`, selfclosed: false },
+        properties: { name: 'section', jsArg: '\'content\'', selfclosed: false },
         loc: {
           start: { line: 3, col: 9 },
           end: { line: 3, col: 19 },
@@ -307,7 +307,7 @@ test.group('Compiler | Tokenize', (group) => {
       {
         type: TagTypes.TAG,
         filename: join(fs.basePath, 'master.edge'),
-        properties: { name: 'section', jsArg: `'header'`, selfclosed: false },
+        properties: { name: 'section', jsArg: '\'header\'', selfclosed: false },
         loc: {
           start: { line: 2, col: 9 },
           end: { line: 2, col: 18 },
@@ -324,7 +324,7 @@ test.group('Compiler | Tokenize', (group) => {
       {
         type: TagTypes.TAG,
         filename: join(fs.basePath, 'index.edge'),
-        properties: { name: 'section', jsArg: `'content'`, selfclosed: false },
+        properties: { name: 'section', jsArg: '\'content\'', selfclosed: false },
         loc: {
           start: { line: 2, col: 9 },
           end: { line: 2, col: 19 },
@@ -370,7 +370,7 @@ test.group('Compiler | Tokenize', (group) => {
           start: { line: 1, col: 2 },
           end: { line: 1, col: 14 },
         },
-        properties: { jsArg: ` username ` },
+        properties: { jsArg: ' username ' },
       },
       {
         type: 'newline' as const,
@@ -380,7 +380,7 @@ test.group('Compiler | Tokenize', (group) => {
       {
         type: TagTypes.TAG,
         filename: join(fs.basePath, 'index.edge'),
-        properties: { name: 'section', jsArg: `'content'`, selfclosed: false },
+        properties: { name: 'section', jsArg: '\'content\'', selfclosed: false },
         loc: {
           start: { line: 2, col: 9 },
           end: { line: 2, col: 19 },

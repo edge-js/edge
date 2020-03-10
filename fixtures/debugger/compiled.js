@@ -1,9 +1,14 @@
-(function (template, ctx) {
-  let out = '';
-  ctx.set('$filename', 'debugger/index.edge');
-  debugger;
-  out += '';
-  out += '\n';
-  out += 'Hello';
-  return out;
+return (function (template, ctx) {
+let out = '';
+ctx.$lineNumber = 1;
+ctx.$filename = '{{__dirname}}index.edge';
+try {
+debugger;
+out += '';
+out += '\n';
+out += 'Hello';
+} catch (error) {
+ctx.reThrow(error);
+}
+return out;
 })(template, ctx)

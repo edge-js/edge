@@ -1,7 +1,3 @@
-/**
- * @module edge
- */
-
 /*
 * edge
 *
@@ -14,7 +10,7 @@
 import { expressions } from 'edge-parser'
 
 import { TagContract } from '../Contracts'
-import { allowExpressions } from '../utils'
+import { unallowedExpression, isSubsetOf } from '../utils'
 
 /**
  * Include tag is used to include partials in the same scope of the parent
@@ -33,8 +29,12 @@ export const includeTag: TagContract = {
    * Compiles else block node to Javascript else statement
    */
   compile (parser, buffer, token) {
-    const parsed = parser.generateEdgeExpression(token.properties.jsArg, token.loc)
-    allowExpressions(
+    const parsed = parser.utils.transformAst(
+      parser.utils.generateAST(token.properties.jsArg, token.loc, token.filename),
+      token.filename,
+    )
+
+    isSubsetOf(
       parsed,
       [
         expressions.Identifier,
@@ -45,8 +45,13 @@ export const includeTag: TagContract = {
         expressions.CallExpression,
         expressions.TemplateLiteral,
       ],
-      parser.options.filename,
-      `{${token.properties.jsArg}} is not a valid argument type for the @include tag`,
+      () => {
+        unallowedExpression(
+          `"${token.properties.jsArg}" is not a valid argument type for the @include tag`,
+          parsed,
+          token.filename,
+        )
+      },
     )
 
     /**
@@ -54,6 +59,11 @@ export const includeTag: TagContract = {
      * the content right now and have to defer to runtime to get the value of
      * the partial and then process it
      */
-    buffer.writeLine(`template.renderInline(${parser.stringifyExpression(parsed)})(template, ctx)`)
+    buffer.outputExpression(
+      `template.renderInline(${parser.utils.stringify(parsed)})(template, ctx)`,
+      token.filename,
+      token.loc.start.line,
+      true,
+    )
   },
 }

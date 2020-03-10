@@ -10,7 +10,7 @@
 import { EdgeError } from 'edge-error'
 import { expressions as expressionsList } from 'edge-parser'
 
-type ExpressionList = (keyof typeof expressionsList)[]
+type ExpressionList = readonly (keyof typeof expressionsList)[]
 
 /**
  * Raise an `E_UNALLOWED_EXPRESSION` exception. Filename and expression is

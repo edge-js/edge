@@ -1,7 +1,3 @@
-/**
- * @module edge
- */
-
 /*
 * edge
 *
@@ -23,14 +19,14 @@ export const slotTag: TagContract = {
   seekable: true,
   tagName: 'slot',
 
-  compile (parser, _buffer, token) {
+  compile (_, __, token) {
     throw new EdgeError(
-      `@slot tag must appear as top level tag inside the @component tag`,
+      '@slot tag must appear as top level tag inside the @component tag',
       'E_ORPHAN_SLOT_TAG',
       {
         line: token.loc.start.line,
         col: token.loc.start.col,
-        filename: parser.options.filename,
+        filename: token.filename,
       },
     )
   },

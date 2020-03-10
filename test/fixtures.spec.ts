@@ -8,8 +8,9 @@
 */
 
 import test from 'japa'
+import { join, sep } from 'path'
 import { readdirSync, readFileSync, statSync } from 'fs'
-import { join } from 'path'
+
 import { Context } from '../src/Context'
 import { Template } from '../src/Template'
 import { Compiler } from '../src/Compiler'
@@ -44,14 +45,14 @@ test.group('Fixtures', (group) => {
       const { template: compiled } = compiler.compile(`${dir}/index.edge`, false)
       const expectedCompiled = readFileSync(join(dirBasePath, 'compiled.js'), 'utf-8')
 
-      assert.stringEqual(compiled, expectedCompiled)
+      assert.stringEqual(compiled, expectedCompiled.replace(/\{\{__dirname\}\}/g, `${dirBasePath}${sep}`))
 
       const out = readFileSync(join(dirBasePath, 'index.txt'), 'utf-8')
       const output = template.render(
         `${dir}/index.edge`,
         JSON.parse(readFileSync(join(dirBasePath, 'index.json'), 'utf-8')),
       )
-      assert.equal(output.trim(), out)
+      assert.stringEqual(output.trim(), out)
     })
   })
 })

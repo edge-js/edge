@@ -1,7 +1,3 @@
-/**
- * @module edge
- */
-
 /*
 * edge
 *
@@ -11,47 +7,64 @@
 * file that was distributed with this source code.
 */
 
+import { utils as lexerUtils } from 'edge-lexer'
 import { Parser, expressions } from 'edge-parser'
 import { each, size } from 'lodash'
 
 import { TagContract } from '../Contracts'
-import { allowExpressions, isBlockToken } from '../utils'
+import { isSubsetOf, unallowedExpression } from '../utils'
 
 /**
  * Returns the list to loop over for the each expression
  */
-function getLoopList (expression: any, parser: Parser): string {
-  return parser.stringifyExpression(parser.acornToEdgeExpression(expression))
+function getLoopList (expression: any, parser: Parser, filename: string): string {
+  return parser.utils.stringify(parser.utils.transformAst(expression, filename))
 }
 
 /**
  * Returns loop item and the index for the each expression
  */
 function getLoopItemAndIndex (expression: any, filename: string): [string, string] {
-  allowExpressions(
+  isSubsetOf(
     expression,
     [expressions.SequenceExpression, expressions.Identifier],
-    filename,
-    `invalid left hand side expression for the @each tag`,
+    () => {
+      unallowedExpression(
+        `invalid left hand side "${expression.type}" for the @each tag`,
+        expression,
+        filename,
+      )
+    },
   )
 
   /**
    * Return list index from the sequence expression
    */
   if (expression.type === 'SequenceExpression') {
-    allowExpressions(
+    isSubsetOf(
       expression.expressions[0],
       [expressions.Identifier],
-      filename,
-      `invalid expression for {value} identifier for the @each tag`,
+      () => {
+        unallowedExpression(
+          `"${expression.expressions[0]}.type" is not allowed as value identifier for @each tag`,
+          expression.expressions[0],
+          filename,
+        )
+      },
     )
 
-    allowExpressions(
+    isSubsetOf(
       expression.expressions[1],
-      [expressions.SequenceExpression, expressions.Identifier],
-      filename,
-      `invalid expression for {key} identifier for the @each tag`,
+      [expressions.Identifier],
+      () => {
+        unallowedExpression(
+          `"${expression.expressions[1]}.type" is not allowed as key identifier for @each tag`,
+          expression.expressions[1],
+          filename,
+        )
+      },
     )
+
     return [expression.expressions[0].name, expression.expressions[1].name]
   }
 
@@ -77,94 +90,88 @@ export const eachTag: TagContract = {
    */
   compile (parser, buffer, token) {
     /**
-     * Instead of using `parser.generateEdgeExpression`, we make use of
-     * `generateAcornExpression`, since we do not want to process
-     * `Indentifer` expressions as per the normal parsing logic
-     * and just want to extract it's name.
+     * We just generate the AST and do not transform it, since the transform
+     * function attempts to resolve identifiers
      */
-    const parsed = parser.generateAcornExpression(token.properties.jsArg, token.loc).expression
-    allowExpressions(
+    const parsed = parser.utils.generateAST(
+      token.properties.jsArg,
+      token.loc,
+      token.filename,
+    ).expression
+
+    isSubsetOf(
       parsed,
       [expressions.BinaryExpression],
-      parser.options.filename,
-      `{${token.properties.jsArg}} is not a valid binary expression for the @each tag`,
+      () => {
+        unallowedExpression(
+          `"${token.properties.jsArg}" is not a valid binary expression for the @each tag`,
+          parsed,
+          token.filename,
+        )
+      },
     )
 
     /**
      * Finding if an else child exists inside the each tag
      */
-    const elseIndex = token.children.findIndex((child) => isBlockToken(child, 'else'))
+    const elseIndex = token.children.findIndex((child) => lexerUtils.isTag(child, 'else'))
     const elseChild = elseIndex > -1 ? token.children.splice(elseIndex) : []
 
     /**
      * Fetching the item,index and list for the each loop
      */
-    const [item, index] = getLoopItemAndIndex(parsed.left, parser.options.filename)
-    const list = getLoopList(parsed.right, parser)
+    const [item, index] = getLoopItemAndIndex(parsed.left, token.filename)
+    const list = getLoopList(parsed.right, parser, token.filename)
 
     /**
      * If there is an else statement, then wrap the loop
      * inside the `if` statement first
      */
     if (elseIndex > -1) {
-      buffer.writeStatement(`if(ctx.size(${list})) {`)
-      buffer.indent()
+      buffer.writeStatement(`if(ctx.size(${list})) {`, token.filename, token.loc.start.line)
     }
 
     /**
      * Write the loop statement to the template
      */
-    buffer.writeStatement(`ctx.loop(${list}, function (${item}, loop) {`)
-
-    /**
-     * Indent block
-     */
-    buffer.indent()
+    buffer.writeStatement(`ctx.loop(${list}, function (${item}, loop) {`, token.filename, token.loc.start.line)
 
     /**
      * Start a new context frame. Frame ensures the value inside
      * the loop is given priority over top level values. Think
      * of it as a Javascript block scope.
      */
-    buffer.writeStatement('ctx.newFrame();')
+    buffer.writeExpression('ctx.newFrame()', token.filename, -1)
 
     /**
      * Set key and value pair on the context
      */
-    buffer.writeStatement(`ctx.setOnFrame('${item}', ${item});`)
-    buffer.writeStatement(`ctx.setOnFrame('$loop', loop);`)
-    buffer.writeStatement(`ctx.setOnFrame('${index}', loop.key);`)
+    buffer.writeExpression(`ctx.setOnFrame('${item}', ${item})`, token.filename, -1)
+    buffer.writeExpression('ctx.setOnFrame(\'$loop\', loop)', token.filename, -1)
+    buffer.writeExpression(`ctx.setOnFrame('${index}', loop.key)`, token.filename, -1)
 
     /**
      * Process all kids
      */
-    token.children.forEach((child) => {
-      parser.processLexerToken(child, buffer)
-    })
+    token.children.forEach((child) => parser.processToken(child, buffer))
 
     /**
      * Remove the frame
      */
-    buffer.writeStatement('ctx.removeFrame();')
-
-    /**
-     * Dedent block
-     */
-    buffer.dedent()
+    buffer.writeExpression('ctx.removeFrame()', token.filename, -1)
 
     /**
      * Close each loop
      */
-    buffer.writeStatement('});')
+    buffer.writeExpression('})', token.filename, -1)
 
     /**
      * If there is an else statement, then process
      * else childs and close the if block
      */
     if (elseIndex > -1) {
-      elseChild.forEach((child) => parser.processLexerToken(child, buffer))
-      buffer.dedent()
-      buffer.writeStatement(`}`)
+      elseChild.forEach((child) => parser.processToken(child, buffer))
+      buffer.writeStatement('}', token.filename, -1)
     }
   },
 

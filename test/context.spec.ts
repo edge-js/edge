@@ -34,7 +34,7 @@ test.group('Context', (group) => {
     }
 
     class MyPresenter extends Presenter {
-      get fullName () {
+      public get fullName () {
         return 'Aman virk'
       }
     }
@@ -158,7 +158,7 @@ test.group('Context', (group) => {
       username: 'virk',
     }
 
-    Context.macro('upper', function username (username) {
+    Context.macro('upper', (username) => {
       return username.toUpperCase()
     })
 
@@ -343,7 +343,7 @@ test.group('Context', (group) => {
     }
 
     const data = {
-      username: 'virk'
+      username: 'virk',
     }
 
     class MyPresenter extends Presenter {
@@ -366,7 +366,7 @@ test.group('Context', (group) => {
     }
 
     const data = {
-      username: 'virk'
+      username: 'virk',
     }
 
     class MyPresenter extends Presenter {

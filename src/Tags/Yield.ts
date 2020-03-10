@@ -1,7 +1,3 @@
-/**
- * @module edge
- */
-
 /*
 * edge
 *
@@ -13,7 +9,7 @@
 
 import { expressions } from 'edge-parser'
 import { TagContract } from '../Contracts'
-import { disAllowExpressions } from '../utils'
+import { isNotSubsetOf, unallowedExpression } from '../utils'
 
 /**
  * Yield tag is a shorthand of `if/else` for markup based content.
@@ -43,34 +39,43 @@ export const yieldTag: TagContract = {
    * Compiles the if block node to a Javascript if statement
    */
   compile (parser, buffer, token) {
-    const parsed = parser.generateEdgeExpression(token.properties.jsArg, token.loc)
-    disAllowExpressions(
-      parsed,
-      [expressions.SequenceExpression],
-      parser.options.filename,
-      `{${token.properties.jsArg}} is not a valid argument type for the @yield tag`,
+    let yieldCounter = buffer['yieldCounter'] || 0
+    buffer['yieldCounter'] = yieldCounter++
+
+    const parsed = parser.utils.transformAst(
+      parser.utils.generateAST(token.properties.jsArg, token.loc, token.filename),
+      token.filename,
     )
 
-    const parsedString = parser.stringifyExpression(parsed)
+    isNotSubsetOf(
+      parsed,
+      [expressions.SequenceExpression],
+      () => {
+        unallowedExpression(
+          `"${token.properties.jsArg}" is not a valid argument type for the @yield tag`,
+          parsed,
+          token.filename,
+        )
+      },
+    )
+
+    const parsedString = parser.utils.stringify(parsed)
 
     /**
      * Write main content when it's truthy
      */
-    buffer.writeStatement(`if(${parsedString}) {`)
-    buffer.indent()
-    buffer.writeLine(parsedString)
-    buffer.dedent()
+    buffer.writeExpression(`let yield_${yieldCounter} = ${parsedString}`, token.filename, token.loc.start.line)
+    buffer.writeStatement(`if (yield_${yieldCounter}) {`, token.filename, -1)
+    buffer.outputExpression(`yield_${yieldCounter}`, token.filename, -1, true)
 
     /**
      * Else write fallback
      */
     if (!token.properties.selfclosed) {
-      buffer.writeStatement('} else {')
-      buffer.indent()
-      token.children.forEach((child) => (parser.processLexerToken(child, buffer)))
-      buffer.dedent()
+      buffer.writeStatement('} else {', token.filename, -1)
+      token.children.forEach((child) => (parser.processToken(child, buffer)))
     }
 
-    buffer.writeStatement('}')
+    buffer.writeStatement('}', token.filename, -1)
   },
 }

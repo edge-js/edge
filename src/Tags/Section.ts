@@ -1,7 +1,3 @@
-/**
- * @module edge
- */
-
 /*
 * edge
 *
@@ -23,6 +19,6 @@ export const sectionTag: TagContract = {
   tagName: 'section',
 
   compile (parser, buffer, token) {
-    token.children.forEach((token) => parser.processLexerToken(token, buffer))
+    token.children.forEach((child) => parser.processToken(child, buffer))
   },
 }

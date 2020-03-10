@@ -12,6 +12,7 @@
 */
 
 import { inspect as utilInspect } from 'util'
+import { range } from 'lodash'
 import { EdgeContract, ContextContract } from '../../Contracts'
 
 /**
@@ -40,4 +41,5 @@ inspect[Symbol.for('nodejs.util.inspect.custom')] = function customInspect () {
 
 export default function globals (edge: EdgeContract) {
   edge.global('inspect', inspect)
+  edge.global('range', (_, start: number, end?: number, step?: number) => range(start, end, step))
 }

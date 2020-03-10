@@ -1,7 +1,3 @@
-/**
- * @module edge
- */
-
 /*
 * edge
 *
@@ -11,11 +7,11 @@
 * file that was distributed with this source code.
 */
 
-import { expressions } from 'edge-parser'
 import { EdgeError } from 'edge-error'
+import { expressions } from 'edge-parser'
 
 import { TagContract } from '../Contracts'
-import { allowExpressions } from '../utils'
+import { isSubsetOf, unallowedExpression } from '../utils'
 
 /**
  * The set tag is used to set runtime values within the template. The value
@@ -44,44 +40,61 @@ export const setTag: TagContract = {
    * Compiles else block node to Javascript else statement
    */
   compile (parser, buffer, token) {
-    const parsed = parser.generateEdgeExpression(token.properties.jsArg, token.loc)
+    const parsed = parser.utils.transformAst(
+      parser.utils.generateAST(token.properties.jsArg, token.loc, token.filename),
+      token.filename,
+    )
 
     /**
      * The set tag only accepts a sequence expression.
      */
-    allowExpressions(
+    isSubsetOf(
       parsed,
       [expressions.SequenceExpression],
-      parser.options.filename,
-      `{${token.properties.jsArg}} is not a valid key-value pair for the @slot tag`,
+      () => {
+        throw unallowedExpression(
+          `"${token.properties.jsArg}" is not a valid key-value pair for the @slot tag`,
+          parsed,
+          token.filename,
+        )
+      },
     )
 
     /**
      * Disallow more than 2 values for the sequence expression
      */
-    if (parsed.expressions.length > 2) {
-      throw new EdgeError(`maximum of 2 arguments are allowed for the @set tag`, 'E_MAX_ARGUMENTS', {
+    if (parsed.expressions.length > 3) {
+      throw new EdgeError('maximum of 3 arguments are allowed for the @set tag', 'E_MAX_ARGUMENTS', {
         line: parsed.loc.start.line,
         col: parsed.loc.start.column,
-        filename: parser.options.filename,
+        filename: token.filename,
       })
     }
 
-    const [key, value] = parsed.expressions
+    const [key, value, isolated] = parsed.expressions
 
     /**
      * The key has to be a literal value
      */
-    allowExpressions(
+    isSubsetOf(
       key,
       [expressions.Literal],
-      parser.options.filename,
-      'The first argument for @set tag must be a string literal',
+      () => {
+        throw unallowedExpression(
+          'The first argument for @set tag must be a string literal',
+          parsed,
+          token.filename,
+        )
+      },
     )
 
     /**
      * Write statement to mutate the key
      */
-    buffer.writeStatement(`ctx.set(${key.raw}, ${parser.stringifyExpression(value)});`)
+    buffer.writeExpression(
+      `ctx.set(${key.raw}, ${parser.utils.stringify(value)}, ${!!isolated})`,
+      token.filename,
+      token.loc.start.line,
+    )
   },
 }

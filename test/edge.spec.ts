@@ -42,7 +42,7 @@ test.group('Edge', (group) => {
   test('register globals', (assert) => {
     const edge = new Edge()
     edge.global('foo', 'bar')
-    assert.deepEqual(edge['_globals'].foo, 'bar')
+    assert.deepEqual(edge['globals'].foo, 'bar')
   })
 
   test('add a custom tag to the tags list', (assert) => {
@@ -57,7 +57,7 @@ test.group('Edge', (group) => {
     }
 
     edge.registerTag(MyTag)
-    assert.deepEqual(edge.compiler['_tags'].mytag, MyTag)
+    assert.deepEqual(edge.compiler['tags'].mytag, MyTag)
   })
 
   test('invoke tag run method when registering the tag', (assert) => {
@@ -78,7 +78,7 @@ test.group('Edge', (group) => {
     }
 
     edge.registerTag(MyTag)
-    assert.deepEqual(edge.compiler['_tags'].mytag, MyTag)
+    assert.deepEqual(edge.compiler['tags'].mytag, MyTag)
   })
 
   test('render a view using the render method', async (assert) => {
@@ -91,7 +91,7 @@ test.group('Edge', (group) => {
 
   test('pass locals to the view context', async (assert) => {
     const edge = new Edge()
-    await fs.add('foo.edge', `Hello {{ username || 'guest' }}`)
+    await fs.add('foo.edge', 'Hello {{ username || \'guest\' }}')
 
     edge.mount(fs.basePath)
 
@@ -106,7 +106,7 @@ test.group('Edge', (group) => {
     const edge = new Edge()
 
     edge.registerTemplate('foo', {
-      template: `Hello {{ username }}`,
+      template: 'Hello {{ username }}',
     })
 
     assert.equal(edge.render('foo', { username: 'virk' }).trim(), 'Hello virk')
@@ -117,7 +117,7 @@ test.group('Edge', (group) => {
     edge.mount('hello', fs.basePath)
 
     edge.registerTemplate('hello::foo', {
-      template: `Hello {{ username }}`,
+      template: 'Hello {{ username }}',
     })
 
     assert.equal(edge.render('hello::foo', { username: 'virk' }).trim(), 'Hello virk')
@@ -153,8 +153,8 @@ test.group('Edge', (group) => {
 
   test('pass absolute path of layout to lexer errors', async (assert) => {
     assert.plan(1)
-    await fs.add('foo.edge', `@layout('bar')`)
-    await fs.add('bar.edge', `@if(username)`)
+    await fs.add('foo.edge', '@layout(\'bar\')')
+    await fs.add('bar.edge', '@if(username)')
 
     const edge = new Edge()
     edge.mount(fs.basePath)
@@ -168,8 +168,8 @@ test.group('Edge', (group) => {
 
   test('pass absolute path of layout to parser errors', async (assert) => {
     assert.plan(1)
-    await fs.add('foo.edge', `@layout('bar')`)
-    await fs.add('bar.edge', `{{ a:b }}`)
+    await fs.add('foo.edge', '@layout(\'bar\')')
+    await fs.add('bar.edge', '{{ a:b }}')
 
     const edge = new Edge()
     edge.mount(fs.basePath)
@@ -183,8 +183,8 @@ test.group('Edge', (group) => {
 
   test('pass absolute path of partial to lexer errors', async (assert) => {
     assert.plan(1)
-    await fs.add('foo.edge', `@include('bar')`)
-    await fs.add('bar.edge', `@if(username)`)
+    await fs.add('foo.edge', '@include(\'bar\')')
+    await fs.add('bar.edge', '@if(username)')
 
     const edge = new Edge()
     edge.mount(fs.basePath)
@@ -198,8 +198,8 @@ test.group('Edge', (group) => {
 
   test('pass absolute path of partial to parser errors', async (assert) => {
     assert.plan(1)
-    await fs.add('foo.edge', `@include('bar')`)
-    await fs.add('bar.edge', `{{ a:b }}`)
+    await fs.add('foo.edge', '@include(\'bar\')')
+    await fs.add('bar.edge', '{{ a:b }}')
 
     const edge = new Edge()
     edge.mount(fs.basePath)
@@ -213,8 +213,8 @@ test.group('Edge', (group) => {
 
   test('pass absolute path of component to lexer errors', async (assert) => {
     assert.plan(1)
-    await fs.add('foo.edge', `@!component('bar')`)
-    await fs.add('bar.edge', `@if(username)`)
+    await fs.add('foo.edge', '@!component(\'bar\')')
+    await fs.add('bar.edge', '@if(username)')
 
     const edge = new Edge()
     edge.mount(fs.basePath)
@@ -228,8 +228,8 @@ test.group('Edge', (group) => {
 
   test('pass absolute path of component to parser errors', async (assert) => {
     assert.plan(1)
-    await fs.add('foo.edge', `@!component('bar')`)
-    await fs.add('bar.edge', `{{ a:b }}`)
+    await fs.add('foo.edge', '@!component(\'bar\')')
+    await fs.add('bar.edge', '{{ a:b }}')
 
     const edge = new Edge()
     edge.mount(fs.basePath)

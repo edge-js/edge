@@ -1,8 +1,4 @@
 /**
- * @module edge
- */
-
-/**
  * edge
  *
  * (c) Harminder Virk <virk@adonisjs.com>
@@ -13,7 +9,7 @@
 
 import { Token } from 'edge-lexer'
 import { MacroableConstructorContract } from 'macroable'
-import { ParseTagDefininationContract } from 'edge-parser'
+import { ParserTagDefininationContract } from 'edge-parser'
 
 /**
  * The shape in which the loader must resolve the template
@@ -61,11 +57,18 @@ export interface LoaderContract {
 }
 
 /**
+ * Shape of a view presenter
+ */
+export interface PresenterContract {
+  state: any,
+  sharedState: any,
+}
+
+/**
  * Shape of runtime context
  */
 export interface ContextContract {
-  presenter: { state: any },
-  sharedState: any,
+  presenter: PresenterContract,
   safe <T extends any> (value: T): { value: T },
   newFrame (): void,
   setOnFrame (key: string, value: any): void,
@@ -86,7 +89,7 @@ export interface ContextConstructorContract extends MacroableConstructorContract
  * The final tag must have a tagName along with other properties
  * required by lexer and parser
  */
-export interface TagContract extends ParseTagDefininationContract {
+export interface TagContract extends ParserTagDefininationContract {
   tagName: string,
   run? (context: ContextConstructorContract): void,
 }
@@ -99,11 +102,21 @@ export type TagsContract = {
 }
 
 /**
+ * Shape of the cache manager
+ */
+export interface CacheManagerContract {
+  get (templatePath: string): undefined | LoaderTemplate
+  set (templatePath: string, compiledOutput: LoaderTemplate): void
+  has (templatePath: string): boolean
+}
+
+/**
  * Shape of the compiler
  */
 export interface CompilerContract {
+  cacheManager: CacheManagerContract,
   compile (templatePath: string, inline: boolean): LoaderTemplate,
-  generateLexerTokens (templatePath: string): Token[],
+  tokenize (templatePath: string): Token[],
 }
 
 /**

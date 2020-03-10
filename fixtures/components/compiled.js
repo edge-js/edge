@@ -1,12 +1,19 @@
-(function (template, ctx) {
-  let out = '';
-  ctx.set('$filename', 'components/index.edge');
-  out += template.renderWithState('components/alert', {}, { 'main': (function (template, ctx) {
-return function () {
-  let slot_0 = '';
-  slot_0 += '  Hello world';
-  return slot_0;
-};
-})(template, ctx) });
-  return out;
+return (function (template, ctx) {
+let out = '';
+ctx.$lineNumber = 1;
+ctx.$filename = '{{__dirname}}index.edge';
+try {
+out += template.renderWithState('components/alert', {}, { main: function () {
+let slot_main = '';
+try {
+slot_main += '  Hello world';
+} catch (error) {
+ctx.reThrow(error);
+}
+return slot_main;
+} });
+} catch (error) {
+ctx.reThrow(error);
+}
+return out;
 })(template, ctx)

@@ -1,7 +1,3 @@
-/**
- * @module edge
- */
-
 /*
 * edge
 *
@@ -21,9 +17,7 @@ export const elseTag: TagContract = {
   /**
    * Compiles else block node to Javascript else statement
    */
-  compile (_parser, buffer) {
-    buffer.dedent()
-    buffer.writeStatement(`} else {`)
-    buffer.indent()
+  compile (_, buffer, token) {
+    buffer.writeStatement('} else {', token.filename, -1)
   },
 }
