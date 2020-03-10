@@ -9,10 +9,8 @@
 
 import { readFileSync } from 'fs'
 import requireUncached from 'import-fresh'
-import { join, isAbsolute, extname } from 'path'
+import { join, isAbsolute, extname, sep } from 'path'
 import { Exception, esmResolver } from '@poppinss/utils'
-
-import { extractDiskAndTemplateName } from '../utils'
 import { LoaderContract, LoaderTemplate } from '../Contracts'
 
 /**
@@ -72,6 +70,32 @@ export class Loader implements LoaderContract {
         throw error
       }
     }
+  }
+
+  /**
+   * Extracts the disk name and the template name from the template
+   * path expression.
+   *
+   * If `diskName` is missing, it will be set to `default`.
+   *
+   * ```
+   * extractDiskAndTemplateName('users::list')
+   * // returns ['users', 'list.edge']
+   *
+   * extractDiskAndTemplateName('list')
+   * // returns ['default', 'list.edge']
+   * ```
+   */
+  private extractDiskAndTemplateName (templatePath: string): [string, string] {
+    let [disk, ...rest] = templatePath.split('::')
+
+    if (!rest.length) {
+      rest = [disk]
+      disk = 'default'
+    }
+
+    const [template, ext] = rest.join('::').split('.edge')
+    return [disk, `${template.replace(/\./, sep)}.${ext || 'edge'}`]
   }
 
   /**
@@ -153,7 +177,7 @@ export class Loader implements LoaderContract {
     /**
      * Extract disk name and template path from the expression
      */
-    const [ diskName, template ] = extractDiskAndTemplateName(templatePath)
+    const [ diskName, template ] = this.extractDiskAndTemplateName(templatePath)
 
     /**
      * Raise exception when disk name is not registered
