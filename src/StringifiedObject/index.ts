@@ -7,6 +7,8 @@
  * file that was distributed with this source code.
 */
 
+import { Parser } from 'edge-parser'
+
 /**
  * This class generates a valid object as a string, which is written to the template
  * output. The reason we need a string like object, since we don't want it's
@@ -41,5 +43,44 @@ export class StringifiedObject {
     const obj = `{ ${this.obj} }`
     this.obj = ''
     return obj
+  }
+
+  /**
+   * Parses an array of expressions to form an object. Each expression inside the array must
+   * be `ObjectExpression` or an `AssignmentExpression`, otherwise it will be ignored.
+   *
+   * ```js
+   * (title = 'hello')
+   * // returns { title: 'hello' }
+   *
+   * ({ title: 'hello' })
+   * // returns { title: 'hello' }
+   *
+   * ({ title: 'hello' }, username = 'virk')
+   * // returns { title: 'hello', username: 'virk' }
+   * ```
+   */
+  public static fromAcornExpressions (expressions: any[], parser: Parser): string {
+    if (!Array.isArray(expressions)) {
+      throw new Error('"fromAcornExpressions" expects an array of acorn ast expressions')
+    }
+
+    const objectifyString = new this()
+
+    expressions.forEach((arg) => {
+      if (arg.type === 'ObjectExpression') {
+        arg.properties.forEach((prop: any) => {
+          const key = parser.utils.stringify(prop.key)
+          const value = parser.utils.stringify(prop.value)
+          objectifyString.add(key, value)
+        })
+      }
+
+      if (arg.type === 'AssignmentExpression') {
+        objectifyString.add(arg.left.name, parser.utils.stringify(arg.right))
+      }
+    })
+
+    return objectifyString.flush()
   }
 }
