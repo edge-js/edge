@@ -9,27 +9,10 @@
 
 import { Edge } from './src/Edge'
 import globals from './src/Edge/globals'
-
-export {
-  LoaderContract,
-  LoaderTemplate,
-  EdgeContract,
-  EdgeRendererContract,
-  ContextContract,
-  ContextConstructorContract,
-  TagContract,
-  CompilerContract,
-} from './src/Contracts'
-
-export {
-  disAllowExpressions,
-  allowExpressions,
-  extractDiskAndTemplateName,
-} from './src/utils'
-
-export { Edge }
+export * from './src/Contracts'
 
 const edge = new Edge()
 globals(edge)
 
 export default edge
+export { Edge }
