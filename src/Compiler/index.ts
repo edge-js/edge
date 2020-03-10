@@ -1,7 +1,3 @@
-/**
- * @module edge
- */
-
 /*
 * edge
 *
@@ -12,10 +8,10 @@
 */
 
 import { EdgeError } from 'edge-error'
-import { Parser, EdgeBuffer, ParserToken, ParserTagToken } from 'edge-parser'
+import { Parser, EdgeBuffer } from 'edge-parser'
+import { Token, TagToken, utils as lexerUtils } from 'edge-lexer'
 
 import { CacheManager } from '../CacheManager'
-import { isBlockToken, getLineAndColumnForToken } from '../utils'
 import { LoaderContract, TagsContract, LoaderTemplate, CompilerContract } from '../Contracts'
 
 /**
@@ -27,33 +23,28 @@ import { LoaderContract, TagsContract, LoaderTemplate, CompilerContract } from '
  * the parsing process, it will recursively merge the layout sections.
  */
 export class Compiler implements CompilerContract {
-  private _cacheManager = new CacheManager(this._cache)
+  public cacheManager = new CacheManager(this.cache)
 
   constructor (
-    private _loader: LoaderContract,
-    private _tags: TagsContract,
-    private _cache: boolean = true,
+    private loader: LoaderContract,
+    private tags: TagsContract,
+    private cache: boolean = true,
   ) {}
 
   /**
    * Merges sections of base template and parent template tokens
    */
-  private _mergeSections (
-    base: ParserToken[],
-    extended: ParserToken[],
-    filename: string,
-    layoutPath: string,
-  ): ParserToken[] {
+  private mergeSections (base: Token[], extended: Token[]): Token[] {
     /**
      * Collection of all sections from the extended tokens
      */
-    const extendedSections: { [key: string]: ParserTagToken } = {}
+    const extendedSections: { [key: string]: TagToken } = {}
 
     /**
-     * Collection of extended set calls as top level nodes. Now since they are hanging
-     * up in the air, they will be hoisted like `var` statements in Javascript
+     * Collection of extended set calls as top level nodes. The set
+     * calls are hoisted just like `var` statements in Javascript.
      */
-    const extendedSetCalls: ParserTagToken[] = []
+    const extendedSetCalls: TagToken[] = []
 
     extended
       .forEach((node) => {
@@ -62,7 +53,7 @@ export class Compiler implements CompilerContract {
          * template
          */
         if (
-          isBlockToken(node, 'layout') ||
+          lexerUtils.isTag(node, 'layout') ||
           node.type === 'newline' ||
           (node.type === 'raw' && !node.value.trim())
         ) {
@@ -72,7 +63,7 @@ export class Compiler implements CompilerContract {
         /**
          * Collect parent template sections
          */
-        if (isBlockToken(node, 'section')) {
+        if (lexerUtils.isTag(node, 'section')) {
           extendedSections[node.properties.jsArg.trim()] = node
           return
         }
@@ -80,19 +71,20 @@ export class Compiler implements CompilerContract {
         /**
          * Collect set calls inside parent templates
          */
-        if (isBlockToken(node, 'set')) {
+        if (lexerUtils.isTag(node, 'set')) {
           extendedSetCalls.push(node)
           return
         }
 
         /**
-         * Everything else if not allowed as top level nodes
+         * Everything else is not allowed as top level nodes
          */
-        const [line, col] = getLineAndColumnForToken(node)
+        const [line, col] = lexerUtils.getLineAndColumn(node)
+
         throw new EdgeError(
-          `Template extending the layout can only define @sections as top level nodes`,
+          'Template extending a layout can only use "@section" or "@set" tags as top level nodes',
           'E_UNALLOWED_EXPRESSION',
-          { line, col, filename },
+          { line, col, filename: node.filename },
         )
       })
 
@@ -101,25 +93,21 @@ export class Compiler implements CompilerContract {
      */
     const finalNodes = base
       .map((node) => {
-        if (!isBlockToken(node, 'section')) {
-          node.filename = layoutPath
+        if (!lexerUtils.isTag(node, 'section')) {
           return node
         }
 
-        const extendedNode = extendedSections[node.properties.jsArg.trim()]
+        const sectionName = node.properties.jsArg.trim()
+        const extendedNode = extendedSections[sectionName]
         if (!extendedNode) {
-          node.filename = layoutPath
           return node
         }
 
         /**
          * Concat children when super was called
          */
-        if (extendedNode.children.length && isBlockToken(extendedNode.children[0], 'super')) {
-          extendedNode.children = node.children.map((child) => {
-            (child as ParserToken).filename = layoutPath
-            return child
-          }).concat(extendedNode.children)
+        if (extendedNode.children.length && lexerUtils.isTag(extendedNode.children[0], 'super')) {
+          extendedNode.children = node.children.concat(extendedNode.children)
         }
 
         return extendedNode
@@ -128,7 +116,7 @@ export class Compiler implements CompilerContract {
     /**
      * Set calls are hoisted to the top
      */
-    return ([] as ParserToken[]).concat(extendedSetCalls).concat(finalNodes)
+    return ([] as Token[]).concat(extendedSetCalls).concat(finalNodes)
   }
 
   /**
@@ -136,34 +124,17 @@ export class Compiler implements CompilerContract {
    * are checked for layouts and if layouts are used, their sections will be
    * merged together.
    */
-  private _templateContentToTokens (
-    content: string,
-    parser: Parser,
-    filename: string,
-  ): ParserToken[] {
-    let templateTokens = parser.generateLexerTokens(content)
+  private templateContentToTokens (content: string, parser: Parser): Token[] {
+    let templateTokens = parser.tokenize(content)
     const firstToken = templateTokens[0]
 
     /**
      * The `layout` is inbuilt feature from core, where we merge the layout
      * and parent template sections together
      */
-    if (isBlockToken(firstToken, 'layout')) {
+    if (lexerUtils.isTag(firstToken, 'layout')) {
       const layoutName = firstToken.properties.jsArg.replace(/'/g, '')
-
-      /**
-       * Making absolute path, so that lexer errors must point to the
-       * absolute file path
-       */
-      const absPath = this._loader.makePath(layoutName)
-      const layoutTokens = this.generateLexerTokens(absPath)
-
-      templateTokens = this._mergeSections(
-        layoutTokens,
-        templateTokens,
-        filename,
-        absPath,
-      )
+      templateTokens = this.mergeSections(this.tokenize(layoutName), templateTokens)
     }
 
     return templateTokens
@@ -171,18 +142,18 @@ export class Compiler implements CompilerContract {
 
   /**
    * Converts the template content to an [array of lexer tokens]. The method is
-   * same as the `parser.generateLexerTokens`, plus it will handle the layouts
-   * and it's sections.
+   * same as the `parser.tokenize`, but it also handles layouts natively.
    *
    * ```
-   * compiler.generateLexerTokens('<template-path>')
+   * compiler.tokenize('<template-path>')
    * ```
    */
-  public generateLexerTokens (templatePath: string): ParserToken[] {
-    const { template } = this._loader.resolve(templatePath, false)
+  public tokenize (templatePath: string): Token[] {
+    const absPath = this.loader.makePath(templatePath)
+    const { template } = this.loader.resolve(absPath, false)
 
-    const parser = new Parser(this._tags, { filename: templatePath })
-    return this._templateContentToTokens(template, parser, templatePath)
+    const parser = new Parser(this.tags, { filename: absPath })
+    return this.templateContentToTokens(template, parser)
   }
 
   /**
@@ -207,19 +178,19 @@ export class Compiler implements CompilerContract {
    * ```
    */
   public compile (templatePath: string, inline: boolean): LoaderTemplate {
-    const absPath = this._loader.makePath(templatePath)
+    const absPath = this.loader.makePath(templatePath)
 
     /**
      * If template is in the cache, then return it without
      * further processing
      */
-    const cachedResponse = this._cacheManager.get(absPath)
+    const cachedResponse = this.cacheManager.get(absPath)
     if (cachedResponse) {
       return cachedResponse
     }
 
     /**
-     * Do not load presenter in inline mode
+     * Do not return presenter in inline mode
      */
     const loadPresenter = !inline
 
@@ -232,32 +203,32 @@ export class Compiler implements CompilerContract {
     /**
      * Get a new instance of the parser.
      */
-    const parser = new Parser(this._tags, { filename: absPath })
+    const parser = new Parser(this.tags, { filename: absPath })
 
     /**
-     * Resolve the template and Presenter using the given loader
+     * Resolve the template and Presenter using the given loader. We always
+     * load the presenter but don't return it when `loadPresenter = false`.
      */
-    const { template, Presenter } = this._loader.resolve(absPath, loadPresenter)
+    const { template, Presenter } = this.loader.resolve(absPath, true)
 
     /**
      * Convert template to AST. The AST will have the layout actions merged (if layout)
      * is used.
      */
-    const templateTokens = this._templateContentToTokens(template, parser, absPath)
+    const templateTokens = this.templateContentToTokens(template, parser)
 
     /**
      * Finally process the ast
      */
-    const buffer = new EdgeBuffer()
-    buffer.writeStatement(`ctx.set('$filename', '${templatePath.replace(/\.edge$/, '')}.edge');`)
-    templateTokens.forEach((token) => parser.processLexerToken(token, buffer))
+    const buffer = new EdgeBuffer(absPath, wrapAsFunction)
+    templateTokens.forEach((token) => parser.processToken(token, buffer))
 
     const payload = {
-      template: buffer.flush(wrapAsFunction),
+      template: buffer.flush(),
       Presenter,
     }
 
-    this._cacheManager.set(absPath, payload)
-    return payload
+    this.cacheManager.set(absPath, payload)
+    return loadPresenter ? payload : { template: payload.template }
   }
 }
