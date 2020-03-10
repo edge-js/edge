@@ -1,7 +1,3 @@
-/**
- * @module edge
- */
-
 /*
  * edge
  *
@@ -11,15 +7,23 @@
  * file that was distributed with this source code.
 */
 
-import { LoaderTemplate } from '../Contracts'
+import { LoaderTemplate, CacheManagerContract } from '../Contracts'
 
 /**
- * In memory cache manager to cache pre-compiled templates
+ * In memory cache manager to cache pre-compiled templates.
  */
-export class CacheManager {
-  private _cacheStore: Map<string, LoaderTemplate> = new Map()
+export class CacheManager implements CacheManagerContract {
+  private cacheStore: Map<string, LoaderTemplate> = new Map()
 
-  constructor (private _enabled: boolean) {
+  constructor (private enabled: boolean) {
+  }
+
+  /**
+   * Returns a boolean to tell if a template has already been cached
+   * or not.
+   */
+  public has (absPath: string): boolean {
+    return this.cacheStore.has(absPath)
   }
 
   /**
@@ -28,11 +32,11 @@ export class CacheManager {
    * return undefined.
    */
   public get (absPath: string): undefined | LoaderTemplate {
-    if (!this._enabled) {
+    if (!this.enabled) {
       return
     }
 
-    return this._cacheStore.get(absPath)
+    return this.cacheStore.get(absPath)
   }
 
   /**
@@ -40,10 +44,10 @@ export class CacheManager {
    * cache is disabled, then this function returns in noop.
    */
   public set (absPath: string, payload: LoaderTemplate) {
-    if (!this._enabled) {
+    if (!this.enabled) {
       return
     }
 
-    this._cacheStore.set(absPath, payload)
+    this.cacheStore.set(absPath, payload)
   }
 }
