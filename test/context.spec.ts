@@ -21,8 +21,8 @@ test.group('Context', (group) => {
     const data = {
       username: 'virk',
     }
-    const presenter = new Presenter(data)
-    const context = new Context(presenter, sharedState)
+    const presenter = new Presenter(data, sharedState)
+    const context = new Context(presenter)
 
     assert.equal(context.resolve('username'), 'virk')
   })
@@ -39,8 +39,8 @@ test.group('Context', (group) => {
       }
     }
 
-    const presenter = new MyPresenter(data)
-    const context = new Context(presenter, sharedState)
+    const presenter = new MyPresenter(data, sharedState)
+    const context = new Context(presenter)
 
     assert.equal(context.resolve('fullName'), 'Aman virk')
   })
@@ -51,8 +51,8 @@ test.group('Context', (group) => {
       username: 'virk',
     }
 
-    const presenter = new Presenter(data)
-    const context = new Context(presenter, sharedState)
+    const presenter = new Presenter(data, sharedState)
+    const context = new Context(presenter)
 
     context.newFrame()
     context.setOnFrame('username', 'foo')
@@ -66,8 +66,8 @@ test.group('Context', (group) => {
       username: 'virk',
     }
 
-    const presenter = new Presenter(data)
-    const context = new Context(presenter, sharedState)
+    const presenter = new Presenter(data, sharedState)
+    const context = new Context(presenter)
 
     context.newFrame()
     context.setOnFrame('user', { username: 'virk' })
@@ -93,8 +93,8 @@ test.group('Context', (group) => {
       username: 'virk',
     }
 
-    const presenter = new Presenter(data)
-    const context = new Context(presenter, sharedState)
+    const presenter = new Presenter(data, sharedState)
+    const context = new Context(presenter)
 
     context.newFrame()
     context.setOnFrame('user', { username: 'virk' })
@@ -109,8 +109,8 @@ test.group('Context', (group) => {
       username: 'virk',
     }
 
-    const presenter = new Presenter(data)
-    const context = new Context(presenter, sharedState)
+    const presenter = new Presenter(data, sharedState)
+    const context = new Context(presenter)
 
     assert.equal(context.escape('<h2> Hello world </h2>'), '&lt;h2&gt; Hello world &lt;/h2&gt;')
   })
@@ -123,8 +123,8 @@ test.group('Context', (group) => {
       username: 'virk',
     }
 
-    const presenter = new Presenter(data)
-    const context = new Context(presenter, sharedState)
+    const presenter = new Presenter(data, sharedState)
+    const context = new Context(presenter)
 
     assert.equal(context.escape(22), 22)
   })
@@ -135,8 +135,8 @@ test.group('Context', (group) => {
       username: 'virk',
     }
 
-    const presenter = new Presenter(data)
-    const context = new Context(presenter, sharedState)
+    const presenter = new Presenter(data, sharedState)
+    const context = new Context(presenter)
 
     context.newFrame()
     context.setOnFrame('user', { username: 'virk' })
@@ -162,8 +162,8 @@ test.group('Context', (group) => {
       return username.toUpperCase()
     })
 
-    const presenter = new Presenter(data)
-    const context = new Context(presenter, sharedState)
+    const presenter = new Presenter(data, sharedState)
+    const context = new Context(presenter)
 
     assert.equal(context['upper']('virk'), 'VIRK')
   })
@@ -178,8 +178,8 @@ test.group('Context', (group) => {
       return 'virk'
     })
 
-    const presenter = new Presenter(data)
-    const context = new Context(presenter, sharedState)
+    const presenter = new Presenter(data, sharedState)
+    const context = new Context(presenter)
 
     assert.equal(context['username'], 'virk')
   })
@@ -196,8 +196,8 @@ test.group('Context', (group) => {
       }
     }
 
-    const presenter = new MyPresenter(data)
-    const context = new Context(presenter, sharedState)
+    const presenter = new MyPresenter(data, sharedState)
+    const context = new Context(presenter)
 
     assert.equal(context.resolve('getUsername')(), 'virk')
   })
@@ -214,8 +214,8 @@ test.group('Context', (group) => {
     class MyPresenter extends Presenter {
     }
 
-    const presenter = new MyPresenter(data)
-    const context = new Context(presenter, sharedState)
+    const presenter = new MyPresenter(data, sharedState)
+    const context = new Context(presenter)
 
     assert.equal(context.resolve('getUsername')(), 'virk')
   })
@@ -234,8 +234,8 @@ test.group('Context', (group) => {
     class MyPresenter extends Presenter {
     }
 
-    const presenter = new MyPresenter(data)
-    const context = new Context(presenter, sharedState)
+    const presenter = new MyPresenter(data, sharedState)
+    const context = new Context(presenter)
 
     assert.equal(context.resolve('getUsername')(), 'virk')
   })
@@ -249,8 +249,8 @@ test.group('Context', (group) => {
     class MyPresenter extends Presenter {
     }
 
-    const presenter = new MyPresenter(data)
-    const context = new Context(presenter, sharedState)
+    const presenter = new MyPresenter(data, sharedState)
+    const context = new Context(presenter)
     context.newFrame()
     context.setOnFrame('getUsername', function () {
       return this.resolve('username')
@@ -269,8 +269,8 @@ test.group('Context', (group) => {
     class MyPresenter extends Presenter {
     }
 
-    const presenter = new MyPresenter(data)
-    const context = new Context(presenter, sharedState)
+    const presenter = new MyPresenter(data, sharedState)
+    const context = new Context(presenter)
 
     context.set('username', 'virk')
     assert.equal(context.presenter.state.username, 'virk')
@@ -286,8 +286,8 @@ test.group('Context', (group) => {
     class MyPresenter extends Presenter {
     }
 
-    const presenter = new MyPresenter(data)
-    const context = new Context(presenter, sharedState)
+    const presenter = new MyPresenter(data, sharedState)
+    const context = new Context(presenter)
 
     context.set('user.username', 'virk')
     assert.equal(context.presenter.state.user.username, 'virk')
@@ -303,8 +303,8 @@ test.group('Context', (group) => {
     class MyPresenter extends Presenter {
     }
 
-    const presenter = new MyPresenter(data)
-    const context = new Context(presenter, sharedState)
+    const presenter = new MyPresenter(data, sharedState)
+    const context = new Context(presenter)
 
     context.newFrame()
     context.set('username', 'virk')
@@ -321,8 +321,8 @@ test.group('Context', (group) => {
     class MyPresenter extends Presenter {
     }
 
-    const presenter = new MyPresenter(data)
-    const context = new Context(presenter, sharedState)
+    const presenter = new MyPresenter(data, sharedState)
+    const context = new Context(presenter)
 
     context.newFrame()
     context.set('username', 'virk')
@@ -349,8 +349,8 @@ test.group('Context', (group) => {
     class MyPresenter extends Presenter {
     }
 
-    const presenter = new MyPresenter(data)
-    const context = new Context(presenter, sharedState)
+    const presenter = new MyPresenter(data, sharedState)
+    const context = new Context(presenter)
 
     context.newFrame()
     context.set('username', 'nikk')
@@ -372,8 +372,8 @@ test.group('Context', (group) => {
     class MyPresenter extends Presenter {
     }
 
-    const presenter = new MyPresenter(data)
-    const context = new Context(presenter, sharedState)
+    const presenter = new MyPresenter(data, sharedState)
+    const context = new Context(presenter)
 
     context.newFrame()
     context.set('username', 'nikk', true)
@@ -395,8 +395,8 @@ test.group('Context', (group) => {
     class MyPresenter extends Presenter {
     }
 
-    const presenter = new MyPresenter(data)
-    const context = new Context(presenter, sharedState)
+    const presenter = new MyPresenter(data, sharedState)
+    const context = new Context(presenter)
 
     const fn = () => context.setOnFrame('username', 'nikk')
     assert.throw(fn, 'Make sure to call "newFrame" before calling "setOnFrame"')
@@ -408,8 +408,8 @@ test.group('Context', (group) => {
       username: 'virk',
     }
 
-    const presenter = new Presenter(data)
-    const context = new Context(presenter, sharedState)
+    const presenter = new Presenter(data, sharedState)
+    const context = new Context(presenter)
 
     assert.deepEqual(context.resolve('$state'), {
       username: 'virk',
@@ -422,8 +422,8 @@ test.group('Context', (group) => {
       username: 'virk',
     }
 
-    const presenter = new Presenter(data)
-    const context = new Context(presenter, sharedState)
+    const presenter = new Presenter(data, sharedState)
+    const context = new Context(presenter)
 
     context.newFrame()
     context.setOnFrame('username', 'foo')
@@ -442,8 +442,8 @@ test.group('Context', (group) => {
       username: 'virk',
     }
 
-    const presenter = new Presenter(data)
-    const context = new Context(presenter, sharedState)
+    const presenter = new Presenter(data, sharedState)
+    const context = new Context(presenter)
 
     assert.deepEqual(context.resolve('$state'), {
       username: 'virk',
@@ -457,8 +457,8 @@ test.group('Context', (group) => {
       username: 'virk',
     }
 
-    const presenter = new Presenter(data)
-    const context = new Context(presenter, sharedState)
+    const presenter = new Presenter(data, sharedState)
+    const context = new Context(presenter)
 
     context.newFrame()
     context.setOnFrame('user', { username: 'virk' })
@@ -478,8 +478,8 @@ test.group('Context', (group) => {
   })
 
   test('transform ctx.resolve errors before rethrowing them', (assert) => {
-    const presenter = new Presenter({})
-    const ctx = new Context(presenter, {})
+    const presenter = new Presenter({}, {})
+    const ctx = new Context(presenter)
 
     try {
       ctx.resolve('getUser')()

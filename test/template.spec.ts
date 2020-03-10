@@ -53,12 +53,13 @@ test.group('Template', (group) => {
   test('run template with shared state', async (assert) => {
     await fs.add('foo.edge', 'Hello {{ getUsername() }}')
     await fs.add('foo.presenter.js', `module.exports = class MyPresenter {
-      constructor (state) {
+      constructor (state, sharedState) {
         this.state = state
+        this.sharedState = sharedState
       }
 
-      getUsername (ctx) {
-        return ctx.resolve('username').toUpperCase()
+      getUsername () {
+        return this.sharedState.username.toUpperCase()
       }
     }`)
 

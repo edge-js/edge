@@ -11,6 +11,7 @@ import he from 'he'
 import { set, get } from 'lodash'
 import { Macroable } from 'macroable'
 import { EdgeError } from 'edge-error'
+import { Presenter } from '../Presenter'
 import { ContextContract } from '../Contracts'
 
 /**
@@ -56,7 +57,7 @@ export class Context extends Macroable implements ContextContract {
   public $filename = ''
   public $lineNumber = 0
 
-  constructor (public presenter: any, public sharedState: any) {
+  constructor (public presenter: Presenter) {
     super()
   }
 
@@ -76,7 +77,7 @@ export class Context extends Macroable implements ContextContract {
   private getCurrentState () {
     return Object.assign(
       {},
-      this.sharedState,
+      this.presenter.sharedState,
       this.presenter.state,
       ...this.frames,
     )
@@ -221,10 +222,10 @@ export class Context extends Macroable implements ContextContract {
     }
 
     /**
-     * Finally fallback to defined globals
+     * Finally fallback to shared globals
      */
-    value = this.sharedState[key]
-    return typeof (value) === 'function' ? value.bind(this.sharedState) : value
+    value = this.presenter.sharedState[key]
+    return typeof (value) === 'function' ? value.bind(this.presenter.sharedState) : value
   }
 
   /**

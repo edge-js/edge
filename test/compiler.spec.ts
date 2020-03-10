@@ -535,7 +535,7 @@ test.group('Compiler | Compile', (group) => {
     try {
       new Function('template', 'ctx', compiler.compile('index.edge', false).template)(
         {},
-        new Context({ state: {} }, {}),
+        new Context({ state: {}, sharedState: {} }),
       )
     } catch (error) {
       assert.equal(error.message, 'getUserName is not a function')
@@ -570,7 +570,7 @@ test.group('Compiler | Compile', (group) => {
 
     try {
       const fn = new Function('template', 'ctx', compiler.compile('index.edge', false).template)
-      fn({}, new Context({ state: {} }, {}))
+      fn({}, new Context({ state: {}, sharedState: {} }))
     } catch (error) {
       assert.equal(error.message, 'getContent is not a function')
       assert.equal(error.filename, join(fs.basePath, 'index.edge'))

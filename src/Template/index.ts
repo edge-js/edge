@@ -1,7 +1,3 @@
-/**
- * @module edge
- */
-
 /*
 * edge
 *
@@ -26,10 +22,10 @@ export class Template {
    * The shared state is used to hold the globals and locals,
    * since it is shared with components too.
    */
-  private _sharedState: any
+  private sharedState: any
 
-  constructor (private _compiler: CompilerContract, globals: any, locals: any) {
-    this._sharedState = merge({}, globals, locals)
+  constructor (private compiler: CompilerContract, globals: any, locals: any) {
+    this.sharedState = merge({}, globals, locals)
   }
 
   /**
@@ -43,7 +39,7 @@ export class Template {
    * ```
    */
   public renderInline (templatePath: string): Function {
-    return new Function('template', 'ctx', this._compiler.compile(templatePath, true).template)
+    return new Function('template', 'ctx', this.compiler.compile(templatePath, true).template)
   }
 
   /**
@@ -58,11 +54,11 @@ export class Template {
    * ```
    */
   public renderWithState (template: string, state: any, slots: any): string {
-    const { template: compiledTemplate, Presenter } = this._compiler.compile(template, false)
-    const presenter = new (Presenter || BasePresenter)(merge(state, { $slots: slots }))
-    const ctx = new Context(presenter, this._sharedState)
+    const { template: compiledTemplate, Presenter } = this.compiler.compile(template, false)
+    const presenter = new (Presenter || BasePresenter)(merge(state, { $slots: slots }), this.sharedState)
+    const ctx = new Context(presenter)
 
-    return new Function('template', 'ctx', `return ${compiledTemplate}`)(this, ctx)
+    return new Function('template', 'ctx', compiledTemplate)(this, ctx)
   }
 
   /**
@@ -73,10 +69,9 @@ export class Template {
    * ```
    */
   public render (template: string, state: any): string {
-    const { template: compiledTemplate, Presenter } = this._compiler.compile(template, false)
-    const presenter = new (Presenter || BasePresenter)(state)
-    const ctx = new Context(presenter, this._sharedState)
-
-    return new Function('template', 'ctx', `return ${compiledTemplate}`)(this, ctx)
+    const { template: compiledTemplate, Presenter } = this.compiler.compile(template, false)
+    const presenter = new (Presenter || BasePresenter)(state, this.sharedState)
+    const ctx = new Context(presenter)
+    return new Function('template', 'ctx', compiledTemplate)(this, ctx)
   }
 }
