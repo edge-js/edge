@@ -538,7 +538,7 @@ test.group('Compiler | Compile', (group) => {
         new Context({ state: {}, sharedState: {} }),
       )
     } catch (error) {
-      assert.equal(error.message, 'getUserName is not a function')
+      assert.equal(error.message, 'ctx.resolve(...) is not a function')
       assert.equal(error.filename, join(fs.basePath, 'master.edge'))
       assert.equal(error.line, 1)
       assert.equal(error.col, 0)
@@ -572,7 +572,7 @@ test.group('Compiler | Compile', (group) => {
       const fn = new Function('template', 'ctx', compiler.compile('index.edge', false).template)
       fn({}, new Context({ state: {}, sharedState: {} }))
     } catch (error) {
-      assert.equal(error.message, 'getContent is not a function')
+      assert.equal(error.message, 'ctx.resolve(...) is not a function')
       assert.equal(error.filename, join(fs.basePath, 'index.edge'))
       assert.equal(error.line, 3)
       assert.equal(error.col, 0)

@@ -144,7 +144,7 @@ test.group('Component | render | errors', (group) => {
     try {
       template.render('eval.edge', {})
     } catch (error) {
-      assert.equal(error.message, 'getComponentName is not a function')
+      assert.equal(error.message, 'ctx.resolve(...) is not a function')
       assert.equal(error.line, 3)
       assert.equal(error.col, 0)
       assert.equal(error.filename, join(fs.basePath, 'eval.edge'))
@@ -167,7 +167,7 @@ test.group('Component | render | errors', (group) => {
     try {
       template.render('eval.edge', {})
     } catch (error) {
-      assert.equal(error.message, 'getColor is not a function')
+      assert.equal(error.message, 'ctx.resolve(...) is not a function')
       assert.equal(error.line, 3)
       assert.equal(error.col, 0)
       assert.equal(error.filename, join(fs.basePath, 'eval.edge'))
@@ -192,7 +192,7 @@ test.group('Component | render | errors', (group) => {
     try {
       template.render('eval.edge', {})
     } catch (error) {
-      assert.equal(error.message, 'getColor is not a function')
+      assert.equal(error.message, 'ctx.resolve(...) is not a function')
       /**
        * Expected to be on line 4. But okay for now
        */
@@ -218,7 +218,7 @@ test.group('Component | render | errors', (group) => {
     try {
       template.render('eval.edge', {})
     } catch (error) {
-      assert.equal(error.message, 'getColor is not a function')
+      assert.equal(error.message, 'ctx.resolve(...) is not a function')
       assert.equal(error.line, 3)
       assert.equal(error.col, 0)
       assert.equal(error.filename, join(fs.basePath, 'eval.edge'))
@@ -244,7 +244,7 @@ test.group('Component | render | errors', (group) => {
     try {
       template.render('eval.edge', {})
     } catch (error) {
-      assert.equal(error.message, 'getColor is not a function')
+      assert.equal(error.message, 'ctx.resolve(...) is not a function')
       /**
        * Expected to be on line 5. But okay for now
        */
@@ -299,7 +299,7 @@ test.group('Component | render | errors', (group) => {
     try {
       template.render('eval.edge', {})
     } catch (error) {
-      assert.equal(error.message, 'getColor is not a function')
+      assert.equal(error.message, 'ctx.resolve(...) is not a function')
       assert.equal(error.line, 2)
       assert.equal(error.col, 0)
       assert.equal(error.filename, join(fs.basePath, 'button.edge'))

@@ -1,7 +1,3 @@
-/**
- * @module edge
- */
-
 /*
 * edge
 *
@@ -12,13 +8,26 @@
 */
 
 import { inspect as utilInspect } from 'util'
-import { range } from 'lodash'
+import {
+  size,
+  last,
+  first,
+  range,
+  groupBy,
+  truncate,
+} from 'lodash'
+
+import { safeValue, withCtx } from '../../Context'
 import { EdgeContract, ContextContract } from '../../Contracts'
 
 /**
  * Inspect value.
  */
-function inspect (ctx: ContextContract, valueToInspect: any, depth: number = 1) {
+function inspect (
+  ctx: ContextContract,
+  valueToInspect: any,
+  depth: number = 1,
+) {
   const inspectedString = `<pre>${utilInspect(valueToInspect, {
     showHidden: true,
     compact: false,
@@ -29,7 +38,9 @@ function inspect (ctx: ContextContract, valueToInspect: any, depth: number = 1) 
     ${ctx.resolve('$filename')}
   </span>`
 
-  return ctx.safe(`<div class="__inspect_output" style="background: #000; color: #fff; padding: 20px; position: relative;">${inspectedString}${filename}</div>`)
+  return safeValue(
+    `<div class="__inspect_output" style="background: #000; color: #fff; padding: 20px; position: relative;">${inspectedString}${filename}</div>`,
+  )
 }
 
 /**
@@ -39,7 +50,21 @@ inspect[Symbol.for('nodejs.util.inspect.custom')] = function customInspect () {
   return '[inspect]'
 }
 
+/**
+ * A list of default globals
+ */
 export default function globals (edge: EdgeContract) {
-  edge.global('inspect', inspect)
-  edge.global('range', (_, start: number, end?: number, step?: number) => range(start, end, step))
+  edge.global('inspect', withCtx(inspect))
+  edge.global('range', (start: number, end?: number, step?: number) => range(start, end, step))
+  edge.global('first', first)
+  edge.global('last', last)
+  edge.global('groupBy', groupBy)
+  edge.global('size', size)
+  edge.global('truncate', truncate)
+  edge.global('toAnchor', (url: string, title: string = url) => {
+    return safeValue(`<a href="${url}"> ${title} </a>`)
+  })
+  edge.global('style', (url: string, title: string = url) => {
+    return safeValue(`<a href="${url}"> ${title} </a>`)
+  })
 }

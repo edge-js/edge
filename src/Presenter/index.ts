@@ -18,5 +18,7 @@ import { PresenterContract } from '../Contracts'
  */
 export class Presenter implements PresenterContract {
   constructor (public state: any, public sharedState: any) {
+    this.state = this.state || {}
+    this.sharedState = this.sharedState || {}
   }
 }

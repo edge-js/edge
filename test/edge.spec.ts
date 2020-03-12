@@ -12,6 +12,7 @@ import { join } from 'path'
 import { Filesystem } from '@poppinss/dev-utils'
 
 import { Edge } from '../src/Edge'
+import applyGlobals from '../src/Edge/globals'
 
 const fs = new Filesystem(join(__dirname, 'views'))
 
@@ -239,5 +240,77 @@ test.group('Edge', (group) => {
     } catch ({ stack }) {
       assert.equal(stack.split('\n')[1].trim(), `at anonymous (${join(fs.basePath, 'bar.edge')}:1:3)`)
     }
+  })
+})
+
+test.group('Edge | globals', () => {
+  test('return first item from an array', (assert) => {
+    const edge = new Edge()
+    edge.registerTemplate('welcome', {
+      template: 'Hello {{ first(users) }}',
+    })
+    applyGlobals(edge)
+    assert.equal(edge.render('welcome', { users: ['virk', 'romain'] }), 'Hello virk')
+  })
+
+  test('return last item from an array', (assert) => {
+    const edge = new Edge()
+    edge.registerTemplate('welcome', {
+      template: 'Hello {{ last(users) }}',
+    })
+    applyGlobals(edge)
+    assert.equal(edge.render('welcome', { users: ['virk', 'romain'] }), 'Hello romain')
+  })
+
+  test('group array values by key', (assert) => {
+    const edge = new Edge()
+    edge.registerTemplate('welcome', {
+      template: 'Total of {{ groupBy(users, \'age\')[\'28\'].length }} users',
+    })
+    applyGlobals(edge)
+
+    const users = [
+      {
+        username: 'virk',
+        age: 28,
+      },
+      {
+        username: 'romain',
+        age: 28,
+      },
+      {
+        username: 'nikk',
+        age: 26,
+      },
+    ]
+
+    assert.equal(edge.render('welcome', { users }), 'Total of 2 users')
+  })
+
+  test('group array values by closure', (assert) => {
+    const edge = new Edge()
+    edge.registerTemplate('welcome', {
+      template: `Total of {{
+        groupBy(users, ({ age }) => age)[\'28\'].length
+      }} users`,
+    })
+    applyGlobals(edge)
+
+    const users = [
+      {
+        username: 'virk',
+        age: 28,
+      },
+      {
+        username: 'romain',
+        age: 28,
+      },
+      {
+        username: 'nikk',
+        age: 26,
+      },
+    ]
+
+    assert.equal(edge.render('welcome', { users }), 'Total of 2 users')
   })
 })

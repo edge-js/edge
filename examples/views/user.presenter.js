@@ -1,9 +1,6 @@
 module.exports = class User {
-  constructor (state) {
+  constructor (state, sharedState) {
     this.state = state
-  }
-
-  slotTitle (ctx) {
-    return ctx.resolve('props').title.toUpperCase()
+    this.sharedState = sharedState
   }
 }

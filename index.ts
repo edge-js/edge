@@ -7,12 +7,13 @@
  * file that was distributed with this source code.
 */
 
+export * from './src/Contracts'
 import { Edge } from './src/Edge'
 import globals from './src/Edge/globals'
-export * from './src/Contracts'
 
 const edge = new Edge()
 globals(edge)
 
-export default edge
 export { Edge }
+export default edge
+export { safeValue, withCtx } from './src/Context'

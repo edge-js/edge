@@ -19,8 +19,25 @@ import { ContextContract } from '../Contracts'
  * method ensures that underlying value is never
  * escaped.
  */
-export class SafeValue {
+class SafeValue {
   constructor (public value: any) {}
+}
+
+/**
+ * A class to wrap callbacks that can access the `ctx`
+ */
+class WithCtx {
+  constructor (private callback: (ctx: ContextContract, ...args: any[]) => any) {
+  }
+
+  /**
+   * Invoke the callback
+   */
+  public invoke (ctx: ContextContract, bindState: any) {
+    return (...args: any[]) => {
+      return this.callback.bind(bindState)(ctx, ...args)
+    }
+  }
 }
 
 /**
@@ -38,12 +55,6 @@ export class Context extends Macroable implements ContextContract {
    * frame.
    */
   private frames: any[] = []
-
-  /**
-   * We keep a reference to the last resolved key and use it inside
-   * the `reThrow` method.
-   */
-  private lastResolvedKey = ''
 
   /**
    * Required by Macroable
@@ -152,6 +163,22 @@ export class Context extends Macroable implements ContextContract {
   }
 
   /**
+   * Transform the resolved value before returning it
+   * back
+   */
+  private transformValue (value: any, bindState: any) {
+    if (value instanceof WithCtx) {
+      return value.invoke(this, bindState)
+    }
+
+    if (typeof (value) === 'function') {
+      return value.bind(bindState)
+    }
+
+    return value
+  }
+
+  /**
    * Resolves value for a given key. It will look for the value in different
    * locations and continues till the end if `undefined` is returned at
    * each step.
@@ -169,8 +196,6 @@ export class Context extends Macroable implements ContextContract {
    * ```
    */
   public resolve (key: string): any {
-    this.lastResolvedKey = key
-
     /**
      * A special key to return the template current state
      */
@@ -201,7 +226,7 @@ export class Context extends Macroable implements ContextContract {
      */
     value = this.getFromFrame(key)
     if (value !== undefined) {
-      return typeof (value) === 'function' ? value.bind(this) : value
+      return this.transformValue(value, this)
     }
 
     /**
@@ -210,7 +235,7 @@ export class Context extends Macroable implements ContextContract {
      */
     value = this.presenter[key]
     if (value !== undefined) {
-      return typeof (value) === 'function' ? value.bind(this.presenter) : value
+      return this.transformValue(value, this.presenter)
     }
 
     /**
@@ -218,14 +243,14 @@ export class Context extends Macroable implements ContextContract {
      */
     value = this.presenter.state[key]
     if (value !== undefined) {
-      return typeof (value) === 'function' ? value.bind(this.presenter.state) : value
+      return this.transformValue(value, this.presenter.state)
     }
 
     /**
      * Finally fallback to shared globals
      */
     value = this.presenter.sharedState[key]
-    return typeof (value) === 'function' ? value.bind(this.presenter.sharedState) : value
+    return this.transformValue(value, this.presenter.sharedState)
   }
 
   /**
@@ -272,11 +297,26 @@ export class Context extends Macroable implements ContextContract {
       throw error
     }
 
-    const message = error.message.replace(/ctx\.resolve\(\.\.\.\)/, this.lastResolvedKey)
-    throw new EdgeError(message, 'E_RUNTIME_EXCEPTION', {
+    // const message = error.message.replace(/ctx\.resolve\(\.\.\.\)/, this.lastResolvedKey)
+    throw new EdgeError(error.message, 'E_RUNTIME_EXCEPTION', {
       filename: this.$filename,
       line: this.$lineNumber,
       col: 0,
     })
   }
+}
+
+/**
+ * Mark value as safe and not to be escaped
+ */
+export function safeValue (value: string) {
+  return new SafeValue(value)
+}
+
+/**
+ * Wrap a function that receives the template engine current
+ * ctx when invoked.
+ */
+export function withCtx (callback: (ctx: ContextContract, ...args: any[]) => any) {
+  return new WithCtx(callback)
 }

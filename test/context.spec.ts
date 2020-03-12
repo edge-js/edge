@@ -8,8 +8,8 @@
 */
 
 import test from 'japa'
-import { Context } from '../src/Context'
 import { Presenter } from '../src/Presenter'
+import { Context, withCtx } from '../src/Context'
 
 test.group('Context', (group) => {
   group.afterEach(() => {
@@ -487,8 +487,43 @@ test.group('Context', (group) => {
       try {
         ctx.reThrow(error)
       } catch (newError) {
-        assert.equal(newError.message, 'getUser is not a function')
+        assert.equal(newError.message, 'ctx.resolve(...) is not a function')
       }
     }
+  })
+
+  test('withCtx wrapped functions should be able to access ctx', (assert) => {
+    const sharedState = {}
+    const data = {
+      username: 'virk',
+    }
+
+    class MyPresenter extends Presenter {
+      public getUsername = withCtx(function (ctx) {
+        return `${this.state.username} ${ctx.presenter.state.username}`
+      })
+    }
+
+    const presenter = new MyPresenter(data, sharedState)
+    const context = new Context(presenter)
+
+    assert.equal(context.resolve('getUsername')(), 'virk virk')
+  })
+
+  test('withCtx wrapped global functions should be able to access ctx', (assert) => {
+    const sharedState = {
+      getUsername: withCtx(function (ctx) {
+        assert.deepEqual(this, sharedState)
+        return ctx.presenter.state.username
+      }),
+    }
+    const data = {
+      username: 'virk',
+    }
+
+    const presenter = new Presenter(data, sharedState)
+    const context = new Context(presenter)
+
+    assert.equal(context.resolve('getUsername')(), 'virk')
   })
 })
