@@ -20,12 +20,6 @@
   {{ inspect($state, 1) }}
   @set('users', [{}])
 
-  {{ users.map(
-    (user) => {
-      return user.getUsername()
-    }
-  ) }}
-
   @component('alert', { title: 'hello world' })
     @slot('title', props)
       @include('partial')

@@ -9,6 +9,7 @@
 
 import test from 'japa'
 import { join } from 'path'
+import dedent from 'dedent-js'
 import { Filesystem } from '@poppinss/dev-utils'
 
 import { Edge } from '../src/Edge'
@@ -326,5 +327,22 @@ test.group('Edge | globals', () => {
 
     assert.equal(edge.render('numeric', { total: 0 }), 'Total 0')
     assert.equal(edge.render('boolean', { isActive: false }), 'Is Active false')
+  })
+
+  test('render inline scripts with regex', (assert) => {
+    const edge = new Edge()
+    edge.registerTemplate('eval', {
+      template: dedent`
+      <script type="text/javascript">
+        var pl = /\+/g
+      </script>
+      `,
+    })
+
+    assert.equal(edge.render('eval'), dedent`
+      <script type="text/javascript">
+        var pl = /\+/g
+      </script>
+    `)
   })
 })
