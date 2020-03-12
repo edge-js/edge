@@ -133,7 +133,7 @@ export class Compiler implements CompilerContract {
      * and parent template sections together
      */
     if (lexerUtils.isTag(firstToken, 'layout')) {
-      const layoutName = firstToken.properties.jsArg.replace(/'/g, '')
+      const layoutName = firstToken.properties.jsArg.replace(/'|"/g, '')
       templateTokens = this.mergeSections(this.tokenize(layoutName), templateTokens)
     }
 

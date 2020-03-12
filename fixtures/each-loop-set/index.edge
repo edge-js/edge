@@ -1,8 +1,8 @@
-@set('total', 0)
-@set('grossPrice', 0)
+@set("total", 0)
+@set("grossPrice", 0)
 @each(item in items)
-  @set('grossPrice', item.price * item.quantity, true)
-  @set('total', total + grossPrice)
+  @set("grossPrice", item.price * item.quantity, true)
+  @set("total", total + grossPrice)
 
 - {{ item.name }} x {{ item.quantity }} = {{ grossPrice }}
 @endeach

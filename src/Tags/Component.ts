@@ -305,7 +305,7 @@ export const componentTag: TagContract = {
         mainSlot.buffer.wrap('function () {', '}')
         obj.add('main', mainSlot.buffer.flush())
       } else {
-        obj.add('main', 'function () { return \'\' }')
+        obj.add('main', 'function () { return "" }')
       }
     }
 
@@ -319,7 +319,7 @@ export const componentTag: TagContract = {
         slots[slotName].buffer.wrap(fnCall, '}')
         obj.add(slotName, slots[slotName].buffer.flush())
       } else {
-        obj.add(slotName, 'function () { return \'\' }')
+        obj.add(slotName, 'function () { return "" }')
       }
     })
 

@@ -40,11 +40,11 @@ test.group('Compiler | Cache', (group) => {
     const { template } = compiler.compile('foo', false)
 
     assert.stringEqual(template, dedent`return (function (template, ctx) {
-    let out = '';
+    let out = "";
     ctx.$lineNumber = 1;
-    ctx.$filename = '${join(fs.basePath, 'foo.edge')}';
+    ctx.$filename = "${join(fs.basePath, 'foo.edge')}";
     try {
-    out += 'Hello ';
+    out += "Hello ";
     out += \`\${ctx.escape(ctx.resolve('username'))}\`;
     } catch (error) {
     ctx.reThrow(error);
@@ -426,15 +426,15 @@ test.group('Compiler | Compile', (group) => {
 
     assert.stringEqual(compiler.compile('index.edge', false).template, dedent`
     return (function (template, ctx) {
-    let out = '';
+    let out = "";
     ctx.$lineNumber = 1;
-    ctx.$filename = '${join(fs.basePath, 'index.edge')}';
+    ctx.$filename = "${join(fs.basePath, 'index.edge')}";
     try {
-    ctx.$filename = '${join(fs.basePath, 'master.edge')}';
+    ctx.$filename = "${join(fs.basePath, 'master.edge')}";
     out += \`\${ctx.escape(ctx.resolve('username'))}\`;
-    out += '\\n';
-    out += '  ';
-    ctx.$filename = '${join(fs.basePath, 'index.edge')}';
+    out += "\\n";
+    out += "  ";
+    ctx.$filename = "${join(fs.basePath, 'index.edge')}";
     ctx.$lineNumber = 3;
     out += \`\${ctx.escape(ctx.resolve('content'))}\`;
     } catch (error) {

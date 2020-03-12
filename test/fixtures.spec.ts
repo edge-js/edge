@@ -32,9 +32,7 @@ test.group('Fixtures', (group) => {
     })
   })
 
-  const dirs = readdirSync(basePath).filter((file) => {
-    return statSync(join(basePath, file)).isDirectory()
-  })
+  const dirs = readdirSync(basePath).filter((file) => statSync(join(basePath, file)).isDirectory())
 
   dirs.forEach((dir) => {
     const dirBasePath = join(basePath, dir)
@@ -42,11 +40,19 @@ test.group('Fixtures', (group) => {
     test(dir, (assert) => {
       const template = new Template(compiler, {}, {})
 
+      /**
+       * Compiled output
+       */
       const { template: compiled } = compiler.compile(`${dir}/index.edge`, false)
       const expectedCompiled = readFileSync(join(dirBasePath, 'compiled.js'), 'utf-8')
+      assert.stringEqual(
+        compiled,
+        expectedCompiled.replace(/\{\{__dirname\}\}/g, `${dirBasePath}${sep}`)
+      )
 
-      assert.stringEqual(compiled, expectedCompiled.replace(/\{\{__dirname\}\}/g, `${dirBasePath}${sep}`))
-
+      /**
+       * Render output
+       */
       const out = readFileSync(join(dirBasePath, 'index.txt'), 'utf-8')
       const output = template.render(
         `${dir}/index.edge`,

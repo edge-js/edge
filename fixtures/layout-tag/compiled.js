@@ -1,9 +1,9 @@
 return (function (template, ctx) {
-let out = '';
+let out = "";
 ctx.$lineNumber = 1;
-ctx.$filename = '{{__dirname}}index.edge';
+ctx.$filename = "{{__dirname}}index.edge";
 try {
-out += 'This is the base template';
+out += "This is the base template";
 } catch (error) {
 ctx.reThrow(error);
 }

@@ -1,13 +1,13 @@
 return (function (template, ctx) {
-let out = '';
+let out = "";
 ctx.$lineNumber = 1;
-ctx.$filename = '{{__dirname}}index.edge';
+ctx.$filename = "{{__dirname}}index.edge";
 try {
-out += 'This is the base template';
-out += '\n';
-out += '';
-out += '\n';
-out += 'Here goes the content section content';
+out += "This is the base template";
+out += "\n";
+out += "";
+out += "\n";
+out += "Here goes the content section content";
 } catch (error) {
 ctx.reThrow(error);
 }
