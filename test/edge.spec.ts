@@ -345,4 +345,25 @@ test.group('Edge | globals', () => {
       </script>
     `)
   })
+
+  test('render complex binary expressions', (assert) => {
+    const edge = new Edge()
+    edge.registerTemplate('eval', {
+      template: dedent`
+      {{
+        line.lineName + (
+          (user.line.id === line.id)
+            ? ' (current)' :
+            (' (' + (line.user.username || 'unselected') + ')')
+          )
+      }}`,
+    })
+
+    assert.equal(edge.render('eval', {
+      line: { id: 1, lineName: 'aaa', user: {} },
+      user: { line: {} },
+    }), dedent`
+      aaa (unselected)
+    `)
+  })
 })
