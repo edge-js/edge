@@ -313,4 +313,18 @@ test.group('Edge | globals', () => {
 
     assert.equal(edge.render('welcome', { users }), 'Total of 2 users')
   })
+
+  test('render non-existy values', (assert) => {
+    const edge = new Edge()
+    edge.registerTemplate('numeric', {
+      template: 'Total {{ total }}',
+    })
+
+    edge.registerTemplate('boolean', {
+      template: 'Is Active {{ isActive }}',
+    })
+
+    assert.equal(edge.render('numeric', { total: 0 }), 'Total 0')
+    assert.equal(edge.render('boolean', { isActive: false }), 'Is Active false')
+  })
 })
