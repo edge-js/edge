@@ -15,13 +15,12 @@ import { TagTypes, MustacheTypes } from 'edge-lexer'
 
 import { Loader } from '../src/Loader'
 import { Context } from '../src/Context'
+import { setTag } from '../src/Tags/Set'
 import { Compiler } from '../src/Compiler'
 import { layoutTag } from '../src/Tags/Layout'
 import { sectionTag } from '../src/Tags/Section'
-import { setTag } from '../src/Tags/Set'
-import './assert-extend'
 
-const tags = {}
+import './assert-extend'
 
 const fs = new Filesystem(join(__dirname, 'views'))
 
@@ -36,21 +35,19 @@ test.group('Compiler | Cache', (group) => {
     const loader = new Loader()
     loader.mount('default', fs.basePath)
 
-    const compiler = new Compiler(loader, tags)
-    const { template } = compiler.compile('foo', false)
+    const compiler = new Compiler(loader, {})
+    const { template } = compiler.compile('foo')
 
-    assert.stringEqual(template, dedent`return (function (template, ctx) {
-    let out = "";
-    ctx.$lineNumber = 1;
-    ctx.$filename = "${join(fs.basePath, 'foo.edge')}";
-    try {
-    out += "Hello ";
-    out += \`\${ctx.escape(ctx.resolve('username'))}\`;
-    } catch (error) {
-    ctx.reThrow(error);
-    }
-    return out;
-    })(template, ctx)`)
+    assert.stringEqual(template, dedent`let out = "";
+      let $lineNumber = 1;
+      let $filename = "${join(fs.basePath, 'foo.edge')}";
+      try {
+      out += "Hello ";
+      out += \`\${ctx.escape(state.username)}\`;
+      } catch (error) {
+      ctx.reThrow(error, $filename, $lineNumber);
+      }
+      return out;`)
   })
 
   test('save template to cache when caching is turned on', async (assert) => {
@@ -59,25 +56,10 @@ test.group('Compiler | Cache', (group) => {
     const loader = new Loader()
     loader.mount('default', fs.basePath)
 
-    const compiler = new Compiler(loader, tags, true)
+    const compiler = new Compiler(loader, {}, true)
     assert.equal(
-      compiler.compile('foo', false),
-      compiler.cacheManager.get(join(fs.basePath, 'foo.edge')),
-    )
-  })
-
-  test('save template and presenter both to the cache when caching is turned on', async (assert) => {
-    await fs.add('foo.edge', 'Hello {{ username }}')
-    await fs.add('foo.presenter.js', 'module.exports = class Foo {}')
-
-    const loader = new Loader()
-    loader.mount('default', fs.basePath)
-
-    const compiler = new Compiler(loader, tags, true)
-    compiler.compile('foo', false)
-    assert.equal(
-      compiler.cacheManager.get(join(fs.basePath, 'foo.edge'))!.Presenter!['name'],
-      'Foo',
+      compiler.compile('foo').template,
+      compiler.cacheManager.get(join(fs.basePath, 'foo.edge'))!.template,
     )
   })
 
@@ -87,21 +69,9 @@ test.group('Compiler | Cache', (group) => {
     const loader = new Loader()
     loader.mount('default', fs.basePath)
 
-    const compiler = new Compiler(loader, tags, false)
-    compiler.compile('foo', false)
+    const compiler = new Compiler(loader, {}, false)
+    compiler.compile('foo')
     assert.isUndefined(compiler.cacheManager.get(join(fs.basePath, 'foo.edge')))
-  })
-
-  test('do not load presenter for inline templates', async (assert) => {
-    await fs.add('foo.edge', 'Hello {{ username }}')
-    await fs.add('foo.presenter.js', '')
-
-    const loader = new Loader()
-    loader.mount('default', fs.basePath)
-
-    const compiler = new Compiler(loader, tags)
-    assert.isUndefined(compiler.compile('foo', true).Presenter)
-    assert.isDefined(compiler.compile('foo', false).Presenter)
   })
 })
 
@@ -112,15 +82,15 @@ test.group('Compiler | Tokenize', (group) => {
 
   test('during tokenize, merge @section tags of a given layout', async (assert) => {
     await fs.add('master.edge', dedent`
-    Master page
-    @!section('content')
+      Master page
+      @!section('content')
     `)
 
     await fs.add('index.edge', dedent`
-    @layout('master')
-    @section('content')
-      Hello world
-    @endsection
+      @layout('master')
+      @section('content')
+        Hello world
+      @endsection
     `)
 
     const loader = new Loader()
@@ -130,7 +100,6 @@ test.group('Compiler | Tokenize', (group) => {
       section: sectionTag,
       layout: layoutTag,
     })
-
     assert.deepEqual(compiler.tokenize('index.edge'), [
       {
         type: 'raw' as const,
@@ -165,16 +134,16 @@ test.group('Compiler | Tokenize', (group) => {
 
   test('during tokenize, merge @set tags of a given layout', async (assert) => {
     await fs.add('master.edge', dedent`
-    Master page
-    @!section('content')
+      Master page
+      @!section('content')
     `)
 
     await fs.add('index.edge', dedent`
-    @layout('master')
-    @set('username', 'virk')
-    @section('content')
-      Hello world
-    @endsection
+      @layout('master')
+      @set('username', 'virk')
+      @section('content')
+        Hello world
+      @endsection
     `)
 
     const loader = new Loader()
@@ -232,13 +201,13 @@ test.group('Compiler | Tokenize', (group) => {
     assert.plan(4)
 
     await fs.add('master.edge', dedent`
-    Master page
-    @!section('content')
+      Master page
+      @!section('content')
     `)
 
     await fs.add('index.edge', dedent`
-    @layout('master')
-    Hello world
+      @layout('master')
+      Hello world
     `)
 
     const loader = new Loader()
@@ -264,24 +233,24 @@ test.group('Compiler | Tokenize', (group) => {
 
   test('during tokenize, merge @section tags of a nested layouts', async (assert) => {
     await fs.add('super-master.edge', dedent`
-    Master page
-    @!section('header')
-    @!section('content')
+      Master page
+      @!section('header')
+      @!section('content')
     `)
 
     await fs.add('master.edge', dedent`
-    @layout('super-master')
-    @section('header')
-      This is header
-    @endsection
-    @!section('content')
+      @layout('super-master')
+      @section('header')
+        This is header
+      @endsection
+      @!section('content')
     `)
 
     await fs.add('index.edge', dedent`
-    @layout('master')
-    @section('content')
-      This is content
-    @endsection
+      @layout('master')
+      @section('content')
+        This is content
+      @endsection
     `)
 
     const loader = new Loader()
@@ -343,15 +312,15 @@ test.group('Compiler | Tokenize', (group) => {
 
   test('layout tokens must point to its own filename', async (assert) => {
     await fs.add('master.edge', dedent`
-    {{ username }}
-    @!section('content')
+      {{ username }}
+      @!section('content')
     `)
 
     await fs.add('index.edge', dedent`
-    @layout('master')
-    @section('content')
-      Hello world
-    @endsection
+      @layout('master')
+      @section('content')
+        Hello world
+      @endsection
     `)
 
     const loader = new Loader()
@@ -405,15 +374,15 @@ test.group('Compiler | Compile', (group) => {
 
   test('compile template with layouts', async (assert) => {
     await fs.add('master.edge', dedent`
-    {{ username }}
-    @!section('content')
+      {{ username }}
+      @!section('content')
     `)
 
     await fs.add('index.edge', dedent`
-    @layout('master')
-    @section('content')
-      {{ content }}
-    @endsection
+      @layout('master')
+      @section('content')
+        {{ content }}
+      @endsection
     `)
 
     const loader = new Loader()
@@ -424,24 +393,21 @@ test.group('Compiler | Compile', (group) => {
       layout: layoutTag,
     })
 
-    assert.stringEqual(compiler.compile('index.edge', false).template, dedent`
-    return (function (template, ctx) {
-    let out = "";
-    ctx.$lineNumber = 1;
-    ctx.$filename = "${join(fs.basePath, 'index.edge')}";
-    try {
-    ctx.$filename = "${join(fs.basePath, 'master.edge')}";
-    out += \`\${ctx.escape(ctx.resolve('username'))}\`;
-    out += "\\n";
-    out += "  ";
-    ctx.$filename = "${join(fs.basePath, 'index.edge')}";
-    ctx.$lineNumber = 3;
-    out += \`\${ctx.escape(ctx.resolve('content'))}\`;
-    } catch (error) {
-    ctx.reThrow(error);
-    }
-    return out;
-    })(template, ctx)
+    assert.stringEqual(compiler.compile('index.edge').template, dedent`let out = "";
+      let $lineNumber = 1;
+      let $filename = "${join(fs.basePath, 'index.edge')}";
+      try {
+      $filename = "${join(fs.basePath, 'master.edge')}";
+      out += \`\${ctx.escape(state.username)}\`;
+      out += "\\n";
+      out += "  ";
+      $filename = "${join(fs.basePath, 'index.edge')}";
+      $lineNumber = 3;
+      out += \`\${ctx.escape(state.content)}\`;
+      } catch (error) {
+      ctx.reThrow(error, $filename, $lineNumber);
+      }
+      return out;
     `)
   })
 
@@ -449,15 +415,15 @@ test.group('Compiler | Compile', (group) => {
     assert.plan(3)
 
     await fs.add('master.edge', dedent`
-    {{ user name }}
-    @!section('content')
+      {{ user name }}
+      @!section('content')
     `)
 
     await fs.add('index.edge', dedent`
-    @layout('master')
-    @section('content')
-      {{ content }}
-    @endsection
+      @layout('master')
+      @section('content')
+        {{ content }}
+      @endsection
     `)
 
     const loader = new Loader()
@@ -469,7 +435,7 @@ test.group('Compiler | Compile', (group) => {
     })
 
     try {
-      compiler.compile('index.edge', false)
+      compiler.compile('index.edge')
     } catch (error) {
       assert.equal(error.filename, join(fs.basePath, 'master.edge'))
       assert.equal(error.line, 1)
@@ -481,15 +447,15 @@ test.group('Compiler | Compile', (group) => {
     assert.plan(3)
 
     await fs.add('master.edge', dedent`
-    {{ username }}
-    @!section('content')
+      {{ username }}
+      @!section('content')
     `)
 
     await fs.add('index.edge', dedent`
-    @layout('master')
-    @section('content')
-      {{ con tent }}
-    @endsection
+      @layout('master')
+      @section('content')
+        {{ con tent }}
+      @endsection
     `)
 
     const loader = new Loader()
@@ -501,7 +467,7 @@ test.group('Compiler | Compile', (group) => {
     })
 
     try {
-      compiler.compile('index.edge', false)
+      compiler.compile('index.edge')
     } catch (error) {
       assert.equal(error.filename, join(fs.basePath, 'index.edge'))
       assert.equal(error.line, 3)
@@ -514,14 +480,14 @@ test.group('Compiler | Compile', (group) => {
 
     await fs.add('master.edge', dedent`
       {{ getUserName() }}
-    @!section('content')
+      @!section('content')
     `)
 
     await fs.add('index.edge', dedent`
-    @layout('master')
-    @section('content')
-      {{ content }}
-    @endsection
+      @layout('master')
+      @section('content')
+        {{ content }}
+      @endsection
     `)
 
     const loader = new Loader()
@@ -533,12 +499,9 @@ test.group('Compiler | Compile', (group) => {
     })
 
     try {
-      new Function('template', 'ctx', compiler.compile('index.edge', false).template)(
-        {},
-        new Context({ state: {}, sharedState: {} }),
-      )
+      new Function('state', 'ctx', compiler.compile('index.edge').template)({}, new Context())
     } catch (error) {
-      assert.equal(error.message, 'ctx.resolve(...) is not a function')
+      assert.equal(error.message, 'getUserName is not a function')
       assert.equal(error.filename, join(fs.basePath, 'master.edge'))
       assert.equal(error.line, 1)
       assert.equal(error.col, 0)
@@ -569,10 +532,9 @@ test.group('Compiler | Compile', (group) => {
     })
 
     try {
-      const fn = new Function('template', 'ctx', compiler.compile('index.edge', false).template)
-      fn({}, new Context({ state: {}, sharedState: {} }))
+      new Function('state', 'ctx', compiler.compile('index.edge').template)({}, new Context())
     } catch (error) {
-      assert.equal(error.message, 'ctx.resolve(...) is not a function')
+      assert.equal(error.message, 'getContent is not a function')
       assert.equal(error.filename, join(fs.basePath, 'index.edge'))
       assert.equal(error.line, 3)
       assert.equal(error.col, 0)

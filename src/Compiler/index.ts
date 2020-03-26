@@ -15,12 +15,8 @@ import { CacheManager } from '../CacheManager'
 import { LoaderContract, TagsContract, LoaderTemplate, CompilerContract } from '../Contracts'
 
 /**
- * Compiler compiles the template to a function, which can be invoked at a later
- * stage using the [[Context]]. [edge-parser](https://npm.im/edge-parser) is
- * used under the hood to parse the templates.
- *
- * Also, the `layouts` are handled natively by the compiler. Before starting
- * the parsing process, it will recursively merge the layout sections.
+ * Compiler is to used to compile templates using the `edge-parser`. Along with that
+ * it natively merges the contents of a layout with a parent template.
  */
 export class Compiler implements CompilerContract {
   public cacheManager = new CacheManager(this.cache)
@@ -49,13 +45,14 @@ export class Compiler implements CompilerContract {
     extended
       .forEach((node) => {
         /**
-         * Ignore new lines, layout tag and empty raw nodes inside the parent
+         * Ignore new lines, comments, layout tag and empty raw nodes inside the parent
          * template
          */
         if (
-          lexerUtils.isTag(node, 'layout') ||
-          node.type === 'newline' ||
-          (node.type === 'raw' && !node.value.trim())
+          lexerUtils.isTag(node, 'layout')
+          || node.type === 'newline'
+          || (node.type === 'raw' && !node.value.trim())
+          || node.type === 'comment'
         ) {
           return
         }
@@ -124,8 +121,8 @@ export class Compiler implements CompilerContract {
    * are checked for layouts and if layouts are used, their sections will be
    * merged together.
    */
-  private templateContentToTokens (content: string, parser: Parser): Token[] {
-    let templateTokens = parser.tokenize(content)
+  private templateContentToTokens (content: string, parser: Parser, absPath: string): Token[] {
+    let templateTokens = parser.tokenize(content, absPath)
     const firstToken = templateTokens[0]
 
     /**
@@ -134,50 +131,36 @@ export class Compiler implements CompilerContract {
      */
     if (lexerUtils.isTag(firstToken, 'layout')) {
       const layoutName = firstToken.properties.jsArg.replace(/'|"/g, '')
-      templateTokens = this.mergeSections(this.tokenize(layoutName), templateTokens)
+      templateTokens = this.mergeSections(this.tokenize(layoutName, parser), templateTokens)
     }
 
     return templateTokens
   }
 
   /**
-   * Converts the template content to an [array of lexer tokens]. The method is
+   * Converts the template content to an array of lexer tokens. The method is
    * same as the `parser.tokenize`, but it also handles layouts natively.
    *
    * ```
    * compiler.tokenize('<template-path>')
    * ```
    */
-  public tokenize (templatePath: string): Token[] {
+  public tokenize (templatePath: string, parser?: Parser): Token[] {
     const absPath = this.loader.makePath(templatePath)
-    const { template } = this.loader.resolve(absPath, false)
-
-    const parser = new Parser(this.tags, { filename: absPath })
-    return this.templateContentToTokens(template, parser)
+    const { template } = this.loader.resolve(absPath)
+    return this.templateContentToTokens(template, parser || new Parser(this.tags), absPath)
   }
 
   /**
-   * Compiles the template contents to a function string, which can be invoked
-   * later.
-   *
-   * When `inline` is set to true, the compiled output **will not have it's own scope** and
-   * neither an attempt to load the presenter is made. The `inline` is mainly used for partials.
+   * Compiles the template contents to string. The output is same as the `edge-parser`,
+   * it's just that the compiler uses the loader to load the templates and also
+   * handles layouts.
    *
    * ```js
-   * compiler.compile('welcome', false)
-   * // output
-   *
-   * {
-   *   template: `function (template, ctx) {
-   *     let out = ''
-   *     out += ''
-   *     return out
-   *   })(template, ctx)`,
-   *   Presenter: class Presenter | undefined
-   * }
+   * compiler.compile('welcome')
    * ```
    */
-  public compile (templatePath: string, inline: boolean): LoaderTemplate {
+  public compile (templatePath: string, localVariables?: string[]): LoaderTemplate {
     const absPath = this.loader.makePath(templatePath)
 
     /**
@@ -189,46 +172,23 @@ export class Compiler implements CompilerContract {
       return cachedResponse
     }
 
-    /**
-     * Do not return presenter in inline mode
-     */
-    const loadPresenter = !inline
+    const parser = new Parser(this.tags)
+    const buffer = new EdgeBuffer(absPath)
 
     /**
-     * Inline templates are not wrapped inside a function
-     * call. They share the parent template scope
+     * Define local variables on the parser. This is helpful when trying to compile
+     * a partail and we want to share the local state of the parent template
+     * with it
      */
-    const wrapAsFunction = !inline
-
-    /**
-     * Get a new instance of the parser.
-     */
-    const parser = new Parser(this.tags, { filename: absPath })
-
-    /**
-     * Resolve the template and Presenter using the given loader. We always
-     * load the presenter but don't return it when `loadPresenter = false`.
-     */
-    const { template, Presenter } = this.loader.resolve(absPath, true)
-
-    /**
-     * Convert template to AST. The AST will have the layout actions merged (if layout)
-     * is used.
-     */
-    const templateTokens = this.templateContentToTokens(template, parser)
-
-    /**
-     * Finally process the ast
-     */
-    const buffer = new EdgeBuffer(absPath, wrapAsFunction)
-    templateTokens.forEach((token) => parser.processToken(token, buffer))
-
-    const payload = {
-      template: buffer.flush(),
-      Presenter,
+    if (localVariables) {
+      localVariables.forEach((localVariable) => parser.stack.defineVariable(localVariable))
     }
 
-    this.cacheManager.set(absPath, payload)
-    return loadPresenter ? payload : { template: payload.template }
+    const templateTokens = this.tokenize(absPath, parser)
+    templateTokens.forEach((token) => parser.processToken(token, buffer))
+    const template = buffer.flush()
+
+    this.cacheManager.set(absPath, { template })
+    return { template }
   }
 }
