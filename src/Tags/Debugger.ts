@@ -11,10 +11,6 @@ import { TagContract } from '../Contracts'
 
 /**
  * Add debugger break point to the compiled template
- *
- * ```edge
- *  @debugger
- * ```
  */
 export const debuggerTag: TagContract = {
   block: false,
@@ -22,7 +18,7 @@ export const debuggerTag: TagContract = {
   tagName: 'debugger',
 
   /**
-   * Compiles else block node to Javascript else statement
+   * Compiles `@debugger` tags
    */
   compile (_, buffer, token) {
     buffer.writeExpression('debugger', token.filename, token.loc.start.line)
