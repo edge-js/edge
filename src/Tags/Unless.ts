@@ -10,7 +10,7 @@
 import { expressions } from 'edge-parser'
 
 import { TagContract } from '../Contracts'
-import { isNotSubsetOf, unallowedExpression } from '../utils'
+import { isNotSubsetOf, unallowedExpression, parseJsArg } from '../utils'
 
 /**
  * Inverse of the `if` condition. The term `unless` is more readable and logical
@@ -31,11 +31,11 @@ export const unlessTag: TagContract = {
    * Compiles the if block node to a Javascript if statement
    */
   compile (parser, buffer, token) {
-    const parsed = parser.utils.transformAst(
-      parser.utils.generateAST(token.properties.jsArg, token.loc, token.filename),
-      token.filename,
-    )
+    const parsed = parseJsArg(parser, token)
 
+    /**
+     * Disallow sequence expressions
+     */
     isNotSubsetOf(
       parsed,
       [expressions.SequenceExpression],
@@ -54,7 +54,7 @@ export const unlessTag: TagContract = {
     buffer.writeStatement(`if (!${parser.utils.stringify(parsed)}) {`, token.filename, token.loc.start.line)
 
     /**
-     * Process of all kids recursively
+     * Process of all children recursively
      */
     token.children.forEach((child) => parser.processToken(child, buffer))
 
