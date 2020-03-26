@@ -1,11 +1,9 @@
-return (function (template, ctx) {
 let out = "";
-ctx.$lineNumber = 1;
-ctx.$filename = "{{__dirname}}index.edge";
+let $lineNumber = 1;
+let $filename = "{{__dirname}}index.edge";
 try {
-out += `${template.renderInline("include-nested/partial")(template, ctx)}`;
+out += `${template.renderInline("include-nested/partial")(template,state,ctx)}`;
 } catch (error) {
-ctx.reThrow(error);
+ctx.reThrow(error, $filename, $lineNumber);
 }
 return out;
-})(template, ctx)

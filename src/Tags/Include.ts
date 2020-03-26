@@ -10,7 +10,7 @@
 import { expressions } from 'edge-parser'
 
 import { TagContract } from '../Contracts'
-import { unallowedExpression, isSubsetOf } from '../utils'
+import { unallowedExpression, isSubsetOf, parseJsArg } from '../utils'
 
 /**
  * Include tag is used to include partials in the same scope of the parent
@@ -29,11 +29,11 @@ export const includeTag: TagContract = {
    * Compiles else block node to Javascript else statement
    */
   compile (parser, buffer, token) {
-    const parsed = parser.utils.transformAst(
-      parser.utils.generateAST(token.properties.jsArg, token.loc, token.filename),
-      token.filename,
-    )
+    const parsed = parseJsArg(parser, token)
 
+    /**
+     * Only mentioned expressions are allowed inside `@include` tag
+     */
     isSubsetOf(
       parsed,
       [
@@ -55,12 +55,26 @@ export const includeTag: TagContract = {
     )
 
     /**
-     * Include template. Since the partials can be a runtime value, we cannot inline
-     * the content right now and have to defer to runtime to get the value of
-     * the partial and then process it
+     * We need to pass the local variables to the partial render function
      */
+    const localVariables = parser.stack.list()
+
+    /**
+     * Arguments for the `renderInline` method
+     */
+    const renderArgs = localVariables.length
+      ? [parser.utils.stringify(parsed), localVariables.map((localVar) => `"${localVar}"`).join(',')]
+      : [parser.utils.stringify(parsed)]
+
+    /**
+     * Arguments for invoking the output function of `renderInline`
+     */
+    const callFnArgs = localVariables.length
+      ? ['template', 'state', 'ctx', localVariables.map((localVar) => localVar).join(',')]
+      : ['template', 'state', 'ctx']
+
     buffer.outputExpression(
-      `template.renderInline(${parser.utils.stringify(parsed)})(template, ctx)`,
+      `template.renderInline(${renderArgs.join(',')})(${callFnArgs.join(',')})`,
       token.filename,
       token.loc.start.line,
       true,
