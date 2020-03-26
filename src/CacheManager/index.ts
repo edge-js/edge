@@ -27,9 +27,8 @@ export class CacheManager implements CacheManagerContract {
   }
 
   /**
-   * Returns the template and the presenter class from the
-   * cache. If caching is disabled, then it will
-   * return undefined.
+   * Returns the template from the cache. If caching is disabled,
+   * then it will return undefined.
    */
   public get (absPath: string): undefined | LoaderTemplate {
     if (!this.enabled) {
@@ -41,7 +40,7 @@ export class CacheManager implements CacheManagerContract {
 
   /**
    * Set's the template path and the payload to the cache. If
-   * cache is disabled, then this function returns in noop.
+   * cache is disabled, then this function results in a noop.
    */
   public set (absPath: string, payload: LoaderTemplate) {
     if (!this.enabled) {
