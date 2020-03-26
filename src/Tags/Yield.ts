@@ -9,7 +9,7 @@
 
 import { expressions } from 'edge-parser'
 import { TagContract } from '../Contracts'
-import { isNotSubsetOf, unallowedExpression } from '../utils'
+import { isNotSubsetOf, unallowedExpression, parseJsArg } from '../utils'
 
 /**
  * Yield tag is a shorthand of `if/else` for markup based content.
@@ -39,14 +39,18 @@ export const yieldTag: TagContract = {
    * Compiles the if block node to a Javascript if statement
    */
   compile (parser, buffer, token) {
+    /**
+     * Holding the yield variable counder on the buffer as a private
+     * variable
+     */
     let yieldCounter = buffer['yieldCounter'] || 0
     buffer['yieldCounter'] = yieldCounter++
 
-    const parsed = parser.utils.transformAst(
-      parser.utils.generateAST(token.properties.jsArg, token.loc, token.filename),
-      token.filename,
-    )
+    const parsed = parseJsArg(parser, token)
 
+    /**
+     * Sequence expression is not
+     */
     isNotSubsetOf(
       parsed,
       [expressions.SequenceExpression],
@@ -62,14 +66,22 @@ export const yieldTag: TagContract = {
     const parsedString = parser.utils.stringify(parsed)
 
     /**
-     * Write main content when it's truthy
+     * Write main content when it's truthy. The reason we store a reference to a variable first, is that
+     * at times the properties can have side-effects, so calling it inside `if` and then yield may
+     * cause unintended behavior. For example:
+     *
+     * `@yield(getPropertyAge())`
+     *
+     * The `getPropertyAge` uses timestamp comparsion for some logic. So if we will call this method
+     * twice, first inside the `if` block and then to yield it, then it may cause some unintended
+     * behavior.
      */
     buffer.writeExpression(`let yield_${yieldCounter} = ${parsedString}`, token.filename, token.loc.start.line)
     buffer.writeStatement(`if (yield_${yieldCounter}) {`, token.filename, -1)
     buffer.outputExpression(`yield_${yieldCounter}`, token.filename, -1, true)
 
     /**
-     * Else write fallback
+     * Write fallback content
      */
     if (!token.properties.selfclosed) {
       buffer.writeStatement('} else {', token.filename, -1)

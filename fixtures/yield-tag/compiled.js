@@ -1,14 +1,12 @@
-return (function (template, ctx) {
 let out = "";
-ctx.$lineNumber = 1;
-ctx.$filename = "{{__dirname}}index.edge";
+let $lineNumber = 1;
+let $filename = "{{__dirname}}index.edge";
 try {
-let yield_1 = ctx.resolve('username');
+let yield_1 = state.username;
 if (yield_1) {
 out += `${yield_1}`;
 }
 } catch (error) {
-ctx.reThrow(error);
+ctx.reThrow(error, $filename, $lineNumber);
 }
 return out;
-})(template, ctx)
