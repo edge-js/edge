@@ -7,31 +7,40 @@
 * file that was distributed with this source code.
 */
 
+import { each, size } from 'lodash'
 import { utils as lexerUtils } from 'edge-lexer'
 import { Parser, expressions } from 'edge-parser'
-import { each, size } from 'lodash'
 
 import { TagContract } from '../Contracts'
 import { isSubsetOf, unallowedExpression } from '../utils'
 
 /**
- * Returns the list to loop over for the each expression
+ * Returns the list to loop over for the each binary expression
  */
-function getLoopList (expression: any, parser: Parser, filename: string): string {
-  return parser.utils.stringify(parser.utils.transformAst(expression, filename))
+function getLoopList (rhsExpression: any, parser: Parser, filename: string): string {
+  return parser.utils.stringify(parser.utils.transformAst(rhsExpression, filename, parser.stack))
 }
 
 /**
- * Returns loop item and the index for the each expression
+ * Returns loop item and the index for the each binary expression
  */
-function getLoopItemAndIndex (expression: any, filename: string): [string, string] {
+function getLoopItemAndIndex (lhsExpression: any, filename: string): [string, string?] {
+  /**
+   * Ensure the LHS content inside `@each()` curly braces is a `SequenceExpression` or
+   * `Identifier`. Anything else is not allowed.
+   *
+   * For example:
+   *
+   * - In `@each(user in users)`, `user` is an indentifier
+   * - In `@each((user, index) in users)`, `(user, index)` is a sequence expression
+   */
   isSubsetOf(
-    expression,
+    lhsExpression,
     [expressions.SequenceExpression, expressions.Identifier],
     () => {
       unallowedExpression(
-        `invalid left hand side "${expression.type}" for the @each tag`,
-        expression,
+        `invalid left hand side "${lhsExpression.type}" for the @each tag`,
+        lhsExpression,
         filename,
       )
     },
@@ -40,43 +49,52 @@ function getLoopItemAndIndex (expression: any, filename: string): [string, strin
   /**
    * Return list index from the sequence expression
    */
-  if (expression.type === 'SequenceExpression') {
+  if (lhsExpression.type === 'SequenceExpression') {
+    /**
+     * First item of the sequence expression must be an idenifier
+     */
     isSubsetOf(
-      expression.expressions[0],
+      lhsExpression.expressions[0],
       [expressions.Identifier],
       () => {
         unallowedExpression(
-          `"${expression.expressions[0]}.type" is not allowed as value identifier for @each tag`,
-          expression.expressions[0],
+          `"${lhsExpression.expressions[0]}.type" is not allowed as value identifier for @each tag`,
+          lhsExpression.expressions[0],
           filename,
         )
       },
     )
 
+    /**
+     * Second item of the sequence expression must be an idenifier
+     */
     isSubsetOf(
-      expression.expressions[1],
+      lhsExpression.expressions[1],
       [expressions.Identifier],
       () => {
         unallowedExpression(
-          `"${expression.expressions[1]}.type" is not allowed as key identifier for @each tag`,
-          expression.expressions[1],
+          `"${lhsExpression.expressions[1]}.type" is not allowed as key identifier for @each tag`,
+          lhsExpression.expressions[1],
           filename,
         )
       },
     )
 
-    return [expression.expressions[0].name, expression.expressions[1].name]
+    return [lhsExpression.expressions[0].name, lhsExpression.expressions[1].name]
   }
 
-  return [expression.name, 'key']
+  /**
+   * There is no key, just the value
+   */
+  return [lhsExpression.name]
 }
 
 /**
  * Each tag is used to run a foreach loop on arrays and even objects.
  *
  * ```edge
- * @each(user in users)
- *   {{ user }} {{ $loop.index }}
+ * @each((user, index) in users)
+ *   {{ user }} {{ index }}
  * @endeach
  * ```
  */
@@ -91,21 +109,20 @@ export const eachTag: TagContract = {
   compile (parser, buffer, token) {
     /**
      * We just generate the AST and do not transform it, since the transform
-     * function attempts to resolve identifiers
+     * function attempts to resolve identifiers and we don't want that
      */
-    const parsed = parser.utils.generateAST(
-      token.properties.jsArg,
-      token.loc,
-      token.filename,
-    ).expression
+    const { expression } = parser.utils.generateAST(token.properties.jsArg, token.loc, token.filename)
 
+    /**
+     * Each tag only accepts the binary expression or sequence expression. ie `user in users`
+     */
     isSubsetOf(
-      parsed,
-      [expressions.BinaryExpression],
+      expression,
+      [expressions.BinaryExpression, expression.SequenceExpression],
       () => {
         unallowedExpression(
-          `"${token.properties.jsArg}" is not a valid binary expression for the @each tag`,
-          parsed,
+          `"${token.properties.jsArg}" is not valid expression for the @each tag`,
+          expression,
           token.filename,
         )
       },
@@ -115,17 +132,16 @@ export const eachTag: TagContract = {
      * Finding if an else child exists inside the each tag
      */
     const elseIndex = token.children.findIndex((child) => lexerUtils.isTag(child, 'else'))
-    const elseChild = elseIndex > -1 ? token.children.splice(elseIndex) : []
+    const elseChildren = elseIndex > -1 ? token.children.splice(elseIndex) : []
 
     /**
      * Fetching the item,index and list for the each loop
      */
-    const [item, index] = getLoopItemAndIndex(parsed.left, token.filename)
-    const list = getLoopList(parsed.right, parser, token.filename)
+    const list = getLoopList(expression.right, parser, token.filename)
+    const [item, index] = getLoopItemAndIndex(expression.left, token.filename)
 
     /**
-     * If there is an else statement, then wrap the loop
-     * inside the `if` statement first
+     * If there is an else statement, then wrap the loop inside the `if` statement first
      */
     if (elseIndex > -1) {
       buffer.writeStatement(`if(ctx.size(${list})) {`, token.filename, token.loc.start.line)
@@ -134,21 +150,16 @@ export const eachTag: TagContract = {
     /**
      * Write the loop statement to the template
      */
-    buffer.writeStatement(`ctx.loop(${list}, function (${item}, loop) {`, token.filename, token.loc.start.line)
+    const loopCallbackArgs = (index ? [item, index] : [item]).join(',')
+    buffer.writeStatement(`ctx.loop(${list}, function (${loopCallbackArgs}) {`, token.filename, token.loc.start.line)
 
     /**
-     * Start a new context frame. Frame ensures the value inside
-     * the loop is given priority over top level values. Think
-     * of it as a Javascript block scope.
+     * Start a new parser scope. So that all variable resolutions for the `item`
+     * are pointing to the local variable and not the template `state`.
      */
-    buffer.writeExpression('ctx.newFrame()', token.filename, -1)
-
-    /**
-     * Set key and value pair on the context
-     */
-    buffer.writeExpression(`ctx.setOnFrame('${item}', ${item})`, token.filename, -1)
-    buffer.writeExpression('ctx.setOnFrame(\'$loop\', loop)', token.filename, -1)
-    buffer.writeExpression(`ctx.setOnFrame('${index}', loop.key)`, token.filename, -1)
+    parser.stack.defineScope()
+    parser.stack.defineVariable(item)
+    index && parser.stack.defineVariable(index)
 
     /**
      * Process all kids
@@ -156,9 +167,9 @@ export const eachTag: TagContract = {
     token.children.forEach((child) => parser.processToken(child, buffer))
 
     /**
-     * Remove the frame
+     * Clear scope
      */
-    buffer.writeExpression('ctx.removeFrame()', token.filename, -1)
+    parser.stack.clearScope()
 
     /**
      * Close each loop
@@ -170,7 +181,7 @@ export const eachTag: TagContract = {
      * else childs and close the if block
      */
     if (elseIndex > -1) {
-      elseChild.forEach((child) => parser.processToken(child, buffer))
+      elseChildren.forEach((elseChild) => parser.processToken(elseChild, buffer))
       buffer.writeStatement('}', token.filename, -1)
     }
   },
@@ -180,26 +191,8 @@ export const eachTag: TagContract = {
    */
   run (context) {
     context.macro('loop', function loop (source, callback) {
-      let index = 0
-      const total = size(source)
-
-      each(source, (value: any, key: any) => {
-        const isEven = (index + 1) % 2 === 0
-
-        callback(value, {
-          key: key,
-          index: index,
-          first: index === 0,
-          isOdd: !isEven,
-          isEven: isEven,
-          last: (index + 1 === total),
-          total: total,
-        })
-
-        index++
-      })
+      each(source, callback)
     })
-
     context.macro('size', size)
   },
 }

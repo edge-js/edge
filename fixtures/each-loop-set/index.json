@@ -15,5 +15,6 @@
       "price": 2.99,
       "quantity": 4
     }
-  ]
+  ],
+  "surcharge": 2
 }

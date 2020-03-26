@@ -1,5 +1,6 @@
-- Burger x 2 = 20
-- Sandwich x 4 = 41.2
-- Doughnut x 4 = 11.96
-Total price = 73.16
-Gross price = 0
+- Burger x 2 = 40
+- Sandwich x 4 = 82.4
+- Doughnut x 4 = 23.92
+Total price = 146.32
+Surcharge = 2
+Gross price = undefined

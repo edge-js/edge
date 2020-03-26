@@ -1,42 +1,38 @@
-return (function (template, ctx) {
 let out = "";
-ctx.$lineNumber = 1;
-ctx.$filename = "{{__dirname}}index.edge";
+let $lineNumber = 1;
+let $filename = "{{__dirname}}index.edge";
 try {
-ctx.set("total", 0, false);
-ctx.$lineNumber = 2;
-ctx.set("grossPrice", 0, false);
-ctx.$lineNumber = 3;
-ctx.loop(ctx.resolve('items'), function (item, loop) {
-ctx.newFrame();
-ctx.setOnFrame('item', item);
-ctx.setOnFrame('$loop', loop);
-ctx.setOnFrame('key', loop.key);
-ctx.$lineNumber = 4;
-ctx.set("grossPrice", ctx.resolve('item').price * ctx.resolve('item').quantity, true);
-ctx.$lineNumber = 5;
-ctx.set("total", ctx.resolve('total') + ctx.resolve('grossPrice'), false);
+let total = 0;
+$lineNumber = 2;
+ctx.loop(state.items, function (item) {
+$lineNumber = 3;
+let grossPrice = item.price * item.quantity * state.surcharge;
+$lineNumber = 4;
+total = total + grossPrice;
 out += "";
 out += "\n";
 out += "- ";
-ctx.$lineNumber = 7;
-out += `${ctx.escape(ctx.resolve('item').name)}`;
+$lineNumber = 6;
+out += `${ctx.escape(item.name)}`;
 out += " x ";
-out += `${ctx.escape(ctx.resolve('item').quantity)}`;
+out += `${ctx.escape(item.quantity)}`;
 out += " = ";
-out += `${ctx.escape(ctx.resolve('grossPrice'))}`;
-ctx.removeFrame();
+out += `${ctx.escape(grossPrice)}`;
 });
 out += "\n";
 out += "Total price = ";
-ctx.$lineNumber = 9;
-out += `${ctx.escape(ctx.resolve('total'))}`;
+$lineNumber = 8;
+out += `${ctx.escape(total)}`;
+out += "\n";
+out += "Surcharge = ";
+$lineNumber = 9;
+out += `${ctx.escape(state.surcharge)}`;
 out += "\n";
 out += "Gross price = ";
-ctx.$lineNumber = 10;
-out += `${ctx.escape(ctx.resolve('grossPrice'))}`;
+$lineNumber = 10;
+out += `${ctx.escape(state.grossPrice)}`;
+out += " ";
 } catch (error) {
-ctx.reThrow(error);
+ctx.reThrow(error, $filename, $lineNumber);
 }
 return out;
-})(template, ctx)
