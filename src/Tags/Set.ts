@@ -11,7 +11,7 @@ import { EdgeError } from 'edge-error'
 import { expressions } from 'edge-parser'
 
 import { TagContract } from '../Contracts'
-import { isSubsetOf, unallowedExpression } from '../utils'
+import { isSubsetOf, unallowedExpression, parseJsArg } from '../utils'
 
 /**
  * The set tag is used to set runtime values within the template. The value
@@ -40,10 +40,7 @@ export const setTag: TagContract = {
    * Compiles else block node to Javascript else statement
    */
   compile (parser, buffer, token) {
-    const parsed = parser.utils.transformAst(
-      parser.utils.generateAST(token.properties.jsArg, token.loc, token.filename),
-      token.filename,
-    )
+    const parsed = parseJsArg(parser, token)
 
     /**
      * The set tag only accepts a sequence expression.
@@ -63,15 +60,15 @@ export const setTag: TagContract = {
     /**
      * Disallow more than 2 values for the sequence expression
      */
-    if (parsed.expressions.length > 3) {
-      throw new EdgeError('maximum of 3 arguments are allowed for the @set tag', 'E_MAX_ARGUMENTS', {
+    if (parsed.expressions.length > 2) {
+      throw new EdgeError('maximum of 2 arguments are allowed for the @set tag', 'E_MAX_ARGUMENTS', {
         line: parsed.loc.start.line,
         col: parsed.loc.start.column,
         filename: token.filename,
       })
     }
 
-    const [key, value, isolated] = parsed.expressions
+    const [key, value] = parsed.expressions
 
     /**
      * The key has to be a literal value
@@ -82,19 +79,23 @@ export const setTag: TagContract = {
       () => {
         throw unallowedExpression(
           'The first argument for @set tag must be a string literal',
-          parsed,
+          key,
           token.filename,
         )
       },
     )
 
     /**
-     * Write statement to mutate the key
+     * Write statement to mutate the key. If the variable has already been
+     * defined, then just update it's value.
+     *
+     * We do not allow re-declaring a variable as of now
      */
-    buffer.writeExpression(
-      `ctx.set(${key.raw}, ${parser.utils.stringify(value)}, ${!!isolated})`,
-      token.filename,
-      token.loc.start.line,
-    )
+    const expression = parser.stack.has(key.value)
+      ? `${key.value} = ${parser.utils.stringify(value)}`
+      : `let ${key.value} = ${parser.utils.stringify(value)}`
+
+    buffer.writeExpression(expression, token.filename, token.loc.start.line)
+    parser.stack.defineVariable(key.value)
   },
 }

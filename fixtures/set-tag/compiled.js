@@ -1,13 +1,11 @@
-return (function (template, ctx) {
 let out = "";
-ctx.$lineNumber = 1;
-ctx.$filename = "{{__dirname}}index.edge";
+let $lineNumber = 1;
+let $filename = "{{__dirname}}index.edge";
 try {
-ctx.set("username", "nikk", false);
-ctx.$lineNumber = 2;
-out += `${ctx.escape(ctx.resolve('username'))}`;
+let username = "nikk";
+$lineNumber = 2;
+out += `${ctx.escape(username)}`;
 } catch (error) {
-ctx.reThrow(error);
+ctx.reThrow(error, $filename, $lineNumber);
 }
 return out;
-})(template, ctx)
