@@ -7,10 +7,49 @@
 * file that was distributed with this source code.
 */
 
-import { expressions } from 'edge-parser'
+import { expressions, Parser } from 'edge-parser'
 
 import { TagContract } from '../Contracts'
 import { unallowedExpression, isSubsetOf, parseJsArg } from '../utils'
+
+/**
+ * List of expressions allowed for the include tag
+ */
+export const ALLOWED_EXPRESSION = [
+  expressions.Identifier,
+  expressions.Literal,
+  expressions.LogicalExpression,
+  expressions.MemberExpression,
+  expressions.ConditionalExpression,
+  expressions.CallExpression,
+  expressions.TemplateLiteral,
+]
+
+/**
+ * Returns the expression for rendering the partial
+ */
+export function getRenderExpression (parser: Parser, parsedExpression: any) {
+  /**
+   * We need to pass the local variables to the partial render function
+   */
+  const localVariables = parser.stack.list()
+
+  /**
+   * Arguments for the `renderInline` method
+   */
+  const renderArgs = localVariables.length
+    ? [parser.utils.stringify(parsedExpression), localVariables.map((localVar) => `"${localVar}"`).join(',')]
+    : [parser.utils.stringify(parsedExpression)]
+
+  /**
+   * Arguments for invoking the output function of `renderInline`
+   */
+  const callFnArgs = localVariables.length
+    ? ['template', 'state', 'ctx', localVariables.map((localVar) => localVar).join(',')]
+    : ['template', 'state', 'ctx']
+
+  return `template.renderInline(${renderArgs.join(',')})(${callFnArgs.join(',')})`
+}
 
 /**
  * Include tag is used to include partials in the same scope of the parent
@@ -36,15 +75,7 @@ export const includeTag: TagContract = {
      */
     isSubsetOf(
       parsed,
-      [
-        expressions.Identifier,
-        expressions.Literal,
-        expressions.LogicalExpression,
-        expressions.MemberExpression,
-        expressions.ConditionalExpression,
-        expressions.CallExpression,
-        expressions.TemplateLiteral,
-      ],
+      ALLOWED_EXPRESSION,
       () => {
         unallowedExpression(
           `"${token.properties.jsArg}" is not a valid argument type for the @include tag`,
@@ -54,30 +85,6 @@ export const includeTag: TagContract = {
       },
     )
 
-    /**
-     * We need to pass the local variables to the partial render function
-     */
-    const localVariables = parser.stack.list()
-
-    /**
-     * Arguments for the `renderInline` method
-     */
-    const renderArgs = localVariables.length
-      ? [parser.utils.stringify(parsed), localVariables.map((localVar) => `"${localVar}"`).join(',')]
-      : [parser.utils.stringify(parsed)]
-
-    /**
-     * Arguments for invoking the output function of `renderInline`
-     */
-    const callFnArgs = localVariables.length
-      ? ['template', 'state', 'ctx', localVariables.map((localVar) => localVar).join(',')]
-      : ['template', 'state', 'ctx']
-
-    buffer.outputExpression(
-      `template.renderInline(${renderArgs.join(',')})(${callFnArgs.join(',')})`,
-      token.filename,
-      token.loc.start.line,
-      false,
-    )
+    buffer.outputExpression(getRenderExpression(parser, parsed), token.filename, token.loc.start.line, false)
   },
 }
