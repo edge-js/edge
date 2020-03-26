@@ -2,7 +2,7 @@ let out = "";
 let $lineNumber = 1;
 let $filename = "{{__dirname}}index.edge";
 try {
-out += `${template.renderInline(`include-conditionals/${state.username === "virk" ? "virk.edge" : "guest.edge"}`)(template,state,ctx)}`;
+out += template.renderInline(`include-conditionals/${state.username === "virk" ? "virk.edge" : "guest.edge"}`)(template,state,ctx);
 } catch (error) {
 ctx.reThrow(error, $filename, $lineNumber);
 }

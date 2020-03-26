@@ -77,7 +77,7 @@ export const includeTag: TagContract = {
       `template.renderInline(${renderArgs.join(',')})(${callFnArgs.join(',')})`,
       token.filename,
       token.loc.start.line,
-      true,
+      false,
     )
   },
 }

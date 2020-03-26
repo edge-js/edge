@@ -6,7 +6,7 @@ out += template.renderWithState("components-slots-partials/alert", {}, { main: f
 let slot_main = "";
 try {
 $lineNumber = 2;
-slot_main += `${template.renderInline("components-slots-partials/partial")(template,state,ctx)}`;
+slot_main += template.renderInline("components-slots-partials/partial")(template,state,ctx);
 } catch (error) {
 ctx.reThrow(error, $filename, $lineNumber);
 }

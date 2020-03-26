@@ -2,7 +2,7 @@ let out = "";
 let $lineNumber = 1;
 let $filename = "{{__dirname}}index.edge";
 try {
-out += `${template.renderInline(state.partial)(template,state,ctx)}`;
+out += template.renderInline(state.partial)(template,state,ctx);
 } catch (error) {
 ctx.reThrow(error, $filename, $lineNumber);
 }

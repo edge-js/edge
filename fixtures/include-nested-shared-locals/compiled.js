@@ -4,7 +4,7 @@ let $filename = "{{__dirname}}index.edge";
 try {
 let username = 'virk';
 $lineNumber = 2;
-out += `${template.renderInline("include-nested-shared-locals/partial","username")(template,state,ctx,username)}`;
+out += template.renderInline("include-nested-shared-locals/partial","username")(template,state,ctx,username);
 } catch (error) {
 ctx.reThrow(error, $filename, $lineNumber);
 }
