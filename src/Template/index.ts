@@ -10,7 +10,6 @@
 import { merge } from 'lodash'
 import { Context } from '../Context'
 import { CompilerContract } from '../Contracts'
-import { Presenter as BasePresenter } from '../Presenter'
 
 /**
  * The template is used to compile and run templates. Also the instance
@@ -29,17 +28,26 @@ export class Template {
   }
 
   /**
+   * Wraps template to a function
+   */
+  private wrapToFunction (template: string, ...localVariables: string[]) {
+    const args = ['template', 'state', 'ctx'].concat(localVariables)
+    return new Function('', `return function template (${args.join(',')}) { ${template} }`)()
+  }
+
+  /**
    * Render the template inline by sharing the state of the current template.
    *
    * ```js
    * const partialFn = template.renderInline('includes.user')
    *
    * // render and use output
-   * partialFn(template, ctx)
+   * partialFn(template, state, ctx)
    * ```
    */
-  public renderInline (templatePath: string): Function {
-    return new Function('template', 'ctx', this.compiler.compile(templatePath, true).template)
+  public renderInline (templatePath: string, ...localVariables: string[]): Function {
+    const { template: compiledTemplate } = this.compiler.compile(templatePath, localVariables)
+    return this.wrapToFunction(compiledTemplate, ...localVariables)
   }
 
   /**
@@ -54,11 +62,9 @@ export class Template {
    * ```
    */
   public renderWithState (template: string, state: any, slots: any): string {
-    const { template: compiledTemplate, Presenter } = this.compiler.compile(template, false)
-    const presenter = new (Presenter || BasePresenter)(merge(state, { $slots: slots }), this.sharedState)
-    const ctx = new Context(presenter)
-
-    return new Function('template', 'ctx', compiledTemplate)(this, ctx)
+    const { template: compiledTemplate } = this.compiler.compile(template)
+    const templateState = Object.assign({}, this.sharedState, state, { $slots: slots })
+    return this.wrapToFunction(compiledTemplate)(this, templateState, new Context())
   }
 
   /**
@@ -69,9 +75,9 @@ export class Template {
    * ```
    */
   public render (template: string, state: any): string {
-    const { template: compiledTemplate, Presenter } = this.compiler.compile(template, false)
-    const presenter = new (Presenter || BasePresenter)(state, this.sharedState)
-    const ctx = new Context(presenter)
-    return new Function('template', 'ctx', compiledTemplate)(this, ctx)
+    const { template: compiledTemplate } = this.compiler.compile(template)
+    const templateState = Object.assign({}, this.sharedState, state)
+    const fn = this.wrapToFunction(compiledTemplate)
+    return fn(this, templateState, new Context())
   }
 }

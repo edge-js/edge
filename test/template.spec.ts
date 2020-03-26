@@ -11,12 +11,12 @@ import test from 'japa'
 import { join } from 'path'
 import { Filesystem } from '@poppinss/dev-utils'
 
+import { Loader } from '../src/Loader'
+import { Context } from '../src/Context'
 import { Template } from '../src/Template'
 import { Compiler } from '../src/Compiler'
-import { Loader } from '../src/Loader'
 
 const tags = {}
-
 const fs = new Filesystem(join(__dirname, 'views'))
 
 const loader = new Loader()
@@ -34,36 +34,30 @@ test.group('Template', (group) => {
     assert.equal(output.trim(), 'Hello virk')
   })
 
-  test('run template with custom presenter', async (assert) => {
+  test('run template with shared state', async (assert) => {
     await fs.add('foo.edge', 'Hello {{ getUsername() }}')
-    await fs.add('foo.presenter.js', `module.exports = class MyPresenter {
-      constructor (state) {
-        this.state = state
-      }
-
+    const output = new Template(compiler, { username: 'virk' }, {
       getUsername () {
-        return this.state.username.toUpperCase()
-      }
-    }`)
-
-    const output = new Template(compiler, {}, {}).render('foo', { username: 'virk' })
+        return this.username.toUpperCase()
+      },
+    }).render('foo', {})
     assert.equal(output.trim(), 'Hello VIRK')
   })
 
-  test('run template with shared state', async (assert) => {
-    await fs.add('foo.edge', 'Hello {{ getUsername() }}')
-    await fs.add('foo.presenter.js', `module.exports = class MyPresenter {
-      constructor (state, sharedState) {
-        this.state = state
-        this.sharedState = sharedState
-      }
+  test('run partial inside existing state', async (assert) => {
+    await fs.add('foo.edge', 'Hello {{ username }}')
+    const template = new Template(compiler, {}, {})
 
-      getUsername () {
-        return this.sharedState.username.toUpperCase()
-      }
-    }`)
+    const output = template.renderInline('foo')(template, { username: 'virk' }, new Context())
+    assert.equal(output.trim(), 'Hello virk')
+  })
 
-    const output = new Template(compiler, { username: 'virk' }, {}).render('foo', {})
-    assert.equal(output.trim(), 'Hello VIRK')
+  test('pass local variables to inline templates', async (assert) => {
+    await fs.add('foo.edge', 'Hello {{ user.username }}')
+    const template = new Template(compiler, {}, {})
+
+    const user = { username: 'virk' }
+    const output = template.renderInline('foo', 'user')(template, {}, new Context(), user)
+    assert.equal(output.trim(), 'Hello virk')
   })
 })
