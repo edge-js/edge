@@ -1,12 +1,14 @@
 // @ts-check
 
-const edge = require('..').default
+const { Edge } = require('..')
 const Youch = require('youch')
 const { join } = require('path')
 const http = require('http')
 
+const edge = new Edge({ cache: false })
+edge.mount(join(__dirname, './views'))
+
 http.createServer((req, res) => {
-  edge.mount(join(__dirname, './views'))
   res.writeHead(200, { 'content-type': 'text/html' })
   try {
     res.end(edge.render('user', { title: 'Hello', username: 'virk' }))

@@ -17,9 +17,6 @@
   </style>
 </head>
 <body>
-  {{ inspect($state, 1) }}
-  @set('users', [{}])
-
   @component('alert', { title: 'hello world' })
     @slot('title', props)
       @include('partial')

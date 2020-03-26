@@ -75,7 +75,7 @@
     "edge-lexer": "^2.2.0",
     "edge-parser": "^4.0.3",
     "he": "^1.2.0",
-    "lodash": "^4.17.15",
+    "lodash.merge": "^4.6.2",
     "macroable": "^4.0.2"
   },
   "gitHooks": {

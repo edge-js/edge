@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
 */
 
-import { merge } from 'lodash'
+import merge from 'lodash.merge'
 import { Template } from '../Template'
 import { EdgeRendererContract, CompilerContract } from '../Contracts'
 
