@@ -1,20 +1,18 @@
-return (function (template, ctx) {
 let out = "";
-ctx.$lineNumber = 1;
-ctx.$filename = "{{__dirname}}index.edge";
+let $lineNumber = 1;
+let $filename = "{{__dirname}}index.edge";
 try {
-ctx.$lineNumber = 2;
-ctx.set("username", "virk", false);
+$lineNumber = 2;
+let username = "virk";
 out += "This is the base template";
 out += "\n";
 out += "";
 out += "\n";
 out += "Hello ";
-ctx.$filename = "{{__dirname}}master.edge";
-ctx.$lineNumber = 4;
-out += `${ctx.escape(ctx.resolve('username'))}`;
+$filename = "{{__dirname}}master.edge";
+$lineNumber = 4;
+out += `${ctx.escape(username)}`;
 } catch (error) {
-ctx.reThrow(error);
+ctx.reThrow(error, $filename, $lineNumber);
 }
 return out;
-})(template, ctx)

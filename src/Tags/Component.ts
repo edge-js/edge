@@ -41,11 +41,7 @@ type Slot = {
 /**
  * Returns the component name and props by parsing the component jsArg expression
  */
-function getComponentNameAndProps (
-  expression: any,
-  parser: Parser,
-  filename: string,
-): [string, string] {
+function getComponentNameAndProps (expression: any, parser: Parser, filename: string): [string, string] {
   let name: string
 
   /**
@@ -94,10 +90,7 @@ function getComponentNameAndProps (
 /**
  * Parses the slot component to fetch it's name and props
  */
-function getSlotNameAndProps (
-  token: TagToken,
-  parser: Parser,
-): [string, null | string] {
+function getSlotNameAndProps (token: TagToken, parser: Parser): [string, null | string] {
   /**
    * We just generate the acorn AST only, since we don't want parser to transform
    * ast to edge statements for a `@slot` tag.
@@ -192,6 +185,7 @@ export const componentTag: TagContract = {
     const parsed = parser.utils.transformAst(
       parser.utils.generateAST(token.properties.jsArg, token.loc, token.filename),
       token.filename,
+      parser.stack,
     )
 
     /**
@@ -227,7 +221,7 @@ export const componentTag: TagContract = {
      */
     const mainSlot: Slot = {
       props: {},
-      buffer: new EdgeBuffer(token.filename, false, { outputVar: 'slot_main' }),
+      buffer: new EdgeBuffer(token.filename, { outputVar: 'slot_main' }),
       line: -1,
       filename: token.filename,
     }
@@ -250,7 +244,7 @@ export const componentTag: TagContract = {
       const [slotName, slotProps] = getSlotNameAndProps(child, parser)
 
       /**
-       * Create a new slot with buffer to process the childs
+       * Create a new slot with buffer to process the children
        */
       if (!slots[slotName]) {
         /**
@@ -258,7 +252,7 @@ export const componentTag: TagContract = {
          * have their own file names.
          */
         slots[slotName] = {
-          buffer: new EdgeBuffer(token.filename, false, { outputVar: `slot_${index}` }),
+          buffer: new EdgeBuffer(token.filename, { outputVar: `slot_${index}` }),
           props: slotProps,
           line: -1,
           filename: token.filename,
@@ -268,16 +262,8 @@ export const componentTag: TagContract = {
          * Only start the frame, when there are props in use for a given slot.
          */
         if (slotProps) {
-          slots[slotName].buffer.writeExpression(
-            'ctx.newFrame()',
-            slots[slotName].filename,
-            slots[slotName].line,
-          )
-          slots[slotName].buffer.writeExpression(
-            `ctx.setOnFrame('${slotProps}', ${slotProps})`,
-            slots[slotName].filename,
-            slots[slotName].line,
-          )
+          parser.stack.defineScope()
+          parser.stack.defineVariable(slotProps)
         }
       }
 
@@ -290,7 +276,7 @@ export const componentTag: TagContract = {
        * Close the frame after process the slot children
        */
       if (slotProps) {
-        slots[slotName].buffer.writeExpression('ctx.removeFrame()', slots[slotName].filename, slots[slotName].line)
+        parser.stack.clearScope()
       }
     })
 
@@ -303,7 +289,7 @@ export const componentTag: TagContract = {
     if (!slots['main']) {
       if (mainSlot.buffer.size) {
         mainSlot.buffer.wrap('function () {', '}')
-        obj.add('main', mainSlot.buffer.flush())
+        obj.add('main', mainSlot.buffer.disableFileAndLineVariables().flush())
       } else {
         obj.add('main', 'function () { return "" }')
       }
@@ -317,7 +303,7 @@ export const componentTag: TagContract = {
       if (slots[slotName].buffer.size) {
         const fnCall = slots[slotName].props ? `function (${slots[slotName].props}) {` : 'function () {'
         slots[slotName].buffer.wrap(fnCall, '}')
-        obj.add(slotName, slots[slotName].buffer.flush())
+        obj.add(slotName, slots[slotName].buffer.disableFileAndLineVariables().flush())
       } else {
         obj.add(slotName, 'function () { return "" }')
       }
