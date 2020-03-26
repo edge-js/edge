@@ -9,18 +9,12 @@
 
 import { expressions } from 'edge-parser'
 import { TagContract } from '../Contracts'
-import { isNotSubsetOf, unallowedExpression } from '../utils'
+import { isNotSubsetOf, unallowedExpression, parseJsArg } from '../utils'
 
 /**
- * Else if tag is used to define conditional blocks.
- *
- * ```edge
- * @if(username)
- *   // If
- * @elseif(user.username)
- *   // Else if
- * @endif
- * ```
+ * Else if tag is used to define conditional blocks. We keep `@elseif` tag
+ * is a inline tag, so that everything between the `if` and the `elseif`
+ * comes `if` children.
  */
 export const elseIfTag: TagContract = {
   block: false,
@@ -31,11 +25,11 @@ export const elseIfTag: TagContract = {
    * Compiles the else if block node to a Javascript if statement
    */
   compile (parser, buffer, token) {
-    const parsed = parser.utils.transformAst(
-      parser.utils.generateAST(token.properties.jsArg, token.loc, token.filename),
-      token.filename,
-    )
+    const parsed = parseJsArg(parser, token)
 
+    /**
+     * Disallow sequence expressions
+     */
     isNotSubsetOf(
       parsed,
       [expressions.SequenceExpression],
@@ -49,7 +43,7 @@ export const elseIfTag: TagContract = {
     )
 
     /**
-     * Start else block
+     * Start else if block
      */
     buffer.writeStatement(`} else if (${parser.utils.stringify(parsed)}) {`, token.filename, token.loc.start.line)
   },

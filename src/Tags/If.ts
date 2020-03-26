@@ -10,15 +10,10 @@
 import { expressions } from 'edge-parser'
 
 import { TagContract } from '../Contracts'
-import { unallowedExpression, isNotSubsetOf } from '../utils'
+import { unallowedExpression, isNotSubsetOf, parseJsArg } from '../utils'
 
 /**
  * If tag is used to define conditional blocks.
- *
- * ```edge
- * @if(username)
- * @endif
- * ```
  */
 export const ifTag: TagContract = {
   block: true,
@@ -29,11 +24,11 @@ export const ifTag: TagContract = {
    * Compiles the if block node to a Javascript if statement
    */
   compile (parser, buffer, token) {
-    const parsed = parser.utils.transformAst(
-      parser.utils.generateAST(token.properties.jsArg, token.loc, token.filename),
-      token.filename,
-    )
+    const parsed = parseJsArg(parser, token)
 
+    /**
+     * Disallow sequence expressions
+     */
     isNotSubsetOf(
       parsed,
       [expressions.SequenceExpression],
@@ -52,7 +47,7 @@ export const ifTag: TagContract = {
     buffer.writeStatement(`if (${parser.utils.stringify(parsed)}) {`, token.filename, token.loc.start.line)
 
     /**
-     * Process of all kids recursively
+     * Process of all children recursively
      */
     token.children.forEach((child) => parser.processToken(child, buffer))
 
