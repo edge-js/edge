@@ -25,7 +25,8 @@ export class StringifiedObject {
    * stringifiedObject.add('username', `'virk'`)
    * ```
    */
-  public add (key: any, value: any) {
+  public add (key: any, value: any, isComputed: boolean = false) {
+    key = isComputed ? `[${key}]` : key
     this.obj += this.obj.length ? `, ${key}: ${value}` : `${key}: ${value}`
   }
 
@@ -72,7 +73,7 @@ export class StringifiedObject {
         arg.properties.forEach((prop: any) => {
           const key = parser.utils.stringify(prop.key)
           const value = parser.utils.stringify(prop.value)
-          objectifyString.add(key, value)
+          objectifyString.add(key, value, prop.computed)
         })
       }
 

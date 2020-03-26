@@ -59,10 +59,11 @@ test.group('StringifiedObject', () => {
 
 test.group('StringifiedObject | fromAcornAst', () => {
   test('stringify object expression', (assert) => {
-    const parser = new Parser({}, { filename: 'eval.edge' })
+    const parser = new Parser({})
     const expression = parser.utils.transformAst(
-      parser.utils.generateAST('({ username: \'virk\' })', LOC, parser.options.filename),
-      parser.options.filename,
+      parser.utils.generateAST('({ username: \'virk\' })', LOC, 'eval.edge'),
+      'eval.edge',
+      parser.stack,
     )
 
     const props = StringifiedObject.fromAcornExpressions([expression], parser)
@@ -70,32 +71,35 @@ test.group('StringifiedObject | fromAcornAst', () => {
   })
 
   test('parse props with shorthand obj', (assert) => {
-    const parser = new Parser({}, { filename: 'eval.edge' })
+    const parser = new Parser({})
     const expression = parser.utils.transformAst(
-      parser.utils.generateAST('({ username })', LOC, parser.options.filename),
-      parser.options.filename,
+      parser.utils.generateAST('({ username })', LOC, 'eval.edge'),
+      'eval.edge',
+      parser.stack,
     )
 
     const props = StringifiedObject.fromAcornExpressions([expression], parser)
-    assert.equal(props, '{ username: ctx.resolve(\'username\') }')
+    assert.equal(props, '{ username: state.username }')
   })
 
   test('parse props with computed obj', (assert) => {
-    const parser = new Parser({}, { filename: 'eval.edge' })
+    const parser = new Parser({})
     const expression = parser.utils.transformAst(
-      parser.utils.generateAST('({ [username]: username })', LOC, parser.options.filename),
-      parser.options.filename,
+      parser.utils.generateAST('({ [username]: username })', LOC, 'eval.edge'),
+      'eval.edge',
+      parser.stack,
     )
 
     const props = StringifiedObject.fromAcornExpressions([expression], parser)
-    assert.equal(props, '{ ctx.resolve(\'username\'): ctx.resolve(\'username\') }')
+    assert.equal(props, '{ [state.username]: state.username }')
   })
 
   test('parse props with multiple obj properties', (assert) => {
-    const parser = new Parser({}, { filename: 'eval.edge' })
+    const parser = new Parser({})
     const expression = parser.utils.transformAst(
-      parser.utils.generateAST('({ username: \'virk\', age: 22 })', LOC, parser.options.filename),
-      parser.options.filename,
+      parser.utils.generateAST('({ username: \'virk\', age: 22 })', LOC, 'eval.edge'),
+      'eval.edge',
+      parser.stack,
     )
 
     const props = StringifiedObject.fromAcornExpressions([expression], parser)
@@ -104,21 +108,23 @@ test.group('StringifiedObject | fromAcornAst', () => {
   })
 
   test('parse props with shorthand and full properties', (assert) => {
-    const parser = new Parser({}, { filename: 'eval.edge' })
+    const parser = new Parser({})
     const expression = parser.utils.transformAst(
-      parser.utils.generateAST('({ username, age: 22 })', LOC, parser.options.filename),
-      parser.options.filename,
+      parser.utils.generateAST('({ username, age: 22 })', LOC, 'eval.edge'),
+      'eval.edge',
+      parser.stack,
     )
 
     const props = StringifiedObject.fromAcornExpressions([expression], parser)
-    assert.equal(props, '{ username: ctx.resolve(\'username\'), age: 22 }')
+    assert.equal(props, '{ username: state.username, age: 22 }')
   })
 
   test('parse props with assignment expression', (assert) => {
-    const parser = new Parser({}, { filename: 'eval.edge' })
+    const parser = new Parser({})
     const expression = parser.utils.transformAst(
-      parser.utils.generateAST('(title = \'Hello\')', LOC, parser.options.filename),
-      parser.options.filename,
+      parser.utils.generateAST('(title = \'Hello\')', LOC, 'eval.edge'),
+      'eval.edge',
+      parser.stack,
     )
 
     const props = StringifiedObject.fromAcornExpressions([expression], parser)
@@ -126,10 +132,11 @@ test.group('StringifiedObject | fromAcornAst', () => {
   })
 
   test('parse props with more than one assignment expression', (assert) => {
-    const parser = new Parser({}, { filename: 'eval.edge' })
+    const parser = new Parser({})
     const expression = parser.utils.transformAst(
-      parser.utils.generateAST('(title = \'Hello\', body = \'Some content\')', LOC, parser.options.filename),
-      parser.options.filename,
+      parser.utils.generateAST('(title = \'Hello\', body = \'Some content\')', LOC, 'eval.edge'),
+      'eval.edge',
+      parser.stack,
     )
 
     const props = StringifiedObject.fromAcornExpressions(expression.expressions, parser)
