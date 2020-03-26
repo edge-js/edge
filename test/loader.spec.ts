@@ -30,13 +30,12 @@ test.group('Loader', (group) => {
     const loader = new Loader()
     loader.mount('default', fs.basePath)
     loader.unmount('default')
-
     assert.deepEqual(loader.mounted, {})
   })
 
   test('throw exception when resolving path from undefined location', (assert) => {
     const loader = new Loader()
-    const fn = () => loader.resolve('foo', true)
+    const fn = () => loader.resolve('foo')
     assert.throw(fn, 'E_UNMOUNTED_DISK_NAME: "default" namespace is not mounted')
   })
 
@@ -46,7 +45,7 @@ test.group('Loader', (group) => {
     const loader = new Loader()
     loader.mount('default', fs.basePath)
 
-    const { template } = loader.resolve('foo', false)
+    const { template } = loader.resolve('foo')
     assert.equal(template.trim(), 'Hello world')
   })
 
@@ -54,7 +53,7 @@ test.group('Loader', (group) => {
     const loader = new Loader()
     loader.mount('default', fs.basePath)
 
-    const fn = () => loader.resolve('foo', false)
+    const fn = () => loader.resolve('foo')
     assert.throw(fn, `Cannot resolve "${join(fs.basePath, 'foo.edge')}". Make sure the file exists`)
   })
 
@@ -64,7 +63,7 @@ test.group('Loader', (group) => {
     const loader = new Loader()
     loader.mount('default', fs.basePath)
 
-    const { template } = loader.resolve('foo.edge', false)
+    const { template } = loader.resolve('foo.edge')
     assert.equal(template.trim(), 'Hello world')
   })
 
@@ -74,7 +73,7 @@ test.group('Loader', (group) => {
     const loader = new Loader()
     loader.mount('users', fs.basePath)
 
-    const { template } = loader.resolve('users::foo.edge', false)
+    const { template } = loader.resolve('users::foo.edge')
     assert.equal(template.trim(), 'Hello world')
   })
 
@@ -110,41 +109,14 @@ test.group('Loader', (group) => {
     assert.equal(templatePath, join(fs.basePath, 'partial/edge.edge'))
   })
 
-  test('resolve presenter if exists', async (assert) => {
-    await fs.add('foo.edge', 'Hello world')
-    await fs.add('foo.presenter.js', `module.exports = class Foo {
-    }`)
-
-    const loader = new Loader()
-    loader.mount('users', fs.basePath)
-
-    const { template, Presenter } = loader.resolve('users::foo.edge', true)
-    assert.equal(template.trim(), 'Hello world')
-    assert.equal(Presenter!['name'], 'Foo')
-  })
-
-  test('do not resolve presenter if withPresenter is set to false', async (assert) => {
-    await fs.add('foo.edge', 'Hello world')
-    await fs.add('foo.presenter.js', `module.exports = class Foo {
-    }`)
-
-    const loader = new Loader()
-    loader.mount('users', fs.basePath)
-
-    const { template, Presenter } = loader.resolve('users::foo.edge', false)
-    assert.equal(template.trim(), 'Hello world')
-    assert.isUndefined(Presenter)
-  })
-
   test('pre register templates with a key', async (assert) => {
     const loader = new Loader()
     loader.register('my-view', {
       template: 'Hello world',
     })
 
-    const { template, Presenter } = loader.resolve('my-view', true)
+    const { template } = loader.resolve('my-view')
     assert.equal(template.trim(), 'Hello world')
-    assert.isUndefined(Presenter)
   })
 
   test('pre registering duplicate templates must raise an error', async (assert) => {

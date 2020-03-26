@@ -8,15 +8,14 @@
  */
 
 import { readFileSync } from 'fs'
-import requireUncached from 'import-fresh'
-import { join, isAbsolute, extname, sep } from 'path'
-import { Exception, esmResolver } from '@poppinss/utils'
+import { Exception } from '@poppinss/utils'
+import { join, isAbsolute, sep } from 'path'
 import { LoaderContract, LoaderTemplate } from '../Contracts'
 
 /**
- * The job of a loader is to load the template and it's presenter for a given path.
- * The base loader (shipped with edge) looks for files on the file-system and
- * reads them synchronously.
+ * The job of a loader is to load the template from a given path.
+ * The base loader (shipped with edge) looks for files on the
+ * file-system and reads them synchronously.
  *
  * You are free to define your own loaders that implements the [[LoaderContract]] interface.
  */
@@ -30,27 +29,6 @@ export class Loader implements LoaderContract {
    * List of pre-registered (in-memory) templates
    */
   private preRegistered: Map<string, LoaderTemplate> = new Map()
-
-  /**
-   * Attempts to load the presenter for a given template. If presenter doesn't exists, it
-   * will swallow the error.
-   *
-   * Also this method will **bypass the `require` cache**, since in production compiled templates
-   * and their presenters are cached anyways.
-   */
-  private getPresenterForTemplate (templatePath: string): LoaderTemplate['Presenter'] | undefined {
-    const presenterPath = templatePath
-      .replace(/^\w/, c => c.toUpperCase())
-      .replace(extname(templatePath), '.presenter.js')
-
-    try {
-      return esmResolver(requireUncached(presenterPath)) as LoaderTemplate['Presenter']
-    } catch (error) {
-      if (['ENOENT', 'MODULE_NOT_FOUND'].indexOf(error.code) === -1) {
-        throw error
-      }
-    }
-  }
 
   /**
    * Reads the content of a template from the disk. An exception is raised
@@ -191,13 +169,7 @@ export class Loader implements LoaderContract {
   }
 
   /**
-   * Resolves the template from the disk, optionally loads the presenter too. The presenter
-   * resolution is based on the convention and resolved from the same directory
-   * as the template.
-   *
-   * ## Presenter convention
-   * - View name - welcome.edge
-   * - Presenter name - Welcome.presenter.js
+   * Resolves the template by reading its contents from the disk
    *
    * ```js
    * loader.resolve('welcome', true)
@@ -205,17 +177,15 @@ export class Loader implements LoaderContract {
    * // output
    * {
    *   template: `<h1> Template content </h1>`,
-   *   Presenter: class Presenter | undefined
    * }
    * ```
    */
-  public resolve (templatePath: string, withPresenter: boolean): LoaderTemplate {
+  public resolve (templatePath: string): LoaderTemplate {
     /**
      * Return from pre-registered one's if exists
      */
     if (this.preRegistered.has(templatePath)) {
-      const contents = this.preRegistered.get(templatePath)
-      return withPresenter ? contents! : { template: contents!.template }
+      return this.preRegistered.get(templatePath)!
     }
 
     /**
@@ -225,12 +195,11 @@ export class Loader implements LoaderContract {
 
     return {
       template: this.readTemplateContents(templatePath),
-      Presenter: withPresenter ? this.getPresenterForTemplate(templatePath) : undefined,
     }
   }
 
   /**
-   * Register in memory template and Presenter for a given path. This is super helpful
+   * Register in memory template for a given path. This is super helpful
    * when distributing components.
    *
    * ```js
