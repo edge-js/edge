@@ -43,21 +43,16 @@ test.group('Fixtures', (group) => {
       /**
        * Compiled output
        */
-      const { template: compiled } = compiler.compile(`${dir}/index.edge`, false)
+      const { template: compiled } = compiler.compile(`${dir}/index.edge`)
       const expectedCompiled = readFileSync(join(dirBasePath, 'compiled.js'), 'utf-8')
-      assert.stringEqual(
-        compiled,
-        expectedCompiled.replace(/\{\{__dirname\}\}/g, `${dirBasePath}${sep}`)
-      )
+      assert.stringEqual(compiled, expectedCompiled.replace(/\{\{__dirname\}\}/g, `${dirBasePath}${sep}`))
 
       /**
        * Render output
        */
       const out = readFileSync(join(dirBasePath, 'index.txt'), 'utf-8')
-      const output = template.render(
-        `${dir}/index.edge`,
-        JSON.parse(readFileSync(join(dirBasePath, 'index.json'), 'utf-8')),
-      )
+      const state = JSON.parse(readFileSync(join(dirBasePath, 'index.json'), 'utf-8'))
+      const output = template.render(`${dir}/index.edge`, state)
       assert.stringEqual(output.trim(), out)
     })
   })

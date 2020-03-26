@@ -9,16 +9,13 @@
 
 import { Token } from 'edge-lexer'
 import { MacroableConstructorContract } from 'macroable'
-import { ParserTagDefininationContract } from 'edge-parser'
+import { ParserTagDefinitionContract, Parser } from 'edge-parser'
 
 /**
  * The shape in which the loader must resolve the template
  */
 export type LoaderTemplate = {
   template: string,
-  Presenter?: {
-    new (state: any): any,
-  },
 }
 
 /**
@@ -43,7 +40,7 @@ export interface LoaderContract {
   /**
    * Resolve template contents and optionally the Presenter
    */
-  resolve (templatePath: string, withPresenter: boolean): LoaderTemplate
+  resolve (templatePath: string): LoaderTemplate
 
   /**
    * Make absolute path to a template
@@ -57,39 +54,25 @@ export interface LoaderContract {
 }
 
 /**
- * Shape of a view presenter
- */
-export interface PresenterContract {
-  state: any,
-  sharedState: any,
-}
-
-/**
  * Shape of runtime context
  */
 export interface ContextContract {
-  presenter: PresenterContract,
-  safe <T extends any> (value: T): { value: T },
-  newFrame (): void,
-  setOnFrame (key: string, value: any): void,
-  removeFrame (): void,
   escape <T> (input: T): T,
-  resolve (key: string): any,
-  set (key: string, value: any): void,
+  reThrow (error: any, filename: string, linenumber: number): never
 }
 
 /**
  * Shape of context constructor
  */
 export interface ContextConstructorContract extends MacroableConstructorContract<ContextContract> {
-  new (presenter: any, sharedState: any): ContextContract,
+  new (): ContextContract,
 }
 
 /**
- * The final tag must have a tagName along with other properties
+ * The tag must have a tagName along with other properties
  * required by lexer and parser
  */
-export interface TagContract extends ParserTagDefininationContract {
+export interface TagContract extends ParserTagDefinitionContract {
   tagName: string,
   run? (context: ContextConstructorContract): void,
 }
@@ -115,8 +98,8 @@ export interface CacheManagerContract {
  */
 export interface CompilerContract {
   cacheManager: CacheManagerContract,
-  compile (templatePath: string, inline: boolean): LoaderTemplate,
-  tokenize (templatePath: string): Token[],
+  compile (templatePath: string, localVariables?: string[]): LoaderTemplate,
+  tokenize (templatePath: string, parser?: Parser): Token[]
 }
 
 /**

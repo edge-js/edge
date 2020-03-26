@@ -17,14 +17,13 @@ import {
   truncate,
 } from 'lodash'
 
-import { safeValue, withCtx } from '../../Context'
-import { EdgeContract, ContextContract } from '../../Contracts'
+import { safeValue } from '../../Context'
+import { EdgeContract } from '../../Contracts'
 
 /**
  * Inspect value.
  */
 function inspect (
-  ctx: ContextContract,
   valueToInspect: any,
   depth: number = 1,
 ) {
@@ -34,12 +33,8 @@ function inspect (
     depth: depth,
   })}</pre>`
 
-  const filename = `<span style="color: #999; position: absolute; right: 20px; top: 10px;">
-    ${ctx.resolve('$filename')}
-  </span>`
-
   return safeValue(
-    `<div class="__inspect_output" style="background: #000; color: #fff; padding: 20px; position: relative;">${inspectedString}${filename}</div>`,
+    `<div class="__inspect_output" style="background: #000; color: #fff; padding: 20px; position: relative;">${inspectedString}</div>`,
   )
 }
 
@@ -54,7 +49,7 @@ inspect[Symbol.for('nodejs.util.inspect.custom')] = function customInspect () {
  * A list of default globals
  */
 export default function globals (edge: EdgeContract) {
-  edge.global('inspect', withCtx(inspect))
+  edge.global('inspect', inspect)
   edge.global('range', (start: number, end?: number, step?: number) => range(start, end, step))
   edge.global('first', first)
   edge.global('last', last)

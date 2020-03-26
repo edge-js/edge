@@ -7,8 +7,9 @@
 * file that was distributed with this source code.
 */
 
+import { TagToken } from 'edge-lexer'
 import { EdgeError } from 'edge-error'
-import { expressions as expressionsList } from 'edge-parser'
+import { expressions as expressionsList, Parser } from 'edge-parser'
 
 type ExpressionList = readonly (keyof typeof expressionsList)[]
 
@@ -17,9 +18,10 @@ type ExpressionList = readonly (keyof typeof expressionsList)[]
  * required to point the error stack to the correct file
  */
 export function unallowedExpression (message: string, expression: any, filename: string) {
+  const loc = expression.loc || expression.property?.loc
   throw new EdgeError(message, 'E_UNALLOWED_EXPRESSION', {
-    line: expression.loc.start.line,
-    col: expression.loc.start.column,
+    line: loc.start.line,
+    col: loc.start.column,
     filename: filename,
   })
 }
@@ -54,4 +56,15 @@ export function isNotSubsetOf (expression: any, expressions: ExpressionList, err
   if (expressions.includes(expression.type)) {
     errorCallback()
   }
+}
+
+/**
+ * Parses the jsArg by generating and transforming its AST
+ */
+export function parseJsArg (parser: Parser, token: TagToken) {
+  return parser.utils.transformAst(
+    parser.utils.generateAST(token.properties.jsArg, token.loc, token.filename),
+    token.filename,
+    parser.stack,
+  )
 }

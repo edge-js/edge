@@ -38,7 +38,7 @@ test.group('If tag', (group) => {
 
     await fs.add('foo.edge', templateContent)
     try {
-      compiler.compile('foo', true)
+      compiler.compile('foo')
     } catch (error) {
       assert.equal(error.message, 'Unexpected token ')
       assert.equal(error.line, 4)
@@ -56,7 +56,7 @@ test.group('If tag', (group) => {
 
     await fs.add('foo.edge', templateContent)
     try {
-      compiler.compile('foo', true)
+      compiler.compile('foo')
     } catch (error) {
       assert.equal(error.line, 4)
       assert.equal(error.message, '"foo, bar" is not a valid argument type for the @if tag')
@@ -73,7 +73,7 @@ test.group('If tag', (group) => {
 
     await fs.add('foo.edge', templateContent)
     try {
-      compiler.compile('foo', true)
+      compiler.compile('foo')
     } catch (error) {
       assert.equal(error.message, 'Unclosed tag if')
     }
@@ -93,7 +93,7 @@ test.group('Include', (group) => {
 
     await fs.add('foo.edge', templateContent)
     try {
-      compiler.compile('foo', true)
+      compiler.compile('foo')
     } catch (error) {
       assert.equal(error.stack.split('\n')[1], `    at anonymous (${join(fs.basePath, 'foo.edge')}:2:13)`)
     }
@@ -106,7 +106,7 @@ test.group('Include', (group) => {
 
     await fs.add('foo.edge', templateContent)
     try {
-      compiler.compile('foo', true)
+      compiler.compile('foo')
     } catch (error) {
       assert.equal(error.stack.split('\n')[1], `    at anonymous (${join(fs.basePath, 'foo.edge')}:1:9)`)
       assert.equal(error.message, '"\'foo\', \'bar\'" is not a valid argument type for the @include tag')
@@ -130,7 +130,7 @@ test.group('Component', (group) => {
 
     await fs.add('foo.edge', templateContent)
     try {
-      compiler.compile('foo', true)
+      compiler.compile('foo')
     } catch (error) {
       assert.equal(error.stack.split('\n')[1], `    at anonymous (${join(fs.basePath, 'foo.edge')}:2:0)`)
       assert.equal(error.message, '"hello" is not a valid argument type for the @slot tag')
@@ -148,7 +148,7 @@ test.group('Component', (group) => {
 
     await fs.add('foo.edge', templateContent)
     try {
-      compiler.compile('foo', true)
+      compiler.compile('foo')
     } catch (error) {
       assert.equal(error.stack.split('\n')[1], `    at anonymous (${join(fs.basePath, 'foo.edge')}:2:0)`)
       assert.equal(error.message, 'maximum of 2 arguments are allowed for @slot tag')
@@ -166,7 +166,7 @@ test.group('Component', (group) => {
 
     await fs.add('foo.edge', templateContent)
     try {
-      compiler.compile('foo', true)
+      compiler.compile('foo')
     } catch (error) {
       assert.equal(error.stack.split('\n')[1], `    at anonymous (${join(fs.basePath, 'foo.edge')}:2:0)`)
       assert.equal(error.message, 'slot name must be a valid string literal')
@@ -187,7 +187,7 @@ test.group('Component', (group) => {
 
     await fs.add('foo.edge', templateContent)
     try {
-      compiler.compile('foo', true)
+      compiler.compile('foo')
     } catch (error) {
       assert.equal(error.stack.split('\n')[1], `    at anonymous (${join(fs.basePath, 'foo.edge')}:4:2)`)
       assert.equal(error.message, '"\'props\'" is not valid prop identifier for @slot tag')
@@ -208,7 +208,7 @@ test.group('Component', (group) => {
 
     await fs.add('foo.edge', templateContent)
     try {
-      compiler.compile('foo', true)
+      compiler.compile('foo')
     } catch (error) {
       assert.equal(error.stack.split('\n')[1], `    at anonymous (${join(fs.basePath, 'foo.edge')}:4:8)`)
       assert.equal(error.message, '@slot tag must appear as top level tag inside the @component tag')
@@ -236,7 +236,7 @@ test.group('Layouts', (group) => {
     await fs.add('master.edge', '@!section(\'body\')')
 
     try {
-      compiler.compile('foo', true)
+      compiler.compile('foo')
     } catch (error) {
       assert.equal(error.stack.split('\n')[1], `    at anonymous (${join(fs.basePath, 'foo.edge')}:3:4)`)
       assert.equal(
@@ -262,7 +262,7 @@ test.group('Layouts', (group) => {
     await fs.add('super.edge', '@!section(\'body\')')
 
     try {
-      compiler.compile('foo', true)
+      compiler.compile('foo')
     } catch (error) {
       assert.equal(error.stack.split('\n')[1], `    at anonymous (${join(fs.basePath, 'foo.edge')}:3:4)`)
       assert.equal(
@@ -282,7 +282,7 @@ test.group('Layouts', (group) => {
     await fs.add('master.edge', '@!section(\'body\')')
 
     try {
-      compiler.compile('foo', true)
+      compiler.compile('foo')
     } catch (error) {
       assert.equal(error.stack.split('\n')[1], `    at anonymous (${join(fs.basePath, 'foo.edge')}:2:0)`)
       assert.equal(
