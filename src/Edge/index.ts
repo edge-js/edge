@@ -21,6 +21,9 @@ import {
   EdgeRendererContract,
 } from '../Contracts'
 
+/**
+ * Exposes the API to render templates, register custom tags and globals
+ */
 export class Edge implements EdgeContract {
   /**
    * Globals are shared with all rendered templates

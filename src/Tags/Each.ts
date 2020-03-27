@@ -162,7 +162,7 @@ export const eachTag: TagContract = {
     index && parser.stack.defineVariable(index)
 
     /**
-     * Process all kids
+     * Process all children
      */
     token.children.forEach((child) => parser.processToken(child, buffer))
 

@@ -72,8 +72,8 @@
   "dependencies": {
     "@poppinss/utils": "^2.1.2",
     "edge-error": "^1.0.4",
-    "edge-lexer": "^2.2.0",
-    "edge-parser": "^4.0.3",
+    "edge-lexer": "^3.0.0",
+    "edge-parser": "^5.0.0",
     "he": "^1.2.0",
     "lodash.merge": "^4.6.2",
     "macroable": "^4.0.2"
