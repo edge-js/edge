@@ -7,9 +7,9 @@ ctx.loop(state.users, function (user) {
 out += "  - Hello ";
 $lineNumber = 2;
 out += `${ctx.escape(user.username)}`;
-out += "\n";
 });
 } else {
+out += "\n";
 out += "  No users found";
 }
 } catch (error) {

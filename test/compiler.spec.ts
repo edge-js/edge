@@ -108,11 +108,6 @@ test.group('Compiler | Tokenize', (group) => {
         filename: join(fs.basePath, 'master.edge'),
       },
       {
-        type: 'newline' as const,
-        line: 1,
-        filename: join(fs.basePath, 'master.edge'),
-      },
-      {
         type: TagTypes.TAG,
         filename: join(fs.basePath, 'index.edge'),
         properties: { name: 'section', jsArg: '\'content\'', selfclosed: false },
@@ -121,6 +116,11 @@ test.group('Compiler | Tokenize', (group) => {
           end: { line: 2, col: 19 },
         },
         children: [
+          {
+            type: 'newline' as const,
+            line: 2,
+            filename: join(fs.basePath, 'index.edge'),
+          },
           {
             type: 'raw' as const,
             value: '  Hello world',
@@ -173,11 +173,6 @@ test.group('Compiler | Tokenize', (group) => {
         filename: join(fs.basePath, 'master.edge'),
       },
       {
-        type: 'newline' as const,
-        line: 1,
-        filename: join(fs.basePath, 'master.edge'),
-      },
-      {
         type: TagTypes.TAG,
         filename: join(fs.basePath, 'index.edge'),
         properties: { name: 'section', jsArg: '\'content\'', selfclosed: false },
@@ -186,6 +181,11 @@ test.group('Compiler | Tokenize', (group) => {
           end: { line: 3, col: 19 },
         },
         children: [
+          {
+            type: 'newline' as const,
+            line: 3,
+            filename: join(fs.basePath, 'index.edge'),
+          },
           {
             type: 'raw' as const,
             value: '  Hello world',
@@ -269,11 +269,6 @@ test.group('Compiler | Tokenize', (group) => {
         filename: join(fs.basePath, 'super-master.edge'),
       },
       {
-        type: 'newline' as const,
-        line: 1,
-        filename: join(fs.basePath, 'super-master.edge'),
-      },
-      {
         type: TagTypes.TAG,
         filename: join(fs.basePath, 'master.edge'),
         properties: { name: 'section', jsArg: '\'header\'', selfclosed: false },
@@ -282,6 +277,11 @@ test.group('Compiler | Tokenize', (group) => {
           end: { line: 2, col: 18 },
         },
         children: [
+          {
+            type: 'newline' as const,
+            line: 2,
+            filename: join(fs.basePath, 'master.edge'),
+          },
           {
             type: 'raw' as const,
             value: '  This is header',
@@ -299,6 +299,11 @@ test.group('Compiler | Tokenize', (group) => {
           end: { line: 2, col: 19 },
         },
         children: [
+          {
+            type: 'newline' as const,
+            line: 2,
+            filename: join(fs.basePath, 'index.edge'),
+          },
           {
             type: 'raw' as const,
             value: '  This is content',
@@ -342,11 +347,6 @@ test.group('Compiler | Tokenize', (group) => {
         properties: { jsArg: ' username ' },
       },
       {
-        type: 'newline' as const,
-        line: 1,
-        filename: join(fs.basePath, 'master.edge'),
-      },
-      {
         type: TagTypes.TAG,
         filename: join(fs.basePath, 'index.edge'),
         properties: { name: 'section', jsArg: '\'content\'', selfclosed: false },
@@ -355,6 +355,11 @@ test.group('Compiler | Tokenize', (group) => {
           end: { line: 2, col: 19 },
         },
         children: [
+          {
+            type: 'newline' as const,
+            line: 2,
+            filename: join(fs.basePath, 'index.edge'),
+          },
           {
             type: 'raw' as const,
             value: '  Hello world',

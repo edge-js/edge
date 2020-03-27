@@ -6,8 +6,8 @@ if (state.username) {
 out += "  Hello ";
 $lineNumber = 2;
 out += `${ctx.escape(state.username)}`;
-out += "\n";
 } else {
+out += "\n";
 out += "  Hello guest!";
 }
 } catch (error) {

@@ -4,14 +4,14 @@ let $filename = "{{__dirname}}index.edge";
 try {
 if (state.username === "virk") {
 out += "  Hello VK";
-out += "\n";
 $lineNumber = 3;
 } else if (state.username) {
+out += "\n";
 out += "  Hello ";
 $lineNumber = 4;
 out += `${ctx.escape(state.username)}`;
-out += "\n";
 } else {
+out += "\n";
 out += "  Hello Guest!";
 }
 } catch (error) {

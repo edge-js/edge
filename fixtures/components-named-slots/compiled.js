@@ -10,7 +10,6 @@ $lineNumber = 2;
 slot_main += `${ctx.escape(state.name)}`;
 slot_main += " line 1";
 slot_main += "\n";
-slot_main += "\n";
 slot_main += "  Hello ";
 $lineNumber = 6;
 slot_main += `${ctx.escape(state.name)}`;
@@ -20,13 +19,14 @@ ctx.reThrow(error, $filename, $lineNumber);
 }
 return slot_main;
 }, "heading": function () {
-let slot_4 = "";
+let slot_3 = "";
 try {
-slot_4 += "    This is title";
+slot_3 += "\n";
+slot_3 += "    This is title";
 } catch (error) {
 ctx.reThrow(error, $filename, $lineNumber);
 }
-return slot_4;
+return slot_3;
 } });
 } catch (error) {
 ctx.reThrow(error, $filename, $lineNumber);
