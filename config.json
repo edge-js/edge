@@ -1,5 +1,5 @@
 {
-  "core": true,
+  "core": false,
   "ts": true,
   "license": "MIT",
   "services": [
@@ -7,5 +7,5 @@
     "circleci"
   ],
   "appveyorUsername": "thetutlage",
-  "minNodeVersion": "10.15.3"
+  "minNodeVersion": "12.0.0"
 }
