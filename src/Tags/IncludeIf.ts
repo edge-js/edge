@@ -42,8 +42,8 @@ export const includeIfTag: TagContract = {
       () => {
         unallowedExpression(
           `"${token.properties.jsArg}" is not a valid argument type for the @includeIf tag`,
-          parsed,
           token.filename,
+          parser.utils.getExpressionLoc(parsed),
         )
       },
     )
@@ -67,8 +67,8 @@ export const includeIfTag: TagContract = {
       () => {
         unallowedExpression(
           `"${conditional.type}" is not a valid 1st argument type for the @includeIf tag`,
-          conditional,
           token.filename,
+          parser.utils.getExpressionLoc(conditional),
         )
       },
     )
@@ -79,8 +79,8 @@ export const includeIfTag: TagContract = {
       () => {
         unallowedExpression(
           `"${include.type}" is not a valid 2nd argument type for the @includeIf tag`,
-          include,
           token.filename,
+          parser.utils.getExpressionLoc(include),
         )
       },
     )

@@ -18,13 +18,13 @@ import { isSubsetOf, unallowedExpression } from '../utils'
  * Returns the list to loop over for the each binary expression
  */
 function getLoopList (rhsExpression: any, parser: Parser, filename: string): string {
-  return parser.utils.stringify(parser.utils.transformAst(rhsExpression, filename, parser.stack))
+  return parser.utils.stringify(parser.utils.transformAst(rhsExpression, filename, parser))
 }
 
 /**
  * Returns loop item and the index for the each binary expression
  */
-function getLoopItemAndIndex (lhsExpression: any, filename: string): [string, string?] {
+function getLoopItemAndIndex (lhsExpression: any, parser: Parser, filename: string): [string, string?] {
   /**
    * Ensure the LHS content inside `@each()` curly braces is a `SequenceExpression` or
    * `Identifier`. Anything else is not allowed.
@@ -40,8 +40,8 @@ function getLoopItemAndIndex (lhsExpression: any, filename: string): [string, st
     () => {
       unallowedExpression(
         `invalid left hand side "${lhsExpression.type}" for the @each tag`,
-        lhsExpression,
         filename,
+        parser.utils.getExpressionLoc(lhsExpression),
       )
     },
   )
@@ -59,8 +59,8 @@ function getLoopItemAndIndex (lhsExpression: any, filename: string): [string, st
       () => {
         unallowedExpression(
           `"${lhsExpression.expressions[0]}.type" is not allowed as value identifier for @each tag`,
-          lhsExpression.expressions[0],
           filename,
+          parser.utils.getExpressionLoc(lhsExpression.expressions[0]),
         )
       },
     )
@@ -74,8 +74,8 @@ function getLoopItemAndIndex (lhsExpression: any, filename: string): [string, st
       () => {
         unallowedExpression(
           `"${lhsExpression.expressions[1]}.type" is not allowed as key identifier for @each tag`,
-          lhsExpression.expressions[1],
           filename,
+          parser.utils.getExpressionLoc(lhsExpression.expressions[1]),
         )
       },
     )
@@ -122,8 +122,8 @@ export const eachTag: TagContract = {
       () => {
         unallowedExpression(
           `"${token.properties.jsArg}" is not valid expression for the @each tag`,
-          expression,
           token.filename,
+          parser.utils.getExpressionLoc(expression),
         )
       },
     )
@@ -138,7 +138,7 @@ export const eachTag: TagContract = {
      * Fetching the item,index and list for the each loop
      */
     const list = getLoopList(expression.right, parser, token.filename)
-    const [item, index] = getLoopItemAndIndex(expression.left, token.filename)
+    const [item, index] = getLoopItemAndIndex(expression.left, parser, token.filename)
 
     /**
      * If there is an else statement, then wrap the loop inside the `if` statement first

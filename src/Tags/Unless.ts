@@ -42,8 +42,8 @@ export const unlessTag: TagContract = {
       () => {
         unallowedExpression(
           `"${token.properties.jsArg}" is not a valid argument type for the @unless tag`,
-          parsed,
           token.filename,
+          parser.utils.getExpressionLoc(parsed),
         )
       },
     )

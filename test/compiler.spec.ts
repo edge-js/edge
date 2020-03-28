@@ -42,6 +42,7 @@ test.group('Compiler | Cache', (group) => {
       let $lineNumber = 1;
       let $filename = "${join(fs.basePath, 'foo.edge')}";
       try {
+      out += "\\n";
       out += "Hello ";
       out += \`\${ctx.escape(state.username)}\`;
       } catch (error) {
@@ -100,7 +101,13 @@ test.group('Compiler | Tokenize', (group) => {
       section: sectionTag,
       layout: layoutTag,
     })
+
     assert.deepEqual(compiler.tokenize('index.edge'), [
+      {
+        type: 'newline' as const,
+        line: 0,
+        filename: join(fs.basePath, 'master.edge'),
+      },
       {
         type: 'raw' as const,
         value: 'Master page',
@@ -165,6 +172,11 @@ test.group('Compiler | Tokenize', (group) => {
           end: { line: 2, col: 24 },
         },
         children: [],
+      },
+      {
+        type: 'newline' as const,
+        line: 0,
+        filename: join(fs.basePath, 'master.edge'),
       },
       {
         type: 'raw' as const,
@@ -263,6 +275,11 @@ test.group('Compiler | Tokenize', (group) => {
 
     assert.deepEqual(compiler.tokenize('index.edge'), [
       {
+        type: 'newline' as const,
+        line: 0,
+        filename: join(fs.basePath, 'super-master.edge'),
+      },
+      {
         type: 'raw' as const,
         value: 'Master page',
         line: 1,
@@ -338,6 +355,11 @@ test.group('Compiler | Tokenize', (group) => {
 
     assert.deepEqual(compiler.tokenize('index.edge'), [
       {
+        type: 'newline' as const,
+        line: 0,
+        filename: join(fs.basePath, 'master.edge'),
+      },
+      {
         type: MustacheTypes.MUSTACHE,
         filename: join(fs.basePath, 'master.edge'),
         loc: {
@@ -402,6 +424,7 @@ test.group('Compiler | Compile', (group) => {
       let $lineNumber = 1;
       let $filename = "${join(fs.basePath, 'index.edge')}";
       try {
+      out += "\\n";
       $filename = "${join(fs.basePath, 'master.edge')}";
       out += \`\${ctx.escape(state.username)}\`;
       out += "\\n";

@@ -19,14 +19,13 @@ ctx.reThrow(error, $filename, $lineNumber);
 }
 return slot_main;
 }, "heading": function () {
-let slot_3 = "";
+let slot_1 = "";
 try {
-slot_3 += "\n";
-slot_3 += "    This is title";
+slot_1 += "    This is title";
 } catch (error) {
 ctx.reThrow(error, $filename, $lineNumber);
 }
-return slot_3;
+return slot_1;
 } });
 } catch (error) {
 ctx.reThrow(error, $filename, $lineNumber);

@@ -36,7 +36,6 @@ test.group('Fixtures', (group) => {
 
   dirs.forEach((dir) => {
     const dirBasePath = join(basePath, dir)
-
     test(dir, (assert) => {
       const template = new Template(compiler, {}, {})
 

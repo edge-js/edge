@@ -50,7 +50,7 @@ test.group('Component | compile | errors', (group) => {
     } catch (error) {
       assert.equal(error.message, '"[1, 2]" is not a valid argument type for the @component tag')
       assert.equal(error.line, 3)
-      assert.equal(error.col, 0)
+      assert.equal(error.col, 11)
       assert.equal(error.filename, join(fs.basePath, 'eval.edge'))
     }
   })
@@ -73,7 +73,7 @@ test.group('Component | compile | errors', (group) => {
     } catch (error) {
       assert.equal(error.message, '"getSlotName()" is not a valid argument type for the @slot tag')
       assert.equal(error.line, 4)
-      assert.equal(error.col, 0)
+      assert.equal(error.col, 8)
       assert.equal(error.filename, join(fs.basePath, 'eval.edge'))
     }
   })
@@ -96,7 +96,7 @@ test.group('Component | compile | errors', (group) => {
     } catch (error) {
       assert.equal(error.message, 'maximum of 2 arguments are allowed for @slot tag')
       assert.equal(error.line, 4)
-      assert.equal(error.col, 0)
+      assert.equal(error.col, 8)
       assert.equal(error.filename, join(fs.basePath, 'eval.edge'))
     }
   })
@@ -119,7 +119,7 @@ test.group('Component | compile | errors', (group) => {
     } catch (error) {
       assert.equal(error.message, '"[1, 2]" is not valid prop identifier for @slot tag')
       assert.equal(error.line, 4)
-      assert.equal(error.col, 8)
+      assert.equal(error.col, 16)
       assert.equal(error.filename, join(fs.basePath, 'eval.edge'))
     }
   })

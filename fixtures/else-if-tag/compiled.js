@@ -3,6 +3,7 @@ let $lineNumber = 1;
 let $filename = "{{__dirname}}index.edge";
 try {
 if (state.username === "virk") {
+out += "\n";
 out += "  Hello VK";
 $lineNumber = 3;
 } else if (state.username) {

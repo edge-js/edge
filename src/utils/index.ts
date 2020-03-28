@@ -17,11 +17,10 @@ type ExpressionList = readonly (keyof typeof expressionsList)[]
  * Raise an `E_UNALLOWED_EXPRESSION` exception. Filename and expression is
  * required to point the error stack to the correct file
  */
-export function unallowedExpression (message: string, expression: any, filename: string) {
-  const loc = expression.loc || expression.property?.loc
+export function unallowedExpression (message: string, filename: string, loc: { line: number, col: number }) {
   throw new EdgeError(message, 'E_UNALLOWED_EXPRESSION', {
-    line: loc.start.line,
-    col: loc.start.column,
+    line: loc.line,
+    col: loc.col,
     filename: filename,
   })
 }
@@ -65,6 +64,6 @@ export function parseJsArg (parser: Parser, token: TagToken) {
   return parser.utils.transformAst(
     parser.utils.generateAST(token.properties.jsArg, token.loc, token.filename),
     token.filename,
-    parser.stack,
+    parser,
   )
 }

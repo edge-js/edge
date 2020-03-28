@@ -13,7 +13,7 @@ import { EdgeBuffer, expressions, Parser } from 'edge-parser'
 
 import { TagContract } from '../Contracts'
 import { StringifiedObject } from '../StringifiedObject'
-import { isSubsetOf, unallowedExpression } from '../utils'
+import { isSubsetOf, unallowedExpression, parseJsArg } from '../utils'
 
 /**
  * A list of allowed expressions for the component name
@@ -32,6 +32,7 @@ const ALLOWED_EXPRESSION_FOR_COMPONENT_NAME = [
  * Shape of a slot
  */
 type Slot = {
+  outputVar: string,
   props: any,
   buffer: EdgeBuffer,
   line: number,
@@ -64,8 +65,8 @@ function getComponentNameAndProps (expression: any, parser: Parser, filename: st
     () => {
       unallowedExpression(
         `"${parser.utils.stringify(name)}" is not a valid argument for component name`,
-        name,
         filename,
+        parser.utils.getExpressionLoc(name),
       )
     },
   )
@@ -103,8 +104,8 @@ function getSlotNameAndProps (token: TagToken, parser: Parser): [string, null | 
     () => {
       unallowedExpression(
         `"${token.properties.jsArg}" is not a valid argument type for the @slot tag`,
-        parsed,
         token.filename,
+        parser.utils.getExpressionLoc(parsed),
       )
     },
   )
@@ -128,8 +129,8 @@ function getSlotNameAndProps (token: TagToken, parser: Parser): [string, null | 
     () => {
       unallowedExpression(
         'slot name must be a valid string literal',
-        name,
         token.filename,
+        parser.utils.getExpressionLoc(name),
       )
     },
   )
@@ -160,8 +161,8 @@ function getSlotNameAndProps (token: TagToken, parser: Parser): [string, null | 
     () => {
       unallowedExpression(
         `"${parser.utils.stringify(parsed.expressions[1])}" is not valid prop identifier for @slot tag`,
-        parsed.expressions[1],
         token.filename,
+        parser.utils.getExpressionLoc(parsed.expressions[1]),
       )
     }
   )
@@ -170,6 +171,14 @@ function getSlotNameAndProps (token: TagToken, parser: Parser): [string, null | 
    * Returning the slot name and slot props name
    */
   return [name.raw, parsed.expressions[1].name]
+}
+
+function trimSlotOutput (_slot: Slot) {
+  // slot.buffer.writeExpression(
+  //   `${slot.outputVar} = template.trimTopBottomNewLines(${slot.outputVar})`,
+  //   slot.filename,
+  //   -1,
+  // )
 }
 
 /**
@@ -182,11 +191,7 @@ export const componentTag: TagContract = {
   tagName: 'component',
 
   compile (parser, buffer, token) {
-    const parsed = parser.utils.transformAst(
-      parser.utils.generateAST(token.properties.jsArg, token.loc, token.filename),
-      token.filename,
-      parser.stack,
-    )
+    const parsed = parseJsArg(parser, token)
 
     /**
      * Check component jsProps for allowed expressions
@@ -197,8 +202,8 @@ export const componentTag: TagContract = {
       () => {
         unallowedExpression(
           `"${token.properties.jsArg}" is not a valid argument type for the @component tag`,
-          parsed,
           token.filename,
+          parser.utils.getExpressionLoc(parsed),
         )
       },
     )
@@ -220,20 +225,29 @@ export const componentTag: TagContract = {
      * inside a component
      */
     const mainSlot: Slot = {
+      outputVar: 'slot_main',
       props: {},
       buffer: new EdgeBuffer(token.filename, { outputVar: 'slot_main' }),
       line: -1,
       filename: token.filename,
     }
 
+    let slotsCounter = 0
+
     /**
      * Loop over all the component children
      */
-    token.children.forEach((child, index) => {
+    token.children.forEach((child) => {
       /**
        * If children is not a slot, then add it to the main slot
        */
       if (!lexerUtils.isTag(child, 'slot')) {
+        /**
+         * Ignore first newline inside slots
+         */
+        if (mainSlot.buffer.size === 0 && child.type === 'newline') {
+          return
+        }
         parser.processToken(child, mainSlot.buffer)
         return
       }
@@ -242,6 +256,7 @@ export const componentTag: TagContract = {
        * Fetch slot and props
        */
       const [slotName, slotProps] = getSlotNameAndProps(child, parser)
+      slotsCounter++
 
       /**
        * Create a new slot with buffer to process the children
@@ -252,7 +267,8 @@ export const componentTag: TagContract = {
          * have their own file names.
          */
         slots[slotName] = {
-          buffer: new EdgeBuffer(token.filename, { outputVar: `slot_${index}` }),
+          outputVar: `slot_${slotsCounter}`,
+          buffer: new EdgeBuffer(token.filename, { outputVar: `slot_${slotsCounter}` }),
           props: slotProps,
           line: -1,
           filename: token.filename,
@@ -270,7 +286,12 @@ export const componentTag: TagContract = {
       /**
        * Self process the slot children.
        */
-      child.children.forEach((grandChildren) => parser.processToken(grandChildren, slots[slotName].buffer))
+      child.children.forEach((grandChildren) => {
+        if (slots[slotName].buffer.size === 0 && grandChildren.type === 'newline') {
+          return
+        }
+        parser.processToken(grandChildren, slots[slotName].buffer)
+      })
 
       /**
        * Close the frame after process the slot children
@@ -289,6 +310,7 @@ export const componentTag: TagContract = {
     if (!slots['main']) {
       if (mainSlot.buffer.size) {
         mainSlot.buffer.wrap('function () {', '}')
+        trimSlotOutput(mainSlot)
         obj.add('main', mainSlot.buffer.disableFileAndLineVariables().flush())
       } else {
         obj.add('main', 'function () { return "" }')
@@ -302,6 +324,7 @@ export const componentTag: TagContract = {
     Object.keys(slots).forEach((slotName) => {
       if (slots[slotName].buffer.size) {
         const fnCall = slots[slotName].props ? `function (${slots[slotName].props}) {` : 'function () {'
+        trimSlotOutput(slots[slotName])
         slots[slotName].buffer.wrap(fnCall, '}')
         obj.add(slotName, slots[slotName].buffer.disableFileAndLineVariables().flush())
       } else {

@@ -79,8 +79,8 @@ export const includeTag: TagContract = {
       () => {
         unallowedExpression(
           `"${token.properties.jsArg}" is not a valid argument type for the @include tag`,
-          parsed,
           token.filename,
+          parser.utils.getExpressionLoc(parsed),
         )
       },
     )

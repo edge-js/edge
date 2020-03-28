@@ -4,6 +4,7 @@ let $filename = "{{__dirname}}index.edge";
 try {
 $lineNumber = 2;
 let username = "virk";
+out += "\n";
 out += "This is the base template";
 out += "\n";
 out += "";

@@ -4,6 +4,7 @@ let $filename = "{{__dirname}}index.edge";
 try {
 if(ctx.size(state.users)) {
 ctx.loop(state.users, function (user) {
+out += "\n";
 out += "  - Hello ";
 $lineNumber = 2;
 out += `${ctx.escape(user.username)}`;

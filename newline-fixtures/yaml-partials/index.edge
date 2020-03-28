@@ -1,0 +1,10 @@
+@each(user in users)
+-
+  username: {{ user.username }}
+  name: {{ user.name }}
+  job: {{ user.job }}
+  skills:
+  @each(skill in user.skills)
+    @include('yaml-partials/skills')
+  @endeach
+@endeach

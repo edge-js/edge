@@ -51,8 +51,8 @@ export const setTag: TagContract = {
       () => {
         throw unallowedExpression(
           `"${token.properties.jsArg}" is not a valid key-value pair for the @slot tag`,
-          parsed,
           token.filename,
+          parser.utils.getExpressionLoc(parsed),
         )
       },
     )
@@ -79,8 +79,8 @@ export const setTag: TagContract = {
       () => {
         throw unallowedExpression(
           'The first argument for @set tag must be a string literal',
-          key,
           token.filename,
+          parser.utils.getExpressionLoc(key),
         )
       },
     )

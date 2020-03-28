@@ -36,8 +36,8 @@ export const elseIfTag: TagContract = {
       () => {
         unallowedExpression(
           `{${token.properties.jsArg}} is not a valid argument type for the @elseif tag`,
-          parsed,
           token.filename,
+          parser.utils.getExpressionLoc(parsed),
         )
       }
     )

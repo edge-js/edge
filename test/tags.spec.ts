@@ -132,7 +132,7 @@ test.group('Component', (group) => {
     try {
       compiler.compile('foo')
     } catch (error) {
-      assert.equal(error.stack.split('\n')[1], `    at anonymous (${join(fs.basePath, 'foo.edge')}:2:0)`)
+      assert.equal(error.stack.split('\n')[1], `    at anonymous (${join(fs.basePath, 'foo.edge')}:2:6)`)
       assert.equal(error.message, '"hello" is not a valid argument type for the @slot tag')
     }
   })
@@ -150,7 +150,7 @@ test.group('Component', (group) => {
     try {
       compiler.compile('foo')
     } catch (error) {
-      assert.equal(error.stack.split('\n')[1], `    at anonymous (${join(fs.basePath, 'foo.edge')}:2:0)`)
+      assert.equal(error.stack.split('\n')[1], `    at anonymous (${join(fs.basePath, 'foo.edge')}:2:6)`)
       assert.equal(error.message, 'maximum of 2 arguments are allowed for @slot tag')
     }
   })
@@ -168,7 +168,7 @@ test.group('Component', (group) => {
     try {
       compiler.compile('foo')
     } catch (error) {
-      assert.equal(error.stack.split('\n')[1], `    at anonymous (${join(fs.basePath, 'foo.edge')}:2:0)`)
+      assert.equal(error.stack.split('\n')[1], `    at anonymous (${join(fs.basePath, 'foo.edge')}:2:6)`)
       assert.equal(error.message, 'slot name must be a valid string literal')
     }
   })

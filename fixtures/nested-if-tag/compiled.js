@@ -5,6 +5,7 @@ try {
 if (state.username) {
 $lineNumber = 2;
 if (state.age > 18) {
+out += "\n";
 out += "    Hello ";
 $lineNumber = 3;
 out += `${ctx.escape(state.username)}`;

@@ -35,8 +35,8 @@ export const ifTag: TagContract = {
       () => {
         unallowedExpression(
           `"${token.properties.jsArg}" is not a valid argument type for the @if tag`,
-          parsed,
           token.filename,
+          parser.utils.getExpressionLoc(parsed),
         )
       },
     )

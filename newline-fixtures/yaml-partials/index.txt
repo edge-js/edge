@@ -1,0 +1,16 @@
+-
+  username: martin
+  name: Martin Developer
+  job: Developer
+  skills:
+    - python
+    - perl
+    - pascal
+-
+  username: tabitha
+  name: Tabitha Bitumen
+  job: Developer
+  skills:
+    - lisp
+    - fortran
+    - erlang

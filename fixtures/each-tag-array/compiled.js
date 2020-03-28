@@ -5,6 +5,7 @@ try {
 ctx.loop([{
   username: "virk"
 }], function (user) {
+out += "\n";
 out += "  - Hello ";
 $lineNumber = 2;
 out += `${ctx.escape(user.username)}`;

@@ -63,7 +63,7 @@ test.group('StringifiedObject | fromAcornAst', () => {
     const expression = parser.utils.transformAst(
       parser.utils.generateAST('({ username: \'virk\' })', LOC, 'eval.edge'),
       'eval.edge',
-      parser.stack,
+      parser,
     )
 
     const props = StringifiedObject.fromAcornExpressions([expression], parser)
@@ -75,7 +75,7 @@ test.group('StringifiedObject | fromAcornAst', () => {
     const expression = parser.utils.transformAst(
       parser.utils.generateAST('({ username })', LOC, 'eval.edge'),
       'eval.edge',
-      parser.stack,
+      parser,
     )
 
     const props = StringifiedObject.fromAcornExpressions([expression], parser)
@@ -87,7 +87,7 @@ test.group('StringifiedObject | fromAcornAst', () => {
     const expression = parser.utils.transformAst(
       parser.utils.generateAST('({ [username]: username })', LOC, 'eval.edge'),
       'eval.edge',
-      parser.stack,
+      parser,
     )
 
     const props = StringifiedObject.fromAcornExpressions([expression], parser)
@@ -99,7 +99,7 @@ test.group('StringifiedObject | fromAcornAst', () => {
     const expression = parser.utils.transformAst(
       parser.utils.generateAST('({ username: \'virk\', age: 22 })', LOC, 'eval.edge'),
       'eval.edge',
-      parser.stack,
+      parser,
     )
 
     const props = StringifiedObject.fromAcornExpressions([expression], parser)
@@ -112,7 +112,7 @@ test.group('StringifiedObject | fromAcornAst', () => {
     const expression = parser.utils.transformAst(
       parser.utils.generateAST('({ username, age: 22 })', LOC, 'eval.edge'),
       'eval.edge',
-      parser.stack,
+      parser,
     )
 
     const props = StringifiedObject.fromAcornExpressions([expression], parser)
@@ -124,7 +124,7 @@ test.group('StringifiedObject | fromAcornAst', () => {
     const expression = parser.utils.transformAst(
       parser.utils.generateAST('(title = \'Hello\')', LOC, 'eval.edge'),
       'eval.edge',
-      parser.stack,
+      parser,
     )
 
     const props = StringifiedObject.fromAcornExpressions([expression], parser)
@@ -136,7 +136,7 @@ test.group('StringifiedObject | fromAcornAst', () => {
     const expression = parser.utils.transformAst(
       parser.utils.generateAST('(title = \'Hello\', body = \'Some content\')', LOC, 'eval.edge'),
       'eval.edge',
-      parser.stack,
+      parser,
     )
 
     const props = StringifiedObject.fromAcornExpressions(expression.expressions, parser)

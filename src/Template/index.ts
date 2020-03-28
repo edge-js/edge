@@ -36,6 +36,13 @@ export class Template {
   }
 
   /**
+   * Trims top and bottom new lines from the content
+   */
+  public trimTopBottomNewLines (value) {
+    return value.replace(/^\n|^\r\n/, '').replace(/\n$|\r\n$/, '')
+  }
+
+  /**
    * Render the template inline by sharing the state of the current template.
    *
    * ```js
@@ -78,6 +85,6 @@ export class Template {
     const { template: compiledTemplate } = this.compiler.compile(template)
     const templateState = Object.assign({}, this.sharedState, state)
     const fn = this.wrapToFunction(compiledTemplate)
-    return fn(this, templateState, new Context())
+    return this.trimTopBottomNewLines(fn(this, templateState, new Context()))
   }
 }
