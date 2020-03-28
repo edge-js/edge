@@ -36,7 +36,7 @@ test.group('Loader', (group) => {
   test('throw exception when resolving path from undefined location', (assert) => {
     const loader = new Loader()
     const fn = () => loader.resolve('foo')
-    assert.throw(fn, 'E_UNMOUNTED_DISK_NAME: "default" namespace is not mounted')
+    assert.throw(fn, '"default" namespace is not mounted')
   })
 
   test('resolve template for the default disk', async (assert) => {

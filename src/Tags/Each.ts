@@ -7,7 +7,8 @@
 * file that was distributed with this source code.
 */
 
-import { each, size } from 'lodash'
+import size from 'lodash.size'
+import each from 'lodash.foreach'
 import { utils as lexerUtils } from 'edge-lexer'
 import { Parser, expressions } from 'edge-parser'
 

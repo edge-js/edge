@@ -70,12 +70,13 @@
     ]
   },
   "dependencies": {
-    "@poppinss/utils": "^2.1.2",
     "edge-error": "^1.0.4",
     "edge-lexer": "^3.0.2",
     "edge-parser": "^5.0.3",
     "he": "^1.2.0",
+    "lodash.foreach": "^4.5.0",
     "lodash.merge": "^4.6.2",
+    "lodash.size": "^4.2.0",
     "macroable": "^4.0.2"
   },
   "gitHooks": {

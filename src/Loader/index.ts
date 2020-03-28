@@ -8,7 +8,6 @@
  */
 
 import { readFileSync } from 'fs'
-import { Exception } from '@poppinss/utils'
 import { join, isAbsolute, sep } from 'path'
 import { LoaderContract, LoaderTemplate } from '../Contracts'
 
@@ -39,11 +38,7 @@ export class Loader implements LoaderContract {
       return readFileSync(absPath, 'utf-8')
     } catch (error) {
       if (error.code === 'ENOENT') {
-        throw new Exception(
-          `Cannot resolve "${absPath}". Make sure the file exists`,
-          500,
-          'E_MISSING_TEMPLATE_FILE',
-        )
+        throw new Error(`Cannot resolve "${absPath}". Make sure the file exists`)
       } else {
         throw error
       }
@@ -162,7 +157,7 @@ export class Loader implements LoaderContract {
      */
     const mountedDir = this.mountedDirs.get(diskName)
     if (!mountedDir) {
-      throw new Exception(`"${diskName}" namespace is not mounted`, 500, 'E_UNMOUNTED_DISK_NAME')
+      throw new Error(`"${diskName}" namespace is not mounted`)
     }
 
     return join(mountedDir, template)
@@ -220,22 +215,14 @@ export class Loader implements LoaderContract {
      * Ensure template content is defined as a string
      */
     if (typeof (contents.template) !== 'string') {
-      throw new Exception(
-        'Make sure to define the template content as a string',
-        500,
-        'E_MISSING_TEMPLATE_CONTENTS',
-      )
+      throw new Error('Make sure to define the template content as a string')
     }
 
     /**
      * Do not overwrite existing template with same template path
      */
     if (this.preRegistered.has(templatePath)) {
-      throw new Exception(
-        `Cannot override previously registered "${templatePath}" template`,
-        500,
-        'E_DUPLICATE_TEMPLATE_PATH',
-      )
+      throw new Error(`Cannot override previously registered "${templatePath}" template`)
     }
 
     this.preRegistered.set(templatePath, contents)
