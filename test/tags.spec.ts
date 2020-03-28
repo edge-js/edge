@@ -114,6 +114,57 @@ test.group('Include', (group) => {
   })
 })
 
+test.group('IncludeIf', (group) => {
+  group.afterEach(async () => {
+    await fs.cleanup()
+  })
+
+  test('raise errors when not passing sequence expression', async (assert) => {
+    assert.plan(2)
+
+    const templateContent = dedent`We are writing a bad include condition
+    @includeIf(foo)`
+
+    await fs.add('foo.edge', templateContent)
+    try {
+      compiler.compile('foo')
+    } catch (error) {
+      assert.equal(error.message, '"foo" is not a valid argument type for the @includeIf tag')
+      assert.equal(error.stack.split('\n')[1], `    at anonymous (${join(fs.basePath, 'foo.edge')}:2:11)`)
+    }
+  })
+
+  test('raise errors when passing more than 2 arguments', async (assert) => {
+    assert.plan(2)
+
+    const templateContent = dedent`We are writing a bad include condition
+    @includeIf(foo, bar, baz)`
+
+    await fs.add('foo.edge', templateContent)
+    try {
+      compiler.compile('foo')
+    } catch (error) {
+      assert.equal(error.message, '@includeIf expects a total of 2 arguments')
+      assert.equal(error.stack.split('\n')[1], `    at anonymous (${join(fs.basePath, 'foo.edge')}:2:11)`)
+    }
+  })
+
+  test('raise errors when 1st argument is a sequence expression', async (assert) => {
+    assert.plan(2)
+
+    const templateContent = dedent`We are writing a bad include condition
+    @includeIf((foo, bar), baz)`
+
+    await fs.add('foo.edge', templateContent)
+    try {
+      compiler.compile('foo')
+    } catch (error) {
+      assert.equal(error.message, '"SequenceExpression" is not a valid 1st argument type for the @includeIf tag')
+      assert.equal(error.stack.split('\n')[1], `    at anonymous (${join(fs.basePath, 'foo.edge')}:2:12)`)
+    }
+  })
+})
+
 test.group('Component', (group) => {
   group.afterEach(async () => {
     await fs.cleanup()
@@ -289,6 +340,48 @@ test.group('Layouts', (group) => {
         error.message,
         'Template extending a layout can only use "@section" or "@set" tags as top level nodes',
       )
+    }
+  })
+})
+
+test.group('Each tag', (group) => {
+  group.afterEach(async () => {
+    await fs.cleanup()
+  })
+
+  test('raise errors when arg is not a binary expression', async (assert) => {
+    assert.plan(2)
+
+    const templateContent = dedent`Hello everyone!
+      We are writing a bad each condition
+
+      @each(users)
+      @endeach`
+
+    await fs.add('foo.edge', templateContent)
+    try {
+      compiler.compile('foo')
+    } catch (error) {
+      assert.equal(error.message, '"users" is not valid expression for the @each tag')
+      assert.equal(error.line, 4)
+    }
+  })
+
+  test('raise errors when lhs of binary expression is not an indentifier', async (assert) => {
+    assert.plan(2)
+
+    const templateContent = dedent`Hello everyone!
+      We are writing a bad each condition
+
+      @each('user' in users)
+      @endeach`
+
+    await fs.add('foo.edge', templateContent)
+    try {
+      compiler.compile('foo')
+    } catch (error) {
+      assert.equal(error.message, 'invalid left hand side \"Literal\" expression for the @each tag')
+      assert.equal(error.line, 4)
     }
   })
 })

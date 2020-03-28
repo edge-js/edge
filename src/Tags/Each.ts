@@ -40,7 +40,7 @@ function getLoopItemAndIndex (lhsExpression: any, parser: Parser, filename: stri
     [expressions.SequenceExpression, expressions.Identifier],
     () => {
       unallowedExpression(
-        `invalid left hand side "${lhsExpression.type}" for the @each tag`,
+        `invalid left hand side "${lhsExpression.type}" expression for the @each tag`,
         filename,
         parser.utils.getExpressionLoc(lhsExpression),
       )
@@ -119,7 +119,7 @@ export const eachTag: TagContract = {
      */
     isSubsetOf(
       expression,
-      [expressions.BinaryExpression, expression.SequenceExpression],
+      [expressions.BinaryExpression],
       () => {
         unallowedExpression(
           `"${token.properties.jsArg}" is not valid expression for the @each tag`,
