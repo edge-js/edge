@@ -307,4 +307,80 @@ test.group('Edge | regression', () => {
     })
     assert.equal(edge.render('eval', { username: '<p>virk</p>' }), 'Hello <p>virk</p>')
   })
+
+  test('truncate string by characters', (assert) => {
+    const edge = new Edge()
+    Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
+
+    edge.registerTemplate('eval', {
+      template: '{{{ truncate(text, 10) }}}',
+    })
+    assert.equal(edge.render('eval', { text: '<p>hello world & universe</p>' }), '<p>hello world...</p>')
+  })
+
+  test('truncate string by characters in strict mode', (assert) => {
+    const edge = new Edge()
+    Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
+
+    edge.registerTemplate('eval', {
+      template: '{{{ truncate(text, 10, { strict: true }) }}}',
+    })
+    assert.equal(edge.render('eval', { text: '<p>hello world & universe</p>' }), '<p>hello worl...</p>')
+  })
+
+  test('define custom suffix for truncate', (assert) => {
+    const edge = new Edge()
+    Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
+
+    edge.registerTemplate('eval', {
+      template: '{{{ truncate(text, 10, { suffix: ". more" }) }}}',
+    })
+    assert.equal(edge.render('eval', { text: '<p>hello world & universe</p>' }), '<p>hello world. more</p>')
+  })
+
+  test('generate string excerpt', (assert) => {
+    const edge = new Edge()
+    Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
+
+    edge.registerTemplate('eval', {
+      template: '{{{ excerpt(text, 10) }}}',
+    })
+    assert.equal(edge.render('eval', { text: '<p>hello world & universe</p>' }), 'hello world...')
+  })
+
+  test('excerpt remove in-between tag', (assert) => {
+    const edge = new Edge()
+    Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
+
+    edge.registerTemplate('eval', {
+      template: '{{{ excerpt(text, 10) }}}',
+    })
+    assert.equal(edge.render('eval', {
+      text: '<p>hello <strong>world</strong> & <strong>universe</strong></p>',
+    }), 'hello world...')
+  })
+
+  test('generate excerpt in strict mode', (assert) => {
+    const edge = new Edge()
+    Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
+
+    edge.registerTemplate('eval', {
+      template: '{{{ excerpt(text, 10, { strict: true }) }}}',
+    })
+    assert.equal(edge.render('eval', {
+      text: '<p>hello <strong>world</strong> & <strong>universe</strong></p>',
+    }), 'hello worl...')
+  })
+
+  test('add custom suffix for excerpt', (assert) => {
+    const edge = new Edge()
+    Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
+
+    edge.registerTemplate('eval', {
+      template: '{{{ excerpt(text, 10, { suffix: ". more" }) }}}',
+    })
+    assert.equal(edge.render('eval', {
+      text: '<p>hello <strong>world</strong> & <strong>universe</strong></p>',
+    }), 'hello world. more')
+  })
 })

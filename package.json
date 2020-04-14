@@ -71,7 +71,8 @@
     "lodash.foreach": "^4.5.0",
     "lodash.merge": "^4.6.2",
     "lodash.size": "^4.2.0",
-    "macroable": "^4.0.4"
+    "macroable": "^4.0.4",
+    "truncatise": "0.0.8"
   },
   "husky": {
     "hooks": {
