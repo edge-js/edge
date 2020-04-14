@@ -7,9 +7,13 @@
  * file that was distributed with this source code.
  */
 
-import { Token } from 'edge-lexer'
+import { Token, TagToken } from 'edge-lexer'
 import { MacroableConstructorContract } from 'macroable'
-import { ParserTagDefinitionContract, Parser } from 'edge-parser'
+import {
+  ParserTagDefinitionContract,
+  Parser,
+  EdgeBuffer,
+} from 'edge-parser'
 
 /**
  * The shape in which the loader must resolve the template
@@ -138,3 +142,10 @@ export interface EdgeContract {
   share (locals: any): EdgeRendererContract,
   render (templatePath: string, state?: any): string,
 }
+
+/**
+ * Required for someone creating custom tags
+ */
+export type EdgeBufferContract = EdgeBuffer
+export type ParserContract = Parser
+export type TagTokenContract = TagToken
