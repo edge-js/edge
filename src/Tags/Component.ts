@@ -173,14 +173,6 @@ function getSlotNameAndProps (token: TagToken, parser: Parser): [string, null | 
   return [name.raw, parsed.expressions[1].name]
 }
 
-function trimSlotOutput (_slot: Slot) {
-  // slot.buffer.writeExpression(
-  //   `${slot.outputVar} = template.trimTopBottomNewLines(${slot.outputVar})`,
-  //   slot.filename,
-  //   -1,
-  // )
-}
-
 /**
  * The component tag implementation. It is one of the most complex tags and
  * can be used as a reference for creating other tags.
@@ -310,7 +302,6 @@ export const componentTag: TagContract = {
     if (!slots['main']) {
       if (mainSlot.buffer.size) {
         mainSlot.buffer.wrap('function () {', '}')
-        trimSlotOutput(mainSlot)
         obj.add('main', mainSlot.buffer.disableFileAndLineVariables().flush())
       } else {
         obj.add('main', 'function () { return "" }')
@@ -324,7 +315,6 @@ export const componentTag: TagContract = {
     Object.keys(slots).forEach((slotName) => {
       if (slots[slotName].buffer.size) {
         const fnCall = slots[slotName].props ? `function (${slots[slotName].props}) {` : 'function () {'
-        trimSlotOutput(slots[slotName])
         slots[slotName].buffer.wrap(fnCall, '}')
         obj.add(slotName, slots[slotName].buffer.disableFileAndLineVariables().flush())
       } else {
