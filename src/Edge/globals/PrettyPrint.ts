@@ -21,13 +21,23 @@ export class PrettyPrint {
     null: 'color: rgb(255, 203, 139);',
     function: 'color: rgb(255, 203, 139);',
     pre: `
-      padding: 10px 30px;
+      padding: 30px 25px;
       background-color: rgb(6, 21, 38);
       color: rgb(214, 222, 235);
-      font-family: Menlo, Monaco, monospace;
+      border-radius: 6px;
+      font-family: JetBrains Mono, Menlo, Monaco, monospace;
       font-size: 14px;
+      line-height: 1.4;
       text-align: left;
     `,
+  }
+
+  /**
+   * Return a boolean telling if the variable name is a
+   * standard global
+   */
+  private isStandardGlobal (name) {
+    return ['inspect', 'truncate', 'excerpt', 'safe'].includes(name)
   }
 
   /**
@@ -77,8 +87,8 @@ export class PrettyPrint {
    * Pretty print by converting the value to JSON string first
    */
   public print (value: any) {
-    const json = JSON.stringify(value, function (key, keyValue) {
-      if (['safe', 'inspect'].includes(key)) {
+    const json = JSON.stringify(value, (key, keyValue) => {
+      if (this.isStandardGlobal(key)) {
         return undefined
       }
 
