@@ -60,4 +60,13 @@ test.group('Template', (group) => {
     const output = template.renderInline('foo', 'user')(template, {}, new Context(), user)
     assert.equal(output.trim(), 'Hello virk')
   })
+
+  test('process file names starting with u', async (assert) => {
+    await fs.add('users.edge', 'Hello {{ user.username }}')
+    const template = new Template(compiler, {}, {})
+
+    const user = { username: 'virk' }
+    const output = template.render('users', { user })
+    assert.equal(output.trim(), 'Hello virk')
+  })
 })
