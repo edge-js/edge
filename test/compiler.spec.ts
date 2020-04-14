@@ -19,6 +19,7 @@ import { setTag } from '../src/Tags/Set'
 import { Compiler } from '../src/Compiler'
 import { layoutTag } from '../src/Tags/Layout'
 import { sectionTag } from '../src/Tags/Section'
+import { normalizeNewLines } from '../test-helpers'
 
 import './assert-extend'
 
@@ -38,7 +39,7 @@ test.group('Compiler | Cache', (group) => {
     const compiler = new Compiler(loader, {})
     const { template } = compiler.compile('foo')
 
-    assert.stringEqual(template, dedent`let out = "";
+    assert.stringEqual(template, normalizeNewLines(dedent`let out = "";
       let $lineNumber = 1;
       let $filename = "${join(fs.basePath, 'foo.edge')}";
       try {
@@ -48,7 +49,7 @@ test.group('Compiler | Cache', (group) => {
       } catch (error) {
       ctx.reThrow(error, $filename, $lineNumber);
       }
-      return out;`)
+      return out;`))
   })
 
   test('save template to cache when caching is turned on', async (assert) => {
@@ -420,7 +421,7 @@ test.group('Compiler | Compile', (group) => {
       layout: layoutTag,
     })
 
-    assert.stringEqual(compiler.compile('index.edge').template, dedent`let out = "";
+    assert.stringEqual(compiler.compile('index.edge').template, normalizeNewLines(dedent`let out = "";
       let $lineNumber = 1;
       let $filename = "${join(fs.basePath, 'index.edge')}";
       try {
@@ -436,7 +437,7 @@ test.group('Compiler | Compile', (group) => {
       ctx.reThrow(error, $filename, $lineNumber);
       }
       return out;
-    `)
+    `))
   })
 
   test('compile errors inside layout must point to the right file', async (assert) => {
@@ -527,7 +528,9 @@ test.group('Compiler | Compile', (group) => {
     })
 
     try {
-      new Function('state', 'ctx', compiler.compile('index.edge').template)({}, new Context())
+      const fn = compiler.compile('index.edge').template
+      console.log(fn.toString())
+      new Function('state', 'ctx', fn)({}, new Context())
     } catch (error) {
       assert.equal(error.message, 'getUserName is not a function')
       assert.equal(error.filename, join(fs.basePath, 'master.edge'))

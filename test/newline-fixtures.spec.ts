@@ -8,15 +8,16 @@
 */
 
 import test from 'japa'
-import { join } from 'path'
+import { join, sep } from 'path'
 import { readdirSync, readFileSync, statSync } from 'fs'
 
+import './assert-extend'
 import { Context } from '../src/Context'
 import { Template } from '../src/Template'
 import { Compiler } from '../src/Compiler'
 import { Loader } from '../src/Loader'
 import * as tags from '../src/Tags'
-import './assert-extend'
+import { normalizeNewLines } from '../test-helpers'
 
 const basePath = join(__dirname, '../newline-fixtures')
 const loader = new Loader()
@@ -42,10 +43,12 @@ test.group('Newline Fixtures', (group) => {
       /**
        * Render output
        */
-      const out = readFileSync(join(dirBasePath, 'index.txt'), 'utf-8')
+      const out = normalizeNewLines(readFileSync(join(dirBasePath, 'index.txt'), 'utf-8'))
       const state = JSON.parse(readFileSync(join(dirBasePath, 'index.json'), 'utf-8'))
       const output = template.render(`${dir}/index.edge`, state)
-      assert.stringEqual(output, out)
+      assert.stringEqual(output, out.split('\n').map((line) => {
+        return line.replace('{{__dirname}}', `${dirBasePath}${sep}`)
+      }).join('\n'))
     })
   })
 })

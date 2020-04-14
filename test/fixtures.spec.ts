@@ -11,12 +11,13 @@ import test from 'japa'
 import { join, sep } from 'path'
 import { readdirSync, readFileSync, statSync } from 'fs'
 
+import './assert-extend'
 import { Context } from '../src/Context'
 import { Template } from '../src/Template'
 import { Compiler } from '../src/Compiler'
 import { Loader } from '../src/Loader'
 import * as tags from '../src/Tags'
-import './assert-extend'
+import { normalizeNewLines } from '../test-helpers'
 
 const basePath = join(__dirname, '../fixtures')
 const loader = new Loader()
@@ -43,8 +44,10 @@ test.group('Fixtures', (group) => {
        * Compiled output
        */
       const { template: compiled } = compiler.compile(`${dir}/index.edge`)
-      const expectedCompiled = readFileSync(join(dirBasePath, 'compiled.js'), 'utf-8')
-      assert.stringEqual(compiled, expectedCompiled.replace(/\{\{__dirname\}\}/g, `${dirBasePath}${sep}`))
+      const expectedCompiled = normalizeNewLines(readFileSync(join(dirBasePath, 'compiled.js'), 'utf-8'))
+      assert.stringEqual(compiled, expectedCompiled.split('\n').map((line) => {
+        return line.replace('{{__dirname}}', `${dirBasePath}${sep}`)
+      }).join('\n'))
 
       /**
        * Render output
