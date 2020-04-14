@@ -7,12 +7,14 @@
 * file that was distributed with this source code.
 */
 
+import './assert-extend'
 import test from 'japa'
 import { join } from 'path'
 import dedent from 'dedent-js'
 import { Filesystem } from '@poppinss/dev-utils'
 
 import { Edge } from '../src/Edge'
+import { GLOBALS } from '../src/Edge/globals'
 
 const fs = new Filesystem(join(__dirname, 'views'))
 
@@ -294,5 +296,15 @@ test.group('Edge | regression', () => {
     }), dedent`
       aaa (unselected)
     `)
+  })
+
+  test('do not escape when using safe global method', (assert) => {
+    const edge = new Edge()
+    Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
+
+    edge.registerTemplate('eval', {
+      template: 'Hello {{ safe(username) }}',
+    })
+    assert.equal(edge.render('eval', { username: '<p>virk</p>' }), 'Hello <p>virk</p>')
   })
 })

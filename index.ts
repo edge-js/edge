@@ -10,11 +10,13 @@
 export * from './src/Contracts'
 import { Edge } from './src/Edge'
 import { safeValue } from './src/Context'
+import { GLOBALS } from './src/Edge/globals'
 
 /**
  * Default export
  */
 const edge = new Edge()
+Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
 export default edge
 
-export { Edge, safeValue }
+export { Edge, safeValue, GLOBALS }
