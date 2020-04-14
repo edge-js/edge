@@ -1,0 +1,12 @@
+{{ inspect(state) }}
+
+<div class="modal">
+  <h1 class="title">{{ title }}</h1>
+  <div>
+    {{{ $slots.body() }}}
+  </div>
+
+  <div>
+    {{{ $slots.actions() }}}
+  </div>
+</div>

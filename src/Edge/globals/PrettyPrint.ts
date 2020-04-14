@@ -14,16 +14,17 @@
  */
 export class PrettyPrint {
   private styles = {
-    string: 'color: #6caedd;',
-    key: 'color: #ec5f67;',
-    boolean: 'color: #99c794;',
-    number: 'color: #99c794;',
-    null: 'color: dimgray;',
+    string: 'color: rgb(173, 219, 103);',
+    key: 'color: rgb(127, 219, 202);',
+    boolean: 'color: rgb(247, 140, 108);',
+    number: 'color: rgb(199, 146, 234);',
+    null: 'color: rgb(255, 203, 139);',
+    function: 'color: rgb(255, 203, 139);',
     pre: `
       padding: 10px 30px;
-      background-color: #24282A;
-      color: #d4d4d4;
-      font-family: Menlo, Monaco, "Courier New", monospace;
+      background-color: rgb(6, 21, 38);
+      color: rgb(214, 222, 235);
+      font-family: Menlo, Monaco, monospace;
       font-size: 14px;
       text-align: left;
     `,
@@ -44,11 +45,18 @@ export class PrettyPrint {
    * Build HTML value of the key
    */
   private buildValueHtml (value: string) {
-    const strType = /^"/.test(value) && 'string'
-    const boolType = ['true', 'false'].includes(value) && 'boolean'
-    const nullType = value === 'null' && 'null'
-    const type = boolType || nullType || strType || 'number'
-    return `<span style="${this.styles[type]}"> ${value} </span>`
+    let type = 'number'
+
+    if (value.startsWith('"[Function')) {
+      type = 'function'
+    } else if (/^"/.test(value)) {
+      type = 'string'
+    } else if (['true', 'false'].includes(value)) {
+      type = 'boolean'
+    } else if (value === 'null') {
+      type = 'null'
+    }
+    return `<span style="${this.styles[type]}">${value}</span>`
   }
 
   /**
@@ -69,10 +77,19 @@ export class PrettyPrint {
    * Pretty print by converting the value to JSON string first
    */
   public print (value: any) {
-    const json = JSON.stringify(value, null, 2)
+    const json = JSON.stringify(value, function (key, keyValue) {
+      if (['safe', 'inspect'].includes(key)) {
+        return undefined
+      }
+
+      if (typeof (keyValue) === 'function') {
+        return `[Function (${keyValue.name || 'anonymous'})]`
+      }
+
+      return keyValue
+    }, 2)
+
     const jsonLineRegex = /^( *)("[^"]+": )?("[^"]*"|[\w.+-]*)?([{}[\],]*)?$/mg
-    return `<pre style="${this.styles.pre}">
-      <code>${this.encodeHTML(json).replace(jsonLineRegex, this.replacer.bind(this))}</code>
-    </pre>`
+    return `<pre style="${this.styles.pre}"><code>${this.encodeHTML(json).replace(jsonLineRegex, this.replacer.bind(this))}</code></pre>`
   }
 }

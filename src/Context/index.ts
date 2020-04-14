@@ -17,7 +17,7 @@ import { ContextContract } from '../Contracts'
  * method ensures that underlying value is never
  * escaped.
  */
-class SafeValue {
+export class SafeValue {
   constructor (public value: any) {}
 }
 

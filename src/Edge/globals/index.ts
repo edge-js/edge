@@ -11,6 +11,8 @@ import { PrettyPrint } from './PrettyPrint'
 import { safeValue } from '../../Context'
 
 export const GLOBALS = {
-  inspect: (value) => new PrettyPrint().print(value),
+  inspect: (value) => {
+    return safeValue(new PrettyPrint().print(value))
+  },
   safe: safeValue,
 }
