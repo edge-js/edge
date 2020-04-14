@@ -34,7 +34,6 @@
   "devDependencies": {
     "@adonisjs/mrm-preset": "^2.3.0",
     "@poppinss/dev-utils": "^1.0.6",
-    "@types/lodash": "^4.14.149",
     "@types/node": "^13.11.1",
     "commitizen": "^4.0.4",
     "cz-conventional-changelog": "^3.1.0",
@@ -43,18 +42,12 @@
     "doctoc": "^1.4.0",
     "eslint": "^6.8.0",
     "eslint-plugin-adonis": "^1.0.9",
-    "fs-extra": "^9.0.0",
     "husky": "^4.2.5",
     "japa": "^3.0.1",
     "mrm": "^2.2.1",
     "np": "^6.2.1",
     "ts-node": "^8.8.2",
-    "typedoc": "^0.17.4",
-    "typedoc-clarity-theme": "^1.1.0",
-    "typedoc-plugin-external-module-name": "^3.0.0",
-    "typescript": "^3.8.3",
-    "yorkie": "^2.0.0",
-    "youch": "^2.0.10"
+    "typescript": "^3.8.3"
   },
   "config": {
     "commitizen": {
@@ -78,9 +71,6 @@
     "lodash.merge": "^4.6.2",
     "lodash.size": "^4.2.0",
     "macroable": "^4.0.4"
-  },
-  "gitHooks": {
-    "commit-msg": "node ./node_modules/@adonisjs/mrm-preset/validateCommit/conventional/validate.js"
   },
   "husky": {
     "hooks": {
