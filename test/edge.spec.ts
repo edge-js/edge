@@ -268,7 +268,7 @@ test.group('Edge | regression', () => {
       `,
     })
 
-    assert.equal(edge.render('eval'), dedent`
+    assert.stringEqual(edge.render('eval'), dedent`
       <script type="text/javascript">
         var pl = /\+/g
       </script>
