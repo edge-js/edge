@@ -10,6 +10,7 @@
 import test from 'japa'
 import { join } from 'path'
 import dedent from 'dedent-js'
+import stringify from 'js-stringify'
 import { Filesystem } from '@poppinss/dev-utils'
 import { TagTypes, MustacheTypes } from 'edge-lexer'
 
@@ -41,7 +42,7 @@ test.group('Compiler | Cache', (group) => {
 
     assert.stringEqual(template, normalizeNewLines(dedent`let out = "";
       let $lineNumber = 1;
-      let $filename = "${join(fs.basePath, 'foo.edge')}";
+      let $filename = ${stringify(join(fs.basePath, 'foo.edge'))};
       try {
       out += "\\n";
       out += "Hello ";
@@ -423,14 +424,14 @@ test.group('Compiler | Compile', (group) => {
 
     assert.stringEqual(compiler.compile('index.edge').template, normalizeNewLines(dedent`let out = "";
       let $lineNumber = 1;
-      let $filename = "${join(fs.basePath, 'index.edge')}";
+      let $filename = ${stringify(join(fs.basePath, 'index.edge'))};
       try {
       out += "\\n";
-      $filename = "${join(fs.basePath, 'master.edge')}";
+      $filename = ${stringify(join(fs.basePath, 'master.edge'))};
       out += \`\${ctx.escape(state.username)}\`;
       out += "\\n";
       out += "  ";
-      $filename = "${join(fs.basePath, 'index.edge')}";
+      $filename = ${stringify(join(fs.basePath, 'index.edge'))};
       $lineNumber = 3;
       out += \`\${ctx.escape(state.content)}\`;
       } catch (error) {

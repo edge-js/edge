@@ -7,19 +7,21 @@
 * file that was distributed with this source code.
 */
 
+import './assert-extend'
 import test from 'japa'
-import { join, sep } from 'path'
+import { join } from 'path'
 import { readdirSync, readFileSync, statSync } from 'fs'
 
-import './assert-extend'
+import * as tags from '../src/Tags'
+import { Loader } from '../src/Loader'
 import { Context } from '../src/Context'
 import { Template } from '../src/Template'
 import { Compiler } from '../src/Compiler'
-import { Loader } from '../src/Loader'
-import * as tags from '../src/Tags'
-import { normalizeNewLines } from '../test-helpers'
+
+import { normalizeNewLines, normalizeFilename } from '../test-helpers'
 
 const basePath = join(__dirname, '../newline-fixtures')
+
 const loader = new Loader()
 loader.mount('default', basePath)
 const compiler = new Compiler(loader, tags)
@@ -46,9 +48,11 @@ test.group('Newline Fixtures', (group) => {
       const out = normalizeNewLines(readFileSync(join(dirBasePath, 'index.txt'), 'utf-8'))
       const state = JSON.parse(readFileSync(join(dirBasePath, 'index.json'), 'utf-8'))
       const output = template.render(`${dir}/index.edge`, state)
-      assert.stringEqual(output, out.split('\n').map((line) => {
-        return line.replace('{{__dirname}}', `${dirBasePath}${sep}`)
-      }).join('\n'))
+
+      assert.stringEqual(
+        output,
+        out.split('\n').map((line) => normalizeFilename(dirBasePath, line)).join('\n'),
+      )
     })
   })
 })

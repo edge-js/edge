@@ -8,6 +8,6 @@ declare module 'japa/build/src/Assert' {
 
 Assert.use((chai) => {
   chai.assert.stringEqual = function stringEqual (val, exp, msg) {
-    new chai.Assertion(val.split(/\r\n|\n/g), msg).to.deep.equal(exp.split(/\r\n|\n/g))
+    new chai.Assertion(val.split(/\r\n|\n/), msg).to.deep.equal(exp.split(/\r\n|\n/))
   }
 })

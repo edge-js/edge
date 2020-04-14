@@ -8,7 +8,7 @@
  */
 
 import { readFileSync } from 'fs'
-import { join, isAbsolute, sep, normalize } from 'path'
+import { join, isAbsolute, sep } from 'path'
 import { LoaderContract, LoaderTemplate } from '../Contracts'
 
 /**
@@ -160,7 +160,7 @@ export class Loader implements LoaderContract {
       throw new Error(`"${diskName}" namespace is not mounted`)
     }
 
-    return normalize(join(mountedDir, template))
+    return join(mountedDir, template)
   }
 
   /**
