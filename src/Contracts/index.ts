@@ -129,6 +129,7 @@ export type EdgeOptions = {
 export interface EdgeContract {
   loader: LoaderContract,
   compiler: CompilerContract,
+  GLOBALS: { [key: string]: any },
 
   registerTag (tag: TagContract): this,
   registerTemplate (templatePath: string, contents: LoaderTemplate): this,

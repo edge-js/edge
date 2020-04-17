@@ -28,7 +28,7 @@ export class Edge implements EdgeContract {
   /**
    * Globals are shared with all rendered templates
    */
-  private globals: any = {}
+  public GLOBALS: { [key: string]: any } = {}
 
   /**
    * List of registered tags. Adding new tags will only impact
@@ -94,7 +94,7 @@ export class Edge implements EdgeContract {
    * ```
    */
   public global (name: string, value: any): this {
-    this.globals[name] = value
+    this.GLOBALS[name] = value
     return this
   }
 
@@ -162,7 +162,7 @@ export class Edge implements EdgeContract {
    * can be used to define locals.
    */
   public getRenderer (): EdgeRendererContract {
-    return new EdgeRenderer(this.compiler, this.globals)
+    return new EdgeRenderer(this.compiler, this.GLOBALS)
   }
 
   /**

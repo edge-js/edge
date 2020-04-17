@@ -45,7 +45,7 @@ test.group('Edge', (group) => {
   test('register globals', (assert) => {
     const edge = new Edge()
     edge.global('foo', 'bar')
-    assert.deepEqual(edge['globals'].foo, 'bar')
+    assert.deepEqual(edge.GLOBALS.foo, 'bar')
   })
 
   test('add a custom tag to the tags list', (assert) => {
