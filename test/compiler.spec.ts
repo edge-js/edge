@@ -530,7 +530,6 @@ test.group('Compiler | Compile', (group) => {
 
     try {
       const fn = compiler.compile('index.edge').template
-      console.log(fn.toString())
       new Function('state', 'ctx', fn)({}, new Context())
     } catch (error) {
       assert.equal(error.message, 'getUserName is not a function')

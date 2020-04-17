@@ -104,6 +104,7 @@ export class Compiler implements CompilerContract {
          * Concat children when super was called
          */
         if (extendedNode.children.length && lexerUtils.isTag(extendedNode.children[0], 'super')) {
+          extendedNode.children.shift()
           extendedNode.children = node.children.concat(extendedNode.children)
         }
 

@@ -7,6 +7,7 @@
 * file that was distributed with this source code.
 */
 
+import { EdgeError } from 'edge-error'
 import { TagContract } from '../Contracts'
 
 /**
@@ -21,8 +22,15 @@ export const superTag: TagContract = {
   seekable: false,
   tagName: 'super',
 
-  compile () {
-    // The super tag is handled by the compiler itself. I am just a way to
-    // tell lexer to parse me as an inline node
+  compile (_, __, token) {
+    throw new EdgeError(
+      '@super tag must appear as top level tag inside the @section tag',
+      'E_ORPHAN_SUPER_TAG',
+      {
+        line: token.loc.start.line,
+        col: token.loc.start.col,
+        filename: token.filename,
+      },
+    )
   },
 }
