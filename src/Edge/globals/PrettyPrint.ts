@@ -27,6 +27,12 @@ export class PrettyPrint {
       border-radius: 6px;
       font-family: JetBrains Mono, Menlo, Monaco, monospace;
       font-size: 14px;
+      overflow: auto;
+      white-space: pre;
+      word-spacing: normal;
+      word-break: normal;
+      word-wrap: normal;
+      tab-size: 4;
       line-height: 1.4;
       text-align: left;
     `,
