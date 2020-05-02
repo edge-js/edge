@@ -12,6 +12,9 @@
  * https://www.npmjs.com/package/pretty-print-json package and then tweaked
  * to fit our use cases.
  */
+
+const inspectSymbol = Symbol.for('edge.inspect')
+
 export class PrettyPrint {
   private styles = {
     string: 'color: rgb(173, 219, 103);',
@@ -90,20 +93,40 @@ export class PrettyPrint {
   }
 
   /**
-   * Pretty print by converting the value to JSON string first
+   * JSON replacer that also handles circular references
    */
-  public print (value: any) {
-    const json = JSON.stringify(value, (key, keyValue) => {
+  private getJSONReplacer () {
+    const seen = new WeakSet()
+
+    return (key, value) => {
       if (this.isStandardGlobal(key)) {
         return undefined
       }
 
-      if (typeof (keyValue) === 'function') {
-        return `[Function (${keyValue.name || 'anonymous'})]`
+      if (typeof value === 'object' && value !== null) {
+        if (seen.has(value)) {
+          return '[Circular]'
+        }
+        seen.add(value)
       }
 
-      return keyValue
-    }, 2)
+      if (typeof (value) === 'function') {
+        return `[Function (${value.name || 'anonymous'})]`
+      }
+
+      return value
+    }
+  }
+
+  /**
+   * Pretty print by converting the value to JSON string first
+   */
+  public print (value: any) {
+    const serialized = typeof (value[inspectSymbol]) === 'function'
+      ? value[inspectSymbol]()
+      : value
+
+    const json = JSON.stringify(serialized, this.getJSONReplacer(), 2)
 
     const jsonLineRegex = /^( *)("[^"]+": )?("[^"]*"|[\w.+-]*)?([{}[\],]*)?$/mg
     return `<pre style="${this.styles.pre}"><code>${this.encodeHTML(json).replace(jsonLineRegex, this.replacer.bind(this))}</code></pre>`

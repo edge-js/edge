@@ -5,8 +5,7 @@
   <title></title>
 </head>
 <body>
-  {{ inspect(state) }}
-
+  {{ inspect(state.user) }}
   @component('components.modal', title = 'Card', age = 22)
     @slot('body')
       <p>hello</p>
