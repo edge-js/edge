@@ -14,6 +14,9 @@ class User extends Base {
     username: 'virk',
     email: 'virk@adonisjs.com',
     isAdmin: true,
+    profile: {
+      avatarUrl: 'foo',
+    },
     lastLoginAt: null,
   }
 
@@ -21,10 +24,15 @@ class User extends Base {
   public get username () {
     return this.attributes.username
   }
+
+  public toJSON () {
+    return {}
+  }
 }
 
 const user = new User()
 user.parent = user
+console.log(user)
 
 createServer((_req, res) => {
   res.writeHead(200, { 'content-type': 'text/html' })

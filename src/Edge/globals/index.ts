@@ -8,12 +8,12 @@
 */
 
 import truncatise from 'truncatise'
-import { PrettyPrint } from './PrettyPrint'
+import inspect from '@poppinss/inspect'
 import { safeValue } from '../../Context'
 
 export const GLOBALS = {
   inspect: (value) => {
-    return safeValue(new PrettyPrint().print(value))
+    return safeValue(inspect.string.html(value))
   },
   truncate: (value: string, length: number = 20, options?: { strict: boolean, suffix: string }) => {
     return truncatise(value, {

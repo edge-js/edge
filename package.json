@@ -64,6 +64,7 @@
     ]
   },
   "dependencies": {
+    "@poppinss/inspect": "^1.0.1",
     "edge-error": "^1.0.4",
     "edge-lexer": "^3.0.3",
     "edge-parser": "^5.0.6",
