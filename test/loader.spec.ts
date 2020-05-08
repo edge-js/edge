@@ -126,4 +126,14 @@ test.group('Loader', (group) => {
 
     assert.throw(fn, 'Cannot override previously registered "my-view" template')
   })
+
+  test('resolve template with dot seperator', async (assert) => {
+    await fs.add('foo/bar.edge', 'Hello world')
+
+    const loader = new Loader()
+    loader.mount('default', fs.basePath)
+
+    const { template } = loader.resolve('foo.bar')
+    assert.equal(template.trim(), 'Hello world')
+  })
 })

@@ -8,7 +8,7 @@
  */
 
 import { readFileSync } from 'fs'
-import { join, isAbsolute, sep } from 'path'
+import { join, isAbsolute } from 'path'
 import { LoaderContract, LoaderTemplate } from '../Contracts'
 
 /**
@@ -67,8 +67,20 @@ export class Loader implements LoaderContract {
       disk = 'default'
     }
 
-    const [template, ext] = rest.join('::').split('.edge')
-    return [disk, `${template.replace(/\./, sep)}.${ext || 'edge'}`]
+    let [template, ext] = rest.join('::').split('.edge')
+
+    /**
+     * Depreciate dot based path seperators
+     */
+    if (template.indexOf('.')) {
+      process.emitWarning(
+        'DeprecationWarning',
+        'edge: dot "." based path seperators are depreciated. We recommend using "/" instead'
+      )
+      template = template.replace(/\./g, '/')
+    }
+
+    return [disk, `${template}.${ext || 'edge'}`]
   }
 
   /**
