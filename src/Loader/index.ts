@@ -72,7 +72,7 @@ export class Loader implements LoaderContract {
     /**
      * Depreciate dot based path seperators
      */
-    if (template.indexOf('.')) {
+    if (template.indexOf('.') > -1) {
       process.emitWarning(
         'DeprecationWarning',
         'edge: dot "." based path seperators are depreciated. We recommend using "/" instead'
