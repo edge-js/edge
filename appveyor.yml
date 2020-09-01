@@ -1,7 +1,7 @@
 environment:
   matrix:
     - nodejs_version: Stable
-    - nodejs_version: 12.0.0
+    - nodejs_version: 12.18.2
 init: git config --global core.autocrlf true
 install:
   - ps: 'Install-Product node $env:nodejs_version'

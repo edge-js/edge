@@ -1,11 +1,11 @@
 /*
-* edge-parser
-*
-* (c) Harminder Virk <virk@adonisjs.com>
-*
-* For the full copyright and license information, please view the LICENSE
-* file that was distributed with this source code.
-*/
+ * edge-parser
+ *
+ * (c) Harminder Virk <virk@adonisjs.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 import './assert-extend'
 import test from 'japa'
@@ -27,32 +27,35 @@ loader.mount('default', basePath)
 const compiler = new Compiler(loader, tags)
 
 test.group('Newline Fixtures', (group) => {
-  group.before(() => {
-    Object.keys(tags).forEach((tag) => {
-      if (tags[tag].run) {
-        tags[tag].run(Context)
-      }
-    })
-  })
+	group.before(() => {
+		Object.keys(tags).forEach((tag) => {
+			if (tags[tag].run) {
+				tags[tag].run(Context)
+			}
+		})
+	})
 
-  const dirs = readdirSync(basePath).filter((file) => statSync(join(basePath, file)).isDirectory())
+	const dirs = readdirSync(basePath).filter((file) => statSync(join(basePath, file)).isDirectory())
 
-  dirs.forEach((dir) => {
-    const dirBasePath = join(basePath, dir)
-    test(dir, (assert) => {
-      const template = new Template(compiler, {}, {})
+	dirs.forEach((dir) => {
+		const dirBasePath = join(basePath, dir)
+		test(dir, (assert) => {
+			const template = new Template(compiler, {}, {})
 
-      /**
-       * Render output
-       */
-      const out = normalizeNewLines(readFileSync(join(dirBasePath, 'index.txt'), 'utf-8'))
-      const state = JSON.parse(readFileSync(join(dirBasePath, 'index.json'), 'utf-8'))
-      const output = template.render(`${dir}/index.edge`, state)
+			/**
+			 * Render output
+			 */
+			const out = normalizeNewLines(readFileSync(join(dirBasePath, 'index.txt'), 'utf-8'))
+			const state = JSON.parse(readFileSync(join(dirBasePath, 'index.json'), 'utf-8'))
+			const output = template.render(`${dir}/index.edge`, state)
 
-      assert.stringEqual(
-        output,
-        out.split('\n').map((line) => normalizeFilename(dirBasePath, line)).join('\n'),
-      )
-    })
-  })
+			assert.stringEqual(
+				output,
+				out
+					.split('\n')
+					.map((line) => normalizeFilename(dirBasePath, line))
+					.join('\n')
+			)
+		})
+	})
 })

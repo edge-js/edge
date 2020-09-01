@@ -1,0 +1,18 @@
+{
+	"trailingComma": "es5",
+	"semi": false,
+	"singleQuote": true,
+	"useTabs": true,
+	"quoteProps": "consistent",
+	"bracketSpacing": true,
+	"arrowParens": "always",
+	"printWidth": 100,
+	"overrides": [
+		{
+			"files": "*.md",
+			"options": {
+				"useTabs": false
+			}
+		}
+	]
+}

@@ -1,11 +1,11 @@
 /*
-* edge
-*
-* (c) Harminder Virk <virk@adonisjs.com>
-*
-* For the full copyright and license information, please view the LICENSE
-* file that was distributed with this source code.
-*/
+ * edge
+ *
+ * (c) Harminder Virk <virk@adonisjs.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 import { expressions } from 'edge-parser'
 import { TagContract } from '../Contracts'
@@ -31,63 +31,63 @@ import { isNotSubsetOf, unallowedExpression, parseJsArg } from '../utils'
  * ```
  */
 export const yieldTag: TagContract = {
-  block: true,
-  seekable: true,
-  tagName: 'yield',
+	block: true,
+	seekable: true,
+	tagName: 'yield',
 
-  /**
-   * Compiles the if block node to a Javascript if statement
-   */
-  compile (parser, buffer, token) {
-    /**
-     * Holding the yield variable counder on the buffer as a private
-     * variable
-     */
-    let yieldCounter = buffer['yieldCounter'] || 0
-    buffer['yieldCounter'] = yieldCounter++
+	/**
+	 * Compiles the if block node to a Javascript if statement
+	 */
+	compile(parser, buffer, token) {
+		/**
+		 * Holding the yield variable counder on the buffer as a private
+		 * variable
+		 */
+		let yieldCounter = buffer['yieldCounter'] || 0
+		buffer['yieldCounter'] = yieldCounter++
 
-    const parsed = parseJsArg(parser, token)
+		const parsed = parseJsArg(parser, token)
 
-    /**
-     * Sequence expression is not
-     */
-    isNotSubsetOf(
-      parsed,
-      [expressions.SequenceExpression],
-      () => {
-        unallowedExpression(
-          `"${token.properties.jsArg}" is not a valid argument type for the @yield tag`,
-          token.filename,
-          parser.utils.getExpressionLoc(parsed),
-        )
-      },
-    )
+		/**
+		 * Sequence expression is not
+		 */
+		isNotSubsetOf(parsed, [expressions.SequenceExpression], () => {
+			unallowedExpression(
+				`"${token.properties.jsArg}" is not a valid argument type for the @yield tag`,
+				token.filename,
+				parser.utils.getExpressionLoc(parsed)
+			)
+		})
 
-    const parsedString = parser.utils.stringify(parsed)
+		const parsedString = parser.utils.stringify(parsed)
 
-    /**
-     * Write main content when it's truthy. The reason we store a reference to a variable first, is that
-     * at times the properties can have side-effects, so calling it inside `if` and then yield may
-     * cause unintended behavior. For example:
-     *
-     * `@yield(getPropertyAge())`
-     *
-     * The `getPropertyAge` uses timestamp comparsion for some logic. So if we will call this method
-     * twice, first inside the `if` block and then to yield it, then it may cause some unintended
-     * behavior.
-     */
-    buffer.writeExpression(`let yield_${yieldCounter} = ${parsedString}`, token.filename, token.loc.start.line)
-    buffer.writeStatement(`if (yield_${yieldCounter}) {`, token.filename, -1)
-    buffer.outputExpression(`yield_${yieldCounter}`, token.filename, -1, true)
+		/**
+		 * Write main content when it's truthy. The reason we store a reference to a variable first, is that
+		 * at times the properties can have side-effects, so calling it inside `if` and then yield may
+		 * cause unintended behavior. For example:
+		 *
+		 * `@yield(getPropertyAge())`
+		 *
+		 * The `getPropertyAge` uses timestamp comparsion for some logic. So if we will call this method
+		 * twice, first inside the `if` block and then to yield it, then it may cause some unintended
+		 * behavior.
+		 */
+		buffer.writeExpression(
+			`let yield_${yieldCounter} = ${parsedString}`,
+			token.filename,
+			token.loc.start.line
+		)
+		buffer.writeStatement(`if (yield_${yieldCounter}) {`, token.filename, -1)
+		buffer.outputExpression(`yield_${yieldCounter}`, token.filename, -1, true)
 
-    /**
-     * Write fallback content
-     */
-    if (!token.properties.selfclosed) {
-      buffer.writeStatement('} else {', token.filename, -1)
-      token.children.forEach((child) => (parser.processToken(child, buffer)))
-    }
+		/**
+		 * Write fallback content
+		 */
+		if (!token.properties.selfclosed) {
+			buffer.writeStatement('} else {', token.filename, -1)
+			token.children.forEach((child) => parser.processToken(child, buffer))
+		}
 
-    buffer.writeStatement('}', token.filename, -1)
-  },
+		buffer.writeStatement('}', token.filename, -1)
+	},
 }

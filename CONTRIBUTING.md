@@ -31,7 +31,7 @@ Sharing PR's for small changes works great. However, when contributing big featu
 
 ### What is an RFC?
 
-RFC stands for **Request for Commits**, a standard process followed by many other frameworks including [Ember](https://github.com/emberjs/rfcs), [yarn](https://github.com/yarnpkg/rfcs) and [rust](https://github.com/rust-lang/rfcs). 
+RFC stands for **Request for Commits**, a standard process followed by many other frameworks including [Ember](https://github.com/emberjs/rfcs), [yarn](https://github.com/yarnpkg/rfcs) and [rust](https://github.com/rust-lang/rfcs).
 
 In brief, RFC process allows you to talk about the changes with everyone in the community and get a view of the core team before dedicating your time to work on the feature.
 
@@ -43,6 +43,6 @@ All of the security issues, must be reported via [email](mailto:virk@adonisjs.co
 
 ## Be a part of community
 
-We welcome you to participate in the [forum](https://forum.adonisjs.com/) and the AdonisJs [discord server](https://discord.me/adonisjs). You are free to ask your questions and share your work or contributions made to AdonisJs eco-system. 
+We welcome you to participate in the [forum](https://forum.adonisjs.com/) and the AdonisJs [discord server](https://discord.me/adonisjs). You are free to ask your questions and share your work or contributions made to AdonisJs eco-system.
 
 We follow a strict [Code of Conduct](https://adonisjs.com/community-guidelines) to make sure everyone is respectful to each other.

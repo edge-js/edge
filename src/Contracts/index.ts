@@ -9,67 +9,63 @@
 
 import { Token, TagToken } from 'edge-lexer'
 import { MacroableConstructorContract } from 'macroable'
-import {
-  ParserTagDefinitionContract,
-  Parser,
-  EdgeBuffer,
-} from 'edge-parser'
+import { ParserTagDefinitionContract, Parser, EdgeBuffer } from 'edge-parser'
 
 /**
  * The shape in which the loader must resolve the template
  */
 export type LoaderTemplate = {
-  template: string,
+	template: string
 }
 
 /**
  * Loader contract that every loader must adheres to.
  */
 export interface LoaderContract {
-  /**
-   * List of mounted disks
-   */
-  mounted: { [diskName: string]: string }
+	/**
+	 * List of mounted disks
+	 */
+	mounted: { [diskName: string]: string }
 
-  /**
-   * Save disk name and dirPath to resolve views
-   */
-  mount (diskName: string, dirPath: string): void
+	/**
+	 * Save disk name and dirPath to resolve views
+	 */
+	mount(diskName: string, dirPath: string): void
 
-  /**
-   * Remove disk from the previously saved paths
-   */
-  unmount (diskName: string): void
+	/**
+	 * Remove disk from the previously saved paths
+	 */
+	unmount(diskName: string): void
 
-  /**
-   * Resolve template contents and optionally the Presenter
-   */
-  resolve (templatePath: string): LoaderTemplate
+	/**
+	 * Resolve template contents and optionally the Presenter
+	 */
+	resolve(templatePath: string): LoaderTemplate
 
-  /**
-   * Make absolute path to a template
-   */
-  makePath (templatePath: string): string
+	/**
+	 * Make absolute path to a template
+	 */
+	makePath(templatePath: string): string
 
-  /**
-   * Register in memory template and presenter
-   */
-  register (templatePath: string, contents: LoaderTemplate): void
+	/**
+	 * Register in memory template and presenter
+	 */
+	register(templatePath: string, contents: LoaderTemplate): void
 }
 
 /**
  * Shape of runtime context
  */
 export interface ContextContract {
-  escape <T> (input: T): T,
-  reThrow (error: any, filename: string, linenumber: number): never
+	escape<T>(input: T): T
+	reThrow(error: any, filename: string, linenumber: number): never
 }
 
 /**
  * Shape of context constructor
  */
 export interface ContextConstructorContract extends MacroableConstructorContract<ContextContract> {
-  new (): ContextContract,
+	new (): ContextContract
 }
 
 /**
@@ -77,41 +73,41 @@ export interface ContextConstructorContract extends MacroableConstructorContract
  * required by lexer and parser
  */
 export interface TagContract extends ParserTagDefinitionContract {
-  tagName: string,
-  run? (context: ContextConstructorContract): void,
+	tagName: string
+	run?(context: ContextConstructorContract): void
 }
 
 /**
  * Shape of required tags
  */
 export type TagsContract = {
-  [tagName: string]: TagContract,
+	[tagName: string]: TagContract
 }
 
 /**
  * Shape of the cache manager
  */
 export interface CacheManagerContract {
-  get (templatePath: string): undefined | LoaderTemplate
-  set (templatePath: string, compiledOutput: LoaderTemplate): void
-  has (templatePath: string): boolean
+	get(templatePath: string): undefined | LoaderTemplate
+	set(templatePath: string, compiledOutput: LoaderTemplate): void
+	has(templatePath: string): boolean
 }
 
 /**
  * Shape of the compiler
  */
 export interface CompilerContract {
-  cacheManager: CacheManagerContract,
-  compile (templatePath: string, localVariables?: string[]): LoaderTemplate,
-  tokenize (templatePath: string, parser?: Parser): Token[]
+	cacheManager: CacheManagerContract
+	compile(templatePath: string, localVariables?: string[]): LoaderTemplate
+	tokenize(templatePath: string, parser?: Parser): Token[]
 }
 
 /**
  * Shape of the renderer that renders the edge templates
  */
 export interface EdgeRendererContract {
-  share (locals: any): this,
-  render (templatePath: string, state?: any): string,
+	share(locals: any): this
+	render(templatePath: string, state?: any): string
 }
 
 /**
@@ -119,29 +115,29 @@ export interface EdgeRendererContract {
  * edge constructor
  */
 export type EdgeOptions = {
-  loader?: LoaderContract,
-  cache?: boolean,
+	loader?: LoaderContract
+	cache?: boolean
 }
 
 /**
  * Shape of the main module
  */
 export interface EdgeContract {
-  loader: LoaderContract,
-  compiler: CompilerContract,
-  GLOBALS: { [key: string]: any },
+	loader: LoaderContract
+	compiler: CompilerContract
+	GLOBALS: { [key: string]: any }
 
-  registerTag (tag: TagContract): this,
-  registerTemplate (templatePath: string, contents: LoaderTemplate): this,
-  global (key: string, value: any): this,
+	registerTag(tag: TagContract): this
+	registerTemplate(templatePath: string, contents: LoaderTemplate): this
+	global(key: string, value: any): this
 
-  mount (diskName: string): this,
-  mount (diskName: string, dirPath: string): this,
-  unmount (diskName: string): this,
+	mount(diskName: string): this
+	mount(diskName: string, dirPath: string): this
+	unmount(diskName: string): this
 
-  getRenderer (): EdgeRendererContract,
-  share (locals: any): EdgeRendererContract,
-  render (templatePath: string, state?: any): string,
+	getRenderer(): EdgeRendererContract
+	share(locals: any): EdgeRendererContract
+	render(templatePath: string, state?: any): string
 }
 
 /**

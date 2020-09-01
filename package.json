@@ -19,7 +19,9 @@
     "build": "npm run compile",
     "lint": "eslint . --ext=.ts",
     "release": "np",
-    "version": "npm run build"
+    "version": "npm run build",
+    "format": "prettier --write .",
+    "sync-labels": "github-label-sync --labels ./node_modules/@adonisjs/mrm-preset/gh-labels.json edge-js/edge"
   },
   "repository": {
     "type": "git",
@@ -42,12 +44,17 @@
     "del-cli": "^3.0.1",
     "doctoc": "^1.4.0",
     "eslint": "^7.8.0",
+    "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-adonis": "^1.0.15",
+    "eslint-plugin-prettier": "^3.1.4",
+    "github-label-sync": "^2.0.0",
     "husky": "^4.2.5",
     "japa": "^3.1.1",
     "js-stringify": "^1.0.2",
     "mrm": "^2.3.5",
     "np": "^6.5.0",
+    "npm-audit-html": "^1.4.3",
+    "prettier": "^2.1.1",
     "typescript": "^4.0.2"
   },
   "config": {
@@ -77,7 +84,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "doctoc README.md --title='## Table of contents' && git add README.md",
+      "pre-commit": "doctoc README.md --title='## Table of contents' && git add README.md && npm audit --production --json | ./node_modules/.bin/npm-audit-html && git add npm-audit.html",
       "commit-msg": "node ./node_modules/@adonisjs/mrm-preset/validateCommit/conventional/validate.js"
     }
   },

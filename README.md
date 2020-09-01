@@ -8,18 +8,18 @@
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Edge
+
 > Template engine for Node.js with breath of fresh air
 
 [![appveyor-image]][appveyor-url] [![circleci-image]][circleci-url] [![npm-image]][npm-url] ![](https://img.shields.io/badge/Typescript-294E80.svg?style=for-the-badge&logo=typescript)
 
 ## Maintainers
+
 [Harminder virk](https://github.com/thetutlage)
 
 [appveyor-image]: https://img.shields.io/appveyor/ci/thetutlage/edge/master.svg?style=for-the-badge&logo=appveyor
-[appveyor-url]: https://ci.appveyor.com/project/thetutlage/edge "appveyor"
-
+[appveyor-url]: https://ci.appveyor.com/project/thetutlage/edge 'appveyor'
 [circleci-image]: https://img.shields.io/circleci/project/github/edge-js/edge/master.svg?style=for-the-badge&logo=circleci
-[circleci-url]: https://circleci.com/gh/edge-js/edge "circleci"
-
+[circleci-url]: https://circleci.com/gh/edge-js/edge 'circleci'
 [npm-image]: https://img.shields.io/npm/v/edge.js.svg?style=for-the-badge&logo=npm
-[npm-url]: https://npmjs.org/package/edge.js "npm"
+[npm-url]: https://npmjs.org/package/edge.js 'npm'

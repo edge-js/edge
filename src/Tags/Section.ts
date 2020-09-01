@@ -1,11 +1,11 @@
 /*
-* edge
-*
-* (c) Harminder Virk <virk@adonisjs.com>
-*
-* For the full copyright and license information, please view the LICENSE
-* file that was distributed with this source code.
-*/
+ * edge
+ *
+ * (c) Harminder Virk <virk@adonisjs.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 import { TagContract } from '../Contracts'
 
@@ -14,11 +14,11 @@ import { TagContract } from '../Contracts'
  * nested and must appear as top level children inside a component.
  */
 export const sectionTag: TagContract = {
-  block: true,
-  seekable: true,
-  tagName: 'section',
+	block: true,
+	seekable: true,
+	tagName: 'section',
 
-  compile (parser, buffer, token) {
-    token.children.forEach((child) => parser.processToken(child, buffer))
-  },
+	compile(parser, buffer, token) {
+		token.children.forEach((child) => parser.processToken(child, buffer))
+	},
 }

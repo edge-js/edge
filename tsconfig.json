@@ -1,3 +1,3 @@
 {
-  "extends": "./node_modules/@adonisjs/mrm-preset/_tsconfig"
+	"extends": "./node_modules/@adonisjs/mrm-preset/_tsconfig"
 }
