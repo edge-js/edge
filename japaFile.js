@@ -1,4 +1,4 @@
-require('ts-node/register')
+require('@adonisjs/require-ts/build/register')
 const { configure } = require('japa')
 
 configure({

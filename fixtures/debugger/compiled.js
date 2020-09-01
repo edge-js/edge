@@ -3,7 +3,6 @@ let $lineNumber = 1;
 let $filename = "{{__dirname}}index.edge";
 try {
 debugger;
-out += "\n";
 out += "";
 out += "\n";
 out += "Hello";

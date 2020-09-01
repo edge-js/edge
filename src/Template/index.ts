@@ -38,7 +38,7 @@ export class Template {
   /**
    * Trims top and bottom new lines from the content
    */
-  public trimTopBottomNewLines (value) {
+  public trimTopBottomNewLines (value: string) {
     return value.replace(/^\n|^\r\n/, '').replace(/\n$|\r\n$/, '')
   }
 

@@ -113,7 +113,7 @@ function getSlotNameAndProps (token: TagToken, parser: Parser): [string, null | 
   /**
    * Fetch the slot name
    */
-  let name
+  let name: any
   if (parsed.type === expressions.SequenceExpression) {
     name = parsed.expressions[0]
   } else {
@@ -235,7 +235,7 @@ export const componentTag: TagContract = {
        */
       if (!lexerUtils.isTag(child, 'slot')) {
         /**
-         * Ignore first newline inside slots
+         * Ignore first newline inside the unnamed main slot
          */
         if (mainSlot.buffer.size === 0 && child.type === 'newline') {
           return
@@ -279,9 +279,6 @@ export const componentTag: TagContract = {
        * Self process the slot children.
        */
       child.children.forEach((grandChildren) => {
-        if (slots[slotName].buffer.size === 0 && grandChildren.type === 'newline') {
-          return
-        }
         parser.processToken(grandChildren, slots[slotName].buffer)
       })
 

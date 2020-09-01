@@ -61,7 +61,7 @@ export class Compiler implements CompilerContract {
          * Collect parent template sections
          */
         if (lexerUtils.isTag(node, 'section')) {
-          extendedSections[node.properties.jsArg.trim()] = node
+          extendedSections[(node as TagToken).properties.jsArg.trim()] = node
           return
         }
 
@@ -103,9 +103,15 @@ export class Compiler implements CompilerContract {
         /**
          * Concat children when super was called
          */
-        if (extendedNode.children.length && lexerUtils.isTag(extendedNode.children[0], 'super')) {
-          extendedNode.children.shift()
-          extendedNode.children = node.children.concat(extendedNode.children)
+        if (extendedNode.children.length) {
+          if (lexerUtils.isTag(extendedNode.children[0], 'super')) {
+            extendedNode.children.shift()
+            extendedNode.children = node.children.concat(extendedNode.children)
+          } else if (lexerUtils.isTag(extendedNode.children[1], 'super')) {
+            extendedNode.children.shift()
+            extendedNode.children.shift()
+            extendedNode.children = node.children.concat(extendedNode.children)
+          }
         }
 
         return extendedNode

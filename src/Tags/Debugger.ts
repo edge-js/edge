@@ -16,6 +16,7 @@ export const debuggerTag: TagContract = {
   block: false,
   seekable: false,
   tagName: 'debugger',
+  noNewLine: true,
 
   /**
    * Compiles `@debugger` tags

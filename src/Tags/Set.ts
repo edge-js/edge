@@ -35,6 +35,7 @@ export const setTag: TagContract = {
   block: false,
   seekable: true,
   tagName: 'set',
+  noNewLine: true,
 
   /**
    * Compiles else block node to Javascript else statement

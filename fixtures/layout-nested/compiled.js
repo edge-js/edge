@@ -5,6 +5,7 @@ try {
 out += "\n";
 out += "I will define the header myself";
 out += "\n";
+out += "\n";
 out += "Content from super";
 out += "\n";
 out += "Appended by index";

@@ -5,11 +5,11 @@ try {
 let total = 0;
 $lineNumber = 2;
 ctx.loop(state.items, function (item) {
+out += "\n";
 $lineNumber = 3;
 let grossPrice = item.price * item.quantity * state.surcharge;
 $lineNumber = 4;
 total = total + grossPrice;
-out += "\n";
 out += "- ";
 $lineNumber = 5;
 out += `${ctx.escape(item.name)}`;

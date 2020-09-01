@@ -17,6 +17,7 @@ export const layoutTag: TagContract = {
   block: false,
   seekable: true,
   tagName: 'layout',
+  noNewLine: true,
 
   compile () {
     // The layouts are handled by the template itself. I am just a way to

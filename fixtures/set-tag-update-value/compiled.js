@@ -5,7 +5,6 @@ try {
 let username = "nikk";
 $lineNumber = 2;
 username = "virk";
-out += "\n";
 $lineNumber = 3;
 out += `${ctx.escape(username)}`;
 } catch (error) {

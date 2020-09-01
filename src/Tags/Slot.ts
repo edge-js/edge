@@ -18,6 +18,7 @@ export const slotTag: TagContract = {
   block: true,
   seekable: true,
   tagName: 'slot',
+  noNewLine: true,
 
   compile (_, __, token) {
     throw new EdgeError(
