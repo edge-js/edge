@@ -23,3 +23,4 @@ trim_trailing_whitespace = false
 
 [{fixtures,examples,newline-fixtures}/**/*]
 insert_final_newline = ignore
+indent_style = space
