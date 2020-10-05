@@ -13,10 +13,13 @@ import dedent from 'dedent-js'
 import { Filesystem } from '@poppinss/dev-utils'
 
 import { Edge } from '../src/Edge'
+import { normalizeNewLines } from '../test-helpers'
+
+import './assert-extend'
 
 const fs = new Filesystem(join(__dirname, 'views'))
 
-test.group('Template', (group) => {
+test.group('Template FileName', (group) => {
 	group.afterEach(async () => {
 		await fs.cleanup()
 	})
@@ -46,12 +49,12 @@ test.group('Template', (group) => {
 
 		const output = edge.render('foo', {})
 
-		assert.equal(
+		assert.stringEqual(
 			output.trim(),
-			dedent`
-		${join(fs.basePath, 'bar.edge')}
-		${join(fs.basePath, 'foo.edge')}
-		`
+			normalizeNewLines(dedent`
+				${join(fs.basePath, 'bar.edge')}
+				${join(fs.basePath, 'foo.edge')}
+			`)
 		)
 	})
 
@@ -81,12 +84,12 @@ test.group('Template', (group) => {
 
 		const output = edge.render('foo', {})
 
-		assert.equal(
+		assert.stringEqual(
 			output.trim(),
-			dedent`
+			normalizeNewLines(dedent`
 				${join(fs.basePath, 'master.edge')}
 					${join(fs.basePath, 'foo.edge')}
-		`
+			`)
 		)
 	})
 
@@ -105,12 +108,12 @@ test.group('Template', (group) => {
 
 		const output = edge.render('foo', {})
 
-		assert.equal(
+		assert.stringEqual(
 			output.trim(),
-			dedent`
-		${join(fs.basePath, 'bar.edge')}
-		${join(fs.basePath, 'foo.edge')}
-		`
+			normalizeNewLines(dedent`
+				${join(fs.basePath, 'bar.edge')}
+				${join(fs.basePath, 'foo.edge')}
+			`)
 		)
 	})
 
@@ -139,12 +142,12 @@ test.group('Template', (group) => {
 
 		const output = edge.render('foo', {})
 
-		assert.equal(
+		assert.stringEqual(
 			output.trim(),
-			dedent`
+			normalizeNewLines(dedent`
 				${join(fs.basePath, 'foo.edge')}
 				${join(fs.basePath, 'button.edge')}
-		`
+			`)
 		)
 	})
 })
