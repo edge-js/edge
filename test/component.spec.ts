@@ -15,6 +15,7 @@ import { Filesystem } from '@poppinss/dev-utils'
 import { Loader } from '../src/Loader'
 import { Compiler } from '../src/Compiler'
 import { Template } from '../src/Template'
+import { Processor } from '../src/Processor'
 
 import { slotTag } from '../src/Tags/Slot'
 import { componentTag } from '../src/Tags/Component'
@@ -27,7 +28,9 @@ const tags = {
 
 const loader = new Loader()
 loader.mount('default', fs.basePath)
-const compiler = new Compiler(loader, tags, false)
+
+const processor = new Processor()
+const compiler = new Compiler(loader, tags, processor, false)
 
 test.group('Component | compile | errors', (group) => {
 	group.afterEach(async () => {
@@ -47,7 +50,7 @@ test.group('Component | compile | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {})
+		const template = new Template(compiler, {}, {}, processor)
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -73,7 +76,7 @@ test.group('Component | compile | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {})
+		const template = new Template(compiler, {}, {}, processor)
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -99,7 +102,7 @@ test.group('Component | compile | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {})
+		const template = new Template(compiler, {}, {}, processor)
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -125,7 +128,7 @@ test.group('Component | compile | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {})
+		const template = new Template(compiler, {}, {}, processor)
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -155,7 +158,7 @@ test.group('Component | render | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {})
+		const template = new Template(compiler, {}, {}, processor)
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -181,7 +184,7 @@ test.group('Component | render | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {})
+		const template = new Template(compiler, {}, {}, processor)
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -209,7 +212,7 @@ test.group('Component | render | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {})
+		const template = new Template(compiler, {}, {}, processor)
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -238,7 +241,7 @@ test.group('Component | render | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {})
+		const template = new Template(compiler, {}, {}, processor)
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -267,7 +270,7 @@ test.group('Component | render | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {})
+		const template = new Template(compiler, {}, {}, processor)
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -299,7 +302,7 @@ test.group('Component | render | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {})
+		const template = new Template(compiler, {}, {}, processor)
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -331,7 +334,7 @@ test.group('Component | render | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {})
+		const template = new Template(compiler, {}, {}, processor)
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {

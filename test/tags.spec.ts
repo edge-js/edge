@@ -11,16 +11,19 @@ import test from 'japa'
 import { join } from 'path'
 import dedent from 'dedent-js'
 import { Filesystem } from '@poppinss/dev-utils'
-import { Compiler } from '../src/Compiler'
-import { Loader } from '../src/Loader'
+
 import * as tags from '../src/Tags'
+import { Loader } from '../src/Loader'
+import { Compiler } from '../src/Compiler'
+import { Processor } from '../src/Processor'
 
 const fs = new Filesystem(join(__dirname, 'views'))
 
 const loader = new Loader()
 loader.mount('default', fs.basePath)
 
-const compiler = new Compiler(loader, tags)
+const processor = new Processor()
+const compiler = new Compiler(loader, tags, processor)
 
 test.group('If tag', (group) => {
 	group.afterEach(async () => {

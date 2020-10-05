@@ -103,11 +103,39 @@ export interface CompilerContract {
 }
 
 /**
+ * Shape of the template contract
+ */
+export interface TemplateContract {
+	renderInline(templatePath: string, ...localVariables: string[]): Function
+	renderWithState(template: string, state: any, slots: any): string
+	render(template: string, state: any): string
+}
+
+/**
  * Shape of the renderer that renders the edge templates
  */
 export interface EdgeRendererContract {
 	share(locals: any): this
 	render(templatePath: string, state?: any): string
+}
+
+/**
+ * The processor is used to execute process functions for different
+ * lifecycles
+ */
+export interface ProcessorContract {
+	/**
+	 * Define a processor handler
+	 */
+	process(event: 'raw', handler: (data: { raw: string; path: string }) => string | void): this
+	process(
+		event: 'compiled',
+		handler: (data: { compiled: string; path: string }) => string | void
+	): this
+	process(
+		event: 'output',
+		handler: (data: { output: string; template: TemplateContract }) => string | void
+	): this
 }
 
 /**
@@ -122,7 +150,7 @@ export type EdgeOptions = {
 /**
  * Shape of the main module
  */
-export interface EdgeContract {
+export interface EdgeContract extends ProcessorContract {
 	loader: LoaderContract
 	compiler: CompilerContract
 	GLOBALS: { [key: string]: any }

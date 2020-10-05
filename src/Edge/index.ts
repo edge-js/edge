@@ -11,6 +11,7 @@ import * as Tags from '../Tags'
 import { Loader } from '../Loader'
 import { Context } from '../Context'
 import { Compiler } from '../Compiler'
+import { Processor } from '../Processor'
 import { EdgeRenderer } from '../Renderer'
 
 import {
@@ -18,6 +19,7 @@ import {
 	EdgeOptions,
 	EdgeContract,
 	LoaderTemplate,
+	TemplateContract,
 	EdgeRendererContract,
 } from '../Contracts'
 
@@ -37,6 +39,11 @@ export class Edge implements EdgeContract {
 	private tags = {}
 
 	/**
+	 * Reference to the registered processor handlers
+	 */
+	private processor = new Processor()
+
+	/**
 	 * The loader to load templates. A loader can read and return
 	 * templates from anywhere. The default loader reads files
 	 * from the disk
@@ -46,7 +53,7 @@ export class Edge implements EdgeContract {
 	/**
 	 * The underlying compiler in use
 	 */
-	public compiler = new Compiler(this.loader, this.tags, !!this.options.cache)
+	public compiler = new Compiler(this.loader, this.tags, this.processor, !!this.options.cache)
 
 	constructor(private options: EdgeOptions = {}) {
 		Object.keys(Tags).forEach((name) => this.registerTag(Tags[name]))
@@ -162,7 +169,28 @@ export class Edge implements EdgeContract {
 	 * can be used to define locals.
 	 */
 	public getRenderer(): EdgeRendererContract {
-		return new EdgeRenderer(this.compiler, this.GLOBALS)
+		return new EdgeRenderer(this.compiler, this.GLOBALS, this.processor)
+	}
+
+	/**
+	 * Define processor functions to modify the output of templates
+	 * at different stages
+	 */
+	public process(
+		event: 'raw',
+		handler: (data: { raw: string; path: string }) => string | void
+	): this
+	public process(
+		event: 'compiled',
+		handler: (data: { compiled: string; path: string }) => string | void
+	): this
+	public process(
+		event: 'output',
+		handler: (data: { output: string; template: TemplateContract }) => string | void
+	): this
+	public process(event: any, handler: (...args: any[]) => any): this {
+		this.processor.process(event, handler)
+		return this
 	}
 
 	/**

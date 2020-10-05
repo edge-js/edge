@@ -9,21 +9,27 @@
 
 import merge from 'lodash.merge'
 import { Context } from '../Context'
-import { CompilerContract } from '../Contracts'
+import { Processor } from '../Processor'
+import { CompilerContract, TemplateContract } from '../Contracts'
 
 /**
  * The template is used to compile and run templates. Also the instance
  * of template is passed during runtime to render `dynamic partials`
  * and `dynamic components`.
  */
-export class Template {
+export class Template implements TemplateContract {
 	/**
 	 * The shared state is used to hold the globals and locals,
 	 * since it is shared with components too.
 	 */
 	private sharedState: any
 
-	constructor(private compiler: CompilerContract, globals: any, locals: any) {
+	constructor(
+		private compiler: CompilerContract,
+		globals: any,
+		locals: any,
+		private processor: Processor
+	) {
 		this.sharedState = merge({}, globals, locals)
 	}
 
@@ -70,8 +76,11 @@ export class Template {
 	 */
 	public renderWithState(template: string, state: any, slots: any): string {
 		const { template: compiledTemplate } = this.compiler.compile(template)
+
 		const templateState = Object.assign({}, this.sharedState, state, { $slots: slots })
-		return this.wrapToFunction(compiledTemplate)(this, templateState, new Context())
+		const context = new Context()
+
+		return this.wrapToFunction(compiledTemplate)(this, templateState, context)
 	}
 
 	/**
@@ -83,8 +92,13 @@ export class Template {
 	 */
 	public render(template: string, state: any): string {
 		const { template: compiledTemplate } = this.compiler.compile(template)
+
 		const templateState = Object.assign({}, this.sharedState, state)
-		const fn = this.wrapToFunction(compiledTemplate)
-		return this.trimTopBottomNewLines(fn(this, templateState, new Context()))
+		const context = new Context()
+
+		const output = this.trimTopBottomNewLines(
+			this.wrapToFunction(compiledTemplate)(this, templateState, context)
+		)
+		return this.processor.executeOutput({ output, template: this })
 	}
 }

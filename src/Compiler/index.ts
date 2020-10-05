@@ -11,6 +11,7 @@ import { EdgeError } from 'edge-error'
 import { Parser, EdgeBuffer } from 'edge-parser'
 import { Token, TagToken, utils as lexerUtils } from 'edge-lexer'
 
+import { Processor } from '../Processor'
 import { CacheManager } from '../CacheManager'
 import { LoaderContract, TagsContract, LoaderTemplate, CompilerContract } from '../Contracts'
 
@@ -24,6 +25,7 @@ export class Compiler implements CompilerContract {
 	constructor(
 		private loader: LoaderContract,
 		private tags: TagsContract,
+		private processor: Processor,
 		private cache: boolean = true
 	) {}
 
@@ -152,7 +154,9 @@ export class Compiler implements CompilerContract {
 	 */
 	public tokenize(templatePath: string, parser?: Parser): Token[] {
 		const absPath = this.loader.makePath(templatePath)
-		const { template } = this.loader.resolve(absPath)
+		let { template } = this.loader.resolve(absPath)
+
+		template = this.processor.executeRaw({ path: absPath, raw: template })
 		return this.templateContentToTokens(template, parser || new Parser(this.tags), absPath)
 	}
 
@@ -174,7 +178,11 @@ export class Compiler implements CompilerContract {
 		 */
 		const cachedResponse = this.cacheManager.get(absPath)
 		if (cachedResponse) {
-			return cachedResponse
+			const template = this.processor.executeCompiled({
+				path: absPath,
+				compiled: cachedResponse.template,
+			})
+			return { template }
 		}
 
 		const parser = new Parser(this.tags)
@@ -194,6 +202,6 @@ export class Compiler implements CompilerContract {
 		const template = buffer.flush()
 
 		this.cacheManager.set(absPath, { template })
-		return { template }
+		return { template: this.processor.executeCompiled({ path: absPath, compiled: template }) }
 	}
 }

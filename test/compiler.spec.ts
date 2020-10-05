@@ -18,6 +18,7 @@ import { Loader } from '../src/Loader'
 import { Context } from '../src/Context'
 import { setTag } from '../src/Tags/Set'
 import { Compiler } from '../src/Compiler'
+import { Processor } from '../src/Processor'
 import { layoutTag } from '../src/Tags/Layout'
 import { sectionTag } from '../src/Tags/Section'
 import { normalizeNewLines } from '../test-helpers'
@@ -37,7 +38,7 @@ test.group('Compiler | Cache', (group) => {
 		const loader = new Loader()
 		loader.mount('default', fs.basePath)
 
-		const compiler = new Compiler(loader, {})
+		const compiler = new Compiler(loader, {}, new Processor())
 		const { template } = compiler.compile('foo')
 
 		assert.stringEqual(
@@ -61,7 +62,7 @@ test.group('Compiler | Cache', (group) => {
 		const loader = new Loader()
 		loader.mount('default', fs.basePath)
 
-		const compiler = new Compiler(loader, {}, true)
+		const compiler = new Compiler(loader, {}, new Processor(), true)
 		assert.equal(
 			compiler.compile('foo').template,
 			compiler.cacheManager.get(join(fs.basePath, 'foo.edge'))!.template
@@ -74,7 +75,7 @@ test.group('Compiler | Cache', (group) => {
 		const loader = new Loader()
 		loader.mount('default', fs.basePath)
 
-		const compiler = new Compiler(loader, {}, false)
+		const compiler = new Compiler(loader, {}, new Processor(), false)
 		compiler.compile('foo')
 		assert.isUndefined(compiler.cacheManager.get(join(fs.basePath, 'foo.edge')))
 	})
@@ -107,10 +108,14 @@ test.group('Compiler | Tokenize', (group) => {
 		const loader = new Loader()
 		loader.mount('default', fs.basePath)
 
-		const compiler = new Compiler(loader, {
-			section: sectionTag,
-			layout: layoutTag,
-		})
+		const compiler = new Compiler(
+			loader,
+			{
+				section: sectionTag,
+				layout: layoutTag,
+			},
+			new Processor()
+		)
 
 		assert.deepEqual(compiler.tokenize('index.edge'), [
 			{
@@ -167,11 +172,15 @@ test.group('Compiler | Tokenize', (group) => {
 		const loader = new Loader()
 		loader.mount('default', fs.basePath)
 
-		const compiler = new Compiler(loader, {
-			section: sectionTag,
-			layout: layoutTag,
-			set: setTag,
-		})
+		const compiler = new Compiler(
+			loader,
+			{
+				section: sectionTag,
+				layout: layoutTag,
+				set: setTag,
+			},
+			new Processor()
+		)
 
 		assert.deepEqual(compiler.tokenize('index.edge'), [
 			{
@@ -237,10 +246,14 @@ test.group('Compiler | Tokenize', (group) => {
 		const loader = new Loader()
 		loader.mount('default', fs.basePath)
 
-		const compiler = new Compiler(loader, {
-			section: sectionTag,
-			layout: layoutTag,
-		})
+		const compiler = new Compiler(
+			loader,
+			{
+				section: sectionTag,
+				layout: layoutTag,
+			},
+			new Processor()
+		)
 
 		try {
 			compiler.tokenize('index.edge')
@@ -289,10 +302,14 @@ test.group('Compiler | Tokenize', (group) => {
 		const loader = new Loader()
 		loader.mount('default', fs.basePath)
 
-		const compiler = new Compiler(loader, {
-			section: sectionTag,
-			layout: layoutTag,
-		})
+		const compiler = new Compiler(
+			loader,
+			{
+				section: sectionTag,
+				layout: layoutTag,
+			},
+			new Processor()
+		)
 
 		assert.deepEqual(compiler.tokenize('index.edge'), [
 			{
@@ -375,10 +392,14 @@ test.group('Compiler | Tokenize', (group) => {
 		const loader = new Loader()
 		loader.mount('default', fs.basePath)
 
-		const compiler = new Compiler(loader, {
-			section: sectionTag,
-			layout: layoutTag,
-		})
+		const compiler = new Compiler(
+			loader,
+			{
+				section: sectionTag,
+				layout: layoutTag,
+			},
+			new Processor()
+		)
 
 		assert.deepEqual(compiler.tokenize('index.edge'), [
 			{
@@ -443,10 +464,14 @@ test.group('Compiler | Compile', (group) => {
 		const loader = new Loader()
 		loader.mount('default', fs.basePath)
 
-		const compiler = new Compiler(loader, {
-			section: sectionTag,
-			layout: layoutTag,
-		})
+		const compiler = new Compiler(
+			loader,
+			{
+				section: sectionTag,
+				layout: layoutTag,
+			},
+			new Processor()
+		)
 
 		assert.stringEqual(
 			compiler.compile('index.edge').template,
@@ -493,10 +518,14 @@ test.group('Compiler | Compile', (group) => {
 		const loader = new Loader()
 		loader.mount('default', fs.basePath)
 
-		const compiler = new Compiler(loader, {
-			section: sectionTag,
-			layout: layoutTag,
-		})
+		const compiler = new Compiler(
+			loader,
+			{
+				section: sectionTag,
+				layout: layoutTag,
+			},
+			new Processor()
+		)
 
 		try {
 			compiler.compile('index.edge')
@@ -531,10 +560,14 @@ test.group('Compiler | Compile', (group) => {
 		const loader = new Loader()
 		loader.mount('default', fs.basePath)
 
-		const compiler = new Compiler(loader, {
-			section: sectionTag,
-			layout: layoutTag,
-		})
+		const compiler = new Compiler(
+			loader,
+			{
+				section: sectionTag,
+				layout: layoutTag,
+			},
+			new Processor()
+		)
 
 		try {
 			compiler.compile('index.edge')
@@ -569,10 +602,14 @@ test.group('Compiler | Compile', (group) => {
 		const loader = new Loader()
 		loader.mount('default', fs.basePath)
 
-		const compiler = new Compiler(loader, {
-			section: sectionTag,
-			layout: layoutTag,
-		})
+		const compiler = new Compiler(
+			loader,
+			{
+				section: sectionTag,
+				layout: layoutTag,
+			},
+			new Processor()
+		)
 
 		try {
 			const fn = compiler.compile('index.edge').template
@@ -609,10 +646,14 @@ test.group('Compiler | Compile', (group) => {
 		const loader = new Loader()
 		loader.mount('default', fs.basePath)
 
-		const compiler = new Compiler(loader, {
-			section: sectionTag,
-			layout: layoutTag,
-		})
+		const compiler = new Compiler(
+			loader,
+			{
+				section: sectionTag,
+				layout: layoutTag,
+			},
+			new Processor()
+		)
 
 		try {
 			new Function('state', 'ctx', compiler.compile('index.edge').template)({}, new Context())
@@ -622,5 +663,460 @@ test.group('Compiler | Compile', (group) => {
 			assert.equal(error.line, 3)
 			assert.equal(error.col, 0)
 		}
+	})
+})
+
+test.group('Compiler | Processor', (group) => {
+	group.afterEach(async () => {
+		await fs.cleanup()
+	})
+
+	test('execute raw processor function', async (assert) => {
+		assert.plan(2)
+		await fs.add('index.edge', dedent`Hello`)
+
+		const loader = new Loader()
+		loader.mount('default', fs.basePath)
+
+		const processor = new Processor()
+		processor.process('raw', ({ raw, path }) => {
+			assert.equal(raw, 'Hello')
+			assert.equal(path, join(fs.basePath, 'index.edge'))
+		})
+
+		const compiler = new Compiler(
+			loader,
+			{
+				section: sectionTag,
+				layout: layoutTag,
+			},
+			processor
+		)
+
+		compiler.compile('index')
+	})
+
+	test('use return value of the processor function', async (assert) => {
+		assert.plan(5)
+		await fs.add('index.edge', dedent`Hello`)
+
+		const loader = new Loader()
+		loader.mount('default', fs.basePath)
+
+		const processor = new Processor()
+		processor.process('raw', ({ raw, path }) => {
+			assert.equal(raw, 'Hello')
+			assert.equal(path, join(fs.basePath, 'index.edge'))
+			return 'Hi'
+		})
+
+		processor.process('raw', ({ raw, path }) => {
+			assert.equal(raw, 'Hi')
+			assert.equal(path, join(fs.basePath, 'index.edge'))
+			return 'Hey'
+		})
+
+		const compiler = new Compiler(
+			loader,
+			{
+				section: sectionTag,
+				layout: layoutTag,
+			},
+			processor
+		)
+
+		assert.stringEqual(
+			compiler.compile('index.edge').template,
+			normalizeNewLines(dedent`let out = "";
+      let $lineNumber = 1;
+      let $filename = ${stringify(join(fs.basePath, 'index.edge'))};
+      try {
+      out += "Hey";
+      } catch (error) {
+      ctx.reThrow(error, $filename, $lineNumber);
+      }
+      return out;
+    `)
+		)
+	})
+
+	test('do not run raw processor when template is cached', async (assert) => {
+		assert.plan(2)
+		await fs.add('index.edge', dedent`Hello`)
+
+		const loader = new Loader()
+		loader.mount('default', fs.basePath)
+
+		const processor = new Processor()
+		processor.process('raw', ({ raw, path }) => {
+			assert.equal(raw, 'Hello')
+			assert.equal(path, join(fs.basePath, 'index.edge'))
+		})
+
+		const compiler = new Compiler(
+			loader,
+			{
+				section: sectionTag,
+				layout: layoutTag,
+			},
+			processor,
+			true
+		)
+
+		compiler.compile('index.edge')
+		compiler.compile('index.edge')
+		compiler.compile('index.edge')
+	})
+
+	test('run raw processor function when template is not cached', async (assert) => {
+		assert.plan(6)
+		await fs.add('index.edge', dedent`Hello`)
+
+		const loader = new Loader()
+		loader.mount('default', fs.basePath)
+
+		const processor = new Processor()
+		processor.process('raw', ({ raw, path }) => {
+			assert.equal(raw, 'Hello')
+			assert.equal(path, join(fs.basePath, 'index.edge'))
+		})
+
+		const compiler = new Compiler(
+			loader,
+			{
+				section: sectionTag,
+				layout: layoutTag,
+			},
+			processor,
+			false
+		)
+
+		compiler.compile('index.edge')
+		compiler.compile('index.edge')
+		compiler.compile('index.edge')
+	})
+
+	test('run compiled processor function', async (assert) => {
+		assert.plan(2)
+		await fs.add('index.edge', dedent`Hello`)
+
+		const loader = new Loader()
+		loader.mount('default', fs.basePath)
+
+		const processor = new Processor()
+		processor.process('compiled', ({ compiled, path }) => {
+			assert.stringEqual(
+				compiled,
+				normalizeNewLines(dedent`let out = "";
+		      let $lineNumber = 1;
+		      let $filename = ${stringify(join(fs.basePath, 'index.edge'))};
+		      try {
+		      out += "Hello";
+		      } catch (error) {
+		      ctx.reThrow(error, $filename, $lineNumber);
+		      }
+		      return out;
+		    `)
+			)
+			assert.equal(path, join(fs.basePath, 'index.edge'))
+		})
+
+		const compiler = new Compiler(
+			loader,
+			{
+				section: sectionTag,
+				layout: layoutTag,
+			},
+			processor
+		)
+
+		compiler.compile('index.edge')
+	})
+
+	test('use return value of the compiled processor function', async (assert) => {
+		assert.plan(5)
+		await fs.add('index.edge', dedent`Hello`)
+
+		const loader = new Loader()
+		loader.mount('default', fs.basePath)
+
+		const processor = new Processor()
+		processor.process('compiled', ({ compiled, path }) => {
+			assert.stringEqual(
+				compiled,
+				normalizeNewLines(dedent`let out = "";
+		      let $lineNumber = 1;
+		      let $filename = ${stringify(join(fs.basePath, 'index.edge'))};
+		      try {
+		      out += "Hello";
+		      } catch (error) {
+		      ctx.reThrow(error, $filename, $lineNumber);
+		      }
+		      return out;
+    		`)
+			)
+			assert.equal(path, join(fs.basePath, 'index.edge'))
+			return 'foo'
+		})
+
+		processor.process('compiled', ({ compiled, path }) => {
+			assert.equal(compiled, 'foo')
+			assert.equal(path, join(fs.basePath, 'index.edge'))
+			return 'bar'
+		})
+
+		const compiler = new Compiler(
+			loader,
+			{
+				section: sectionTag,
+				layout: layoutTag,
+			},
+			processor
+		)
+
+		assert.equal(compiler.compile('index.edge').template, 'bar')
+	})
+
+	test('run compiled processor function when template is cached', async (assert) => {
+		assert.plan(6)
+		await fs.add('index.edge', dedent`Hello`)
+
+		const loader = new Loader()
+		loader.mount('default', fs.basePath)
+
+		const processor = new Processor()
+		processor.process('compiled', ({ compiled, path }) => {
+			assert.stringEqual(
+				compiled,
+				normalizeNewLines(dedent`let out = "";
+		      let $lineNumber = 1;
+		      let $filename = ${stringify(join(fs.basePath, 'index.edge'))};
+		      try {
+		      out += "Hello";
+		      } catch (error) {
+		      ctx.reThrow(error, $filename, $lineNumber);
+		      }
+		      return out;
+		    `)
+			)
+			assert.equal(path, join(fs.basePath, 'index.edge'))
+		})
+
+		const compiler = new Compiler(
+			loader,
+			{
+				section: sectionTag,
+				layout: layoutTag,
+			},
+			processor,
+			true
+		)
+
+		compiler.compile('index.edge')
+		compiler.compile('index.edge')
+		compiler.compile('index.edge')
+	})
+
+	test('do not mutate cache when compiled processor function returns a different value', async (assert) => {
+		assert.plan(9)
+		await fs.add('index.edge', dedent`Hello`)
+
+		const loader = new Loader()
+		loader.mount('default', fs.basePath)
+
+		const processor = new Processor()
+		processor.process('compiled', ({ compiled, path }) => {
+			assert.stringEqual(
+				compiled,
+				normalizeNewLines(dedent`let out = "";
+		      let $lineNumber = 1;
+		      let $filename = ${stringify(join(fs.basePath, 'index.edge'))};
+		      try {
+		      out += "Hello";
+		      } catch (error) {
+		      ctx.reThrow(error, $filename, $lineNumber);
+		      }
+		      return out;
+		    `)
+			)
+			assert.equal(path, join(fs.basePath, 'index.edge'))
+			return 'foo'
+		})
+
+		const compiler = new Compiler(
+			loader,
+			{
+				section: sectionTag,
+				layout: layoutTag,
+			},
+			processor,
+			true
+		)
+
+		assert.equal(compiler.compile('index.edge').template, 'foo')
+		assert.equal(compiler.compile('index.edge').template, 'foo')
+		assert.equal(compiler.compile('index.edge').template, 'foo')
+	})
+
+	test('run raw processor function for layouts', async (assert) => {
+		assert.plan(5)
+
+		await fs.add(
+			'master.edge',
+			dedent`
+      {{ username }}
+      @!section('content')
+    `
+		)
+
+		await fs.add(
+			'index.edge',
+			dedent`
+      @layout('master')
+      @section('content')
+        {{ content }}
+      @endsection
+    `
+		)
+
+		const loader = new Loader()
+		loader.mount('default', fs.basePath)
+
+		let iteration = 0
+
+		const processor = new Processor()
+		processor.process('raw', ({ raw, path }) => {
+			iteration++
+
+			if (iteration === 1) {
+				assert.equal(
+					raw,
+					dedent`@layout('master')
+			      @section('content')
+			        {{ content }}
+			      @endsection`
+				)
+				assert.equal(path, join(fs.basePath, 'index.edge'))
+				return
+			}
+
+			if (iteration === 2) {
+				assert.equal(
+					raw,
+					dedent`{{ username }}
+      			@!section('content')
+      		`
+				)
+				assert.equal(path, join(fs.basePath, 'master.edge'))
+				return
+			}
+		})
+
+		const compiler = new Compiler(
+			loader,
+			{
+				section: sectionTag,
+				layout: layoutTag,
+			},
+			processor
+		)
+
+		assert.stringEqual(
+			compiler.compile('index.edge').template,
+			normalizeNewLines(dedent`let out = "";
+      let $lineNumber = 1;
+      let $filename = ${stringify(join(fs.basePath, 'index.edge'))};
+      try {
+      $filename = ${stringify(join(fs.basePath, 'master.edge'))};
+      out += \`\${ctx.escape(state.username)}\`;
+      out += "\\n";
+      out += "  ";
+      $filename = ${stringify(join(fs.basePath, 'index.edge'))};
+      $lineNumber = 3;
+      out += \`\${ctx.escape(state.content)}\`;
+      } catch (error) {
+      ctx.reThrow(error, $filename, $lineNumber);
+      }
+      return out;
+    `)
+		)
+	})
+
+	test('run compiled processor functions for layouts', async (assert) => {
+		assert.plan(3)
+
+		await fs.add(
+			'master.edge',
+			dedent`
+      {{ username }}
+      @!section('content')
+    `
+		)
+
+		await fs.add(
+			'index.edge',
+			dedent`
+      @layout('master')
+      @section('content')
+        {{ content }}
+      @endsection
+    `
+		)
+
+		const loader = new Loader()
+		loader.mount('default', fs.basePath)
+
+		const processor = new Processor()
+		processor.process('compiled', ({ compiled, path }) => {
+			assert.stringEqual(
+				compiled,
+				normalizeNewLines(dedent`let out = "";
+		      let $lineNumber = 1;
+		      let $filename = ${stringify(join(fs.basePath, 'index.edge'))};
+		      try {
+		      $filename = ${stringify(join(fs.basePath, 'master.edge'))};
+		      out += \`\${ctx.escape(state.username)}\`;
+		      out += "\\n";
+		      out += "  ";
+		      $filename = ${stringify(join(fs.basePath, 'index.edge'))};
+		      $lineNumber = 3;
+		      out += \`\${ctx.escape(state.content)}\`;
+		      } catch (error) {
+		      ctx.reThrow(error, $filename, $lineNumber);
+		      }
+		      return out;
+		    `)
+			)
+			assert.equal(path, join(fs.basePath, 'index.edge'))
+		})
+
+		const compiler = new Compiler(
+			loader,
+			{
+				section: sectionTag,
+				layout: layoutTag,
+			},
+			processor
+		)
+
+		assert.stringEqual(
+			compiler.compile('index.edge').template,
+			normalizeNewLines(dedent`let out = "";
+      let $lineNumber = 1;
+      let $filename = ${stringify(join(fs.basePath, 'index.edge'))};
+      try {
+      $filename = ${stringify(join(fs.basePath, 'master.edge'))};
+      out += \`\${ctx.escape(state.username)}\`;
+      out += "\\n";
+      out += "  ";
+      $filename = ${stringify(join(fs.basePath, 'index.edge'))};
+      $lineNumber = 3;
+      out += \`\${ctx.escape(state.content)}\`;
+      } catch (error) {
+      ctx.reThrow(error, $filename, $lineNumber);
+      }
+      return out;
+    `)
+		)
 	})
 })
