@@ -8,7 +8,6 @@
  */
 
 import merge from 'lodash.merge'
-import { EdgeError } from 'edge-error'
 
 import { Context } from '../Context'
 import { Processor } from '../Processor'
