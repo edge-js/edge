@@ -15,11 +15,7 @@ import { safeValue } from '../Context'
  * Class to ease interactions with component props
  */
 export class Props {
-	constructor(options: {
-		component: string
-		state: any
-		caller: { filename: string; lineNumber: number; raise: (message: string) => never }
-	}) {
+	constructor(options: { component: string; state: any }) {
 		this[Symbol.for('options')] = options
 		Object.assign(this, options.state)
 	}

@@ -7,6 +7,7 @@
  * file that was distributed with this source code.
  */
 
+import { EdgeError } from 'edge-error'
 import { safeValue } from '../Context'
 
 /**
@@ -16,7 +17,7 @@ export class Slots {
 	constructor(options: {
 		component: string
 		slots: { [name: string]: (...args: any[]) => string }
-		caller: { filename: string; lineNumber: number; raise: (message: string) => never }
+		caller: { filename: string; line: number; col: number }
 	}) {
 		this[Symbol.for('options')] = options
 		Object.assign(this, options.slots)
@@ -44,10 +45,12 @@ export class Slots {
 	 */
 	public render(name: string, ...args: any[]) {
 		if (!this.has(name)) {
-			this[Symbol.for('options')].caller.raise(
+			throw new EdgeError(
 				`"${name}" slot is required in order to render the "${
 					this[Symbol.for('options')].component
-				}" component`
+				}" component`,
+				'E_MISSING_SLOT',
+				this[Symbol.for('options')].caller
 			)
 		}
 

@@ -314,7 +314,8 @@ export const componentTag: TagContract = {
 
 		const caller = new StringifiedObject()
 		caller.add('filename', '$filename')
-		caller.add('lineNumber', '$lineNumber')
+		caller.add('line', '$lineNumber')
+		caller.add('col', 0)
 
 		/**
 		 * Write the line to render the component with it's own state

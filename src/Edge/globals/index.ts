@@ -8,6 +8,7 @@
  */
 
 import truncatise from 'truncatise'
+import { EdgeError } from 'edge-error'
 import inspect from '@poppinss/inspect'
 import { safeValue } from '../../Context'
 
@@ -23,6 +24,13 @@ export const GLOBALS = {
 			TruncateBy: 'characters',
 			Suffix: options?.suffix,
 		})
+	},
+	raise: (message: string, options?: any) => {
+		if (!options) {
+			throw new Error(message)
+		} else {
+			throw new EdgeError(message, 'E_RUNTIME_EXCEPTION', options)
+		}
 	},
 	excerpt: (value: string, length: number = 20, options?: { strict: boolean; suffix: string }) => {
 		return truncatise(value, {

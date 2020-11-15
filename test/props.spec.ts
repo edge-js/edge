@@ -15,13 +15,6 @@ test.group('Props', () => {
 		const props = new Props({
 			component: 'foo',
 			state: { title: 'Hello' },
-			caller: {
-				filename: 'bar.edge',
-				lineNumber: 1,
-				raise: () => {
-					throw new Error('foo')
-				},
-			},
 		})
 
 		assert.isTrue(props.has('title'))
@@ -31,13 +24,6 @@ test.group('Props', () => {
 		const props = new Props({
 			component: 'foo',
 			state: { title: 'Hello', label: 'Hello world', actionText: 'Confirm' },
-			caller: {
-				filename: 'bar.edge',
-				lineNumber: 1,
-				raise: () => {
-					throw new Error('foo')
-				},
-			},
 		})
 
 		assert.deepEqual(props.only(['label', 'actionText']), {
@@ -50,13 +36,6 @@ test.group('Props', () => {
 		const props = new Props({
 			component: 'foo',
 			state: { title: 'Hello', label: 'Hello world', actionText: 'Confirm' },
-			caller: {
-				filename: 'bar.edge',
-				lineNumber: 1,
-				raise: () => {
-					throw new Error('foo')
-				},
-			},
 		})
 
 		assert.deepEqual(props.except(['label', 'actionText']), {
@@ -71,13 +50,6 @@ test.group('Props', () => {
 				class: ['foo', 'bar'],
 				onclick: 'foo = bar',
 			},
-			caller: {
-				filename: 'bar.edge',
-				lineNumber: 1,
-				raise: () => {
-					throw new Error('foo')
-				},
-			},
 		})
 
 		assert.equal(props.serialize().value, ' class="foo bar" onclick="foo = bar"')
@@ -89,13 +61,6 @@ test.group('Props', () => {
 			state: {
 				class: ['foo', 'bar'],
 				onclick: 'foo = bar',
-			},
-			caller: {
-				filename: 'bar.edge',
-				lineNumber: 1,
-				raise: () => {
-					throw new Error('foo')
-				},
 			},
 		})
 
@@ -109,13 +74,6 @@ test.group('Props', () => {
 				class: ['foo', 'bar'],
 				onclick: 'foo = bar',
 			},
-			caller: {
-				filename: 'bar.edge',
-				lineNumber: 1,
-				raise: () => {
-					throw new Error('foo')
-				},
-			},
 		})
 
 		assert.equal(props.serializeOnly(['class']).value, ' class="foo bar"')
@@ -127,13 +85,6 @@ test.group('Props', () => {
 			state: {
 				class: ['foo', 'bar'],
 				onclick: 'foo = bar',
-			},
-			caller: {
-				filename: 'bar.edge',
-				lineNumber: 1,
-				raise: () => {
-					throw new Error('foo')
-				},
 			},
 		})
 
@@ -147,13 +98,6 @@ test.group('Props', () => {
 				class: ['foo', 'bar'],
 				onclick: 'foo = bar',
 			},
-			caller: {
-				filename: 'bar.edge',
-				lineNumber: 1,
-				raise: () => {
-					throw new Error('foo')
-				},
-			},
 		})
 
 		assert.equal(props.serializeExcept(['class']).value, ' onclick="foo = bar"')
@@ -166,13 +110,6 @@ test.group('Props', () => {
 				class: ['foo', 'bar'],
 				onclick: 'foo = bar',
 			},
-			caller: {
-				filename: 'bar.edge',
-				lineNumber: 1,
-				raise: () => {
-					throw new Error('foo')
-				},
-			},
 		})
 
 		assert.equal(props.serializeExcept(['class'], { id: '1' }).value, ' onclick="foo = bar" id="1"')
@@ -184,13 +121,6 @@ test.group('Props', () => {
 			state: {
 				class: ['foo', 'bar'],
 				onclick: 'foo = bar',
-			},
-			caller: {
-				filename: 'bar.edge',
-				lineNumber: 1,
-				raise: () => {
-					throw new Error('foo')
-				},
 			},
 		})
 
@@ -206,10 +136,6 @@ test.group('Props', () => {
 					name: 'virk',
 				},
 			},
-			caller: {
-				filename: 'bar.edge',
-				lineNumber: 1,
-			},
 		})
 
 		assert.equal(props['user']['name'], 'virk')
@@ -219,13 +145,6 @@ test.group('Props', () => {
 		new Props({
 			component: 'foo',
 			state: undefined,
-			caller: {
-				filename: 'bar.edge',
-				lineNumber: 1,
-				raise: () => {
-					throw new Error('foo')
-				},
-			},
 		})
 	})
 
@@ -233,13 +152,6 @@ test.group('Props', () => {
 		new Props({
 			component: 'foo',
 			state: null,
-			caller: {
-				filename: 'bar.edge',
-				lineNumber: 1,
-				raise: () => {
-					throw new Error('foo')
-				},
-			},
 		})
 	})
 })

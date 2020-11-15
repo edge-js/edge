@@ -10,6 +10,7 @@
 import test from 'japa'
 import { join } from 'path'
 import dedent from 'dedent-js'
+import { EdgeError } from 'edge-error'
 import { Filesystem } from '@poppinss/dev-utils'
 
 import { Loader } from '../src/Loader'
@@ -351,7 +352,7 @@ test.group('Component | render | errors', (group) => {
 		await fs.add(
 			'button.edge',
 			`{{ $props.validate('text', () => {
-				$caller.raise('text prop is required')
+				raise('text prop is required', $caller)
 			}) }}`
 		)
 
@@ -364,7 +365,16 @@ test.group('Component | render | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {}, processor)
+		const template = new Template(
+			compiler,
+			{
+				raise: (message: string, options: any) => {
+					throw new EdgeError(message, 'E_RUNTIME_EXCEPTION', options)
+				},
+			},
+			{},
+			processor
+		)
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
