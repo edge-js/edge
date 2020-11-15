@@ -877,7 +877,7 @@ test.group('Compiler | Processor', (group) => {
 		assert.equal(compiler.compile('index.edge').template, 'bar')
 	})
 
-	test('run compiled processor function when template is cached', async (assert) => {
+	test('run compiled processor function even when template is cached', async (assert) => {
 		assert.plan(6)
 		await fs.add('index.edge', dedent`Hello`)
 
@@ -1117,6 +1117,102 @@ test.group('Compiler | Processor', (group) => {
       }
       return out;
     `)
+		)
+	})
+
+	test('execute line processor function', async (assert) => {
+		assert.plan(2)
+
+		await fs.add(
+			'index.edge',
+			dedent`
+				Hello
+				world
+		`
+		)
+
+		const loader = new Loader()
+		loader.mount('default', fs.basePath)
+
+		const processor = new Processor()
+		let lineNumber = 0
+
+		processor.process('line', (line) => {
+			lineNumber++
+			if (lineNumber === 1) {
+				assert.equal(line, 'Hello')
+			}
+
+			if (lineNumber === 2) {
+				assert.equal(line, 'world')
+			}
+		})
+
+		const compiler = new Compiler(
+			loader,
+			{
+				section: sectionTag,
+				layout: layoutTag,
+			},
+			processor
+		)
+
+		compiler.compile('index')
+	})
+
+	test('use return value of the template', async (assert) => {
+		assert.plan(3)
+
+		await fs.add(
+			'index.edge',
+			dedent`
+				Hello
+				world
+			`
+		)
+
+		const loader = new Loader()
+		loader.mount('default', fs.basePath)
+
+		const processor = new Processor()
+		let lineNumber = 0
+
+		processor.process('line', (line) => {
+			lineNumber++
+			if (lineNumber === 1) {
+				assert.equal(line, 'Hello')
+				return 'hi'
+			}
+
+			if (lineNumber === 2) {
+				assert.equal(line, 'world')
+				return 'universe'
+			}
+		})
+
+		const compiler = new Compiler(
+			loader,
+			{
+				section: sectionTag,
+				layout: layoutTag,
+			},
+			processor
+		)
+
+		assert.stringEqual(
+			compiler.compile('index.edge').template,
+			normalizeNewLines(dedent`let out = "";
+				let $lineNumber = 1;
+				let $filename = ${stringify(join(fs.basePath, 'index.edge'))};
+				try {
+				out += "hi";
+				out += "\\n";
+				out += "universe";
+				} catch (error) {
+				ctx.reThrow(error, $filename, $lineNumber);
+				}
+				return out;
+			`)
 		)
 	})
 })

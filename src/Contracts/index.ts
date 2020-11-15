@@ -155,9 +155,10 @@ export type EdgeOptions = {
 /**
  * Shape of the main module
  */
-export interface EdgeContract extends ProcessorContract {
+export interface EdgeContract {
 	loader: LoaderContract
 	compiler: CompilerContract
+	processor: ProcessorContract
 	GLOBALS: { [key: string]: any }
 	tags: { [name: string]: TagContract }
 

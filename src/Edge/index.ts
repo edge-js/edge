@@ -19,7 +19,6 @@ import {
 	EdgeOptions,
 	EdgeContract,
 	LoaderTemplate,
-	TemplateContract,
 	EdgeRendererContract,
 } from '../Contracts'
 
@@ -28,14 +27,14 @@ import {
  */
 export class Edge implements EdgeContract {
 	/**
-	 * Reference to the registered processor handlers
-	 */
-	private processor = new Processor()
-
-	/**
 	 * An array of registered plugins
 	 */
 	private plugins: ((edge: this) => void)[] = []
+
+	/**
+	 * Reference to the registered processor handlers
+	 */
+	public processor = new Processor()
 
 	/**
 	 * Globals are shared with all rendered templates
@@ -177,27 +176,6 @@ export class Edge implements EdgeContract {
 	 */
 	public registerTemplate(templatePath: string, contents: LoaderTemplate): this {
 		this.loader.register(templatePath, contents)
-		return this
-	}
-
-	/**
-	 * Define processor functions to modify the output of templates
-	 * at different stages
-	 */
-	public process(
-		event: 'raw',
-		handler: (data: { raw: string; path: string }) => string | void
-	): this
-	public process(
-		event: 'compiled',
-		handler: (data: { compiled: string; path: string }) => string | void
-	): this
-	public process(
-		event: 'output',
-		handler: (data: { output: string; template: TemplateContract }) => string | void
-	): this
-	public process(event: any, handler: (...args: any[]) => any): this {
-		this.processor.process(event, handler)
 		return this
 	}
 

@@ -17,6 +17,25 @@ export class Processor implements ProcessorContract {
 	private handlers: Map<string, Set<(...args: any[]) => any>> = new Map()
 
 	/**
+	 * Execute line handler
+	 */
+	public executeLine(line: string): string {
+		const handlers = this.handlers.get('line')
+		if (!handlers) {
+			return line
+		}
+
+		handlers.forEach((handler) => {
+			const output = handler(line)
+			if (output !== undefined) {
+				line = output
+			}
+		})
+
+		return line
+	}
+
+	/**
 	 * Execute raw handlers
 	 */
 	public executeRaw(data: { raw: string; path: string }): string {
@@ -80,6 +99,7 @@ export class Processor implements ProcessorContract {
 		event: 'raw',
 		handler: (data: { raw: string; path: string }) => string | void
 	): this
+	public process(event: 'line', handler: (line: string) => string | void): this
 	public process(
 		event: 'compiled',
 		handler: (data: { compiled: string; path: string }) => string | void
