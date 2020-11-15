@@ -348,7 +348,12 @@ test.group('Component | render | errors', (group) => {
 	test('point error back to the caller when props validation fails', async (assert) => {
 		assert.plan(4)
 
-		await fs.add('button.edge', `{{ $props.get('text') }}`)
+		await fs.add(
+			'button.edge',
+			`{{ $props.validate('text', () => {
+				$caller.raise('text prop is required')
+			}) }}`
+		)
 
 		await fs.add(
 			'eval.edge',
@@ -363,10 +368,7 @@ test.group('Component | render | errors', (group) => {
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
-			assert.equal(
-				error.message,
-				'"text" prop is required in order to render the "button" component'
-			)
+			assert.equal(error.message, 'text prop is required')
 			assert.equal(error.line, 3)
 			assert.equal(error.col, 0)
 			assert.equal(error.filename, join(fs.basePath, 'eval.edge'))

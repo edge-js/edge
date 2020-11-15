@@ -11,19 +11,6 @@ import test from 'japa'
 import { Props } from '../src/Component/Props'
 
 test.group('Props', () => {
-	test('get props value', (assert) => {
-		const props = new Props({
-			component: 'foo',
-			state: { title: 'Hello' },
-			caller: {
-				filename: 'bar.edge',
-				lineNumber: 1,
-			},
-		})
-
-		assert.equal(props.get('title'), 'Hello')
-	})
-
 	test('find if props has value', (assert) => {
 		const props = new Props({
 			component: 'foo',
@@ -31,31 +18,13 @@ test.group('Props', () => {
 			caller: {
 				filename: 'bar.edge',
 				lineNumber: 1,
+				raise: () => {
+					throw new Error('foo')
+				},
 			},
 		})
 
 		assert.isTrue(props.has('title'))
-	})
-
-	test('raise error when prop value is missing', (assert) => {
-		assert.plan(3)
-
-		const props = new Props({
-			component: 'foo',
-			state: { title: 'Hello' },
-			caller: {
-				filename: 'bar.edge',
-				lineNumber: 1,
-			},
-		})
-
-		try {
-			props.get('age')
-		} catch (error) {
-			assert.equal(error.message, '"age" prop is required in order to render the "foo" component')
-			assert.equal(error.filename, 'bar.edge')
-			assert.equal(error.line, 1)
-		}
 	})
 
 	test('cherry pick values from the props', (assert) => {
@@ -65,6 +34,9 @@ test.group('Props', () => {
 			caller: {
 				filename: 'bar.edge',
 				lineNumber: 1,
+				raise: () => {
+					throw new Error('foo')
+				},
 			},
 		})
 
@@ -81,6 +53,9 @@ test.group('Props', () => {
 			caller: {
 				filename: 'bar.edge',
 				lineNumber: 1,
+				raise: () => {
+					throw new Error('foo')
+				},
 			},
 		})
 
@@ -99,6 +74,9 @@ test.group('Props', () => {
 			caller: {
 				filename: 'bar.edge',
 				lineNumber: 1,
+				raise: () => {
+					throw new Error('foo')
+				},
 			},
 		})
 
@@ -115,6 +93,9 @@ test.group('Props', () => {
 			caller: {
 				filename: 'bar.edge',
 				lineNumber: 1,
+				raise: () => {
+					throw new Error('foo')
+				},
 			},
 		})
 
@@ -131,6 +112,9 @@ test.group('Props', () => {
 			caller: {
 				filename: 'bar.edge',
 				lineNumber: 1,
+				raise: () => {
+					throw new Error('foo')
+				},
 			},
 		})
 
@@ -147,6 +131,9 @@ test.group('Props', () => {
 			caller: {
 				filename: 'bar.edge',
 				lineNumber: 1,
+				raise: () => {
+					throw new Error('foo')
+				},
 			},
 		})
 
@@ -163,6 +150,9 @@ test.group('Props', () => {
 			caller: {
 				filename: 'bar.edge',
 				lineNumber: 1,
+				raise: () => {
+					throw new Error('foo')
+				},
 			},
 		})
 
@@ -179,6 +169,9 @@ test.group('Props', () => {
 			caller: {
 				filename: 'bar.edge',
 				lineNumber: 1,
+				raise: () => {
+					throw new Error('foo')
+				},
 			},
 		})
 
@@ -195,6 +188,9 @@ test.group('Props', () => {
 			caller: {
 				filename: 'bar.edge',
 				lineNumber: 1,
+				raise: () => {
+					throw new Error('foo')
+				},
 			},
 		})
 
@@ -226,6 +222,9 @@ test.group('Props', () => {
 			caller: {
 				filename: 'bar.edge',
 				lineNumber: 1,
+				raise: () => {
+					throw new Error('foo')
+				},
 			},
 		})
 	})
@@ -237,6 +236,9 @@ test.group('Props', () => {
 			caller: {
 				filename: 'bar.edge',
 				lineNumber: 1,
+				raise: () => {
+					throw new Error('foo')
+				},
 			},
 		})
 	})

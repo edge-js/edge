@@ -8,6 +8,7 @@
  */
 
 import test from 'japa'
+import { EdgeError } from 'edge-error'
 import { Slots } from '../src/Component/Slots'
 
 test.group('Slots', () => {
@@ -20,6 +21,9 @@ test.group('Slots', () => {
 			caller: {
 				filename: 'bar.edge',
 				lineNumber: 1,
+				raise: () => {
+					throw new Error('foo')
+				},
 			},
 		})
 
@@ -33,6 +37,13 @@ test.group('Slots', () => {
 			caller: {
 				filename: 'bar.edge',
 				lineNumber: 1,
+				raise: function (message) {
+					throw new EdgeError(message, 'E_RUNTIME_EXCEPTION', {
+						filename: this.filename,
+						line: this.lineNumber,
+						col: 0,
+					})
+				},
 			},
 		})
 
@@ -52,6 +63,9 @@ test.group('Slots', () => {
 			caller: {
 				filename: 'bar.edge',
 				lineNumber: 1,
+				raise: () => {
+					throw new Error('foo')
+				},
 			},
 		})
 
@@ -67,6 +81,9 @@ test.group('Slots', () => {
 			caller: {
 				filename: 'bar.edge',
 				lineNumber: 1,
+				raise: () => {
+					throw new Error('foo')
+				},
 			},
 		})
 

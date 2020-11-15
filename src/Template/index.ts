@@ -8,6 +8,8 @@
  */
 
 import merge from 'lodash.merge'
+import { EdgeError } from 'edge-error'
+
 import { Context } from '../Context'
 import { Processor } from '../Processor'
 import { Props } from '../Component/Props'
@@ -79,13 +81,24 @@ export class Template implements TemplateContract {
 	public renderWithState(template: string, state: any, slots: any, caller: any): string {
 		const { template: compiledTemplate } = this.compiler.compile(template)
 
+		/**
+		 * Ask the caller to the raise the error
+		 */
+		caller.raise = function (message: string) {
+			throw new EdgeError(message, 'E_RUNTIME_EXCEPTION', {
+				filename: this.filename,
+				line: this.lineNumber,
+				col: 0,
+			})
+		}
+
 		const templateState = Object.assign({}, this.sharedState, state, {
 			$slots: new Slots({ component: template, caller, slots }),
 			$caller: caller,
 			$props: new Props({ component: template, caller, state }),
 		})
-		const context = new Context()
 
+		const context = new Context()
 		return this.wrapToFunction(compiledTemplate)(this, templateState, context)
 	}
 

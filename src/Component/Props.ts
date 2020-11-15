@@ -7,7 +7,6 @@
  * file that was distributed with this source code.
  */
 
-import { EdgeError } from 'edge-error'
 import { lodash } from '@poppinss/utils'
 import stringifyAttributes from 'stringify-attributes'
 import { safeValue } from '../Context'
@@ -19,7 +18,7 @@ export class Props {
 	constructor(options: {
 		component: string
 		state: any
-		caller: { filename: string; lineNumber: number }
+		caller: { filename: string; lineNumber: number; raise: (message: string) => never }
 	}) {
 		this[Symbol.for('options')] = options
 		Object.assign(this, options.state)
@@ -34,63 +33,48 @@ export class Props {
 	}
 
 	/**
-	 * Returns the value of a key from the props. An exception is raised
-	 * if value is undefined or null.
+	 * Validate prop value
 	 */
-	public get(key: string, defaultValue?: any) {
-		const value = lodash.get(this[Symbol.for('options')].state, key, defaultValue)
-		if (value === undefined || value === null) {
-			throw new EdgeError(
-				`"${key}" prop is required in order to render the "${
-					this[Symbol.for('options')].component
-				}" component`,
-				'E_MISSING_PROP',
-				{
-					filename: this[Symbol.for('options')].caller.filename,
-					line: this[Symbol.for('options')].caller.lineNumber,
-					col: 0,
-				}
-			)
-		}
-
-		return value
+	public validate(key: string, validateFn: (key: string, value?: any) => any) {
+		const value = lodash.get(this[Symbol.for('options')].state, key)
+		validateFn(key, value)
 	}
 
 	/**
-	 * Return only given keys
+	 * Return values for only the given keys
 	 */
 	public only(keys: string[]) {
 		return lodash.pick(this[Symbol.for('options')].state, keys)
 	}
 
 	/**
-	 * Return except the mentioned keys
+	 * Return values except the given keys
 	 */
 	public except(keys: string[]) {
 		return lodash.omit(this[Symbol.for('options')].state, keys)
 	}
 
 	/**
-	 * Serializes props to attributes
+	 * Serialize all props to a string of HTML attributes
 	 */
 	public serialize(mergeProps?: any) {
-		const props = this[Symbol.for('options')].state
-		return safeValue(stringifyAttributes(lodash.merge({}, props, mergeProps)))
+		const attributes = lodash.merge({}, this[Symbol.for('options')].state, mergeProps)
+		return safeValue(stringifyAttributes(attributes))
 	}
 
 	/**
-	 * Serializes only the given props
+	 * Serialize only the given keys to a string of HTML attributes
 	 */
 	public serializeOnly(keys: string[], mergeProps?: any) {
-		const props = this.only(keys)
-		return safeValue(stringifyAttributes(lodash.merge({}, props, mergeProps)))
+		const attributes = lodash.merge({}, this.only(keys), mergeProps)
+		return safeValue(stringifyAttributes(attributes))
 	}
 
 	/**
-	 * Serialize all props except the given keys
+	 * Serialize except the given keys to a string of HTML attributes
 	 */
 	public serializeExcept(keys: string[], mergeProps?: any) {
-		const props = this.except(keys)
-		return safeValue(stringifyAttributes(lodash.merge({}, props, mergeProps)))
+		const attributes = lodash.merge({}, this.except(keys), mergeProps)
+		return safeValue(stringifyAttributes(attributes))
 	}
 }
