@@ -10,7 +10,7 @@ slot_main += "  Hello world";
 ctx.reThrow(error, $filename, $lineNumber);
 }
 return slot_main;
-} });
+} }, { filename: $filename, lineNumber: $lineNumber });
 } catch (error) {
 ctx.reThrow(error, $filename, $lineNumber);
 }

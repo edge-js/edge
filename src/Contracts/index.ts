@@ -112,7 +112,7 @@ export interface CompilerContract {
  */
 export interface TemplateContract {
 	renderInline(templatePath: string, ...localVariables: string[]): Function
-	renderWithState(template: string, state: any, slots: any): string
+	renderWithState(template: string, state: any, slots: any, caller: any): string
 	render(template: string, state: any): string
 }
 

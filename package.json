@@ -72,6 +72,7 @@
   },
   "dependencies": {
     "@poppinss/inspect": "^1.0.1",
+    "@poppinss/utils": "^2.5.7",
     "edge-error": "^1.0.5",
     "edge-lexer": "^3.2.0",
     "edge-parser": "^5.3.0",
@@ -80,6 +81,7 @@
     "lodash.merge": "^4.6.2",
     "lodash.size": "^4.2.0",
     "macroable": "^5.0.3",
+    "stringify-attributes": "^2.0.0",
     "truncatise": "0.0.8"
   },
   "husky": {

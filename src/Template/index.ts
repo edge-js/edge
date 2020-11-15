@@ -10,6 +10,8 @@
 import merge from 'lodash.merge'
 import { Context } from '../Context'
 import { Processor } from '../Processor'
+import { Props } from '../Component/Props'
+import { Slots } from '../Component/Slots'
 import { CompilerContract, TemplateContract } from '../Contracts'
 
 /**
@@ -74,10 +76,14 @@ export class Template implements TemplateContract {
 	 * template.renderWithState('components.user', { username: 'virk' }, slotsIfAny)
 	 * ```
 	 */
-	public renderWithState(template: string, state: any, slots: any): string {
+	public renderWithState(template: string, state: any, slots: any, caller: any): string {
 		const { template: compiledTemplate } = this.compiler.compile(template)
 
-		const templateState = Object.assign({}, this.sharedState, state, { $slots: slots })
+		const templateState = Object.assign({}, this.sharedState, state, {
+			$slots: new Slots({ component: template, caller, slots }),
+			$caller: caller,
+			$props: new Props({ component: template, caller, state }),
+		})
 		const context = new Context()
 
 		return this.wrapToFunction(compiledTemplate)(this, templateState, context)

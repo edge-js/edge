@@ -312,11 +312,15 @@ export const componentTag: TagContract = {
 			}
 		})
 
+		const caller = new StringifiedObject()
+		caller.add('filename', '$filename')
+		caller.add('lineNumber', '$lineNumber')
+
 		/**
 		 * Write the line to render the component with it's own state
 		 */
 		buffer.outputExpression(
-			`template.renderWithState(${name}, ${props}, ${obj.flush()})`,
+			`template.renderWithState(${name}, ${props}, ${obj.flush()}, ${caller.flush()})`,
 			token.filename,
 			token.loc.start.line,
 			false

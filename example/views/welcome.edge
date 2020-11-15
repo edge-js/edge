@@ -5,14 +5,16 @@
   <title></title>
 </head>
 <body>
-  {{ inspect(state.user) }}
-  @component('components.modal', title = 'Card', age = 22)
+	{{ inspect(state.user) }}
+	@set('time', 'afternoon')
+
+  @component('components/modal', title = 'Card', age = 22)
     @slot('body')
       <p>hello</p>
     @endslot
 
     @slot('actions')
-      <button>delete</button>
+      @include('partials/button')
     @endslot
   @endcomponent
 </body>

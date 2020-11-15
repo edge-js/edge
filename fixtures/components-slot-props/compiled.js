@@ -16,7 +16,7 @@ slot_1 += `${ctx.escape(state.username)}`;
 ctx.reThrow(error, $filename, $lineNumber);
 }
 return slot_1;
-} });
+} }, { filename: $filename, lineNumber: $lineNumber });
 } catch (error) {
 ctx.reThrow(error, $filename, $lineNumber);
 }

@@ -1,4 +1,4 @@
-import edge from '..'
+import edge from '../index'
 import { join } from 'path'
 import { createServer } from 'http'
 
@@ -32,7 +32,6 @@ class User extends Base {
 
 const user = new User()
 user.parent = user
-console.log(user)
 
 createServer((_req, res) => {
 	res.writeHead(200, { 'content-type': 'text/html' })
