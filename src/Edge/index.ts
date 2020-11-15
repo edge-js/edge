@@ -28,6 +28,16 @@ import {
  */
 export class Edge implements EdgeContract {
 	/**
+	 * Reference to the registered processor handlers
+	 */
+	private processor = new Processor()
+
+	/**
+	 * An array of registered plugins
+	 */
+	private plugins: ((edge: this) => void)[] = []
+
+	/**
 	 * Globals are shared with all rendered templates
 	 */
 	public GLOBALS: { [key: string]: any } = {}
@@ -36,12 +46,7 @@ export class Edge implements EdgeContract {
 	 * List of registered tags. Adding new tags will only impact
 	 * this list
 	 */
-	private tags = {}
-
-	/**
-	 * Reference to the registered processor handlers
-	 */
-	private processor = new Processor()
+	public tags: { [name: string]: TagContract } = {}
 
 	/**
 	 * The loader to load templates. A loader can read and return
@@ -57,6 +62,28 @@ export class Edge implements EdgeContract {
 
 	constructor(private options: EdgeOptions = {}) {
 		Object.keys(Tags).forEach((name) => this.registerTag(Tags[name]))
+	}
+
+	/**
+	 * Execute plugins. Since plugins are meant to be called only
+	 * once we empty out the array after first call
+	 */
+	private executePlugins() {
+		if (!this.plugins.length) {
+			return
+		}
+
+		this.plugins.forEach((pluginFn) => pluginFn(this))
+		this.plugins = []
+	}
+
+	/**
+	 * Register a plugin. Plugin functions are called once just before
+	 * an attempt to render a view is made.
+	 */
+	public use(pluginFn: (edge: this) => void): this {
+		this.plugins.push(pluginFn)
+		return this
 	}
 
 	/**
@@ -154,25 +181,6 @@ export class Edge implements EdgeContract {
 	}
 
 	/**
-	 * Render a template with optional state
-	 *
-	 * ```ts
-	 * edge.render('welcome', { greeting: 'Hello world' })
-	 * ```
-	 */
-	public render(templatePath: string, state?: any): string {
-		return this.getRenderer().render(templatePath, state)
-	}
-
-	/**
-	 * Returns a new instance of edge. The instance
-	 * can be used to define locals.
-	 */
-	public getRenderer(): EdgeRendererContract {
-		return new EdgeRenderer(this.compiler, this.GLOBALS, this.processor)
-	}
-
-	/**
 	 * Define processor functions to modify the output of templates
 	 * at different stages
 	 */
@@ -191,6 +199,26 @@ export class Edge implements EdgeContract {
 	public process(event: any, handler: (...args: any[]) => any): this {
 		this.processor.process(event, handler)
 		return this
+	}
+
+	/**
+	 * Returns a new instance of edge. The instance
+	 * can be used to define locals.
+	 */
+	public getRenderer(): EdgeRendererContract {
+		this.executePlugins()
+		return new EdgeRenderer(this.compiler, this.GLOBALS, this.processor)
+	}
+
+	/**
+	 * Render a template with optional state
+	 *
+	 * ```ts
+	 * edge.render('welcome', { greeting: 'Hello world' })
+	 * ```
+	 */
+	public render(templatePath: string, state?: any): string {
+		return this.getRenderer().render(templatePath, state)
 	}
 
 	/**

@@ -105,6 +105,25 @@ export class Loader implements LoaderContract {
 	}
 
 	/**
+	 * Returns an object of templates registered as a raw string
+	 *
+	 * ```js
+	 * loader.templates
+	 * // output
+	 *
+	 * {
+	 *   'form.label': { template: '/users/virk/code/app/form/label' }
+	 * }
+	 * ```
+	 */
+	public get templates(): { [templatePath: string]: LoaderTemplate } {
+		return Array.from(this.preRegistered).reduce((obj, [key, value]) => {
+			obj[key] = value
+			return obj
+		}, {})
+	}
+
+	/**
 	 * Mount a directory with a name for resolving views. If name is set
 	 * to `default`, then you can resolve views without prefixing the
 	 * disk name.

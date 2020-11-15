@@ -28,6 +28,11 @@ export interface LoaderContract {
 	mounted: { [diskName: string]: string }
 
 	/**
+	 * List of pre-registered template
+	 */
+	templates: { [templatePath: string]: LoaderTemplate }
+
+	/**
 	 * Save disk name and dirPath to resolve views
 	 */
 	mount(diskName: string, dirPath: string): void
@@ -38,7 +43,7 @@ export interface LoaderContract {
 	unmount(diskName: string): void
 
 	/**
-	 * Resolve template contents and optionally the Presenter
+	 * Resolve template contents
 	 */
 	resolve(templatePath: string): LoaderTemplate
 
@@ -154,6 +159,12 @@ export interface EdgeContract extends ProcessorContract {
 	loader: LoaderContract
 	compiler: CompilerContract
 	GLOBALS: { [key: string]: any }
+	tags: { [name: string]: TagContract }
+
+	/**
+	 * Register a plugin
+	 */
+	use(pluginFn: (edge: this) => void): this
 
 	registerTag(tag: TagContract): this
 	registerTemplate(templatePath: string, contents: LoaderTemplate): this

@@ -265,6 +265,63 @@ test.group('Edge', (group) => {
 			)
 		}
 	})
+
+	test('register and call plugins before rendering a view', async (assert) => {
+		assert.plan(3)
+		const edge = new Edge()
+
+		edge.use(($edge) => {
+			assert.deepEqual($edge.loader.mounted, { hello: fs.basePath })
+			assert.deepEqual(edge.loader.templates, {
+				'hello::foo': { template: 'Hello {{ username }}' },
+			})
+		})
+
+		edge.mount('hello', fs.basePath)
+		edge.registerTemplate('hello::foo', {
+			template: 'Hello {{ username }}',
+		})
+
+		assert.equal(edge.render('hello::foo', { username: 'virk' }).trim(), 'Hello virk')
+	})
+
+	test('do not register plugins until a view is rendered', async (assert) => {
+		assert.plan(0)
+		const edge = new Edge()
+
+		edge.use(($edge) => {
+			assert.deepEqual($edge.loader.mounted, { hello: fs.basePath })
+			assert.deepEqual(edge.loader.templates, {
+				'hello::foo': { template: 'Hello {{ username }}' },
+			})
+		})
+
+		edge.mount('hello', fs.basePath)
+		edge.registerTemplate('hello::foo', {
+			template: 'Hello {{ username }}',
+		})
+	})
+
+	test('register plugins only once', async (assert) => {
+		assert.plan(5)
+		const edge = new Edge()
+
+		edge.use(($edge) => {
+			assert.deepEqual($edge.loader.mounted, { hello: fs.basePath })
+			assert.deepEqual(edge.loader.templates, {
+				'hello::foo': { template: 'Hello {{ username }}' },
+			})
+		})
+
+		edge.mount('hello', fs.basePath)
+		edge.registerTemplate('hello::foo', {
+			template: 'Hello {{ username }}',
+		})
+
+		assert.equal(edge.render('hello::foo', { username: 'virk' }).trim(), 'Hello virk')
+		assert.equal(edge.render('hello::foo', { username: 'virk' }).trim(), 'Hello virk')
+		assert.equal(edge.render('hello::foo', { username: 'virk' }).trim(), 'Hello virk')
+	})
 })
 
 test.group('Edge | regression', () => {
