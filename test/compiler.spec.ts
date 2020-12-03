@@ -76,7 +76,7 @@ test.group('Compiler | Cache', (group) => {
 		const loader = new Loader()
 		loader.mount('default', fs.basePath)
 
-		const compiler = new Compiler(loader, {}, new Processor(), false)
+		const compiler = new Compiler(loader, {}, new Processor(), { cache: false })
 		compiler.compile('foo')
 		assert.isUndefined(compiler.cacheManager.get(join(fs.basePath, 'foo.edge')))
 	})
@@ -789,7 +789,7 @@ test.group('Compiler | Processor', (group) => {
 				layout: layoutTag,
 			},
 			processor,
-			false
+			{ cache: false }
 		)
 
 		compiler.compile('index.edge')
@@ -910,7 +910,7 @@ test.group('Compiler | Processor', (group) => {
 				layout: layoutTag,
 			},
 			processor,
-			true
+			{ cache: true }
 		)
 
 		compiler.compile('index.edge')
@@ -951,7 +951,7 @@ test.group('Compiler | Processor', (group) => {
 				layout: layoutTag,
 			},
 			processor,
-			true
+			{ cache: true }
 		)
 
 		assert.equal(compiler.compile('index.edge').template, 'foo')

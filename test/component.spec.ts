@@ -31,7 +31,7 @@ const loader = new Loader()
 loader.mount('default', fs.basePath)
 
 const processor = new Processor()
-const compiler = new Compiler(loader, tags, processor, false)
+const compiler = new Compiler(loader, tags, processor, { cache: false })
 
 test.group('Component | compile | errors', (group) => {
 	group.afterEach(async () => {

@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title></title>
+	<meta charset="UTF-8">
+	<title></title>
 </head>
 <body>
 	{{ inspect(state.user) }}
 	@set('time', 'afternoon')
 
-  @component('components/modal', title = 'Card', age = 22)
-    @slot('body')
-      <p>hello</p>
-    @endslot
+	@component('components/modal', title = 'foo', title = 'bar')
+		@slot('body')
+			<p>hello</p>
+		@endslot
 
-    @slot('actions')
-      @include('partials/button')
-    @endslot
-  @endcomponent
+		@slot('actions')
+			@include('partials/button')
+		@endslot
+	@endcomponent
 </body>
 </html>

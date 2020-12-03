@@ -36,7 +36,7 @@ test.group('Template', (group) => {
 	test('run template using the given state', async (assert) => {
 		await fs.add('foo.edge', 'Hello {{ username }}')
 		const processor = new Processor()
-		const compiler = new Compiler(loader, tags, processor, false)
+		const compiler = new Compiler(loader, tags, processor, { cache: false })
 		const output = new Template(compiler, {}, {}, processor).render('foo', { username: 'virk' })
 		assert.equal(output.trim(), 'Hello virk')
 	})
@@ -44,7 +44,7 @@ test.group('Template', (group) => {
 	test('run template with shared state', async (assert) => {
 		await fs.add('foo.edge', 'Hello {{ getUsername() }}')
 		const processor = new Processor()
-		const compiler = new Compiler(loader, tags, processor, false)
+		const compiler = new Compiler(loader, tags, processor, { cache: false })
 
 		const output = new Template(
 			compiler,
@@ -63,7 +63,7 @@ test.group('Template', (group) => {
 		await fs.add('foo.edge', 'Hello {{ username }}')
 
 		const processor = new Processor()
-		const compiler = new Compiler(loader, tags, processor, false)
+		const compiler = new Compiler(loader, tags, processor, { cache: false })
 		const template = new Template(compiler, {}, {}, processor)
 
 		const output = template.renderInline('foo')(template, { username: 'virk' }, new Context())
@@ -74,7 +74,7 @@ test.group('Template', (group) => {
 		await fs.add('foo.edge', 'Hello {{ user.username }}')
 
 		const processor = new Processor()
-		const compiler = new Compiler(loader, tags, processor, false)
+		const compiler = new Compiler(loader, tags, processor, { cache: false })
 		const template = new Template(compiler, {}, {}, processor)
 
 		const user = { username: 'virk' }
@@ -86,7 +86,7 @@ test.group('Template', (group) => {
 		await fs.add('users.edge', 'Hello {{ user.username }}')
 
 		const processor = new Processor()
-		const compiler = new Compiler(loader, tags, processor, false)
+		const compiler = new Compiler(loader, tags, processor, { cache: false })
 		const template = new Template(compiler, {}, {}, processor)
 
 		const user = { username: 'virk' }
@@ -104,7 +104,7 @@ test.group('Template', (group) => {
 			assert.instanceOf(template, Template)
 		})
 
-		const compiler = new Compiler(loader, tags, processor, false)
+		const compiler = new Compiler(loader, tags, processor, { cache: false })
 		const template = new Template(compiler, {}, {}, processor)
 
 		const user = { username: 'virk' }
@@ -123,7 +123,7 @@ test.group('Template', (group) => {
 			return output.toUpperCase()
 		})
 
-		const compiler = new Compiler(loader, tags, processor, false)
+		const compiler = new Compiler(loader, tags, processor, { cache: false })
 		const template = new Template(compiler, {}, {}, processor)
 
 		const user = { username: 'virk' }
