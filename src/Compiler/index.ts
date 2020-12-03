@@ -129,9 +129,7 @@ export class Compiler implements CompilerContract {
 	 * merged together.
 	 */
 	private templateContentToTokens(content: string, parser: Parser, absPath: string): Token[] {
-		let templateTokens = parser.tokenize(content, absPath, (line) =>
-			this.processor.executeLine(line)
-		)
+		let templateTokens = parser.tokenize(content, { filename: absPath })
 		const firstToken = templateTokens[0]
 
 		/**

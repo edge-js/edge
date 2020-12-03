@@ -99,7 +99,6 @@ export class Processor implements ProcessorContract {
 		event: 'raw',
 		handler: (data: { raw: string; path: string }) => string | void
 	): this
-	public process(event: 'line', handler: (line: string) => string | void): this
 	public process(
 		event: 'compiled',
 		handler: (data: { compiled: string; path: string }) => string | void
