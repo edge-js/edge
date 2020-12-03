@@ -21,6 +21,7 @@ import { Compiler } from '../src/Compiler'
 import { Processor } from '../src/Processor'
 import { layoutTag } from '../src/Tags/Layout'
 import { sectionTag } from '../src/Tags/Section'
+import { componentTag } from '../src/Tags/Component'
 import { normalizeNewLines } from '../test-helpers'
 
 import './assert-extend'
@@ -62,7 +63,7 @@ test.group('Compiler | Cache', (group) => {
 		const loader = new Loader()
 		loader.mount('default', fs.basePath)
 
-		const compiler = new Compiler(loader, {}, new Processor(), true)
+		const compiler = new Compiler(loader, {}, new Processor(), { cache: true })
 		assert.equal(
 			compiler.compile('foo').template,
 			compiler.cacheManager.get(join(fs.basePath, 'foo.edge'))!.template
@@ -760,7 +761,7 @@ test.group('Compiler | Processor', (group) => {
 				layout: layoutTag,
 			},
 			processor,
-			true
+			{ cache: true }
 		)
 
 		compiler.compile('index.edge')
@@ -1112,6 +1113,64 @@ test.group('Compiler | Processor', (group) => {
       $filename = ${stringify(join(fs.basePath, 'index.edge'))};
       $lineNumber = 3;
       out += \`\${ctx.escape(state.content)}\`;
+      } catch (error) {
+      ctx.reThrow(error, $filename, $lineNumber);
+      }
+      return out;
+    `)
+		)
+	})
+
+	test('run tag processor function', async (assert) => {
+		await fs.add(
+			'modal.edge',
+			dedent`
+			This is a modal
+    	`
+		)
+
+		await fs.add(
+			'index.edge',
+			dedent`
+			@hl.modal()
+			@end
+    	`
+		)
+
+		const loader = new Loader()
+		loader.mount('default', fs.basePath)
+
+		const processor = new Processor()
+		processor.process('tag', ({ tag }) => {
+			if (tag.properties.name === 'hl.modal') {
+				tag.properties.name = 'component'
+				tag.properties.jsArg = `'modal'`
+			}
+		})
+
+		const compiler = new Compiler(
+			loader,
+			{
+				component: componentTag,
+			},
+			processor,
+			{
+				claimTag: (name) => {
+					if (name === 'hl.modal') {
+						return { seekable: true, block: true }
+					}
+					return null
+				},
+			}
+		)
+
+		assert.stringEqual(
+			compiler.compile('index.edge').template,
+			normalizeNewLines(dedent`let out = "";
+      let $lineNumber = 1;
+      let $filename = ${stringify(join(fs.basePath, 'index.edge'))};
+      try {
+      out += template.renderWithState('modal', {}, { main: function () { return \"\" } }, { filename: $filename, line: $lineNumber, col: 0 });
       } catch (error) {
       ctx.reThrow(error, $filename, $lineNumber);
       }

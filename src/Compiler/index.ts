@@ -13,20 +13,28 @@ import { Token, TagToken, utils as lexerUtils } from 'edge-lexer'
 
 import { Processor } from '../Processor'
 import { CacheManager } from '../CacheManager'
-import { LoaderContract, TagsContract, LoaderTemplate, CompilerContract } from '../Contracts'
+import {
+	LoaderContract,
+	TagsContract,
+	LoaderTemplate,
+	CompilerContract,
+	CompilerOptions,
+} from '../Contracts'
 
 /**
  * Compiler is to used to compile templates using the `edge-parser`. Along with that
  * it natively merges the contents of a layout with a parent template.
  */
 export class Compiler implements CompilerContract {
-	public cacheManager = new CacheManager(this.cache)
+	public cacheManager = new CacheManager(!!this.options.cache)
 
 	constructor(
 		private loader: LoaderContract,
 		private tags: TagsContract,
 		private processor: Processor,
-		private cache: boolean = true
+		private options: CompilerOptions = {
+			cache: true,
+		}
 	) {}
 
 	/**
@@ -185,7 +193,11 @@ export class Compiler implements CompilerContract {
 			return { template }
 		}
 
-		const parser = new Parser(this.tags)
+		const parser = new Parser(this.tags, undefined, {
+			claimTag: this.options.claimTag,
+			onTag: (tag) => this.processor.executeTag({ tag, path: absPath }),
+		})
+
 		const buffer = new EdgeBuffer(absPath)
 
 		/**

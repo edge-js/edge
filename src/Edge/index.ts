@@ -7,6 +7,8 @@
  * file that was distributed with this source code.
  */
 
+import { ClaimTagFn } from 'edge-parser'
+
 import * as Tags from '../Tags'
 import { Loader } from '../Loader'
 import { Context } from '../Context'
@@ -19,6 +21,7 @@ import {
 	EdgeOptions,
 	EdgeContract,
 	LoaderTemplate,
+	CompilerOptions,
 	EdgeRendererContract,
 } from '../Contracts'
 
@@ -26,6 +29,13 @@ import {
  * Exposes the API to render templates, register custom tags and globals
  */
 export class Edge implements EdgeContract {
+	/**
+	 * Options passed to the compiler instance
+	 */
+	private compilerOptions: CompilerOptions = {
+		cache: !!this.options.cache,
+	}
+
 	/**
 	 * An array of registered plugins
 	 */
@@ -57,7 +67,7 @@ export class Edge implements EdgeContract {
 	/**
 	 * The underlying compiler in use
 	 */
-	public compiler = new Compiler(this.loader, this.tags, this.processor, !!this.options.cache)
+	public compiler = new Compiler(this.loader, this.tags, this.processor, this.compilerOptions)
 
 	constructor(private options: EdgeOptions = {}) {
 		Object.keys(Tags).forEach((name) => this.registerTag(Tags[name]))
@@ -176,6 +186,14 @@ export class Edge implements EdgeContract {
 	 */
 	public registerTemplate(templatePath: string, contents: LoaderTemplate): this {
 		this.loader.register(templatePath, contents)
+		return this
+	}
+
+	/**
+	 * Register a function to claim tags during the lexal analysis
+	 */
+	public claimTag(fn: ClaimTagFn): this {
+		this.compilerOptions.claimTag = fn
 		return this
 	}
 

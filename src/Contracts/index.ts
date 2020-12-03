@@ -9,7 +9,7 @@
 
 import { Token, TagToken } from 'edge-lexer'
 import { MacroableConstructorContract } from 'macroable'
-import { ParserTagDefinitionContract, Parser, EdgeBuffer } from 'edge-parser'
+import { ParserTagDefinitionContract, Parser, EdgeBuffer, ClaimTagFn } from 'edge-parser'
 
 /**
  * The shape in which the loader must resolve the template
@@ -108,6 +108,14 @@ export interface CompilerContract {
 }
 
 /**
+ * Compiler constructor options
+ */
+export type CompilerOptions = {
+	cache?: boolean
+	claimTag?: ClaimTagFn
+}
+
+/**
  * Shape of the template contract
  */
 export interface TemplateContract {
@@ -133,6 +141,7 @@ export interface ProcessorContract {
 	 * Define a processor handler
 	 */
 	process(event: 'raw', handler: (data: { raw: string; path: string }) => string | void): this
+	process(event: 'tag', handler: (data: { tag: TagToken; path: string }) => void): this
 	process(
 		event: 'compiled',
 		handler: (data: { compiled: string; path: string }) => string | void
@@ -167,12 +176,35 @@ export interface EdgeContract {
 	 */
 	use(pluginFn: (edge: this) => void): this
 
+	/**
+	 * Register a custom tag
+	 */
 	registerTag(tag: TagContract): this
+
+	/**
+	 * Register an inline template
+	 */
 	registerTemplate(templatePath: string, contents: LoaderTemplate): this
+
+	/**
+	 * Hook into lexical analysis to claim tags
+	 */
+	claimTag(fn: ClaimTagFn): this
+
+	/**
+	 * Register a global value
+	 */
 	global(key: string, value: any): this
 
+	/**
+	 * Mount/disk
+	 */
 	mount(diskName: string): this
 	mount(diskName: string, dirPath: string): this
+
+	/**
+	 * Unmount disk
+	 */
 	unmount(diskName: string): this
 
 	getRenderer(): EdgeRendererContract

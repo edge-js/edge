@@ -7,6 +7,7 @@
  * file that was distributed with this source code.
  */
 
+import { TagToken } from 'edge-lexer'
 import { ProcessorContract, TemplateContract } from '../Contracts'
 
 /**
@@ -17,22 +18,17 @@ export class Processor implements ProcessorContract {
 	private handlers: Map<string, Set<(...args: any[]) => any>> = new Map()
 
 	/**
-	 * Execute line handler
+	 * Execute tag handler
 	 */
-	public executeLine(line: string): string {
-		const handlers = this.handlers.get('line')
+	public executeTag(data: { tag: TagToken; path: string }): void {
+		const handlers = this.handlers.get('tag')
 		if (!handlers) {
-			return line
+			return
 		}
 
 		handlers.forEach((handler) => {
-			const output = handler(line)
-			if (output !== undefined) {
-				line = output
-			}
+			handler(data)
 		})
-
-		return line
 	}
 
 	/**
@@ -99,6 +95,7 @@ export class Processor implements ProcessorContract {
 		event: 'raw',
 		handler: (data: { raw: string; path: string }) => string | void
 	): this
+	public process(event: 'tag', handler: (data: { tag: TagToken; path: string }) => void): this
 	public process(
 		event: 'compiled',
 		handler: (data: { compiled: string; path: string }) => string | void
