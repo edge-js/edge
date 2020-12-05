@@ -29,6 +29,8 @@ import {
  * Exposes the API to render templates, register custom tags and globals
  */
 export class Edge implements EdgeContract {
+	private executedPlugins: boolean = false
+
 	/**
 	 * Options passed to the compiler instance
 	 */
@@ -39,7 +41,10 @@ export class Edge implements EdgeContract {
 	/**
 	 * An array of registered plugins
 	 */
-	private plugins: ((edge: this) => void)[] = []
+	private plugins: {
+		fn: (edge: Edge, firstRun: boolean, options?: any) => void
+		options?: any
+	}[] = []
 
 	/**
 	 * Reference to the registered processor handlers
@@ -78,20 +83,32 @@ export class Edge implements EdgeContract {
 	 * once we empty out the array after first call
 	 */
 	private executePlugins() {
-		if (!this.plugins.length) {
-			return
+		if (this.executedPlugins) {
+			this.plugins.forEach(({ fn, options }) => {
+				if (options && options.recurring) {
+					fn(this, false, options)
+				}
+			})
+		} else {
+			this.executedPlugins = true
+			this.plugins.forEach(({ fn, options }) => {
+				fn(this, true, options)
+			})
 		}
-
-		this.plugins.forEach((pluginFn) => pluginFn(this))
-		this.plugins = []
 	}
 
 	/**
 	 * Register a plugin. Plugin functions are called once just before
 	 * an attempt to render a view is made.
 	 */
-	public use(pluginFn: (edge: this) => void): this {
-		this.plugins.push(pluginFn)
+	public use<T extends any>(
+		pluginFn: (edge: this, firstRun: boolean, options: T) => void,
+		options?: T
+	): this {
+		this.plugins.push({
+			fn: pluginFn,
+			options,
+		})
 		return this
 	}
 

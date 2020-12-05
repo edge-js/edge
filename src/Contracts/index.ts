@@ -174,7 +174,10 @@ export interface EdgeContract {
 	/**
 	 * Register a plugin
 	 */
-	use(pluginFn: (edge: this) => void): this
+	use<T extends any>(
+		pluginFn: (edge: this, firstRun: boolean, options: T) => void,
+		options?: T
+	): this
 
 	/**
 	 * Register a custom tag
