@@ -235,6 +235,17 @@ export class Edge implements EdgeContract {
 	}
 
 	/**
+	 * Render a template asynchronously with optional state
+	 *
+	 * ```ts
+	 * edge.render('welcome', { greeting: 'Hello world' })
+	 * ```
+	 */
+	public renderAsync(templatePath: string, state?: any): Promise<string> {
+		return this.getRenderer().renderAsync(templatePath, state)
+	}
+
+	/**
 	 * Share locals with the current view context.
 	 *
 	 * ```js

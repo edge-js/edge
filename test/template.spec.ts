@@ -37,7 +37,9 @@ test.group('Template', (group) => {
 		await fs.add('foo.edge', 'Hello {{ username }}')
 		const processor = new Processor()
 		const compiler = new Compiler(loader, tags, processor, { cache: false })
-		const output = new Template(compiler, {}, {}, processor).render('foo', { username: 'virk' })
+		const output = new Template(compiler, {}, {}, processor, { async: false }).render('foo', {
+			username: 'virk',
+		}) as string
 		assert.equal(output.trim(), 'Hello virk')
 	})
 
@@ -54,8 +56,9 @@ test.group('Template', (group) => {
 					return this.username.toUpperCase()
 				},
 			},
-			processor
-		).render('foo', {})
+			processor,
+			{ async: false }
+		).render('foo', {}) as string
 		assert.equal(output.trim(), 'Hello VIRK')
 	})
 
@@ -64,7 +67,7 @@ test.group('Template', (group) => {
 
 		const processor = new Processor()
 		const compiler = new Compiler(loader, tags, processor, { cache: false })
-		const template = new Template(compiler, {}, {}, processor)
+		const template = new Template(compiler, {}, {}, processor, { async: false })
 
 		const output = template.renderInline('foo')(template, { username: 'virk' }, new Context())
 		assert.equal(output.trim(), 'Hello virk')
@@ -75,7 +78,7 @@ test.group('Template', (group) => {
 
 		const processor = new Processor()
 		const compiler = new Compiler(loader, tags, processor, { cache: false })
-		const template = new Template(compiler, {}, {}, processor)
+		const template = new Template(compiler, {}, {}, processor, { async: false })
 
 		const user = { username: 'virk' }
 		const output = template.renderInline('foo', 'user')(template, {}, new Context(), user)
@@ -87,10 +90,10 @@ test.group('Template', (group) => {
 
 		const processor = new Processor()
 		const compiler = new Compiler(loader, tags, processor, { cache: false })
-		const template = new Template(compiler, {}, {}, processor)
+		const template = new Template(compiler, {}, {}, processor, { async: false })
 
 		const user = { username: 'virk' }
-		const output = template.render('users', { user })
+		const output = template.render('users', { user }) as string
 		assert.equal(output.trim(), 'Hello virk')
 	})
 
@@ -105,10 +108,10 @@ test.group('Template', (group) => {
 		})
 
 		const compiler = new Compiler(loader, tags, processor, { cache: false })
-		const template = new Template(compiler, {}, {}, processor)
+		const template = new Template(compiler, {}, {}, processor, { async: false })
 
 		const user = { username: 'virk' }
-		const output = template.render('users', { user })
+		const output = template.render('users', { user }) as string
 		assert.equal(output.trim(), 'Hello virk')
 	})
 
@@ -124,10 +127,10 @@ test.group('Template', (group) => {
 		})
 
 		const compiler = new Compiler(loader, tags, processor, { cache: false })
-		const template = new Template(compiler, {}, {}, processor)
+		const template = new Template(compiler, {}, {}, processor, { async: false })
 
 		const user = { username: 'virk' }
-		const output = template.render('users', { user })
+		const output = template.render('users', { user }) as string
 		assert.equal(output.trim(), 'HELLO VIRK')
 	})
 })

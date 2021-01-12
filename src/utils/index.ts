@@ -79,3 +79,59 @@ export function parseJsArg(parser: Parser, token: TagToken) {
 		parser
 	)
 }
+
+/**
+ * Each loop. A soft replacement for `lodash.each` that we were using earlier
+ */
+export function each(collection: any, iteratee: (value: any, key: any) => void) {
+	if (Array.isArray(collection)) {
+		for (let [key, value] of collection.entries()) {
+			iteratee(value, key)
+		}
+		return
+	}
+
+	if (typeof collection === 'string') {
+		let index = 0
+		for (let value of collection) {
+			iteratee(value, index++)
+		}
+		return
+	}
+
+	if (collection && typeof collection === 'object') {
+		for (let [key, value] of Object.entries(collection)) {
+			iteratee(value, key)
+		}
+	}
+}
+
+/**
+ * Async each loop. A soft replacement for `lodash.each` that we were
+ * using earlier with support for async await
+ */
+export async function asyncEach(
+	collection: any,
+	iteratee: (value: any, key: any) => Promise<void>
+) {
+	if (Array.isArray(collection)) {
+		for (let [key, value] of collection.entries()) {
+			await iteratee(value, key)
+		}
+		return
+	}
+
+	if (typeof collection === 'string') {
+		let index = 0
+		for (let value of collection) {
+			await iteratee(value, index++)
+		}
+		return
+	}
+
+	if (collection && typeof collection === 'object') {
+		for (let [key, value] of Object.entries(collection)) {
+			await iteratee(value, key)
+		}
+	}
+}

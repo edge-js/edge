@@ -14,11 +14,11 @@ import { Token, TagToken, utils as lexerUtils } from 'edge-lexer'
 import { Processor } from '../Processor'
 import { CacheManager } from '../CacheManager'
 import {
-	LoaderContract,
 	TagsContract,
+	LoaderContract,
 	LoaderTemplate,
-	CompilerContract,
 	CompilerOptions,
+	CompilerContract,
 } from '../Contracts'
 
 /**
@@ -27,6 +27,7 @@ import {
  */
 export class Compiler implements CompilerContract {
 	public cacheManager = new CacheManager(!!this.options.cache)
+	public asyncCacheManager = new CacheManager(!!this.options.cache)
 
 	constructor(
 		private loader: LoaderContract,
@@ -160,12 +161,12 @@ export class Compiler implements CompilerContract {
 	 * compiler.tokenize('<template-path>')
 	 * ```
 	 */
-	public tokenize(templatePath: string, parser?: Parser): Token[] {
+	public tokenize(templatePath: string, parser: Parser): Token[] {
 		const absPath = this.loader.makePath(templatePath)
 		let { template } = this.loader.resolve(absPath)
 
 		template = this.processor.executeRaw({ path: absPath, raw: template })
-		return this.templateContentToTokens(template, parser || new Parser(this.tags), absPath)
+		return this.templateContentToTokens(template, parser, absPath)
 	}
 
 	/**
@@ -177,14 +178,15 @@ export class Compiler implements CompilerContract {
 	 * compiler.compile('welcome')
 	 * ```
 	 */
-	public compile(templatePath: string, localVariables?: string[]): LoaderTemplate {
+	public compile(templatePath: string, async: boolean, localVariables?: string[]): LoaderTemplate {
 		const absPath = this.loader.makePath(templatePath)
+		const cacheManager = async ? this.asyncCacheManager : this.cacheManager
 
 		/**
 		 * If template is in the cache, then return it without
 		 * further processing
 		 */
-		const cachedResponse = this.cacheManager.get(absPath)
+		const cachedResponse = cacheManager.get(absPath)
 		if (cachedResponse) {
 			const template = this.processor.executeCompiled({
 				path: absPath,
@@ -195,6 +197,7 @@ export class Compiler implements CompilerContract {
 
 		const parser = new Parser(this.tags, undefined, {
 			claimTag: this.options.claimTag,
+			async,
 			onTag: (tag) => this.processor.executeTag({ tag, path: absPath }),
 		})
 
@@ -213,7 +216,7 @@ export class Compiler implements CompilerContract {
 		templateTokens.forEach((token) => parser.processToken(token, buffer))
 		const template = buffer.flush()
 
-		this.cacheManager.set(absPath, { template })
+		cacheManager.set(absPath, { template })
 		return { template: this.processor.executeCompiled({ path: absPath, compiled: template }) }
 	}
 }

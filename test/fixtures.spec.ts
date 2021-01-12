@@ -44,12 +44,12 @@ test.group('Fixtures', (group) => {
 	dirs.forEach((dir) => {
 		const dirBasePath = join(basePath, dir)
 		test(dir, (assert) => {
-			const template = new Template(compiler, {}, {}, processor)
+			const template = new Template(compiler, {}, {}, processor, { async: false })
 
 			/**
 			 * Compiled output
 			 */
-			const { template: compiled } = compiler.compile(`${dir}/index.edge`)
+			const { template: compiled } = compiler.compile(`${dir}/index.edge`, false)
 			const expectedCompiled = normalizeNewLines(
 				readFileSync(join(dirBasePath, 'compiled.js'), 'utf-8')
 			)
@@ -66,7 +66,7 @@ test.group('Fixtures', (group) => {
 			 */
 			const out = readFileSync(join(dirBasePath, 'index.txt'), 'utf-8')
 			const state = JSON.parse(readFileSync(join(dirBasePath, 'index.json'), 'utf-8'))
-			const output = template.render(`${dir}/index.edge`, state)
+			const output = template.render(`${dir}/index.edge`, state) as string
 			assert.stringEqual(output.trim(), out)
 		})
 	})

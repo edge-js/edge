@@ -8,12 +8,11 @@
  */
 
 import size from 'lodash.size'
-import each from 'lodash.foreach'
 import { utils as lexerUtils } from 'edge-lexer'
 import { Parser, expressions } from 'edge-parser'
 
 import { TagContract } from '../Contracts'
-import { isSubsetOf, unallowedExpression } from '../utils'
+import { isSubsetOf, unallowedExpression, asyncEach, each } from '../utils'
 
 /**
  * Returns the list to loop over for the each binary expression
@@ -100,6 +99,10 @@ export const eachTag: TagContract = {
 	 * Compile the template
 	 */
 	compile(parser, buffer, token) {
+		const awaitKeyword = parser.asyncMode ? 'await ' : ''
+		const loopFunctionName = parser.asyncMode ? 'loopAsync' : 'loop'
+		const asyncKeyword = parser.asyncMode ? 'async ' : ''
+
 		/**
 		 * We just generate the AST and do not transform it, since the transform
 		 * function attempts to resolve identifiers and we don't want that
@@ -145,7 +148,7 @@ export const eachTag: TagContract = {
 		 */
 		const loopCallbackArgs = (index ? [item, index] : [item]).join(',')
 		buffer.writeStatement(
-			`ctx.loop(${list}, function (${loopCallbackArgs}) {`,
+			`${awaitKeyword}ctx.${loopFunctionName}(${list}, ${asyncKeyword}function (${loopCallbackArgs}) {`,
 			token.filename,
 			token.loc.start.line
 		)
@@ -187,9 +190,8 @@ export const eachTag: TagContract = {
 	 * Add methods to the runtime context for running the loop
 	 */
 	run(context) {
-		context.macro('loop', function loop(source, callback) {
-			each(source, callback)
-		})
+		context.macro('loopAsync', asyncEach)
+		context.macro('loop', each)
 		context.macro('size', size)
 	},
 }

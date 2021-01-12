@@ -31,7 +31,8 @@ export class Template implements TemplateContract {
 		private compiler: CompilerContract,
 		globals: any,
 		locals: any,
-		private processor: Processor
+		private processor: Processor,
+		private options: { async: boolean }
 	) {
 		this.sharedState = merge({}, globals, locals)
 	}
@@ -41,6 +42,12 @@ export class Template implements TemplateContract {
 	 */
 	private wrapToFunction(template: string, ...localVariables: string[]) {
 		const args = ['template', 'state', 'ctx'].concat(localVariables)
+		if (this.options.async) {
+			return new Function(
+				'',
+				`return async function template (${args.join(',')}) { ${template} }`
+			)()
+		}
 		return new Function('', `return function template (${args.join(',')}) { ${template} }`)()
 	}
 
@@ -62,7 +69,11 @@ export class Template implements TemplateContract {
 	 * ```
 	 */
 	public renderInline(templatePath: string, ...localVariables: string[]): Function {
-		const { template: compiledTemplate } = this.compiler.compile(templatePath, localVariables)
+		const { template: compiledTemplate } = this.compiler.compile(
+			templatePath,
+			this.options.async,
+			localVariables
+		)
 		return this.wrapToFunction(compiledTemplate, ...localVariables)
 	}
 
@@ -78,7 +89,7 @@ export class Template implements TemplateContract {
 	 * ```
 	 */
 	public renderWithState(template: string, state: any, slots: any, caller: any): string {
-		const { template: compiledTemplate } = this.compiler.compile(template)
+		const { template: compiledTemplate } = this.compiler.compile(template, this.options.async)
 
 		const templateState = Object.assign({}, this.sharedState, state, {
 			$slots: new Slots({ component: template, caller, slots }),
@@ -97,11 +108,24 @@ export class Template implements TemplateContract {
 	 * template.render('welcome', { key: 'value' })
 	 * ```
 	 */
-	public render(template: string, state: any): string {
-		const { template: compiledTemplate } = this.compiler.compile(template)
+	public render(template: string, state: any): Promise<string> | string {
+		let { template: compiledTemplate } = this.compiler.compile(template, this.options.async)
+		compiledTemplate = `let $context = undefined; ${compiledTemplate}`
 
 		const templateState = Object.assign({}, this.sharedState, state)
 		const context = new Context()
+
+		/**
+		 * Process template as a promise.
+		 */
+		if (this.options.async) {
+			return this.wrapToFunction(compiledTemplate)(this, templateState, context).then(
+				(output: string) => {
+					output = this.trimTopBottomNewLines(output)
+					return this.processor.executeOutput({ output, template: this })
+				}
+			)
+		}
 
 		const output = this.trimTopBottomNewLines(
 			this.wrapToFunction(compiledTemplate)(this, templateState, context)

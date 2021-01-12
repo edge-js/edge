@@ -174,6 +174,8 @@ export const componentTag: TagContract = {
 	tagName: 'component',
 
 	compile(parser, buffer, token) {
+		const asyncKeyword = parser.asyncMode ? 'async ' : ''
+		const awaitKeyword = parser.asyncMode ? 'await ' : ''
 		const parsed = parseJsArg(parser, token)
 
 		/**
@@ -289,7 +291,7 @@ export const componentTag: TagContract = {
 		 */
 		if (!slots['main']) {
 			if (mainSlot.buffer.size) {
-				mainSlot.buffer.wrap('function () {', '}')
+				mainSlot.buffer.wrap(`${asyncKeyword}function () {`, '}')
 				obj.add('main', mainSlot.buffer.disableFileAndLineVariables().flush())
 			} else {
 				obj.add('main', 'function () { return "" }')
@@ -303,8 +305,8 @@ export const componentTag: TagContract = {
 		Object.keys(slots).forEach((slotName) => {
 			if (slots[slotName].buffer.size) {
 				const fnCall = slots[slotName].props
-					? `function (${slots[slotName].props}) {`
-					: 'function () {'
+					? `${asyncKeyword}function (${slots[slotName].props}) {`
+					: `${asyncKeyword}function () {`
 				slots[slotName].buffer.wrap(fnCall, '}')
 				obj.add(slotName, slots[slotName].buffer.disableFileAndLineVariables().flush())
 			} else {
@@ -321,7 +323,7 @@ export const componentTag: TagContract = {
 		 * Write the line to render the component with it's own state
 		 */
 		buffer.outputExpression(
-			`template.renderWithState(${name}, ${props}, ${obj.flush()}, ${caller.flush()})`,
+			`${awaitKeyword}template.renderWithState(${name}, ${props}, ${obj.flush()}, ${caller.flush()})`,
 			token.filename,
 			token.loc.start.line,
 			false

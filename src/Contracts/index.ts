@@ -103,8 +103,9 @@ export interface CacheManagerContract {
  */
 export interface CompilerContract {
 	cacheManager: CacheManagerContract
-	compile(templatePath: string, localVariables?: string[]): LoaderTemplate
-	tokenize(templatePath: string, parser?: Parser): Token[]
+	asyncCacheManager: CacheManagerContract
+	compile(templatePath: string, async: boolean, localVariables?: string[]): LoaderTemplate
+	tokenize(templatePath: string, parser: Parser): Token[]
 }
 
 /**
@@ -121,7 +122,7 @@ export type CompilerOptions = {
 export interface TemplateContract {
 	renderInline(templatePath: string, ...localVariables: string[]): Function
 	renderWithState(template: string, state: any, slots: any, caller: any): string
-	render(template: string, state: any): string
+	render(template: string, state: any): Promise<string> | string
 }
 
 /**
@@ -130,6 +131,7 @@ export interface TemplateContract {
 export interface EdgeRendererContract {
 	share(locals: any): this
 	render(templatePath: string, state?: any): string
+	renderAsync(templatePath: string, state?: any): Promise<string>
 }
 
 /**
@@ -213,6 +215,7 @@ export interface EdgeContract {
 	getRenderer(): EdgeRendererContract
 	share(locals: any): EdgeRendererContract
 	render(templatePath: string, state?: any): string
+	renderAsync(templatePath: string, state?: any): Promise<string>
 }
 
 /**

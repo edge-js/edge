@@ -51,7 +51,7 @@ test.group('Component | compile | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {}, processor)
+		const template = new Template(compiler, {}, {}, processor, { async: false })
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -77,7 +77,7 @@ test.group('Component | compile | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {}, processor)
+		const template = new Template(compiler, {}, {}, processor, { async: false })
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -103,7 +103,7 @@ test.group('Component | compile | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {}, processor)
+		const template = new Template(compiler, {}, {}, processor, { async: false })
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -129,7 +129,7 @@ test.group('Component | compile | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {}, processor)
+		const template = new Template(compiler, {}, {}, processor, { async: false })
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -159,7 +159,7 @@ test.group('Component | render | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {}, processor)
+		const template = new Template(compiler, {}, {}, processor, { async: false })
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -185,7 +185,7 @@ test.group('Component | render | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {}, processor)
+		const template = new Template(compiler, {}, {}, processor, { async: false })
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -213,7 +213,7 @@ test.group('Component | render | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {}, processor)
+		const template = new Template(compiler, {}, {}, processor, { async: false })
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -242,7 +242,7 @@ test.group('Component | render | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {}, processor)
+		const template = new Template(compiler, {}, {}, processor, { async: false })
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -271,7 +271,7 @@ test.group('Component | render | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {}, processor)
+		const template = new Template(compiler, {}, {}, processor, { async: false })
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -303,7 +303,7 @@ test.group('Component | render | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {}, processor)
+		const template = new Template(compiler, {}, {}, processor, { async: false })
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -335,7 +335,7 @@ test.group('Component | render | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {}, processor)
+		const template = new Template(compiler, {}, {}, processor, { async: false })
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -373,7 +373,8 @@ test.group('Component | render | errors', (group) => {
 				},
 			},
 			{},
-			processor
+			processor,
+			{ async: false }
 		)
 		try {
 			template.render('eval.edge', {})

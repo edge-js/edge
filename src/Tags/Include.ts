@@ -71,6 +71,7 @@ export const includeTag: TagContract = {
 	 * Compiles else block node to Javascript else statement
 	 */
 	compile(parser, buffer, token) {
+		const awaitKeyword = parser.asyncMode ? 'await ' : ''
 		const parsed = parseJsArg(parser, token)
 
 		/**
@@ -85,7 +86,7 @@ export const includeTag: TagContract = {
 		})
 
 		buffer.outputExpression(
-			getRenderExpression(parser, parsed),
+			`${awaitKeyword}${getRenderExpression(parser, parsed)}`,
 			token.filename,
 			token.loc.start.line,
 			false

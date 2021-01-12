@@ -38,7 +38,19 @@ export class EdgeRenderer implements EdgeRendererContract {
 	 * Render the template
 	 */
 	public render(templatePath: string, state: any = {}): string {
-		const template = new Template(this.compiler, this.globals, this.locals, this.processor)
+		const template = new Template(this.compiler, this.globals, this.locals, this.processor, {
+			async: false,
+		})
+		return template.render(templatePath, state) as string
+	}
+
+	/**
+	 * Render the template
+	 */
+	public async renderAsync(templatePath: string, state: any = {}): Promise<string> {
+		const template = new Template(this.compiler, this.globals, this.locals, this.processor, {
+			async: true,
+		})
 		return template.render(templatePath, state)
 	}
 }

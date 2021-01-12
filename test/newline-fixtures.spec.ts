@@ -43,14 +43,14 @@ test.group('Newline Fixtures', (group) => {
 	dirs.forEach((dir) => {
 		const dirBasePath = join(basePath, dir)
 		test(dir, (assert) => {
-			const template = new Template(compiler, {}, {}, processor)
+			const template = new Template(compiler, {}, {}, processor, { async: false })
 
 			/**
 			 * Render output
 			 */
 			const out = normalizeNewLines(readFileSync(join(dirBasePath, 'index.txt'), 'utf-8'))
 			const state = JSON.parse(readFileSync(join(dirBasePath, 'index.json'), 'utf-8'))
-			const output = template.render(`${dir}/index.edge`, state)
+			const output = template.render(`${dir}/index.edge`, state) as string
 
 			assert.stringEqual(
 				output,
