@@ -380,8 +380,7 @@ test.group('Component | render | errors', (group) => {
 				},
 			},
 			{},
-			processor,
-			{ async: false }
+			processor
 		)
 		try {
 			template.render('eval.edge', {})
