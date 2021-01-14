@@ -9,7 +9,7 @@
 
 export * from './src/Contracts'
 import { Edge } from './src/Edge'
-import { safeValue } from './src/Context'
+import { safeValue } from './src/Template'
 import { GLOBALS } from './src/Edge/globals'
 
 /**

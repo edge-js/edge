@@ -7,20 +7,36 @@
  * file that was distributed with this source code.
  */
 
-import merge from 'lodash.merge'
+import he from 'he'
+import deepMerge from 'lodash.merge'
+import { EdgeError } from 'edge-error'
+import { Macroable } from 'macroable'
 
-import { Context } from '../Context'
 import { Processor } from '../Processor'
 import { Props } from '../Component/Props'
-import { Slots } from '../Component/Slots'
 import { CompilerContract, TemplateContract } from '../Contracts'
+
+/**
+ * An instance of this class passed to the escape
+ * method ensures that underlying value is never
+ * escaped.
+ */
+export class SafeValue {
+	constructor(public value: any) {}
+}
 
 /**
  * The template is used to compile and run templates. Also the instance
  * of template is passed during runtime to render `dynamic partials`
  * and `dynamic components`.
  */
-export class Template implements TemplateContract {
+export class Template extends Macroable implements TemplateContract {
+	/**
+	 * Required by Macroable
+	 */
+	protected static macros = {}
+	protected static getters = {}
+
 	/**
 	 * The shared state is used to hold the globals and locals,
 	 * since it is shared with components too.
@@ -31,74 +47,78 @@ export class Template implements TemplateContract {
 		private compiler: CompilerContract,
 		globals: any,
 		locals: any,
-		private processor: Processor,
-		private options: { async: boolean }
+		private processor: Processor
 	) {
-		this.sharedState = merge({}, globals, locals)
+		super()
+		this.sharedState = deepMerge({}, globals, locals)
 	}
 
 	/**
 	 * Wraps template to a function
 	 */
 	private wrapToFunction(template: string, ...localVariables: string[]) {
-		const args = ['template', 'state', 'ctx'].concat(localVariables)
-		if (this.options.async) {
+		const args = ['template', 'state'].concat(localVariables)
+
+		if (this.compiler.async) {
 			return new Function(
 				'',
 				`return async function template (${args.join(',')}) { ${template} }`
 			)()
 		}
+
 		return new Function('', `return function template (${args.join(',')}) { ${template} }`)()
 	}
 
 	/**
 	 * Trims top and bottom new lines from the content
 	 */
-	public trimTopBottomNewLines(value: string) {
+	private trimTopBottomNewLines(value: string) {
 		return value.replace(/^\n|^\r\n/, '').replace(/\n$|\r\n$/, '')
 	}
 
 	/**
-	 * Render the template inline by sharing the state of the current template.
+	 * Render a partial
 	 *
 	 * ```js
-	 * const partialFn = template.renderInline('includes.user')
+	 * const partialFn = template.compilePartial('includes/user')
 	 *
 	 * // render and use output
 	 * partialFn(template, state, ctx)
 	 * ```
 	 */
-	public renderInline(templatePath: string, ...localVariables: string[]): Function {
-		const { template: compiledTemplate } = this.compiler.compile(
-			templatePath,
-			this.options.async,
-			localVariables
-		)
+	public compilePartial(templatePath: string, ...localVariables: string[]): Function {
+		const { template: compiledTemplate } = this.compiler.compile(templatePath, localVariables)
 		return this.wrapToFunction(compiledTemplate, ...localVariables)
 	}
 
 	/**
-	 * Renders the template with custom state. The `sharedState` of the template is still
-	 * passed to this template.
-	 *
-	 * Also a set of custom slots can be passed along. The slots uses the state of the parent
-	 * template.
+	 * Render a component
 	 *
 	 * ```js
-	 * template.renderWithState('components.user', { username: 'virk' }, slotsIfAny)
+	 * const componentFn = template.compileComponent('components/button')
+	 *
+	 * // render and use output
+	 * componentFn(template, template.getComponentState(props, slots, caller), ctx)
 	 * ```
 	 */
-	public renderWithState(template: string, state: any, slots: any, caller: any): string {
-		const { template: compiledTemplate } = this.compiler.compile(template, this.options.async)
+	public compileComponent(templatePath: string, ...localVariables: string[]): string {
+		const { template: compiledTemplate } = this.compiler.compile(templatePath, localVariables)
+		return this.wrapToFunction(compiledTemplate, ...localVariables)
+	}
 
-		const templateState = Object.assign({}, this.sharedState, state, {
-			$slots: new Slots({ component: template, caller, slots }),
+	/**
+	 * Returns the isolated state for a given component
+	 */
+	public getComponentState(
+		props: { [key: string]: any },
+		slots: { [key: string]: any },
+		caller: { filename: string; line: number; col: number }
+	) {
+		return Object.assign({}, this.sharedState, props, {
+			$slots: slots,
 			$caller: caller,
-			$props: new Props({ component: template, state }),
+			$props: new Props(props),
 		})
-
-		const context = new Context()
-		return this.wrapToFunction(compiledTemplate)(this, templateState, context)
 	}
 
 	/**
@@ -108,28 +128,61 @@ export class Template implements TemplateContract {
 	 * template.render('welcome', { key: 'value' })
 	 * ```
 	 */
-	public render(template: string, state: any): Promise<string> | string {
-		let { template: compiledTemplate } = this.compiler.compile(template, this.options.async)
-		compiledTemplate = `let $context = undefined; ${compiledTemplate}`
+	public render<T extends Promise<string> | string>(template: string, state: any): T {
+		let { template: compiledTemplate } = this.compiler.compile(template)
 
 		const templateState = Object.assign({}, this.sharedState, state)
-		const context = new Context()
 
 		/**
 		 * Process template as a promise.
 		 */
-		if (this.options.async) {
-			return this.wrapToFunction(compiledTemplate)(this, templateState, context).then(
-				(output: string) => {
-					output = this.trimTopBottomNewLines(output)
-					return this.processor.executeOutput({ output, template: this })
-				}
-			)
+		if (this.compiler.async) {
+			return this.wrapToFunction(compiledTemplate)(this, templateState).then((output: string) => {
+				output = this.trimTopBottomNewLines(output)
+				return this.processor.executeOutput({ output, template: this })
+			})
 		}
 
 		const output = this.trimTopBottomNewLines(
-			this.wrapToFunction(compiledTemplate)(this, templateState, context)
+			this.wrapToFunction(compiledTemplate)(this, templateState)
 		)
-		return this.processor.executeOutput({ output, template: this })
+
+		return this.processor.executeOutput({ output, template: this }) as T
 	}
+
+	/**
+	 * Escapes the value to be HTML safe. Only strings are escaped
+	 * and rest all values will be returned as it is.
+	 */
+	public escape<T>(input: T): T extends SafeValue ? T['value'] : T {
+		return typeof input === 'string'
+			? he.escape(input)
+			: input instanceof SafeValue
+			? input.value
+			: input
+	}
+
+	/**
+	 * Rethrows the runtime exception by re-constructing the error message
+	 * to point back to the original filename
+	 */
+	public reThrow(error: any, filename: string, lineNumber: number): never {
+		if (error instanceof EdgeError) {
+			throw error
+		}
+
+		const message = error.message.replace(/state\./, '')
+		throw new EdgeError(message, 'E_RUNTIME_EXCEPTION', {
+			filename: filename,
+			line: lineNumber,
+			col: 0,
+		})
+	}
+}
+
+/**
+ * Mark value as safe and not to be escaped
+ */
+export function safeValue(value: string) {
+	return new SafeValue(value)
 }

@@ -6,9 +6,9 @@ if (state.username) {
 out += "\n";
 out += "  Hello ";
 $lineNumber = 2;
-out += `${ctx.escape(state.username)}`;
+out += `${template.escape(state.username)}`;
 }
 } catch (error) {
-ctx.reThrow(error, $filename, $lineNumber);
+template.reThrow(error, $filename, $lineNumber);
 }
 return out;

@@ -2,8 +2,8 @@ let out = "";
 let $lineNumber = 1;
 let $filename = "{{__dirname}}index.edge";
 try {
-out += template.renderWithState("components-isolated-state/alert", {}, { main: function () { return "" } }, { filename: $filename, line: $lineNumber, col: 0 });
+out += template.compileComponent("components-isolated-state/alert")(template, template.getComponentState({}, { main: function () { return "" } }, { filename: $filename, line: $lineNumber, col: 0 }));
 } catch (error) {
-ctx.reThrow(error, $filename, $lineNumber);
+template.reThrow(error, $filename, $lineNumber);
 }
 return out;

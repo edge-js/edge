@@ -6,8 +6,8 @@ let username = "nikk";
 $lineNumber = 2;
 username = "virk";
 $lineNumber = 3;
-out += `${ctx.escape(username)}`;
+out += `${template.escape(username)}`;
 } catch (error) {
-ctx.reThrow(error, $filename, $lineNumber);
+template.reThrow(error, $filename, $lineNumber);
 }
 return out;

@@ -3,9 +3,9 @@ let $lineNumber = 1;
 let $filename = "{{__dirname}}index.edge";
 try {
 if (state.username === 'virk') {
-out += template.renderInline("include-if-literal/partial")(template,state,ctx);
+out += template.compilePartial("include-if-literal/partial")(template,state);
 }
 } catch (error) {
-ctx.reThrow(error, $filename, $lineNumber);
+template.reThrow(error, $filename, $lineNumber);
 }
 return out;

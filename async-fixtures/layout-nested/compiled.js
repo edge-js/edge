@@ -10,6 +10,6 @@ out += "Content from super";
 out += "\n";
 out += "Appended by index";
 } catch (error) {
-ctx.reThrow(error, $filename, $lineNumber);
+template.reThrow(error, $filename, $lineNumber);
 }
 return out;

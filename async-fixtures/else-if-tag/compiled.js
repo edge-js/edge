@@ -10,12 +10,12 @@ $lineNumber = 3;
 out += "\n";
 out += "  Hello ";
 $lineNumber = 4;
-out += `${ctx.escape(state.username)}`;
+out += `${template.escape(state.username)}`;
 } else {
 out += "\n";
 out += "  Hello Guest!";
 }
 } catch (error) {
-ctx.reThrow(error, $filename, $lineNumber);
+template.reThrow(error, $filename, $lineNumber);
 }
 return out;

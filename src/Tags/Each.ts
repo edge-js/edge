@@ -12,7 +12,7 @@ import { utils as lexerUtils } from 'edge-lexer'
 import { Parser, expressions } from 'edge-parser'
 
 import { TagContract } from '../Contracts'
-import { isSubsetOf, unallowedExpression, asyncEach, each } from '../utils'
+import { isSubsetOf, asyncEach, each, unallowedExpression } from '../utils'
 
 /**
  * Returns the list to loop over for the each binary expression
@@ -140,7 +140,7 @@ export const eachTag: TagContract = {
 		 * If there is an else statement, then wrap the loop inside the `if` statement first
 		 */
 		if (elseIndex > -1) {
-			buffer.writeStatement(`if(ctx.size(${list})) {`, token.filename, token.loc.start.line)
+			buffer.writeStatement(`if(template.size(${list})) {`, token.filename, token.loc.start.line)
 		}
 
 		/**
@@ -148,7 +148,7 @@ export const eachTag: TagContract = {
 		 */
 		const loopCallbackArgs = (index ? [item, index] : [item]).join(',')
 		buffer.writeStatement(
-			`${awaitKeyword}ctx.${loopFunctionName}(${list}, ${asyncKeyword}function (${loopCallbackArgs}) {`,
+			`${awaitKeyword}template.${loopFunctionName}(${list}, ${asyncKeyword}function (${loopCallbackArgs}) {`,
 			token.filename,
 			token.loc.start.line
 		)
@@ -187,11 +187,11 @@ export const eachTag: TagContract = {
 	},
 
 	/**
-	 * Add methods to the runtime context for running the loop
+	 * Add methods to the template for running the loop
 	 */
-	run(context) {
-		context.macro('loopAsync', asyncEach)
-		context.macro('loop', each)
-		context.macro('size', size)
+	run(template) {
+		template.macro('loopAsync', asyncEach)
+		template.macro('loop', each)
+		template.macro('size', size)
 	},
 }

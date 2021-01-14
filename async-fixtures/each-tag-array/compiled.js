@@ -2,15 +2,15 @@ let out = "";
 let $lineNumber = 1;
 let $filename = "{{__dirname}}index.edge";
 try {
-await ctx.loopAsync([{
+await template.loopAsync([{
   username: "virk"
 }], async function (user) {
 out += "\n";
 out += "  - Hello ";
 $lineNumber = 2;
-out += `${ctx.escape(user.username)}`;
+out += `${template.escape(user.username)}`;
 });
 } catch (error) {
-ctx.reThrow(error, $filename, $lineNumber);
+template.reThrow(error, $filename, $lineNumber);
 }
 return out;

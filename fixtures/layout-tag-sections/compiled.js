@@ -8,6 +8,6 @@ out += "";
 out += "\n";
 out += "Here goes the content section content";
 } catch (error) {
-ctx.reThrow(error, $filename, $lineNumber);
+template.reThrow(error, $filename, $lineNumber);
 }
 return out;

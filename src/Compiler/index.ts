@@ -8,7 +8,7 @@
  */
 
 import { EdgeError } from 'edge-error'
-import { Parser, EdgeBuffer } from 'edge-parser'
+import { Parser, EdgeBuffer, Stack } from 'edge-parser'
 import { Token, TagToken, utils as lexerUtils } from 'edge-lexer'
 
 import { Processor } from '../Processor'
@@ -26,8 +26,15 @@ import {
  * it natively merges the contents of a layout with a parent template.
  */
 export class Compiler implements CompilerContract {
+	/**
+	 * Caches compiled templates
+	 */
 	public cacheManager = new CacheManager(!!this.options.cache)
-	public asyncCacheManager = new CacheManager(!!this.options.cache)
+
+	/**
+	 * Know if compiler is compiling for the async mode or not
+	 */
+	public async = !!this.options.async
 
 	constructor(
 		private loader: LoaderContract,
@@ -35,6 +42,7 @@ export class Compiler implements CompilerContract {
 		private processor: Processor,
 		private options: CompilerOptions = {
 			cache: true,
+			async: false,
 		}
 	) {}
 
@@ -154,6 +162,41 @@ export class Compiler implements CompilerContract {
 	}
 
 	/**
+	 * Returns the parser instance for a given template
+	 */
+	private getParserFor(templatePath: string, localVariables?: string[]) {
+		const parser = new Parser(this.tags, new Stack(), {
+			claimTag: this.options.claimTag,
+			async: this.async,
+			statePropertyName: 'state',
+			escapeCallPath: ['template', 'escape'],
+			localVariables: ['$filename', 'state'],
+			onTag: (tag) => this.processor.executeTag({ tag, path: templatePath }),
+		})
+
+		/**
+		 * Define local variables on the parser. This is helpful when trying to compile
+		 * a partail and we want to share the local state of the parent template
+		 * with it
+		 */
+		if (localVariables) {
+			localVariables.forEach((localVariable) => parser.stack.defineVariable(localVariable))
+		}
+
+		return parser
+	}
+
+	/**
+	 * Returns the parser instance for a given template
+	 */
+	private getBufferFor(templatePath: string) {
+		return new EdgeBuffer(templatePath, {
+			outputVar: 'out',
+			rethrowCallPath: ['template', 'reThrow'],
+		})
+	}
+
+	/**
 	 * Converts the template content to an array of lexer tokens. The method is
 	 * same as the `parser.tokenize`, but it also handles layouts natively.
 	 *
@@ -161,12 +204,12 @@ export class Compiler implements CompilerContract {
 	 * compiler.tokenize('<template-path>')
 	 * ```
 	 */
-	public tokenize(templatePath: string, parser: Parser): Token[] {
+	public tokenize(templatePath: string, parser?: Parser): Token[] {
 		const absPath = this.loader.makePath(templatePath)
 		let { template } = this.loader.resolve(absPath)
 
 		template = this.processor.executeRaw({ path: absPath, raw: template })
-		return this.templateContentToTokens(template, parser, absPath)
+		return this.templateContentToTokens(template, parser || this.getParserFor(absPath), absPath)
 	}
 
 	/**
@@ -178,45 +221,34 @@ export class Compiler implements CompilerContract {
 	 * compiler.compile('welcome')
 	 * ```
 	 */
-	public compile(templatePath: string, async: boolean, localVariables?: string[]): LoaderTemplate {
+	public compile(templatePath: string, localVariables?: string[]): LoaderTemplate {
 		const absPath = this.loader.makePath(templatePath)
-		const cacheManager = async ? this.asyncCacheManager : this.cacheManager
+
+		let cachedResponse = this.cacheManager.get(absPath)
 
 		/**
-		 * If template is in the cache, then return it without
-		 * further processing
+		 * Process the template and cache it
 		 */
-		const cachedResponse = cacheManager.get(absPath)
-		if (cachedResponse) {
-			const template = this.processor.executeCompiled({
-				path: absPath,
-				compiled: cachedResponse.template,
-			})
-			return { template }
+		if (!cachedResponse) {
+			const parser = this.getParserFor(absPath, localVariables)
+			const buffer = this.getBufferFor(absPath)
+
+			/**
+			 * Generate tokens and process them
+			 */
+			const templateTokens = this.tokenize(absPath, parser)
+			templateTokens.forEach((token) => parser.processToken(token, buffer))
+
+			const template = buffer.flush()
+			this.cacheManager.set(absPath, { template })
+			cachedResponse = { template }
 		}
 
-		const parser = new Parser(this.tags, undefined, {
-			claimTag: this.options.claimTag,
-			async,
-			onTag: (tag) => this.processor.executeTag({ tag, path: absPath }),
+		const template = this.processor.executeCompiled({
+			path: absPath,
+			compiled: cachedResponse.template,
 		})
 
-		const buffer = new EdgeBuffer(absPath)
-
-		/**
-		 * Define local variables on the parser. This is helpful when trying to compile
-		 * a partail and we want to share the local state of the parent template
-		 * with it
-		 */
-		if (localVariables) {
-			localVariables.forEach((localVariable) => parser.stack.defineVariable(localVariable))
-		}
-
-		const templateTokens = this.tokenize(absPath, parser)
-		templateTokens.forEach((token) => parser.processToken(token, buffer))
-		const template = buffer.flush()
-
-		cacheManager.set(absPath, { template })
-		return { template: this.processor.executeCompiled({ path: absPath, compiled: template }) }
+		return { template }
 	}
 }

@@ -11,8 +11,8 @@ import { ClaimTagFn } from 'edge-parser'
 
 import * as Tags from '../Tags'
 import { Loader } from '../Loader'
-import { Context } from '../Context'
 import { Compiler } from '../Compiler'
+import { Template } from '../Template'
 import { Processor } from '../Processor'
 import { EdgeRenderer } from '../Renderer'
 
@@ -36,6 +36,15 @@ export class Edge implements EdgeContract {
 	 */
 	private compilerOptions: CompilerOptions = {
 		cache: !!this.options.cache,
+		async: false,
+	}
+
+	/**
+	 * Options passed to the compiler instance
+	 */
+	private asyncCompilerOptions: CompilerOptions = {
+		cache: !!this.options.cache,
+		async: true,
 	}
 
 	/**
@@ -73,6 +82,16 @@ export class Edge implements EdgeContract {
 	 * The underlying compiler in use
 	 */
 	public compiler = new Compiler(this.loader, this.tags, this.processor, this.compilerOptions)
+
+	/**
+	 * The underlying compiler in use
+	 */
+	public asyncCompiler = new Compiler(
+		this.loader,
+		this.tags,
+		this.processor,
+		this.asyncCompilerOptions
+	)
 
 	constructor(private options: EdgeOptions = {}) {
 		Object.keys(Tags).forEach((name) => this.registerTag(Tags[name]))
@@ -175,7 +194,7 @@ export class Edge implements EdgeContract {
 	 */
 	public registerTag(tag: TagContract): this {
 		if (typeof tag.run === 'function') {
-			tag.run(Context)
+			tag.run(Template)
 		}
 
 		this.tags[tag.tagName] = tag
@@ -211,6 +230,7 @@ export class Edge implements EdgeContract {
 	 */
 	public claimTag(fn: ClaimTagFn): this {
 		this.compilerOptions.claimTag = fn
+		this.asyncCompilerOptions.claimTag = fn
 		return this
 	}
 
@@ -220,7 +240,7 @@ export class Edge implements EdgeContract {
 	 */
 	public getRenderer(): EdgeRendererContract {
 		this.executePlugins()
-		return new EdgeRenderer(this.compiler, this.GLOBALS, this.processor)
+		return new EdgeRenderer(this.compiler, this.asyncCompiler, this.GLOBALS, this.processor)
 	}
 
 	/**

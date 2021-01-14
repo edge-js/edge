@@ -9,9 +9,9 @@ out += `${yield_1}`;
 out += "\n";
 out += "  Hello ";
 $lineNumber = 2;
-out += `${ctx.escape(state.guestName)}`;
+out += `${template.escape(state.guestName)}`;
 }
 } catch (error) {
-ctx.reThrow(error, $filename, $lineNumber);
+template.reThrow(error, $filename, $lineNumber);
 }
 return out;

@@ -7,6 +7,6 @@ if (yield_1) {
 out += `${yield_1}`;
 }
 } catch (error) {
-ctx.reThrow(error, $filename, $lineNumber);
+template.reThrow(error, $filename, $lineNumber);
 }
 return out;

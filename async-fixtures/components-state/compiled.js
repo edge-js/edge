@@ -2,18 +2,18 @@ let out = "";
 let $lineNumber = 1;
 let $filename = "{{__dirname}}index.edge";
 try {
-out += await template.renderWithState("components-state/alert", {}, { main: async function () {
+out += await template.compileComponent("components-state/alert")(template, template.getComponentState({}, { main: async function () {
 let slot_main = "";
 try {
 slot_main += "  Hello ";
 $lineNumber = 2;
-slot_main += `${ctx.escape(state.username)}`;
+slot_main += `${template.escape(state.username)}`;
 } catch (error) {
-ctx.reThrow(error, $filename, $lineNumber);
+template.reThrow(error, $filename, $lineNumber);
 }
 return slot_main;
-} }, { filename: $filename, line: $lineNumber, col: 0 });
+} }, { filename: $filename, line: $lineNumber, col: 0 }));
 } catch (error) {
-ctx.reThrow(error, $filename, $lineNumber);
+template.reThrow(error, $filename, $lineNumber);
 }
 return out;

@@ -7,15 +7,15 @@ out += "\n";
 out += "Hello ";
 $filename = "{{__dirname}}master.edge";
 $lineNumber = 3;
-out += `${ctx.escape(state.username)}`;
+out += `${template.escape(state.username)}`;
 out += " from layout";
 out += "\n";
 out += "Hello ";
 $filename = "{{__dirname}}index.edge";
 $lineNumber = 4;
-out += `${ctx.escape(state.username)}`;
+out += `${template.escape(state.username)}`;
 out += " from children";
 } catch (error) {
-ctx.reThrow(error, $filename, $lineNumber);
+template.reThrow(error, $filename, $lineNumber);
 }
 return out;

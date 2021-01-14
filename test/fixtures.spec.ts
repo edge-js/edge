@@ -15,7 +15,6 @@ import { readdirSync, readFileSync, statSync } from 'fs'
 
 import * as tags from '../src/Tags'
 import { Loader } from '../src/Loader'
-import { Context } from '../src/Context'
 import { Template } from '../src/Template'
 import { Compiler } from '../src/Compiler'
 import { Processor } from '../src/Processor'
@@ -28,13 +27,13 @@ const loader = new Loader()
 loader.mount('default', basePath)
 
 const processor = new Processor()
-const compiler = new Compiler(loader, tags, processor)
+const compiler = new Compiler(loader, tags, processor, { async: false })
 
 test.group('Fixtures', (group) => {
 	group.before(() => {
 		Object.keys(tags).forEach((tag) => {
 			if (tags[tag].run) {
-				tags[tag].run(Context)
+				tags[tag].run(Template)
 			}
 		})
 	})
@@ -44,12 +43,12 @@ test.group('Fixtures', (group) => {
 	dirs.forEach((dir) => {
 		const dirBasePath = join(basePath, dir)
 		test(dir, (assert) => {
-			const template = new Template(compiler, {}, {}, processor, { async: false })
+			const template = new Template(compiler, {}, {}, processor)
 
 			/**
 			 * Compiled output
 			 */
-			const { template: compiled } = compiler.compile(`${dir}/index.edge`, false)
+			const { template: compiled } = compiler.compile(`${dir}/index.edge`)
 			const expectedCompiled = normalizeNewLines(
 				readFileSync(join(dirBasePath, 'compiled.js'), 'utf-8')
 			)

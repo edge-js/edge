@@ -59,18 +59,16 @@ export interface LoaderContract {
 }
 
 /**
- * Shape of runtime context
+ * Shape of template constructor
  */
-export interface ContextContract {
-	escape<T>(input: T): T
-	reThrow(error: any, filename: string, linenumber: number): never
-}
-
-/**
- * Shape of context constructor
- */
-export interface ContextConstructorContract extends MacroableConstructorContract<ContextContract> {
-	new (): ContextContract
+export interface TemplateConstructorContract
+	extends MacroableConstructorContract<TemplateContract> {
+	new (
+		compiler: CompilerContract,
+		globals: any,
+		locals: any,
+		processor: ProcessorContract
+	): TemplateContract
 }
 
 /**
@@ -79,7 +77,7 @@ export interface ContextConstructorContract extends MacroableConstructorContract
  */
 export interface TagContract extends ParserTagDefinitionContract {
 	tagName: string
-	run?(context: ContextConstructorContract): void
+	run?(template: TemplateConstructorContract): void
 }
 
 /**
@@ -93,19 +91,10 @@ export type TagsContract = {
  * Shape of the cache manager
  */
 export interface CacheManagerContract {
+	enabled: boolean
 	get(templatePath: string): undefined | LoaderTemplate
 	set(templatePath: string, compiledOutput: LoaderTemplate): void
 	has(templatePath: string): boolean
-}
-
-/**
- * Shape of the compiler
- */
-export interface CompilerContract {
-	cacheManager: CacheManagerContract
-	asyncCacheManager: CacheManagerContract
-	compile(templatePath: string, async: boolean, localVariables?: string[]): LoaderTemplate
-	tokenize(templatePath: string, parser: Parser): Token[]
 }
 
 /**
@@ -113,24 +102,115 @@ export interface CompilerContract {
  */
 export type CompilerOptions = {
 	cache?: boolean
+	async?: boolean
 	claimTag?: ClaimTagFn
+}
+
+/**
+ * Shape of the compiler
+ */
+export interface CompilerContract {
+	cacheManager: CacheManagerContract
+	async: boolean
+	compile(templatePath: string, localVariables?: string[]): LoaderTemplate
+	tokenize(templatePath: string, parser?: Parser): Token[]
+}
+
+/**
+ * Shape of the props class passed to the components
+ */
+export interface PropsContract {
+	/**
+	 * Find if a key exists inside the props
+	 */
+	has(key: string): boolean
+
+	/**
+	 * Return values for only the given keys
+	 */
+	only(keys: string[]): { [key: string]: any }
+
+	/**
+	 * Return values except the given keys
+	 */
+	except(keys: string[]): { [key: string]: any }
+
+	/**
+	 * Serialize all props to a string of HTML attributes
+	 */
+	serialize(mergeProps?: any): string
+
+	/**
+	 * Serialize only the given keys to a string of HTML attributes
+	 */
+	serializeOnly(keys: string[], mergeProps?: any): string
+
+	/**
+	 * Serialize except the given keys to a string of HTML attributes
+	 */
+	serializeExcept(keys: string[], mergeProps?: any): string
 }
 
 /**
  * Shape of the template contract
  */
 export interface TemplateContract {
-	renderInline(templatePath: string, ...localVariables: string[]): Function
-	renderWithState(template: string, state: any, slots: any, caller: any): string
-	render(template: string, state: any): Promise<string> | string
+	/**
+	 * Compiles partial
+	 */
+	compilePartial(templatePath: string, ...localVariables: string[]): Function
+
+	/**
+	 * Compiles a component
+	 */
+	compileComponent(templatePath: string, ...localVariables: string[]): string
+
+	/**
+	 * Returns the state for a component
+	 */
+	getComponentState(
+		props: { [key: string]: any },
+		slots: { [key: string]: any },
+		caller: { filename: string; line: number; col: number }
+	): {
+		$props: PropsContract & { [key: string]: any }
+		$slots: { [key: string]: any }
+		$caller: { filename: string; line: number; col: number }
+	}
+
+	/**
+	 * Renders a template to a string
+	 */
+	render<T extends Promise<string> | string>(template: string, state: any): T
+
+	/**
+	 * Escape input
+	 */
+	escape<T>(input: T): T
+
+	/**
+	 * Rethrow exceptions by pointing back to edge source file and line number
+	 */
+	reThrow(error: any, filename: string, line: number): never
 }
 
 /**
  * Shape of the renderer that renders the edge templates
  */
 export interface EdgeRendererContract {
+	/**
+	 * Share state with the template and its partials and component
+	 */
 	share(locals: any): this
+
+	/**
+	 * Render a template synchronously
+	 */
 	render(templatePath: string, state?: any): string
+
+	/**
+	 * Render a template asynchronously
+	 */
 	renderAsync(templatePath: string, state?: any): Promise<string>
 }
 
@@ -140,14 +220,32 @@ export interface EdgeRendererContract {
  */
 export interface ProcessorContract {
 	/**
-	 * Define a processor handler
+	 * Hook into the raw text to modify its contents. Make sure to return the
+	 * new string back or return "void" in case no modifications have been
+	 * performed
 	 */
 	process(event: 'raw', handler: (data: { raw: string; path: string }) => string | void): this
+
+	/**
+	 * Hook into the tag node to modify its properties
+	 */
 	process(event: 'tag', handler: (data: { tag: TagToken; path: string }) => void): this
+
+	/**
+	 * Hook into the compiled template to modify its contents. Make sure to return the
+	 * new string back or return "void" in case no modifications have been
+	 * performed
+	 */
 	process(
 		event: 'compiled',
 		handler: (data: { compiled: string; path: string }) => string | void
 	): this
+
+	/**
+	 * Hook into the compiled output to modify its contents. Make sure to return the
+	 * new string back or return "void" in case no modifications have been
+	 * performed
+	 */
 	process(
 		event: 'output',
 		handler: (data: { output: string; template: TemplateContract }) => string | void
@@ -167,14 +265,45 @@ export type EdgeOptions = {
  * Shape of the main module
  */
 export interface EdgeContract {
+	/**
+	 * Loader for loading templates. You can also define a custom loader when creating
+	 * a new instance of edge
+	 */
 	loader: LoaderContract
+
+	/**
+	 * Compiler to be used for compiling synchronously
+	 */
 	compiler: CompilerContract
+
+	/**
+	 * Compiler to be used for compiling asynchronously
+	 */
+	asyncCompiler: CompilerContract
+
+	/**
+	 * Processor reference to hook into the compile and the rendering
+	 * phase of templates
+	 */
 	processor: ProcessorContract
+
+	/**
+	 * Set of registered globals. One can define custom globals using `edge.global`
+	 * method
+	 */
 	GLOBALS: { [key: string]: any }
+
+	/**
+	 * A custom set of registered tags. One can define a custom tag using `edge.registerTag`
+	 * method
+	 */
 	tags: { [name: string]: TagContract }
 
 	/**
-	 * Register a plugin
+	 * Register a plugin. Plugins are lazily invoked just before the views are rendered. This
+	 * ensures that plugins will receive a fully configured edge instance.
+	 *
+	 * Also plugins are invoked only once. Unless, the `options.recurring` value is set
 	 */
 	use<T extends any>(
 		pluginFn: (edge: this, firstRun: boolean, options: T) => void,

@@ -8,7 +8,7 @@
  */
 
 import test from 'japa'
-import { Parser } from 'edge-parser'
+import { Parser, Stack } from 'edge-parser'
 import { StringifiedObject } from '../src/StringifiedObject'
 
 /**
@@ -59,7 +59,11 @@ test.group('StringifiedObject', () => {
 
 test.group('StringifiedObject | fromAcornAst', () => {
 	test('stringify object expression', (assert) => {
-		const parser = new Parser({})
+		const parser = new Parser({}, new Stack(), {
+			async: false,
+			statePropertyName: 'state',
+			escapeCallPath: 'escape',
+		})
 		const expression = parser.utils.transformAst(
 			parser.utils.generateAST("({ username: 'virk' })", LOC, 'eval.edge'),
 			'eval.edge',
@@ -71,7 +75,11 @@ test.group('StringifiedObject | fromAcornAst', () => {
 	})
 
 	test('parse props with shorthand obj', (assert) => {
-		const parser = new Parser({})
+		const parser = new Parser({}, new Stack(), {
+			async: false,
+			statePropertyName: 'state',
+			escapeCallPath: 'escape',
+		})
 		const expression = parser.utils.transformAst(
 			parser.utils.generateAST('({ username })', LOC, 'eval.edge'),
 			'eval.edge',
@@ -83,7 +91,11 @@ test.group('StringifiedObject | fromAcornAst', () => {
 	})
 
 	test('parse props with computed obj', (assert) => {
-		const parser = new Parser({})
+		const parser = new Parser({}, new Stack(), {
+			async: false,
+			statePropertyName: 'state',
+			escapeCallPath: 'escape',
+		})
 		const expression = parser.utils.transformAst(
 			parser.utils.generateAST('({ [username]: username })', LOC, 'eval.edge'),
 			'eval.edge',
@@ -95,7 +107,11 @@ test.group('StringifiedObject | fromAcornAst', () => {
 	})
 
 	test('parse props with multiple obj properties', (assert) => {
-		const parser = new Parser({})
+		const parser = new Parser({}, new Stack(), {
+			async: false,
+			statePropertyName: 'state',
+			escapeCallPath: 'escape',
+		})
 		const expression = parser.utils.transformAst(
 			parser.utils.generateAST("({ username: 'virk', age: 22 })", LOC, 'eval.edge'),
 			'eval.edge',
@@ -108,7 +124,11 @@ test.group('StringifiedObject | fromAcornAst', () => {
 	})
 
 	test('parse props with shorthand and full properties', (assert) => {
-		const parser = new Parser({})
+		const parser = new Parser({}, new Stack(), {
+			async: false,
+			statePropertyName: 'state',
+			escapeCallPath: 'escape',
+		})
 		const expression = parser.utils.transformAst(
 			parser.utils.generateAST('({ username, age: 22 })', LOC, 'eval.edge'),
 			'eval.edge',
@@ -120,7 +140,11 @@ test.group('StringifiedObject | fromAcornAst', () => {
 	})
 
 	test('parse props with assignment expression', (assert) => {
-		const parser = new Parser({})
+		const parser = new Parser({}, new Stack(), {
+			async: false,
+			statePropertyName: 'state',
+			escapeCallPath: 'escape',
+		})
 		const expression = parser.utils.transformAst(
 			parser.utils.generateAST("(title = 'Hello')", LOC, 'eval.edge'),
 			'eval.edge',
@@ -132,7 +156,11 @@ test.group('StringifiedObject | fromAcornAst', () => {
 	})
 
 	test('parse props with more than one assignment expression', (assert) => {
-		const parser = new Parser({})
+		const parser = new Parser({}, new Stack(), {
+			async: false,
+			statePropertyName: 'state',
+			escapeCallPath: 'escape',
+		})
 		const expression = parser.utils.transformAst(
 			parser.utils.generateAST("(title = 'Hello', body = 'Some content')", LOC, 'eval.edge'),
 			'eval.edge',

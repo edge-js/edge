@@ -15,7 +15,7 @@ import { LoaderTemplate, CacheManagerContract } from '../Contracts'
 export class CacheManager implements CacheManagerContract {
 	private cacheStore: Map<string, LoaderTemplate> = new Map()
 
-	constructor(private enabled: boolean) {}
+	constructor(public enabled: boolean) {}
 
 	/**
 	 * Returns a boolean to tell if a template has already been cached

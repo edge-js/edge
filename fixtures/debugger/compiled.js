@@ -7,6 +7,6 @@ out += "";
 out += "\n";
 out += "Hello";
 } catch (error) {
-ctx.reThrow(error, $filename, $lineNumber);
+template.reThrow(error, $filename, $lineNumber);
 }
 return out;

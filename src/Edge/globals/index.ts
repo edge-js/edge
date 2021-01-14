@@ -7,17 +7,15 @@
  * file that was distributed with this source code.
  */
 
-import truncatise from 'truncatise'
 import { EdgeError } from 'edge-error'
-import inspect from '@poppinss/inspect'
-import { safeValue } from '../../Context'
+import { safeValue } from '../../Template'
 
 export const GLOBALS = {
-	inspect: (value) => {
-		return safeValue(inspect.string.html(value))
+	inspect: (value: any) => {
+		return safeValue(require('@poppinss/inspect').string.html(value))
 	},
 	truncate: (value: string, length: number = 20, options?: { strict: boolean; suffix: string }) => {
-		return truncatise(value, {
+		return require('truncatise')(value, {
 			Strict: !!options?.strict,
 			StripHTML: false,
 			TruncateLength: length,
@@ -33,7 +31,7 @@ export const GLOBALS = {
 		}
 	},
 	excerpt: (value: string, length: number = 20, options?: { strict: boolean; suffix: string }) => {
-		return truncatise(value, {
+		return require('truncatise')(value, {
 			Strict: !!options?.strict,
 			StripHTML: true,
 			TruncateLength: length,

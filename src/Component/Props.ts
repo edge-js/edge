@@ -9,22 +9,23 @@
 
 import { lodash } from '@poppinss/utils'
 import stringifyAttributes from 'stringify-attributes'
-import { safeValue } from '../Context'
+
+import { safeValue } from '../Template'
 
 /**
  * Class to ease interactions with component props
  */
 export class Props {
-	constructor(options: { component: string; state: any }) {
-		this[Symbol.for('options')] = options
-		Object.assign(this, options.state)
+	constructor(props: any) {
+		this[Symbol.for('options')] = { props }
+		Object.assign(this, props)
 	}
 
 	/**
 	 * Find if a key exists inside the props
 	 */
 	public has(key: string) {
-		const value = lodash.get(this[Symbol.for('options')].state, key)
+		const value = lodash.get(this[Symbol.for('options')].props, key)
 		return value !== undefined && value !== null
 	}
 
@@ -32,7 +33,7 @@ export class Props {
 	 * Validate prop value
 	 */
 	public validate(key: string, validateFn: (key: string, value?: any) => any) {
-		const value = lodash.get(this[Symbol.for('options')].state, key)
+		const value = lodash.get(this[Symbol.for('options')].props, key)
 		validateFn(key, value)
 	}
 
@@ -40,21 +41,21 @@ export class Props {
 	 * Return values for only the given keys
 	 */
 	public only(keys: string[]) {
-		return lodash.pick(this[Symbol.for('options')].state, keys)
+		return lodash.pick(this[Symbol.for('options')].props, keys)
 	}
 
 	/**
 	 * Return values except the given keys
 	 */
 	public except(keys: string[]) {
-		return lodash.omit(this[Symbol.for('options')].state, keys)
+		return lodash.omit(this[Symbol.for('options')].props, keys)
 	}
 
 	/**
 	 * Serialize all props to a string of HTML attributes
 	 */
 	public serialize(mergeProps?: any) {
-		const attributes = lodash.merge({}, this[Symbol.for('options')].state, mergeProps)
+		const attributes = lodash.merge({}, this[Symbol.for('options')].props, mergeProps)
 		return safeValue(stringifyAttributes(attributes))
 	}
 

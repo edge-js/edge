@@ -212,7 +212,10 @@ export const componentTag: TagContract = {
 		const mainSlot: Slot = {
 			outputVar: 'slot_main',
 			props: {},
-			buffer: new EdgeBuffer(token.filename, { outputVar: 'slot_main' }),
+			buffer: new EdgeBuffer(token.filename, {
+				outputVar: 'slot_main',
+				rethrowCallPath: ['template', 'reThrow'],
+			}),
 			line: -1,
 			filename: token.filename,
 		}
@@ -253,7 +256,10 @@ export const componentTag: TagContract = {
 				 */
 				slots[slotName] = {
 					outputVar: `slot_${slotsCounter}`,
-					buffer: new EdgeBuffer(token.filename, { outputVar: `slot_${slotsCounter}` }),
+					buffer: new EdgeBuffer(token.filename, {
+						outputVar: `slot_${slotsCounter}`,
+						rethrowCallPath: ['template', 'reThrow'],
+					}),
 					props: slotProps,
 					line: -1,
 					filename: token.filename,
@@ -323,7 +329,7 @@ export const componentTag: TagContract = {
 		 * Write the line to render the component with it's own state
 		 */
 		buffer.outputExpression(
-			`${awaitKeyword}template.renderWithState(${name}, ${props}, ${obj.flush()}, ${caller.flush()})`,
+			`${awaitKeyword}template.compileComponent(${name})(template, template.getComponentState(${props}, ${obj.flush()}, ${caller.flush()}))`,
 			token.filename,
 			token.loc.start.line,
 			false

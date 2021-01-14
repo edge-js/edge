@@ -14,7 +14,6 @@ import { readdirSync, readFileSync, statSync } from 'fs'
 
 import * as tags from '../src/Tags'
 import { Loader } from '../src/Loader'
-import { Context } from '../src/Context'
 import { Template } from '../src/Template'
 import { Compiler } from '../src/Compiler'
 import { Processor } from '../src/Processor'
@@ -33,7 +32,7 @@ test.group('Newline Fixtures', (group) => {
 	group.before(() => {
 		Object.keys(tags).forEach((tag) => {
 			if (tags[tag].run) {
-				tags[tag].run(Context)
+				tags[tag].run(Template)
 			}
 		})
 	})
@@ -43,7 +42,7 @@ test.group('Newline Fixtures', (group) => {
 	dirs.forEach((dir) => {
 		const dirBasePath = join(basePath, dir)
 		test(dir, (assert) => {
-			const template = new Template(compiler, {}, {}, processor, { async: false })
+			const template = new Template(compiler, {}, {}, processor)
 
 			/**
 			 * Render output

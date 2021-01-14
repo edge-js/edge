@@ -7,10 +7,10 @@
  * file that was distributed with this source code.
  */
 
-import merge from 'lodash.merge'
+import deepMerge from 'lodash.merge'
 
-import { Processor } from '../Processor'
 import { Template } from '../Template'
+import { Processor } from '../Processor'
 import { EdgeRendererContract, CompilerContract } from '../Contracts'
 
 /**
@@ -21,6 +21,7 @@ export class EdgeRenderer implements EdgeRendererContract {
 
 	constructor(
 		private compiler: CompilerContract,
+		private asyncCompiler: CompilerContract,
 		private globals: any,
 		private processor: Processor
 	) {}
@@ -30,7 +31,7 @@ export class EdgeRenderer implements EdgeRendererContract {
 	 * globals
 	 */
 	public share(data: any): this {
-		merge(this.locals, data)
+		deepMerge(this.locals, data)
 		return this
 	}
 
@@ -38,19 +39,19 @@ export class EdgeRenderer implements EdgeRendererContract {
 	 * Render the template
 	 */
 	public render(templatePath: string, state: any = {}): string {
-		const template = new Template(this.compiler, this.globals, this.locals, this.processor, {
-			async: false,
-		})
-		return template.render(templatePath, state) as string
+		return new Template(this.compiler, this.globals, this.locals, this.processor).render<string>(
+			templatePath,
+			state
+		)
 	}
 
 	/**
 	 * Render the template
 	 */
 	public async renderAsync(templatePath: string, state: any = {}): Promise<string> {
-		const template = new Template(this.compiler, this.globals, this.locals, this.processor, {
-			async: true,
-		})
-		return template.render(templatePath, state)
+		return new Template(this.asyncCompiler, this.globals, this.locals, this.processor).render(
+			templatePath,
+			state
+		)
 	}
 }

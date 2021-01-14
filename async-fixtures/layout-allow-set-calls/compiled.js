@@ -11,8 +11,8 @@ out += "\n";
 out += "Hello ";
 $filename = "{{__dirname}}master.edge";
 $lineNumber = 4;
-out += `${ctx.escape(username)}`;
+out += `${template.escape(username)}`;
 } catch (error) {
-ctx.reThrow(error, $filename, $lineNumber);
+template.reThrow(error, $filename, $lineNumber);
 }
 return out;

@@ -12,6 +12,6 @@ out += "";
 out += "\n";
 out += "I will override the content";
 } catch (error) {
-ctx.reThrow(error, $filename, $lineNumber);
+template.reThrow(error, $filename, $lineNumber);
 }
 return out;
