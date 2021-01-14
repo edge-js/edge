@@ -11,11 +11,12 @@ import { lodash } from '@poppinss/utils'
 import stringifyAttributes from 'stringify-attributes'
 
 import { safeValue } from '../Template'
+import { PropsContract } from '../Contracts'
 
 /**
  * Class to ease interactions with component props
  */
-export class Props {
+export class Props implements PropsContract {
 	constructor(props: any) {
 		this[Symbol.for('options')] = { props }
 		Object.assign(this, props)

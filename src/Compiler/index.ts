@@ -14,6 +14,7 @@ import { Token, TagToken, utils as lexerUtils } from 'edge-lexer'
 import { Processor } from '../Processor'
 import { CacheManager } from '../CacheManager'
 import {
+	ClaimTagFn,
 	TagsContract,
 	LoaderContract,
 	LoaderTemplate,
@@ -26,6 +27,8 @@ import {
  * it natively merges the contents of a layout with a parent template.
  */
 export class Compiler implements CompilerContract {
+	private claimTagFn?: ClaimTagFn
+
 	/**
 	 * Caches compiled templates
 	 */
@@ -166,7 +169,7 @@ export class Compiler implements CompilerContract {
 	 */
 	private getParserFor(templatePath: string, localVariables?: string[]) {
 		const parser = new Parser(this.tags, new Stack(), {
-			claimTag: this.options.claimTag,
+			claimTag: this.claimTagFn,
 			async: this.async,
 			statePropertyName: 'state',
 			escapeCallPath: ['template', 'escape'],
@@ -194,6 +197,14 @@ export class Compiler implements CompilerContract {
 			outputVar: 'out',
 			rethrowCallPath: ['template', 'reThrow'],
 		})
+	}
+
+	/**
+	 * Define a function to claim tags
+	 */
+	public claimTag(fn: ClaimTagFn): this {
+		this.claimTagFn = fn
+		return this
 	}
 
 	/**

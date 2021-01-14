@@ -7,8 +7,6 @@
  * file that was distributed with this source code.
  */
 
-import { ClaimTagFn } from 'edge-parser'
-
 import * as Tags from '../Tags'
 import { Loader } from '../Loader'
 import { Compiler } from '../Compiler'
@@ -40,7 +38,7 @@ export class Edge implements EdgeContract {
 	}
 
 	/**
-	 * Options passed to the compiler instance
+	 * Options passed to the async compiler instance
 	 */
 	private asyncCompilerOptions: CompilerOptions = {
 		cache: !!this.options.cache,
@@ -222,15 +220,6 @@ export class Edge implements EdgeContract {
 	 */
 	public registerTemplate(templatePath: string, contents: LoaderTemplate): this {
 		this.loader.register(templatePath, contents)
-		return this
-	}
-
-	/**
-	 * Register a function to claim tags during the lexal analysis
-	 */
-	public claimTag(fn: ClaimTagFn): this {
-		this.compilerOptions.claimTag = fn
-		this.asyncCompilerOptions.claimTag = fn
 		return this
 	}
 

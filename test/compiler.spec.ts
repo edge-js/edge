@@ -1139,16 +1139,15 @@ test.group('Compiler | Processor', (group) => {
 			{
 				component: componentTag,
 			},
-			processor,
-			{
-				claimTag: (name) => {
-					if (name === 'hl.modal') {
-						return { seekable: true, block: true }
-					}
-					return null
-				},
-			}
+			processor
 		)
+
+		compiler.claimTag((name) => {
+			if (name === 'hl.modal') {
+				return { seekable: true, block: true }
+			}
+			return null
+		})
 
 		assert.stringEqual(
 			compiler.compile('index.edge').template,

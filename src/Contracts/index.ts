@@ -103,7 +103,6 @@ export interface CacheManagerContract {
 export type CompilerOptions = {
 	cache?: boolean
 	async?: boolean
-	claimTag?: ClaimTagFn
 }
 
 /**
@@ -112,6 +111,7 @@ export type CompilerOptions = {
 export interface CompilerContract {
 	cacheManager: CacheManagerContract
 	async: boolean
+	claimTag(fn: ClaimTagFn): this
 	compile(templatePath: string, localVariables?: string[]): LoaderTemplate
 	tokenize(templatePath: string, parser?: Parser): Token[]
 }
@@ -138,17 +138,17 @@ export interface PropsContract {
 	/**
 	 * Serialize all props to a string of HTML attributes
 	 */
-	serialize(mergeProps?: any): string
+	serialize(mergeProps?: any): { value: string }
 
 	/**
 	 * Serialize only the given keys to a string of HTML attributes
 	 */
-	serializeOnly(keys: string[], mergeProps?: any): string
+	serializeOnly(keys: string[], mergeProps?: any): { value: string }
 
 	/**
 	 * Serialize except the given keys to a string of HTML attributes
 	 */
-	serializeExcept(keys: string[], mergeProps?: any): string
+	serializeExcept(keys: string[], mergeProps?: any): { value: string }
 }
 
 /**
@@ -321,11 +321,6 @@ export interface EdgeContract {
 	registerTemplate(templatePath: string, contents: LoaderTemplate): this
 
 	/**
-	 * Hook into lexical analysis to claim tags
-	 */
-	claimTag(fn: ClaimTagFn): this
-
-	/**
 	 * Register a global value
 	 */
 	global(key: string, value: any): this
@@ -341,9 +336,24 @@ export interface EdgeContract {
 	 */
 	unmount(diskName: string): this
 
+	/**
+	 * Get a renderer instance to render templates
+	 */
 	getRenderer(): EdgeRendererContract
+
+	/**
+	 * Creates a renderer instances and shares the locals with it
+	 */
 	share(locals: any): EdgeRendererContract
+
+	/**
+	 * Render a template synchronously
+	 */
 	render(templatePath: string, state?: any): string
+
+	/**
+	 * Render a template asynchronously
+	 */
 	renderAsync(templatePath: string, state?: any): Promise<string>
 }
 
@@ -353,3 +363,4 @@ export interface EdgeContract {
 export type EdgeBufferContract = EdgeBuffer
 export type ParserContract = Parser
 export type TagTokenContract = TagToken
+export { ClaimTagFn }
