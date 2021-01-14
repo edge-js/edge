@@ -18,13 +18,20 @@ import { Compiler } from '../src/Compiler'
 import { Template } from '../src/Template'
 import { Processor } from '../src/Processor'
 
+import { ifTag } from '../src/Tags/If'
 import { slotTag } from '../src/Tags/Slot'
+import { injectTag } from '../src/Tags/Inject'
+import { includeTag } from '../src/Tags/Include'
 import { componentTag } from '../src/Tags/Component'
+import './assert-extend'
 
 const fs = new Filesystem(join(__dirname, 'views'))
 const tags = {
 	component: componentTag,
 	slot: slotTag,
+	inject: injectTag,
+	if: ifTag,
+	include: includeTag,
 }
 
 const loader = new Loader()
@@ -51,7 +58,7 @@ test.group('Component | compile | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {}, processor, { async: false })
+		const template = new Template(compiler, {}, {}, processor)
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -77,7 +84,7 @@ test.group('Component | compile | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {}, processor, { async: false })
+		const template = new Template(compiler, {}, {}, processor)
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -103,7 +110,7 @@ test.group('Component | compile | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {}, processor, { async: false })
+		const template = new Template(compiler, {}, {}, processor)
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -129,7 +136,7 @@ test.group('Component | compile | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {}, processor, { async: false })
+		const template = new Template(compiler, {}, {}, processor)
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -159,7 +166,7 @@ test.group('Component | render | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {}, processor, { async: false })
+		const template = new Template(compiler, {}, {}, processor)
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -185,7 +192,7 @@ test.group('Component | render | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {}, processor, { async: false })
+		const template = new Template(compiler, {}, {}, processor)
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -213,7 +220,7 @@ test.group('Component | render | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {}, processor, { async: false })
+		const template = new Template(compiler, {}, {}, processor)
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -242,7 +249,7 @@ test.group('Component | render | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {}, processor, { async: false })
+		const template = new Template(compiler, {}, {}, processor)
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -271,7 +278,7 @@ test.group('Component | render | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {}, processor, { async: false })
+		const template = new Template(compiler, {}, {}, processor)
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -303,7 +310,7 @@ test.group('Component | render | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {}, processor, { async: false })
+		const template = new Template(compiler, {}, {}, processor)
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -335,7 +342,7 @@ test.group('Component | render | errors', (group) => {
     `
 		)
 
-		const template = new Template(compiler, {}, {}, processor, { async: false })
+		const template = new Template(compiler, {}, {}, processor)
 		try {
 			template.render('eval.edge', {})
 		} catch (error) {
@@ -383,6 +390,346 @@ test.group('Component | render | errors', (group) => {
 			assert.equal(error.line, 3)
 			assert.equal(error.col, 0)
 			assert.equal(error.filename, join(fs.basePath, 'eval.edge'))
+		}
+	})
+})
+
+test.group('Component | context API', (group) => {
+	group.afterEach(async () => {
+		await fs.cleanup()
+	})
+
+	test('inject data from the component to the parent', async (assert) => {
+		await fs.add(
+			'modal.edge',
+			dedent`
+			@if(needsHandler)
+				@inject({ closeHandler: 'closePopup' })
+			@endif
+			{{{ $slots.main() }}}
+		`
+		)
+
+		await fs.add(
+			'eval.edge',
+			dedent`
+      <p> Some content </p>
+
+      @component('modal', needsHandler = true)
+      	<p>{{ $context.closeHandler }}</p>
+      @endcomponent
+    `
+		)
+
+		const template = new Template(compiler, {}, {}, processor)
+		const output = template.render<string>('eval.edge', {}).trim()
+		assert.stringEqual(
+			output,
+			dedent`
+		<p> Some content </p>
+
+			<p>closePopup</p>
+		`
+		)
+	})
+
+	test('do not leak context out of the component scope', async (assert) => {
+		await fs.add(
+			'modal.edge',
+			dedent`
+			@if(needsHandler)
+				@inject({ closeHandler: 'closePopup' })
+			@endif
+			{{{ $slots.main() }}}
+		`
+		)
+
+		await fs.add(
+			'eval.edge',
+			dedent`
+      <p> Some content </p>
+
+      @component('modal', needsHandler = true)
+      	<p>{{ $context.closeHandler }}</p>
+      @endcomponent
+
+      <p>{{ $context.closeHandler }}</p>
+    `
+		)
+
+		const template = new Template(compiler, {}, {}, processor)
+		const output = template.render<string>('eval.edge', {}).trim()
+		assert.stringEqual(
+			output,
+			dedent`
+		<p> Some content </p>
+
+			<p>closePopup</p>
+
+		<p>undefined</p>
+		`
+		)
+	})
+
+	test('do not leak context across sibling components', async (assert) => {
+		await fs.add(
+			'modal.edge',
+			dedent`
+			@if(needsHandler)
+				@inject({ closeHandler: 'closePopup' })
+			@endif
+			{{{ $slots.main() }}}
+		`
+		)
+
+		await fs.add(
+			'eval.edge',
+			dedent`
+      <p> Some content </p>
+
+      @component('modal', needsHandler = true)
+      	<p>{{ $context.closeHandler }}</p>
+      @endcomponent
+
+      @component('modal', needsHandler = false)
+      	<p>{{ $context.closeHandler }}</p>
+      @endcomponent
+    `
+		)
+
+		const template = new Template(compiler, {}, {}, processor)
+		const output = template.render<string>('eval.edge', {}).trim()
+		assert.stringEqual(
+			output,
+			dedent`
+		<p> Some content </p>
+
+			<p>closePopup</p>
+			<p>undefined</p>
+		`
+		)
+	})
+
+	test('do not leak context across sibling components within a nested component', async (assert) => {
+		await fs.add(
+			'modal.edge',
+			dedent`
+			@if(needsHandler)
+				@inject({ closeHandler: 'closePopup' })
+			@endif
+			{{{ $slots.main() }}}
+		`
+		)
+
+		await fs.add(
+			'wrapper.edge',
+			dedent`
+			@inject({})
+			{{{ $slots.main() }}}
+		`
+		)
+
+		await fs.add(
+			'eval.edge',
+			dedent`
+      <p> Some content </p>
+
+      @component('wrapper')
+	      @component('modal', needsHandler = true)
+	      	<p>{{ $context.closeHandler }}</p>
+	      @endcomponent
+
+	      @component('modal', needsHandler = false)
+	      	<p>{{ $context.closeHandler }}</p>
+	      @endcomponent
+	    @end
+    `
+		)
+
+		const template = new Template(compiler, {}, {}, processor)
+		const output = template.render<string>('eval.edge', {}).trim()
+		assert.stringEqual(
+			output,
+			dedent`
+		<p> Some content </p>
+
+		  	<p>closePopup</p>
+		  	<p>undefined</p>
+		`
+		)
+	})
+
+	test('share context with nested components', async (assert) => {
+		await fs.add(
+			'modal.edge',
+			dedent`
+			@inject({})
+			{{{ $slots.main() }}}
+		`
+		)
+
+		await fs.add(
+			'modalsRoot.edge',
+			dedent`
+			@inject({ closeHandler: 'closePopup' })
+			{{{ $slots.main() }}}
+		`
+		)
+
+		await fs.add(
+			'eval.edge',
+			dedent`
+      <p> Some content </p>
+
+      @component('modalsRoot')
+	      @component('modal')
+	      	<p>{{ $context.closeHandler }}</p>
+	      @endcomponent
+
+	      @component('modal')
+	      	<p>{{ $context.closeHandler }}</p>
+	      @endcomponent
+	    @end
+    `
+		)
+
+		const template = new Template(compiler, {}, {}, processor)
+		const output = template.render<string>('eval.edge', {}).trim()
+		assert.stringEqual(
+			output,
+			dedent`
+		<p> Some content </p>
+		  	<p>closePopup</p>
+		  	<p>closePopup</p>
+		`
+		)
+	})
+
+	test('share context with partials', async (assert) => {
+		await fs.add(
+			'modal.edge',
+			dedent`
+			@inject({})
+			{{{ $slots.main() }}}
+		`
+		)
+
+		await fs.add(
+			'modalsRoot.edge',
+			dedent`
+			@inject({ closeHandler: 'closePopup' })
+			{{{ $slots.main() }}}
+		`
+		)
+
+		await fs.add('button.edge', dedent`<button>{{ $context.closeHandler }}</button>`)
+
+		await fs.add(
+			'eval.edge',
+			dedent`
+      <p> Some content </p>
+
+      @component('modalsRoot')
+	      @component('modal')
+	      	@include('button')
+	      @endcomponent
+
+	      @component('modal')
+	      	@include('button')
+	      @endcomponent
+	    @end
+    `
+		)
+
+		const template = new Template(compiler, {}, {}, processor)
+		const output = template.render<string>('eval.edge', {}).trim()
+		assert.stringEqual(
+			output,
+			dedent`
+		<p> Some content </p>
+		<button>closePopup</button>
+		<button>closePopup</button>
+		`
+		)
+	})
+
+	test('share context with components', async (assert) => {
+		await fs.add(
+			'modal.edge',
+			dedent`
+			@inject({})
+			{{{ $slots.main() }}}
+		`
+		)
+
+		await fs.add(
+			'modalsRoot.edge',
+			dedent`
+			@inject({ closeHandler: 'closePopup' })
+			{{{ $slots.main() }}}
+		`
+		)
+
+		await fs.add('button.edge', dedent`<button>{{ $context.closeHandler }}</button>`)
+
+		await fs.add(
+			'eval.edge',
+			dedent`
+      <p> Some content </p>
+
+      @component('modalsRoot')
+	      @component('modal')
+	      	@!component('button')
+	      @endcomponent
+
+	      @component('modal')
+	      	@!component('button')
+	      @endcomponent
+	    @end
+    `
+		)
+
+		const template = new Template(compiler, {}, {}, processor)
+		const output = template.render<string>('eval.edge', {}).trim()
+		assert.stringEqual(
+			output,
+			dedent`
+		<p> Some content </p>
+		<button>closePopup</button>
+		<button>closePopup</button>
+		`
+		)
+	})
+
+	test('raise error when trying to use inject outside of the component scope', async (assert) => {
+		assert.plan(3)
+
+		await fs.add(
+			'button.edge',
+			dedent`
+			I will render a button
+
+			And then try to inject some values
+
+			@inject({ foo: 'bar' })
+		`
+		)
+
+		await fs.add(
+			'eval.edge',
+			dedent`
+      <p> Some content </p>
+      @include('button')
+    `
+		)
+
+		const template = new Template(compiler, {}, {}, processor)
+		try {
+			template.render<string>('eval.edge', {})
+		} catch (error) {
+			assert.equal(error.message, 'Cannot use "@inject" outside of a component scope')
+			assert.equal(error.filename, join(fs.basePath, 'button.edge'))
+			assert.equal(error.line, 5)
 		}
 	})
 })

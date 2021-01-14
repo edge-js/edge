@@ -48,8 +48,8 @@ export function getRenderExpression(parser: Parser, parsedExpression: any) {
 	 * Arguments for invoking the output function of `renderInline`
 	 */
 	const callFnArgs = localVariables.length
-		? ['template', 'state', localVariables.map((localVar) => localVar).join(',')]
-		: ['template', 'state']
+		? ['template', 'state', '$context', localVariables.map((localVar) => localVar).join(',')]
+		: ['template', 'state', '$context']
 
 	return `template.compilePartial(${renderArgs.join(',')})(${callFnArgs.join(',')})`
 }

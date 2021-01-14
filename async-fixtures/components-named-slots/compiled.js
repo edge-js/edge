@@ -2,7 +2,7 @@ let out = "";
 let $lineNumber = 1;
 let $filename = "{{__dirname}}index.edge";
 try {
-out += await template.compileComponent("components-named-slots/alert")(template, template.getComponentState({}, { main: async function () {
+out += await template.compileComponent("components-named-slots/alert")(template, template.getComponentState({}, { $context: Object.assign({}, $context), main: async function () { const $context = this.$context;
 let slot_main = "";
 try {
 slot_main += "  Hello ";
@@ -18,7 +18,7 @@ slot_main += " line 2";
 template.reThrow(error, $filename, $lineNumber);
 }
 return slot_main;
-}, "heading": async function () {
+}, "heading": async function () { const $context = this.$context;
 let slot_1 = "";
 try {
 slot_1 += "    This is title";
@@ -26,7 +26,7 @@ slot_1 += "    This is title";
 template.reThrow(error, $filename, $lineNumber);
 }
 return slot_1;
-} }, { filename: $filename, line: $lineNumber, col: 0 }));
+} }, { filename: $filename, line: $lineNumber, col: 0 }), $context);
 } catch (error) {
 template.reThrow(error, $filename, $lineNumber);
 }

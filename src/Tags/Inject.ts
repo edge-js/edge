@@ -13,10 +13,10 @@ import { TagContract } from '../Contracts'
 import { isSubsetOf, unallowedExpression, parseJsArg } from '../utils'
 
 /**
- * The share tag is used within the components to share values with the
+ * The inject tag is used within the components to share values with the
  * component caller.
  */
-export const shareTag: TagContract = {
+export const injectTag: TagContract = {
 	block: false,
 	seekable: true,
 	tagName: 'share',
@@ -29,7 +29,7 @@ export const shareTag: TagContract = {
 		/**
 		 * The share tag only accepts an object expression.
 		 */
-		isSubsetOf(parsed, [expressions.ObjectExpression], () => {
+		isSubsetOf(parsed, [expressions.ObjectExpression, expressions.Identifier], () => {
 			throw unallowedExpression(
 				`"${token.properties.jsArg}" is not a valid key-value pair for the @share tag`,
 				token.filename,
@@ -37,8 +37,23 @@ export const shareTag: TagContract = {
 			)
 		})
 
+		/**
+		 * Ensure $slots are defined before merging shared state
+		 */
+		buffer.writeStatement(
+			'if (!state.$slots || !state.$slots.$context) {',
+			token.filename,
+			token.loc.start.line
+		)
 		buffer.writeExpression(
-			`state.$slots.share(${parser.utils.stringify(parsed)})`,
+			`throw new Error('Cannot use "@inject" outside of a component scope')`,
+			token.filename,
+			token.loc.start.line
+		)
+		buffer.writeStatement('}', token.filename, token.loc.start.line)
+
+		buffer.writeExpression(
+			`Object.assign(state.$slots.$context, ${parser.utils.stringify(parsed)})`,
 			token.filename,
 			token.loc.start.line
 		)

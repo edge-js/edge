@@ -2,7 +2,7 @@ let out = "";
 let $lineNumber = 1;
 let $filename = "{{__dirname}}index.edge";
 try {
-out += await template.compileComponent("components-slot-props/alert")(template, template.getComponentState({}, { main: function () { return "" }, "title": async function (user) {
+out += await template.compileComponent("components-slot-props/alert")(template, template.getComponentState({}, { $context: Object.assign({}, $context), main: function () { return "" }, "title": async function (user) { const $context = this.$context;
 let slot_1 = "";
 try {
 slot_1 += "    Hello ";
@@ -16,7 +16,7 @@ slot_1 += `${template.escape(state.username)}`;
 template.reThrow(error, $filename, $lineNumber);
 }
 return slot_1;
-} }, { filename: $filename, line: $lineNumber, col: 0 }));
+} }, { filename: $filename, line: $lineNumber, col: 0 }), $context);
 } catch (error) {
 template.reThrow(error, $filename, $lineNumber);
 }

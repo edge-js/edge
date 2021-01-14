@@ -57,7 +57,7 @@ export class Template extends Macroable implements TemplateContract {
 	 * Wraps template to a function
 	 */
 	private wrapToFunction(template: string, ...localVariables: string[]) {
-		const args = ['template', 'state'].concat(localVariables)
+		const args = ['template', 'state', '$context'].concat(localVariables)
 
 		if (this.compiler.async) {
 			return new Function(
@@ -132,19 +132,22 @@ export class Template extends Macroable implements TemplateContract {
 		let { template: compiledTemplate } = this.compiler.compile(template)
 
 		const templateState = Object.assign({}, this.sharedState, state)
+		const $context = {}
 
 		/**
 		 * Process template as a promise.
 		 */
 		if (this.compiler.async) {
-			return this.wrapToFunction(compiledTemplate)(this, templateState).then((output: string) => {
-				output = this.trimTopBottomNewLines(output)
-				return this.processor.executeOutput({ output, template: this })
-			})
+			return this.wrapToFunction(compiledTemplate)(this, templateState, $context).then(
+				(output: string) => {
+					output = this.trimTopBottomNewLines(output)
+					return this.processor.executeOutput({ output, template: this })
+				}
+			)
 		}
 
 		const output = this.trimTopBottomNewLines(
-			this.wrapToFunction(compiledTemplate)(this, templateState)
+			this.wrapToFunction(compiledTemplate)(this, templateState, $context)
 		)
 
 		return this.processor.executeOutput({ output, template: this }) as T

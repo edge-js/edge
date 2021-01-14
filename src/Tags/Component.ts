@@ -290,12 +290,17 @@ export const componentTag: TagContract = {
 		const obj = new StringifiedObject()
 
 		/**
+		 * Creating a shallow copy of context for the component slots and its children
+		 */
+		obj.add('$context', 'Object.assign({}, $context)')
+
+		/**
 		 * Add main slot to the stringified object, when main slot
 		 * is not defined otherwise.
 		 */
 		if (!slots['main']) {
 			if (mainSlot.buffer.size) {
-				mainSlot.buffer.wrap(`${asyncKeyword}function () {`, '}')
+				mainSlot.buffer.wrap(`${asyncKeyword}function () { const $context = this.$context;`, '}')
 				obj.add('main', mainSlot.buffer.disableFileAndLineVariables().flush())
 			} else {
 				obj.add('main', 'function () { return "" }')
@@ -309,9 +314,10 @@ export const componentTag: TagContract = {
 		Object.keys(slots).forEach((slotName) => {
 			if (slots[slotName].buffer.size) {
 				const fnCall = slots[slotName].props
-					? `${asyncKeyword}function (${slots[slotName].props}) {`
-					: `${asyncKeyword}function () {`
+					? `${asyncKeyword}function (${slots[slotName].props}) { const $context = this.$context;`
+					: `${asyncKeyword}function () { const $context = this.$context;`
 				slots[slotName].buffer.wrap(fnCall, '}')
+
 				obj.add(slotName, slots[slotName].buffer.disableFileAndLineVariables().flush())
 			} else {
 				obj.add(slotName, 'function () { return "" }')
@@ -327,7 +333,7 @@ export const componentTag: TagContract = {
 		 * Write the line to render the component with it's own state
 		 */
 		buffer.outputExpression(
-			`${awaitKeyword}template.compileComponent(${name})(template, template.getComponentState(${props}, ${obj.flush()}, ${caller.flush()}))`,
+			`${awaitKeyword}template.compileComponent(${name})(template, template.getComponentState(${props}, ${obj.flush()}, ${caller.flush()}), $context)`,
 			token.filename,
 			token.loc.start.line,
 			false

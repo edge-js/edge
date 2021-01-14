@@ -80,7 +80,7 @@ test.group('Template', (group) => {
 		const template = new Template(compiler, {}, {}, processor)
 
 		const user = { username: 'virk' }
-		const output = template.compilePartial('foo', 'user')(template, {}, user)
+		const output = template.compilePartial('foo', 'user')(template, {}, {}, user)
 		assert.equal(output.trim(), 'Hello virk')
 	})
 

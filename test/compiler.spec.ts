@@ -1155,7 +1155,7 @@ test.group('Compiler | Processor', (group) => {
       let $lineNumber = 1;
       let $filename = ${stringify(join(fs.basePath, 'index.edge'))};
       try {
-      out += template.compileComponent('modal')(template, template.getComponentState({}, { main: function () { return \"\" } }, { filename: $filename, line: $lineNumber, col: 0 }));
+      out += template.compileComponent('modal')(template, template.getComponentState({}, { $context: Object.assign({}, $context), main: function () { return \"\" } }, { filename: $filename, line: $lineNumber, col: 0 }), $context);
       } catch (error) {
       template.reThrow(error, $filename, $lineNumber);
       }

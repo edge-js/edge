@@ -173,7 +173,7 @@ export class Compiler implements CompilerContract {
 			async: this.async,
 			statePropertyName: 'state',
 			escapeCallPath: ['template', 'escape'],
-			localVariables: ['$filename', 'state'],
+			localVariables: ['$filename', 'state', '$context'],
 			onTag: (tag) => this.processor.executeTag({ tag, path: templatePath }),
 		})
 

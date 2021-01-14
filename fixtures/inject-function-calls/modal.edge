@@ -1,0 +1,3 @@
+@set('foo', 'foobar')
+@inject({ foo: () => foo })
+{{{ $slots.main() }}}
