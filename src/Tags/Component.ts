@@ -212,9 +212,8 @@ export const componentTag: TagContract = {
 		const mainSlot: Slot = {
 			outputVar: 'slot_main',
 			props: {},
-			buffer: new EdgeBuffer(token.filename, {
+			buffer: buffer.create(token.filename, {
 				outputVar: 'slot_main',
-				rethrowCallPath: ['template', 'reThrow'],
 			}),
 			line: -1,
 			filename: token.filename,
@@ -256,9 +255,8 @@ export const componentTag: TagContract = {
 				 */
 				slots[slotName] = {
 					outputVar: `slot_${slotsCounter}`,
-					buffer: new EdgeBuffer(token.filename, {
+					buffer: buffer.create(token.filename, {
 						outputVar: `slot_${slotsCounter}`,
-						rethrowCallPath: ['template', 'reThrow'],
 					}),
 					props: slotProps,
 					line: -1,

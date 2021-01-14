@@ -75,7 +75,7 @@
     "@poppinss/utils": "^2.5.9",
     "edge-error": "^1.0.5",
     "edge-lexer": "^3.2.2",
-    "edge-parser": "^7.0.0",
+    "edge-parser": "^7.0.1",
     "he": "^1.2.0",
     "lodash.merge": "^4.6.2",
     "lodash.size": "^4.2.0",
