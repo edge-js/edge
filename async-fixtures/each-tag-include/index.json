@@ -1,7 +1,5 @@
 {
-  "users": [
-    {
-      "username": "virk"
-    }
-  ]
+  "users": [{
+    "username": "virk"
+  }]
 }

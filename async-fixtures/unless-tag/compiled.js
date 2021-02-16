@@ -1,14 +1,14 @@
-let out = ''
-let $lineNumber = 1
-let $filename = '{{__dirname}}index.edge'
+let out = "";
+let $lineNumber = 1;
+let $filename = "{{__dirname}}index.edge";
 try {
-  if (!state.age) {
-    out += '\n'
-    out += '  Hello '
-    $lineNumber = 2
-    out += `${template.escape(state.username)}`
-  }
-} catch (error) {
-  template.reThrow(error, $filename, $lineNumber)
+if (!state.age) {
+out += "\n";
+out += "  Hello ";
+$lineNumber = 2;
+out += `${template.escape(state.username)}`;
 }
-return out
+} catch (error) {
+template.reThrow(error, $filename, $lineNumber);
+}
+return out;

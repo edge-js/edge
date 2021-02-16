@@ -1,11 +1,11 @@
-let out = ''
-let $lineNumber = 1
-let $filename = '{{__dirname}}index.edge'
+let out = "";
+let $lineNumber = 1;
+let $filename = "{{__dirname}}index.edge";
 try {
-  if (state.username === 'virk') {
-    out += await template.compilePartial(state.partial)(template, state, $context)
-  }
-} catch (error) {
-  template.reThrow(error, $filename, $lineNumber)
+if (state.username === 'virk') {
+out += await template.compilePartial(state.partial)(template,state,$context);
 }
-return out
+} catch (error) {
+template.reThrow(error, $filename, $lineNumber);
+}
+return out;

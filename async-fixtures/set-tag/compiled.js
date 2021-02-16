@@ -1,11 +1,11 @@
-let out = ''
-let $lineNumber = 1
-let $filename = '{{__dirname}}index.edge'
+let out = "";
+let $lineNumber = 1;
+let $filename = "{{__dirname}}index.edge";
 try {
-  let username = 'nikk'
-  $lineNumber = 2
-  out += `${template.escape(username)}`
+let username = "nikk";
+$lineNumber = 2;
+out += `${template.escape(username)}`;
 } catch (error) {
-  template.reThrow(error, $filename, $lineNumber)
+template.reThrow(error, $filename, $lineNumber);
 }
-return out
+return out;
