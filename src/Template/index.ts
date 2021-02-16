@@ -7,10 +7,10 @@
  * file that was distributed with this source code.
  */
 
-import he from 'he'
 import { Macroable } from 'macroable'
 import { EdgeError } from 'edge-error'
 import { lodash } from '@poppinss/utils'
+import { string } from '@poppinss/utils/build/helpers'
 
 import { Processor } from '../Processor'
 import { Props } from '../Component/Props'
@@ -159,7 +159,7 @@ export class Template extends Macroable implements TemplateContract {
 	 */
 	public escape<T>(input: T): T extends SafeValue ? T['value'] : T {
 		return typeof input === 'string'
-			? he.escape(input)
+			? string.escapeHTML(input)
 			: input instanceof SafeValue
 			? input.value
 			: input

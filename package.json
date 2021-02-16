@@ -53,7 +53,6 @@
     "js-stringify": "^1.0.2",
     "mrm": "^2.5.18",
     "np": "^7.4.0",
-    "npm-audit-html": "^1.5.0",
     "prettier": "^2.2.1",
     "typescript": "^4.1.5"
   },
@@ -76,13 +75,12 @@
     "edge-error": "^1.0.5",
     "edge-lexer": "^4.0.0",
     "edge-parser": "^8.0.0",
-    "he": "^1.2.0",
     "macroable": "^5.1.0",
     "stringify-attributes": "^2.0.0"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "doctoc README.md --title='## Table of contents' && git add README.md && npm audit --production --json | ./node_modules/.bin/npm-audit-html && git add npm-audit.html",
+      "pre-commit": "doctoc README.md --title='## Table of contents' && git add README.md",
       "commit-msg": "node ./node_modules/@adonisjs/mrm-preset/validateCommit/conventional/validate.js"
     }
   },
