@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import size from 'lodash.size'
+import { lodash } from '@poppinss/utils'
 import { utils as lexerUtils } from 'edge-lexer'
 import { Parser, expressions } from 'edge-parser'
 
@@ -192,6 +192,6 @@ export const eachTag: TagContract = {
 	run(template) {
 		template.macro('loopAsync', asyncEach)
 		template.macro('loop', each)
-		template.macro('size', size)
+		template.macro('size', lodash.size)
 	},
 }

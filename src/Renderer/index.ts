@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import deepMerge from 'lodash.merge'
+import { lodash } from '@poppinss/utils'
 
 import { Template } from '../Template'
 import { Processor } from '../Processor'
@@ -31,7 +31,7 @@ export class EdgeRenderer implements EdgeRendererContract {
 	 * globals
 	 */
 	public share(data: any): this {
-		deepMerge(this.locals, data)
+		lodash.merge(this.locals, data)
 		return this
 	}
 

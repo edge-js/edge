@@ -7,6 +7,7 @@
  * file that was distributed with this source code.
  */
 
+import { string } from '@poppinss/utils/build/helpers'
 import { EdgeError } from 'edge-error'
 import { safeValue } from '../../Template'
 
@@ -15,12 +16,9 @@ export const GLOBALS = {
 		return safeValue(require('@poppinss/inspect').string.html(value))
 	},
 	truncate: (value: string, length: number = 20, options?: { strict: boolean; suffix: string }) => {
-		return require('truncatise')(value, {
-			Strict: !!options?.strict,
-			StripHTML: false,
-			TruncateLength: length,
-			TruncateBy: 'characters',
-			Suffix: options?.suffix,
+		return string.truncate(value, length, {
+			completeWords: !options?.strict,
+			suffix: options?.suffix,
 		})
 	},
 	raise: (message: string, options?: any) => {
@@ -31,12 +29,9 @@ export const GLOBALS = {
 		}
 	},
 	excerpt: (value: string, length: number = 20, options?: { strict: boolean; suffix: string }) => {
-		return require('truncatise')(value, {
-			Strict: !!options?.strict,
-			StripHTML: true,
-			TruncateLength: length,
-			TruncateBy: 'characters',
-			Suffix: options?.suffix,
+		return string.excerpt(value, length, {
+			completeWords: !options?.strict,
+			suffix: options?.suffix,
 		})
 	},
 	safe: safeValue,

@@ -8,9 +8,9 @@
  */
 
 import he from 'he'
-import deepMerge from 'lodash.merge'
-import { EdgeError } from 'edge-error'
 import { Macroable } from 'macroable'
+import { EdgeError } from 'edge-error'
+import { lodash } from '@poppinss/utils'
 
 import { Processor } from '../Processor'
 import { Props } from '../Component/Props'
@@ -50,7 +50,7 @@ export class Template extends Macroable implements TemplateContract {
 		private processor: Processor
 	) {
 		super()
-		this.sharedState = deepMerge({}, globals, locals)
+		this.sharedState = lodash.merge({}, globals, locals)
 	}
 
 	/**
