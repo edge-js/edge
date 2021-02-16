@@ -17,45 +17,45 @@ import { isSubsetOf, unallowedExpression, parseJsArg } from '../utils'
  * component caller.
  */
 export const injectTag: TagContract = {
-	block: false,
-	seekable: true,
-	tagName: 'share',
-	noNewLine: true,
+  block: false,
+  seekable: true,
+  tagName: 'share',
+  noNewLine: true,
 
-	compile(parser, buffer, token) {
-		token.properties.jsArg = `(${token.properties.jsArg})`
-		const parsed = parseJsArg(parser, token)
+  compile(parser, buffer, token) {
+    token.properties.jsArg = `(${token.properties.jsArg})`
+    const parsed = parseJsArg(parser, token)
 
-		/**
-		 * The share tag only accepts an object expression.
-		 */
-		isSubsetOf(parsed, [expressions.ObjectExpression, expressions.Identifier], () => {
-			throw unallowedExpression(
-				`"${token.properties.jsArg}" is not a valid key-value pair for the @share tag`,
-				token.filename,
-				parser.utils.getExpressionLoc(parsed)
-			)
-		})
+    /**
+     * The share tag only accepts an object expression.
+     */
+    isSubsetOf(parsed, [expressions.ObjectExpression, expressions.Identifier], () => {
+      throw unallowedExpression(
+        `"${token.properties.jsArg}" is not a valid key-value pair for the @share tag`,
+        token.filename,
+        parser.utils.getExpressionLoc(parsed)
+      )
+    })
 
-		/**
-		 * Ensure $slots are defined before merging shared state
-		 */
-		buffer.writeStatement(
-			'if (!state.$slots || !state.$slots.$context) {',
-			token.filename,
-			token.loc.start.line
-		)
-		buffer.writeExpression(
-			`throw new Error('Cannot use "@inject" outside of a component scope')`,
-			token.filename,
-			token.loc.start.line
-		)
-		buffer.writeStatement('}', token.filename, token.loc.start.line)
+    /**
+     * Ensure $slots are defined before merging shared state
+     */
+    buffer.writeStatement(
+      'if (!state.$slots || !state.$slots.$context) {',
+      token.filename,
+      token.loc.start.line
+    )
+    buffer.writeExpression(
+      `throw new Error('Cannot use "@inject" outside of a component scope')`,
+      token.filename,
+      token.loc.start.line
+    )
+    buffer.writeStatement('}', token.filename, token.loc.start.line)
 
-		buffer.writeExpression(
-			`Object.assign(state.$slots.$context, ${parser.utils.stringify(parsed)})`,
-			token.filename,
-			token.loc.start.line
-		)
-	},
+    buffer.writeExpression(
+      `Object.assign(state.$slots.$context, ${parser.utils.stringify(parsed)})`,
+      token.filename,
+      token.loc.start.line
+    )
+  },
 }

@@ -7,16 +7,15 @@ We do our best to reply to all the issues on time. If you will follow the given 
 - Ensure the issue isn't already reported.
 - Ensure you are reporting the bug in the correct repo.
 
-_Delete the above section and the instructions in the sections below before submitting_
+*Delete the above section and the instructions in the sections below before submitting*
 
 ## Description
 
 If this is a feature request, explain why it should be added. Specific use-cases are best.
 
-For bug reports, please provide as much _relevant_ info as possible.
+For bug reports, please provide as much *relevant* info as possible.
 
 ## Package version
-
 <!-- YOUR ANSWER -->
 
 ## Error Message & Stack Trace

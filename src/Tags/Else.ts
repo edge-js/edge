@@ -10,14 +10,14 @@
 import { TagContract } from '../Contracts'
 
 export const elseTag: TagContract = {
-	block: false,
-	seekable: false,
-	tagName: 'else',
+  block: false,
+  seekable: false,
+  tagName: 'else',
 
-	/**
-	 * Compiles else block node to Javascript else statement
-	 */
-	compile(_, buffer, token) {
-		buffer.writeStatement('} else {', token.filename, -1)
-	},
+  /**
+   * Compiles else block node to Javascript else statement
+   */
+  compile(_, buffer, token) {
+    buffer.writeStatement('} else {', token.filename, -1)
+  },
 }

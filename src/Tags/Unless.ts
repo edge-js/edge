@@ -23,44 +23,44 @@ import { isNotSubsetOf, unallowedExpression, parseJsArg } from '../utils'
  * ```
  */
 export const unlessTag: TagContract = {
-	block: true,
-	seekable: true,
-	tagName: 'unless',
+  block: true,
+  seekable: true,
+  tagName: 'unless',
 
-	/**
-	 * Compiles the if block node to a Javascript if statement
-	 */
-	compile(parser, buffer, token) {
-		const parsed = parseJsArg(parser, token)
+  /**
+   * Compiles the if block node to a Javascript if statement
+   */
+  compile(parser, buffer, token) {
+    const parsed = parseJsArg(parser, token)
 
-		/**
-		 * Disallow sequence expressions
-		 */
-		isNotSubsetOf(parsed, [expressions.SequenceExpression], () => {
-			unallowedExpression(
-				`"${token.properties.jsArg}" is not a valid argument type for the @unless tag`,
-				token.filename,
-				parser.utils.getExpressionLoc(parsed)
-			)
-		})
+    /**
+     * Disallow sequence expressions
+     */
+    isNotSubsetOf(parsed, [expressions.SequenceExpression], () => {
+      unallowedExpression(
+        `"${token.properties.jsArg}" is not a valid argument type for the @unless tag`,
+        token.filename,
+        parser.utils.getExpressionLoc(parsed)
+      )
+    })
 
-		/**
-		 * Start if block
-		 */
-		buffer.writeStatement(
-			`if (!${parser.utils.stringify(parsed)}) {`,
-			token.filename,
-			token.loc.start.line
-		)
+    /**
+     * Start if block
+     */
+    buffer.writeStatement(
+      `if (!${parser.utils.stringify(parsed)}) {`,
+      token.filename,
+      token.loc.start.line
+    )
 
-		/**
-		 * Process of all children recursively
-		 */
-		token.children.forEach((child) => parser.processToken(child, buffer))
+    /**
+     * Process of all children recursively
+     */
+    token.children.forEach((child) => parser.processToken(child, buffer))
 
-		/**
-		 * Close if block
-		 */
-		buffer.writeStatement('}', token.filename, -1)
-	},
+    /**
+     * Close if block
+     */
+    buffer.writeStatement('}', token.filename, -1)
+  },
 }

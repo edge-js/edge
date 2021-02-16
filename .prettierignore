@@ -6,3 +6,5 @@ package.json
 *.html
 fixtures/*
 newline-fixtures/*
+*.md
+*.txt

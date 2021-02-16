@@ -15,101 +15,101 @@ import { ProcessorContract, TemplateContract } from '../Contracts'
  * templates output at different stages
  */
 export class Processor implements ProcessorContract {
-	private handlers: Map<string, Set<(...args: any[]) => any>> = new Map()
+  private handlers: Map<string, Set<(...args: any[]) => any>> = new Map()
 
-	/**
-	 * Execute tag handler
-	 */
-	public executeTag(data: { tag: TagToken; path: string }): void {
-		const handlers = this.handlers.get('tag')
-		if (!handlers) {
-			return
-		}
+  /**
+   * Execute tag handler
+   */
+  public executeTag(data: { tag: TagToken; path: string }): void {
+    const handlers = this.handlers.get('tag')
+    if (!handlers) {
+      return
+    }
 
-		handlers.forEach((handler) => {
-			handler(data)
-		})
-	}
+    handlers.forEach((handler) => {
+      handler(data)
+    })
+  }
 
-	/**
-	 * Execute raw handlers
-	 */
-	public executeRaw(data: { raw: string; path: string }): string {
-		const handlers = this.handlers.get('raw')
-		if (!handlers) {
-			return data.raw
-		}
+  /**
+   * Execute raw handlers
+   */
+  public executeRaw(data: { raw: string; path: string }): string {
+    const handlers = this.handlers.get('raw')
+    if (!handlers) {
+      return data.raw
+    }
 
-		handlers.forEach((handler) => {
-			const output = handler(data)
-			if (output !== undefined) {
-				data.raw = output
-			}
-		})
+    handlers.forEach((handler) => {
+      const output = handler(data)
+      if (output !== undefined) {
+        data.raw = output
+      }
+    })
 
-		return data.raw
-	}
+    return data.raw
+  }
 
-	/**
-	 * Execute compiled handlers
-	 */
-	public executeCompiled(data: { compiled: string; path: string }): string {
-		const handlers = this.handlers.get('compiled')
-		if (!handlers) {
-			return data.compiled
-		}
+  /**
+   * Execute compiled handlers
+   */
+  public executeCompiled(data: { compiled: string; path: string }): string {
+    const handlers = this.handlers.get('compiled')
+    if (!handlers) {
+      return data.compiled
+    }
 
-		handlers.forEach((handler) => {
-			const output = handler(data)
-			if (output !== undefined) {
-				data.compiled = output
-			}
-		})
+    handlers.forEach((handler) => {
+      const output = handler(data)
+      if (output !== undefined) {
+        data.compiled = output
+      }
+    })
 
-		return data.compiled
-	}
+    return data.compiled
+  }
 
-	/**
-	 * Execute output handlers
-	 */
-	public executeOutput(data: { output: string; template: TemplateContract }): string {
-		const handlers = this.handlers.get('output')
-		if (!handlers) {
-			return data.output
-		}
+  /**
+   * Execute output handlers
+   */
+  public executeOutput(data: { output: string; template: TemplateContract }): string {
+    const handlers = this.handlers.get('output')
+    if (!handlers) {
+      return data.output
+    }
 
-		handlers.forEach((handler) => {
-			const output = handler(data)
-			if (output !== undefined) {
-				data.output = output
-			}
-		})
+    handlers.forEach((handler) => {
+      const output = handler(data)
+      if (output !== undefined) {
+        data.output = output
+      }
+    })
 
-		return data.output
-	}
+    return data.output
+  }
 
-	/**
-	 * Define a processor function
-	 */
-	public process(
-		event: 'raw',
-		handler: (data: { raw: string; path: string }) => string | void
-	): this
-	public process(event: 'tag', handler: (data: { tag: TagToken; path: string }) => void): this
-	public process(
-		event: 'compiled',
-		handler: (data: { compiled: string; path: string }) => string | void
-	): this
-	public process(
-		event: 'output',
-		handler: (data: { output: string; template: TemplateContract }) => string | void
-	): this
-	public process(event: string, handler: (...args: any[]) => any): this {
-		if (!this.handlers.has(event)) {
-			this.handlers.set(event, new Set())
-		}
+  /**
+   * Define a processor function
+   */
+  public process(
+    event: 'raw',
+    handler: (data: { raw: string; path: string }) => string | void
+  ): this
+  public process(event: 'tag', handler: (data: { tag: TagToken; path: string }) => void): this
+  public process(
+    event: 'compiled',
+    handler: (data: { compiled: string; path: string }) => string | void
+  ): this
+  public process(
+    event: 'output',
+    handler: (data: { output: string; template: TemplateContract }) => string | void
+  ): this
+  public process(event: string, handler: (...args: any[]) => any): this {
+    if (!this.handlers.has(event)) {
+      this.handlers.set(event, new Set())
+    }
 
-		this.handlers.get(event)!.add(handler)
-		return this
-	}
+    this.handlers.get(event)!.add(handler)
+    return this
+  }
 }

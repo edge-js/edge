@@ -18,15 +18,15 @@ type ExpressionList = readonly (keyof typeof expressionsList)[]
  * required to point the error stack to the correct file
  */
 export function unallowedExpression(
-	message: string,
-	filename: string,
-	loc: { line: number; col: number }
+  message: string,
+  filename: string,
+  loc: { line: number; col: number }
 ) {
-	throw new EdgeError(message, 'E_UNALLOWED_EXPRESSION', {
-		line: loc.line,
-		col: loc.col,
-		filename: filename,
-	})
+  throw new EdgeError(message, 'E_UNALLOWED_EXPRESSION', {
+    line: loc.line,
+    col: loc.col,
+    filename: filename,
+  })
 }
 
 /**
@@ -40,13 +40,13 @@ export function unallowedExpression(
  * ```
  */
 export function isSubsetOf(
-	expression: any,
-	expressions: ExpressionList,
-	errorCallback: () => void
+  expression: any,
+  expressions: ExpressionList,
+  errorCallback: () => void
 ) {
-	if (!expressions.includes(expression.type)) {
-		errorCallback()
-	}
+  if (!expressions.includes(expression.type)) {
+    errorCallback()
+  }
 }
 
 /**
@@ -60,50 +60,50 @@ export function isSubsetOf(
  * ```
  */
 export function isNotSubsetOf(
-	expression: any,
-	expressions: ExpressionList,
-	errorCallback: () => void
+  expression: any,
+  expressions: ExpressionList,
+  errorCallback: () => void
 ) {
-	if (expressions.includes(expression.type)) {
-		errorCallback()
-	}
+  if (expressions.includes(expression.type)) {
+    errorCallback()
+  }
 }
 
 /**
  * Parses the jsArg by generating and transforming its AST
  */
 export function parseJsArg(parser: Parser, token: TagToken) {
-	return parser.utils.transformAst(
-		parser.utils.generateAST(token.properties.jsArg, token.loc, token.filename),
-		token.filename,
-		parser
-	)
+  return parser.utils.transformAst(
+    parser.utils.generateAST(token.properties.jsArg, token.loc, token.filename),
+    token.filename,
+    parser
+  )
 }
 
 /**
  * Each loop. A soft replacement for `lodash.each` that we were using earlier
  */
 export function each(collection: any, iteratee: (value: any, key: any) => void) {
-	if (Array.isArray(collection)) {
-		for (let [key, value] of collection.entries()) {
-			iteratee(value, key)
-		}
-		return
-	}
+  if (Array.isArray(collection)) {
+    for (let [key, value] of collection.entries()) {
+      iteratee(value, key)
+    }
+    return
+  }
 
-	if (typeof collection === 'string') {
-		let index = 0
-		for (let value of collection) {
-			iteratee(value, index++)
-		}
-		return
-	}
+  if (typeof collection === 'string') {
+    let index = 0
+    for (let value of collection) {
+      iteratee(value, index++)
+    }
+    return
+  }
 
-	if (collection && typeof collection === 'object') {
-		for (let [key, value] of Object.entries(collection)) {
-			iteratee(value, key)
-		}
-	}
+  if (collection && typeof collection === 'object') {
+    for (let [key, value] of Object.entries(collection)) {
+      iteratee(value, key)
+    }
+  }
 }
 
 /**
@@ -111,27 +111,27 @@ export function each(collection: any, iteratee: (value: any, key: any) => void) 
  * using earlier with support for async await
  */
 export async function asyncEach(
-	collection: any,
-	iteratee: (value: any, key: any) => Promise<void>
+  collection: any,
+  iteratee: (value: any, key: any) => Promise<void>
 ) {
-	if (Array.isArray(collection)) {
-		for (let [key, value] of collection.entries()) {
-			await iteratee(value, key)
-		}
-		return
-	}
+  if (Array.isArray(collection)) {
+    for (let [key, value] of collection.entries()) {
+      await iteratee(value, key)
+    }
+    return
+  }
 
-	if (typeof collection === 'string') {
-		let index = 0
-		for (let value of collection) {
-			await iteratee(value, index++)
-		}
-		return
-	}
+  if (typeof collection === 'string') {
+    let index = 0
+    for (let value of collection) {
+      await iteratee(value, index++)
+    }
+    return
+  }
 
-	if (collection && typeof collection === 'object') {
-		for (let [key, value] of Object.entries(collection)) {
-			await iteratee(value, key)
-		}
-	}
+  if (collection && typeof collection === 'object') {
+    for (let [key, value] of Object.entries(collection)) {
+      await iteratee(value, key)
+    }
+  }
 }

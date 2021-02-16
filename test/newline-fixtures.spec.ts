@@ -29,35 +29,35 @@ const processor = new Processor()
 const compiler = new Compiler(loader, tags, processor)
 
 test.group('Newline Fixtures', (group) => {
-	group.before(() => {
-		Object.keys(tags).forEach((tag) => {
-			if (tags[tag].run) {
-				tags[tag].run(Template)
-			}
-		})
-	})
+  group.before(() => {
+    Object.keys(tags).forEach((tag) => {
+      if (tags[tag].run) {
+        tags[tag].run(Template)
+      }
+    })
+  })
 
-	const dirs = readdirSync(basePath).filter((file) => statSync(join(basePath, file)).isDirectory())
+  const dirs = readdirSync(basePath).filter((file) => statSync(join(basePath, file)).isDirectory())
 
-	dirs.forEach((dir) => {
-		const dirBasePath = join(basePath, dir)
-		test(dir, (assert) => {
-			const template = new Template(compiler, {}, {}, processor)
+  dirs.forEach((dir) => {
+    const dirBasePath = join(basePath, dir)
+    test(dir, (assert) => {
+      const template = new Template(compiler, {}, {}, processor)
 
-			/**
-			 * Render output
-			 */
-			const out = normalizeNewLines(readFileSync(join(dirBasePath, 'index.txt'), 'utf-8'))
-			const state = JSON.parse(readFileSync(join(dirBasePath, 'index.json'), 'utf-8'))
-			const output = template.render(`${dir}/index.edge`, state) as string
+      /**
+       * Render output
+       */
+      const out = normalizeNewLines(readFileSync(join(dirBasePath, 'index.txt'), 'utf-8'))
+      const state = JSON.parse(readFileSync(join(dirBasePath, 'index.json'), 'utf-8'))
+      const output = template.render(`${dir}/index.edge`, state) as string
 
-			assert.stringEqual(
-				output,
-				out
-					.split('\n')
-					.map((line) => normalizeFilename(dirBasePath, line))
-					.join('\n')
-			)
-		})
-	})
+      assert.stringEqual(
+        output,
+        out
+          .split('\n')
+          .map((line) => normalizeFilename(dirBasePath, line))
+          .join('\n')
+      )
+    })
+  })
 })

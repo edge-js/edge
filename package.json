@@ -21,7 +21,8 @@
     "release": "np",
     "version": "npm run build",
     "format": "prettier --write .",
-    "sync-labels": "github-label-sync --labels ./node_modules/@adonisjs/mrm-preset/gh-labels.json edge-js/edge"
+    "sync-labels": "github-label-sync --labels ./node_modules/@adonisjs/mrm-preset/gh-labels.json edge-js/edge",
+    "prepublishOnly": "npm run build"
   },
   "repository": {
     "type": "git",

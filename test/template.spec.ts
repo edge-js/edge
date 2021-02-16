@@ -28,151 +28,151 @@ const loader = new Loader()
 loader.mount('default', fs.basePath)
 
 test.group('Template', (group) => {
-	group.afterEach(async () => {
-		await fs.cleanup()
-		Template.hydrate()
-	})
+  group.afterEach(async () => {
+    await fs.cleanup()
+    Template.hydrate()
+  })
 
-	test('run template using the given state', async (assert) => {
-		await fs.add('foo.edge', 'Hello {{ username }}')
-		const processor = new Processor()
-		const compiler = new Compiler(loader, tags, processor, { cache: false })
-		const output = new Template(compiler, {}, {}, processor).render('foo', {
-			username: 'virk',
-		}) as string
-		assert.equal(output.trim(), 'Hello virk')
-	})
+  test('run template using the given state', async (assert) => {
+    await fs.add('foo.edge', 'Hello {{ username }}')
+    const processor = new Processor()
+    const compiler = new Compiler(loader, tags, processor, { cache: false })
+    const output = new Template(compiler, {}, {}, processor).render('foo', {
+      username: 'virk',
+    }) as string
+    assert.equal(output.trim(), 'Hello virk')
+  })
 
-	test('run template with shared state', async (assert) => {
-		await fs.add('foo.edge', 'Hello {{ getUsername() }}')
-		const processor = new Processor()
-		const compiler = new Compiler(loader, tags, processor, { cache: false })
+  test('run template with shared state', async (assert) => {
+    await fs.add('foo.edge', 'Hello {{ getUsername() }}')
+    const processor = new Processor()
+    const compiler = new Compiler(loader, tags, processor, { cache: false })
 
-		const output = new Template(
-			compiler,
-			{ username: 'virk' },
-			{
-				getUsername() {
-					return this.username.toUpperCase()
-				},
-			},
-			processor
-		).render('foo', {}) as string
-		assert.equal(output.trim(), 'Hello VIRK')
-	})
+    const output = new Template(
+      compiler,
+      { username: 'virk' },
+      {
+        getUsername() {
+          return this.username.toUpperCase()
+        },
+      },
+      processor
+    ).render('foo', {}) as string
+    assert.equal(output.trim(), 'Hello VIRK')
+  })
 
-	test('run partial inside existing state', async (assert) => {
-		await fs.add('foo.edge', 'Hello {{ username }}')
+  test('run partial inside existing state', async (assert) => {
+    await fs.add('foo.edge', 'Hello {{ username }}')
 
-		const processor = new Processor()
-		const compiler = new Compiler(loader, tags, processor, { cache: false })
-		const template = new Template(compiler, {}, {}, processor)
+    const processor = new Processor()
+    const compiler = new Compiler(loader, tags, processor, { cache: false })
+    const template = new Template(compiler, {}, {}, processor)
 
-		const output = template.compilePartial('foo')(template, { username: 'virk' })
-		assert.equal(output.trim(), 'Hello virk')
-	})
+    const output = template.compilePartial('foo')(template, { username: 'virk' })
+    assert.equal(output.trim(), 'Hello virk')
+  })
 
-	test('pass local variables to inline templates', async (assert) => {
-		await fs.add('foo.edge', 'Hello {{ user.username }}')
+  test('pass local variables to inline templates', async (assert) => {
+    await fs.add('foo.edge', 'Hello {{ user.username }}')
 
-		const processor = new Processor()
-		const compiler = new Compiler(loader, tags, processor, { cache: false })
-		const template = new Template(compiler, {}, {}, processor)
+    const processor = new Processor()
+    const compiler = new Compiler(loader, tags, processor, { cache: false })
+    const template = new Template(compiler, {}, {}, processor)
 
-		const user = { username: 'virk' }
-		const output = template.compilePartial('foo', 'user')(template, {}, {}, user)
-		assert.equal(output.trim(), 'Hello virk')
-	})
+    const user = { username: 'virk' }
+    const output = template.compilePartial('foo', 'user')(template, {}, {}, user)
+    assert.equal(output.trim(), 'Hello virk')
+  })
 
-	test('process file names starting with u', async (assert) => {
-		await fs.add('users.edge', 'Hello {{ user.username }}')
+  test('process file names starting with u', async (assert) => {
+    await fs.add('users.edge', 'Hello {{ user.username }}')
 
-		const processor = new Processor()
-		const compiler = new Compiler(loader, tags, processor, { cache: false })
-		const template = new Template(compiler, {}, {}, processor)
+    const processor = new Processor()
+    const compiler = new Compiler(loader, tags, processor, { cache: false })
+    const template = new Template(compiler, {}, {}, processor)
 
-		const user = { username: 'virk' }
-		const output = template.render('users', { user }) as string
-		assert.equal(output.trim(), 'Hello virk')
-	})
+    const user = { username: 'virk' }
+    const output = template.render('users', { user }) as string
+    assert.equal(output.trim(), 'Hello virk')
+  })
 
-	test('execute output processor function', async (assert) => {
-		assert.plan(3)
-		await fs.add('users.edge', 'Hello {{ user.username }}')
+  test('execute output processor function', async (assert) => {
+    assert.plan(3)
+    await fs.add('users.edge', 'Hello {{ user.username }}')
 
-		const processor = new Processor()
-		processor.process('output', ({ output, template }) => {
-			assert.stringEqual(output, 'Hello virk')
-			assert.instanceOf(template, Template)
-		})
+    const processor = new Processor()
+    processor.process('output', ({ output, template }) => {
+      assert.stringEqual(output, 'Hello virk')
+      assert.instanceOf(template, Template)
+    })
 
-		const compiler = new Compiler(loader, tags, processor, { cache: false })
-		const template = new Template(compiler, {}, {}, processor)
+    const compiler = new Compiler(loader, tags, processor, { cache: false })
+    const template = new Template(compiler, {}, {}, processor)
 
-		const user = { username: 'virk' }
-		const output = template.render('users', { user }) as string
-		assert.equal(output.trim(), 'Hello virk')
-	})
+    const user = { username: 'virk' }
+    const output = template.render('users', { user }) as string
+    assert.equal(output.trim(), 'Hello virk')
+  })
 
-	test('use return value of the output processor function', async (assert) => {
-		assert.plan(3)
-		await fs.add('users.edge', 'Hello {{ user.username }}')
+  test('use return value of the output processor function', async (assert) => {
+    assert.plan(3)
+    await fs.add('users.edge', 'Hello {{ user.username }}')
 
-		const processor = new Processor()
-		processor.process('output', ({ output, template }) => {
-			assert.stringEqual(output, 'Hello virk')
-			assert.instanceOf(template, Template)
-			return output.toUpperCase()
-		})
+    const processor = new Processor()
+    processor.process('output', ({ output, template }) => {
+      assert.stringEqual(output, 'Hello virk')
+      assert.instanceOf(template, Template)
+      return output.toUpperCase()
+    })
 
-		const compiler = new Compiler(loader, tags, processor, { cache: false })
-		const template = new Template(compiler, {}, {}, processor)
+    const compiler = new Compiler(loader, tags, processor, { cache: false })
+    const template = new Template(compiler, {}, {}, processor)
 
-		const user = { username: 'virk' }
-		const output = template.render('users', { user }) as string
-		assert.equal(output.trim(), 'HELLO VIRK')
-	})
+    const user = { username: 'virk' }
+    const output = template.render('users', { user }) as string
+    assert.equal(output.trim(), 'HELLO VIRK')
+  })
 
-	test('escape HTML', (assert) => {
-		const processor = new Processor()
-		const compiler = new Compiler(loader, tags, processor, { cache: false })
-		const template = new Template(compiler, {}, {}, processor)
-		assert.equal(template.escape('<h2> Hello world </h2>'), '&lt;h2&gt; Hello world &lt;/h2&gt;')
-	})
+  test('escape HTML', (assert) => {
+    const processor = new Processor()
+    const compiler = new Compiler(loader, tags, processor, { cache: false })
+    const template = new Template(compiler, {}, {}, processor)
+    assert.equal(template.escape('<h2> Hello world </h2>'), '&lt;h2&gt; Hello world &lt;/h2&gt;')
+  })
 
-	test('do not escape values, which are not string', (assert) => {
-		const processor = new Processor()
-		const compiler = new Compiler(loader, tags, processor, { cache: false })
-		const template = new Template(compiler, {}, {}, processor)
-		assert.equal(template.escape(22), 22)
-	})
+  test('do not escape values, which are not string', (assert) => {
+    const processor = new Processor()
+    const compiler = new Compiler(loader, tags, processor, { cache: false })
+    const template = new Template(compiler, {}, {}, processor)
+    assert.equal(template.escape(22), 22)
+  })
 
-	test('do not escape values, which instance of safe value', (assert) => {
-		const processor = new Processor()
-		const compiler = new Compiler(loader, tags, processor, { cache: false })
-		const template = new Template(compiler, {}, {}, processor)
-		assert.equal(template.escape(safeValue('<h2> Hello world </h2>')), '<h2> Hello world </h2>')
-	})
+  test('do not escape values, which instance of safe value', (assert) => {
+    const processor = new Processor()
+    const compiler = new Compiler(loader, tags, processor, { cache: false })
+    const template = new Template(compiler, {}, {}, processor)
+    assert.equal(template.escape(safeValue('<h2> Hello world </h2>')), '<h2> Hello world </h2>')
+  })
 
-	test('add macros to context', (assert) => {
-		Template.macro('upper', (username) => {
-			return username.toUpperCase()
-		})
+  test('add macros to context', (assert) => {
+    Template.macro('upper', (username) => {
+      return username.toUpperCase()
+    })
 
-		const processor = new Processor()
-		const compiler = new Compiler(loader, tags, processor, { cache: false })
-		const template = new Template(compiler, {}, {}, processor)
-		assert.equal(template['upper']('virk'), 'VIRK')
-	})
+    const processor = new Processor()
+    const compiler = new Compiler(loader, tags, processor, { cache: false })
+    const template = new Template(compiler, {}, {}, processor)
+    assert.equal(template['upper']('virk'), 'VIRK')
+  })
 
-	test('add getters to context', (assert) => {
-		Template.getter('username', function username() {
-			return 'virk'
-		})
+  test('add getters to context', (assert) => {
+    Template.getter('username', function username() {
+      return 'virk'
+    })
 
-		const processor = new Processor()
-		const compiler = new Compiler(loader, tags, processor, { cache: false })
-		const template = new Template(compiler, {}, {}, processor)
-		assert.equal(template['username'], 'virk')
-	})
+    const processor = new Processor()
+    const compiler = new Compiler(loader, tags, processor, { cache: false })
+    const template = new Template(compiler, {}, {}, processor)
+    assert.equal(template['username'], 'virk')
+  })
 })

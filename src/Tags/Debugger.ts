@@ -13,15 +13,15 @@ import { TagContract } from '../Contracts'
  * Add debugger break point to the compiled template
  */
 export const debuggerTag: TagContract = {
-	block: false,
-	seekable: false,
-	tagName: 'debugger',
-	noNewLine: true,
+  block: false,
+  seekable: false,
+  tagName: 'debugger',
+  noNewLine: true,
 
-	/**
-	 * Compiles `@debugger` tags
-	 */
-	compile(_, buffer, token) {
-		buffer.writeExpression('debugger', token.filename, token.loc.start.line)
-	},
+  /**
+   * Compiles `@debugger` tags
+   */
+  compile(_, buffer, token) {
+    buffer.writeExpression('debugger', token.filename, token.loc.start.line)
+  },
 }
