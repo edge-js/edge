@@ -120,6 +120,16 @@ export interface CompilerContract {
   claimTag(fn: ClaimTagFn): this
   compile(templatePath: string, localVariables?: string[]): LoaderTemplate
   tokenize(templatePath: string, parser?: Parser): Token[]
+
+  /**
+   * Compile the raw string as a template
+   */
+  compileRaw(contents: string, templatePath?: string): LoaderTemplate
+
+  /**
+   * Tokenize the raw string as a template
+   */
+  tokenizeRaw(contents: string, templatePath?: string, parser?: Parser): Token[]
 }
 
 /**
@@ -188,6 +198,11 @@ export interface TemplateContract {
    * Renders a template to a string
    */
   render<T extends Promise<string> | string>(template: string, state: any): T
+  renderRaw<T extends Promise<string> | string>(
+    contents: string,
+    state: any,
+    templatePath?: string
+  ): T
 
   /**
    * Escape input
@@ -213,11 +228,13 @@ export interface EdgeRendererContract {
    * Render a template synchronously
    */
   render(templatePath: string, state?: any): string
+  renderRaw(contents: string, state?: any, templatePath?: string): string
 
   /**
    * Render a template asynchronously
    */
   renderAsync(templatePath: string, state?: any): Promise<string>
+  renderRawAsync(contents: string, state?: any, templatePath?: string): Promise<string>
 }
 
 /**
@@ -361,11 +378,13 @@ export interface EdgeContract {
    * Render a template synchronously
    */
   render(templatePath: string, state?: any): string
+  renderRaw(contents: string, state?: any, templatePath?: string): string
 
   /**
    * Render a template asynchronously
    */
   renderAsync(templatePath: string, state?: any): Promise<string>
+  renderRawAsync(contents: string, state?: any, templatePath?: string): Promise<string>
 }
 
 /**

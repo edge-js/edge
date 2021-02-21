@@ -54,4 +54,30 @@ export class EdgeRenderer implements EdgeRendererContract {
       state
     )
   }
+
+  /**
+   * Render the template from a raw string
+   */
+  public renderRaw(contents: string, state: any = {}, templatePath?: string): string {
+    return new Template(this.compiler, this.globals, this.locals, this.processor).renderRaw<string>(
+      contents,
+      state,
+      templatePath
+    )
+  }
+
+  /**
+   * Render the template from a raw string
+   */
+  public async renderRawAsync(
+    contents: string,
+    state: any = {},
+    templatePath?: string
+  ): Promise<string> {
+    return new Template(this.asyncCompiler, this.globals, this.locals, this.processor).renderRaw(
+      contents,
+      state,
+      templatePath
+    )
+  }
 }

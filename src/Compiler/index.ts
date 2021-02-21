@@ -218,9 +218,23 @@ export class Compiler implements CompilerContract {
   public tokenize(templatePath: string, parser?: Parser): Token[] {
     const absPath = this.loader.makePath(templatePath)
     let { template } = this.loader.resolve(absPath)
+    return this.tokenizeRaw(template, absPath, parser)
+  }
 
-    template = this.processor.executeRaw({ path: absPath, raw: template })
-    return this.templateContentToTokens(template, parser || this.getParserFor(absPath), absPath)
+  /**
+   * Tokenize a raw template
+   */
+  public tokenizeRaw(
+    contents: string,
+    templatePath: string = 'eval.edge',
+    parser?: Parser
+  ): Token[] {
+    contents = this.processor.executeRaw({ path: templatePath, raw: contents })
+    return this.templateContentToTokens(
+      contents,
+      parser || this.getParserFor(templatePath),
+      templatePath
+    )
   }
 
   /**
@@ -258,6 +272,30 @@ export class Compiler implements CompilerContract {
     const template = this.processor.executeCompiled({
       path: absPath,
       compiled: cachedResponse.template,
+    })
+
+    return { template }
+  }
+
+  /**
+   * Compiles the template contents to string. The output is same as the `edge-parser`,
+   * it's just that the compiler uses the loader to load the templates and also
+   * handles layouts.
+   *
+   * ```js
+   * compiler.compile('welcome')
+   * ```
+   */
+  public compileRaw(contents: string, templatePath: string = 'eval.edge'): LoaderTemplate {
+    const parser = this.getParserFor(templatePath)
+    const buffer = this.getBufferFor(templatePath)
+    const templateTokens = this.tokenizeRaw(contents, templatePath, parser)
+
+    templateTokens.forEach((token) => parser.processToken(token, buffer))
+
+    const template = this.processor.executeCompiled({
+      path: templatePath,
+      compiled: buffer.flush(),
     })
 
     return { template }

@@ -77,6 +77,32 @@ export class Template extends Macroable implements TemplateContract {
   }
 
   /**
+   * Render a compiled template with state
+   */
+  private renderCompiled(compiledTemplate: string, state: any) {
+    const templateState = Object.assign({}, this.sharedState, state)
+    const $context = {}
+
+    /**
+     * Process template as a promise.
+     */
+    if (this.compiler.async) {
+      return this.wrapToFunction(compiledTemplate)(this, templateState, $context).then(
+        (output: string) => {
+          output = this.trimTopBottomNewLines(output)
+          return this.processor.executeOutput({ output, template: this })
+        }
+      )
+    }
+
+    const output = this.trimTopBottomNewLines(
+      this.wrapToFunction(compiledTemplate)(this, templateState, $context)
+    )
+
+    return this.processor.executeOutput({ output, template: this })
+  }
+
+  /**
    * Render a partial
    *
    * ```js
@@ -130,27 +156,23 @@ export class Template extends Macroable implements TemplateContract {
    */
   public render<T extends Promise<string> | string>(template: string, state: any): T {
     let { template: compiledTemplate } = this.compiler.compile(template)
+    return this.renderCompiled(compiledTemplate, state)
+  }
 
-    const templateState = Object.assign({}, this.sharedState, state)
-    const $context = {}
-
-    /**
-     * Process template as a promise.
-     */
-    if (this.compiler.async) {
-      return this.wrapToFunction(compiledTemplate)(this, templateState, $context).then(
-        (output: string) => {
-          output = this.trimTopBottomNewLines(output)
-          return this.processor.executeOutput({ output, template: this })
-        }
-      )
-    }
-
-    const output = this.trimTopBottomNewLines(
-      this.wrapToFunction(compiledTemplate)(this, templateState, $context)
-    )
-
-    return this.processor.executeOutput({ output, template: this }) as T
+  /**
+   * Render template from a raw string
+   *
+   * ```js
+   * template.renderRaw('Hello {{ username }}', { username: 'virk' })
+   * ```
+   */
+  public renderRaw<T extends Promise<string> | string>(
+    contents: string,
+    state: any,
+    templatePath?: string
+  ): T {
+    let { template: compiledTemplate } = this.compiler.compileRaw(contents, templatePath)
+    return this.renderCompiled(compiledTemplate, state)
   }
 
   /**

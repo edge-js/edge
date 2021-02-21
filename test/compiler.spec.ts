@@ -653,6 +653,208 @@ test.group('Compiler | Compile', (group) => {
   })
 })
 
+test.group('Compiler | Compile Raw', (group) => {
+  group.afterEach(async () => {
+    await fs.cleanup()
+  })
+
+  test('compile template with layouts', async (assert) => {
+    await fs.add(
+      'master.edge',
+      dedent`
+      {{ username }}
+      @!section('content')
+    `
+    )
+
+    const loader = new Loader()
+    loader.mount('default', fs.basePath)
+    const tags = {
+      section: sectionTag,
+      layout: layoutTag,
+    }
+
+    const compiler = new Compiler(loader, tags, new Processor())
+
+    assert.stringEqual(
+      compiler.compileRaw(dedent`
+      @layout('master')
+      @section('content')
+        {{ content }}
+      @endsection
+    `).template,
+      normalizeNewLines(dedent`let out = "";
+      let $lineNumber = 1;
+      let $filename = ${stringify('eval.edge')};
+      try {
+      $filename = ${stringify(join(fs.basePath, 'master.edge'))};
+      out += \`\${template.escape(state.username)}\`;
+      out += "\\n";
+      out += "  ";
+      $filename = ${stringify('eval.edge')};
+      $lineNumber = 3;
+      out += \`\${template.escape(state.content)}\`;
+      } catch (error) {
+      template.reThrow(error, $filename, $lineNumber);
+      }
+      return out;
+    `)
+    )
+  })
+
+  test('compile errors inside layout must point to the right file', async (assert) => {
+    assert.plan(3)
+
+    await fs.add(
+      'master.edge',
+      dedent`
+      {{ user name }}
+      @!section('content')
+    `
+    )
+
+    const loader = new Loader()
+    loader.mount('default', fs.basePath)
+
+    const compiler = new Compiler(
+      loader,
+      {
+        section: sectionTag,
+        layout: layoutTag,
+      },
+      new Processor()
+    )
+
+    try {
+      compiler.compileRaw(dedent`
+      @layout('master')
+      @section('content')
+        {{ content }}
+      @endsection
+    `)
+    } catch (error) {
+      assert.equal(error.filename, join(fs.basePath, 'master.edge'))
+      assert.equal(error.line, 1)
+      assert.equal(error.col, 8)
+    }
+  })
+
+  test('compile errors parent template must point to the right file', async (assert) => {
+    assert.plan(3)
+
+    await fs.add(
+      'master.edge',
+      dedent`
+      {{ username }}
+      @!section('content')
+    `
+    )
+
+    const loader = new Loader()
+    loader.mount('default', fs.basePath)
+
+    const compiler = new Compiler(
+      loader,
+      {
+        section: sectionTag,
+        layout: layoutTag,
+      },
+      new Processor()
+    )
+
+    try {
+      compiler.compileRaw(dedent`
+      @layout('master')
+      @section('content')
+        {{ con tent }}
+      @endsection
+    `)
+    } catch (error) {
+      assert.equal(error.filename, 'eval.edge')
+      assert.equal(error.line, 3)
+      assert.equal(error.col, 9)
+    }
+  })
+
+  test('runtime errors inside layout must point to the right file', async (assert) => {
+    assert.plan(4)
+
+    await fs.add(
+      'master.edge',
+      dedent`
+      {{ getUserName() }}
+      @!section('content')
+    `
+    )
+
+    const loader = new Loader()
+    loader.mount('default', fs.basePath)
+
+    const compiler = new Compiler(
+      loader,
+      {
+        section: sectionTag,
+        layout: layoutTag,
+      },
+      new Processor()
+    )
+
+    try {
+      const fn = compiler.compileRaw(dedent`
+      @layout('master')
+      @section('content')
+        {{ content }}
+      @endsection
+    `).template
+      new Function('template', 'state', fn)(new Template(compiler, {}, {}, new Processor()), {})
+    } catch (error) {
+      assert.equal(error.message, 'getUserName is not a function')
+      assert.equal(error.filename, join(fs.basePath, 'master.edge'))
+      assert.equal(error.line, 1)
+      assert.equal(error.col, 0)
+    }
+  })
+
+  test('runtime errors inside parent template must point to the right file', async (assert) => {
+    assert.plan(4)
+
+    await fs.add(
+      'master.edge',
+      dedent`
+    {{ username }}
+    @!section('content')
+    `
+    )
+
+    const loader = new Loader()
+    loader.mount('default', fs.basePath)
+
+    const compiler = new Compiler(
+      loader,
+      {
+        section: sectionTag,
+        layout: layoutTag,
+      },
+      new Processor()
+    )
+
+    try {
+      const fn = compiler.compileRaw(dedent`
+      @layout('master')
+      @section('content')
+        {{ getContent() }}
+      @endsection
+      `).template
+      new Function('template', 'state', fn)(new Template(compiler, {}, {}, new Processor()), {})
+    } catch (error) {
+      assert.equal(error.message, 'getContent is not a function')
+      assert.equal(error.filename, 'eval.edge')
+      assert.equal(error.line, 3)
+      assert.equal(error.col, 0)
+    }
+  })
+})
+
 test.group('Compiler | Processor', (group) => {
   group.afterEach(async () => {
     await fs.cleanup()
