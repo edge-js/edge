@@ -124,6 +124,23 @@ test.group('Edge', (group) => {
     assert.equal(edge.render('hello::foo', { username: 'virk' }).trim(), 'Hello virk')
   })
 
+  test('clear compiled cache when template is removed', async (assert) => {
+    const edge = new Edge({ cache: true })
+
+    edge.registerTemplate('foo', {
+      template: 'Hello {{ username }}',
+    })
+    assert.equal(edge.render('foo', { username: 'virk' }).trim(), 'Hello virk')
+    assert.equal((await edge.renderAsync('foo', { username: 'virk' })).trim(), 'Hello virk')
+
+    edge.removeTemplate('foo')
+    edge.registerTemplate('foo', {
+      template: 'Hi {{ username }}',
+    })
+    assert.equal(edge.render('foo', { username: 'virk' }).trim(), 'Hi virk')
+    assert.equal((await edge.renderAsync('foo', { username: 'virk' })).trim(), 'Hi virk')
+  })
+
   test('pass absolute path of template to lexer errors', async (assert) => {
     assert.plan(1)
     await fs.add('foo.edge', '@if(1 + 1)')

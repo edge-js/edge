@@ -119,6 +119,23 @@ test.group('Loader', (group) => {
     assert.equal(template.trim(), 'Hello world')
   })
 
+  test('remove registered template', async (assert) => {
+    const loader = new Loader()
+    loader.register('my-view', {
+      template: 'Hello world',
+    })
+    loader.mount('default', __dirname)
+
+    const { template } = loader.resolve('my-view')
+    assert.equal(template.trim(), 'Hello world')
+
+    loader.remove('my-view')
+    assert.throw(
+      () => loader.resolve('my-view'),
+      `Cannot resolve "${join(__dirname, 'my-view.edge')}". Make sure the file exists`
+    )
+  })
+
   test('pre registering duplicate templates must raise an error', async (assert) => {
     const loader = new Loader()
     loader.register('my-view', { template: 'Hello world' })

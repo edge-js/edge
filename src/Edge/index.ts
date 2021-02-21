@@ -224,6 +224,16 @@ export class Edge implements EdgeContract {
   }
 
   /**
+   * Remove the template registered using the "registerTemplate" method
+   */
+  public removeTemplate(templatePath: string): this {
+    this.loader.remove(templatePath)
+    this.compiler.cacheManager.delete(templatePath)
+    this.asyncCompiler.cacheManager.delete(templatePath)
+    return this
+  }
+
+  /**
    * Returns a new instance of edge. The instance
    * can be used to define locals.
    */

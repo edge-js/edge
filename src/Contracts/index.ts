@@ -56,6 +56,11 @@ export interface LoaderContract {
    * Register in memory template and presenter
    */
   register(templatePath: string, contents: LoaderTemplate): void
+
+  /**
+   * Remove the pre-registered template
+   */
+  remove(templatePath: string): void
 }
 
 /**
@@ -95,6 +100,7 @@ export interface CacheManagerContract {
   get(templatePath: string): undefined | LoaderTemplate
   set(templatePath: string, compiledOutput: LoaderTemplate): void
   has(templatePath: string): boolean
+  delete(templatePath: string): void
 }
 
 /**
@@ -319,6 +325,11 @@ export interface EdgeContract {
    * Register an inline template
    */
   registerTemplate(templatePath: string, contents: LoaderTemplate): this
+
+  /**
+   * Remove the template registered using the "registerTemplate" method
+   */
+  removeTemplate(templatePath: string): this
 
   /**
    * Register a global value

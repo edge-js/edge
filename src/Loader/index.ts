@@ -258,4 +258,11 @@ export class Loader implements LoaderContract {
 
     this.preRegistered.set(templatePath, contents)
   }
+
+  /**
+   * Remove registered template
+   */
+  public remove(templatePath: string) {
+    this.preRegistered.delete(templatePath)
+  }
 }

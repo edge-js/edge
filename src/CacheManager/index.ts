@@ -48,4 +48,15 @@ export class CacheManager implements CacheManagerContract {
 
     this.cacheStore.set(absPath, payload)
   }
+
+  /**
+   * Delete template from the compiled cache
+   */
+  public delete(absPath: string) {
+    if (!this.enabled) {
+      return
+    }
+
+    this.cacheStore.delete(absPath)
+  }
 }
