@@ -9,6 +9,7 @@
 
 import { EdgeError } from 'edge-error'
 import { expressions } from 'edge-parser'
+import { lodash } from '@poppinss/utils'
 
 import { TagContract } from '../Contracts'
 import { isSubsetOf, unallowedExpression, parseJsArg } from '../utils'
@@ -57,10 +58,10 @@ export const setTag: TagContract = {
     /**
      * Disallow more than 2 values for the sequence expression
      */
-    if (parsed.expressions.length > 2) {
+    if (parsed.expressions.length < 2 || parsed.expressions.length > 3) {
       throw new EdgeError(
-        'maximum of 2 arguments are allowed for the @set tag',
-        'E_MAX_ARGUMENTS',
+        '@set tag accepts a minimum of 2 or maximum or 3 arguments',
+        'E_INVALID_ARGUMENTS_COUNT',
         {
           line: parsed.loc.start.line,
           col: parsed.loc.start.column,
@@ -69,18 +70,46 @@ export const setTag: TagContract = {
       )
     }
 
-    const [key, value] = parsed.expressions
+    /**
+     * Extract key-value and the collection (if any)
+     */
+    let collection: any
+    let key: any
+    let value: any
+
+    if (parsed.expressions.length === 3) {
+      collection = parsed.expressions[0]
+      key = parsed.expressions[1]
+      value = parsed.expressions[2]
+    } else {
+      key = parsed.expressions[0]
+      value = parsed.expressions[1]
+    }
 
     /**
      * The key has to be a literal value
      */
     isSubsetOf(key, [expressions.Literal], () => {
       throw unallowedExpression(
-        'The first argument for @set tag must be a string literal',
+        `The ${collection ? 'second' : 'first'} argument for @set tag must be a string literal`,
         token.filename,
         parser.utils.getExpressionLoc(key)
       )
     })
+
+    /**
+     * Mutate the collection when defined
+     */
+    if (collection) {
+      buffer.writeExpression(
+        `template.setValue(${parser.utils.stringify(collection)}, '${
+          key.value
+        }', ${parser.utils.stringify(value)})`,
+        token.filename,
+        token.loc.start.line
+      )
+      return
+    }
 
     /**
      * Write statement to mutate the key. If the variable has already been
@@ -94,5 +123,12 @@ export const setTag: TagContract = {
 
     buffer.writeExpression(expression, token.filename, token.loc.start.line)
     parser.stack.defineVariable(key.value)
+  },
+
+  /**
+   * Add methods to the template for running the loop
+   */
+  run(template) {
+    template.macro('setValue', lodash.set)
   },
 }
