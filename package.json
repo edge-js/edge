@@ -1,6 +1,6 @@
 {
   "name": "edge.js",
-  "version": "4.0.2",
+  "version": "4.0.3",
   "description": "Template engine",
   "main": "build/index.js",
   "files": [
