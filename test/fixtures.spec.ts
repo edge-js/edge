@@ -31,8 +31,8 @@ const processor = new Processor()
 test.group('Fixtures', (group) => {
   group.before(() => {
     Object.keys(tags).forEach((tag) => {
-      if (tags[tag].run) {
-        tags[tag].run(Template)
+      if (tags[tag].boot) {
+        tags[tag].boot(Template)
       }
     })
   })
@@ -79,8 +79,8 @@ test.group('Fixtures', (group) => {
 test.group('Fixtures | Cache', (group) => {
   group.before(() => {
     Object.keys(tags).forEach((tag) => {
-      if (tags[tag].run) {
-        tags[tag].run(Template)
+      if (tags[tag].boot) {
+        tags[tag].boot(Template)
       }
     })
   })

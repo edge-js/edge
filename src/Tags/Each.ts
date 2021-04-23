@@ -189,7 +189,7 @@ export const eachTag: TagContract = {
   /**
    * Add methods to the template for running the loop
    */
-  run(template) {
+  boot(template) {
     template.macro('loopAsync', asyncEach)
     template.macro('loop', each)
     template.macro('size', lodash.size)

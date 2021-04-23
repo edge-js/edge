@@ -62,7 +62,7 @@ test.group('Edge', (group) => {
     assert.deepEqual(edge.compiler['tags'].mytag, MyTag)
   })
 
-  test('invoke tag run method when registering the tag', (assert) => {
+  test('invoke tag boot method when registering the tag', (assert) => {
     assert.plan(2)
 
     const edge = new Edge()
@@ -73,7 +73,7 @@ test.group('Edge', (group) => {
       public static seekable = true
       public static compile(): void {}
 
-      public static run(): void {
+      public static boot(): void {
         assert.isTrue(true)
       }
     }

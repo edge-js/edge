@@ -128,7 +128,7 @@ export const setTag: TagContract = {
   /**
    * Add methods to the template for running the loop
    */
-  run(template) {
+  boot(template) {
     template.macro('setValue', lodash.set)
   },
 }

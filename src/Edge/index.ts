@@ -191,8 +191,8 @@ export class Edge implements EdgeContract {
    * ```
    */
   public registerTag(tag: TagContract): this {
-    if (typeof tag.run === 'function') {
-      tag.run(Template)
+    if (typeof tag.boot === 'function') {
+      tag.boot(Template)
     }
 
     this.tags[tag.tagName] = tag

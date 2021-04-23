@@ -82,7 +82,7 @@ export interface TemplateConstructorContract
  */
 export interface TagContract extends ParserTagDefinitionContract {
   tagName: string
-  run?(template: TemplateConstructorContract): void
+  boot?(template: TemplateConstructorContract): void
 }
 
 /**
