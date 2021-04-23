@@ -227,14 +227,14 @@ export interface EdgeRendererContract {
   /**
    * Render a template synchronously
    */
-  render(templatePath: string, state?: any): string
-  renderRaw(contents: string, state?: any, templatePath?: string): string
+  render(templatePath: string, state?: any): Promise<string>
+  renderRaw(contents: string, state?: any, templatePath?: string): Promise<string>
 
   /**
    * Render a template asynchronously
    */
-  renderAsync(templatePath: string, state?: any): Promise<string>
-  renderRawAsync(contents: string, state?: any, templatePath?: string): Promise<string>
+  renderSync(templatePath: string, state?: any): string
+  renderRawSync(contents: string, state?: any, templatePath?: string): string
 }
 
 /**
@@ -377,14 +377,14 @@ export interface EdgeContract {
   /**
    * Render a template synchronously
    */
-  render(templatePath: string, state?: any): string
-  renderRaw(contents: string, state?: any, templatePath?: string): string
+  render(templatePath: string, state?: any): Promise<string>
+  renderRaw(contents: string, state?: any, templatePath?: string): Promise<string>
 
   /**
    * Render a template asynchronously
    */
-  renderAsync(templatePath: string, state?: any): Promise<string>
-  renderRawAsync(contents: string, state?: any, templatePath?: string): Promise<string>
+  renderSync(templatePath: string, state?: any): string
+  renderRawSync(contents: string, state?: any, templatePath?: string): string
 }
 
 /**

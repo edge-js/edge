@@ -249,7 +249,7 @@ export class Edge implements EdgeContract {
    * edge.render('welcome', { greeting: 'Hello world' })
    * ```
    */
-  public render(templatePath: string, state?: any): string {
+  public render(templatePath: string, state?: any): Promise<string> {
     return this.getRenderer().render(templatePath, state)
   }
 
@@ -260,8 +260,8 @@ export class Edge implements EdgeContract {
    * edge.render('welcome', { greeting: 'Hello world' })
    * ```
    */
-  public renderAsync(templatePath: string, state?: any): Promise<string> {
-    return this.getRenderer().renderAsync(templatePath, state)
+  public renderSync(templatePath: string, state?: any): string {
+    return this.getRenderer().renderSync(templatePath, state)
   }
 
   /**
@@ -271,7 +271,7 @@ export class Edge implements EdgeContract {
    * edge.render('welcome', { greeting: 'Hello world' })
    * ```
    */
-  public renderRaw(contents: string, state?: any, templatePath?: string): string {
+  public renderRaw(contents: string, state?: any, templatePath?: string): Promise<string> {
     return this.getRenderer().renderRaw(contents, state, templatePath)
   }
 
@@ -282,8 +282,8 @@ export class Edge implements EdgeContract {
    * edge.render('welcome', { greeting: 'Hello world' })
    * ```
    */
-  public renderRawAsync(templatePath: string, state?: any): Promise<string> {
-    return this.getRenderer().renderRawAsync(templatePath, state)
+  public renderRawSync(templatePath: string, state?: any): string {
+    return this.getRenderer().renderRawSync(templatePath, state)
   }
 
   /**

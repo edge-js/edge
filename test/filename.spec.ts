@@ -30,7 +30,7 @@ test.group('Template FileName', (group) => {
     const edge = new Edge()
     edge.mount(fs.basePath)
 
-    const output = edge.render('foo', {})
+    const output = await edge.render('foo', {})
     assert.equal(output.trim(), join(fs.basePath, 'foo.edge'))
   })
 
@@ -47,7 +47,7 @@ test.group('Template FileName', (group) => {
     const edge = new Edge()
     edge.mount(fs.basePath)
 
-    const output = edge.render('foo', {})
+    const output = await edge.render('foo', {})
 
     assert.stringEqual(
       output.trim(),
@@ -82,7 +82,7 @@ test.group('Template FileName', (group) => {
     const edge = new Edge()
     edge.mount(fs.basePath)
 
-    const output = edge.render('foo', {})
+    const output = await edge.render('foo', {})
 
     assert.stringEqual(
       output.trim(),
@@ -106,7 +106,7 @@ test.group('Template FileName', (group) => {
     const edge = new Edge()
     edge.mount(fs.basePath)
 
-    const output = edge.render('foo', {})
+    const output = await edge.render('foo', {})
 
     assert.stringEqual(
       output.trim(),
@@ -132,7 +132,7 @@ test.group('Template FileName', (group) => {
     await fs.add(
       'button.edge',
       dedent`
-			{{{ $slots.text() }}}
+			{{{ await $slots.text() }}}
 			{{ $filename }}
 		`
     )
@@ -140,7 +140,7 @@ test.group('Template FileName', (group) => {
     const edge = new Edge()
     edge.mount(fs.basePath)
 
-    const output = edge.render('foo', {})
+    const output = await edge.render('foo', {})
 
     assert.stringEqual(
       output.trim(),

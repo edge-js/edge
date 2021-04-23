@@ -23,32 +23,32 @@ test.group('Edge', (group) => {
     await fs.cleanup()
   })
 
-  test('mount default disk', (assert) => {
+  test('mount default disk', async (assert) => {
     const edge = new Edge()
     edge.mount(fs.basePath)
     assert.deepEqual(edge.loader.mounted, { default: fs.basePath })
   })
 
-  test('mount named disk', (assert) => {
+  test('mount named disk', async (assert) => {
     const edge = new Edge()
     edge.mount('foo', fs.basePath)
     assert.deepEqual(edge.loader.mounted, { foo: fs.basePath })
   })
 
-  test('unmount named disk', (assert) => {
+  test('unmount named disk', async (assert) => {
     const edge = new Edge()
     edge.mount('foo', fs.basePath)
     edge.unmount('foo')
     assert.deepEqual(edge.loader.mounted, {})
   })
 
-  test('register globals', (assert) => {
+  test('register globals', async (assert) => {
     const edge = new Edge()
     edge.global('foo', 'bar')
     assert.deepEqual(edge.GLOBALS.foo, 'bar')
   })
 
-  test('add a custom tag to the tags list', (assert) => {
+  test('add a custom tag to the tags list', async (assert) => {
     const edge = new Edge()
 
     class MyTag {
@@ -62,7 +62,7 @@ test.group('Edge', (group) => {
     assert.deepEqual(edge.compiler['tags'].mytag, MyTag)
   })
 
-  test('invoke tag boot method when registering the tag', (assert) => {
+  test('invoke tag boot method when registering the tag', async (assert) => {
     assert.plan(2)
 
     const edge = new Edge()
@@ -87,7 +87,7 @@ test.group('Edge', (group) => {
     await fs.add('foo.edge', 'Hello {{ username }}')
 
     edge.mount(fs.basePath)
-    assert.equal(edge.render('foo', { username: 'virk' }).trim(), 'Hello virk')
+    assert.equal((await edge.render('foo', { username: 'virk' })).trim(), 'Hello virk')
   })
 
   test('pass locals to the view context', async (assert) => {
@@ -99,8 +99,8 @@ test.group('Edge', (group) => {
     const tmpl = edge.getRenderer()
     tmpl.share({ username: 'nikk' })
 
-    assert.equal(tmpl.render('foo', {}).trim(), 'Hello nikk')
-    assert.equal(edge.render('foo', {}).trim(), 'Hello guest')
+    assert.equal((await tmpl.render('foo', {})).trim(), 'Hello nikk')
+    assert.equal((await edge.render('foo', {})).trim(), 'Hello guest')
   })
 
   test('register a template as a string', async (assert) => {
@@ -110,7 +110,7 @@ test.group('Edge', (group) => {
       template: 'Hello {{ username }}',
     })
 
-    assert.equal(edge.render('foo', { username: 'virk' }).trim(), 'Hello virk')
+    assert.equal((await edge.render('foo', { username: 'virk' })).trim(), 'Hello virk')
   })
 
   test('register a template on a named disk', async (assert) => {
@@ -121,7 +121,7 @@ test.group('Edge', (group) => {
       template: 'Hello {{ username }}',
     })
 
-    assert.equal(edge.render('hello::foo', { username: 'virk' }).trim(), 'Hello virk')
+    assert.equal((await edge.render('hello::foo', { username: 'virk' })).trim(), 'Hello virk')
   })
 
   test('clear compiled cache when template is removed', async (assert) => {
@@ -130,15 +130,15 @@ test.group('Edge', (group) => {
     edge.registerTemplate('foo', {
       template: 'Hello {{ username }}',
     })
-    assert.equal(edge.render('foo', { username: 'virk' }).trim(), 'Hello virk')
-    assert.equal((await edge.renderAsync('foo', { username: 'virk' })).trim(), 'Hello virk')
+    assert.equal((await edge.render('foo', { username: 'virk' })).trim(), 'Hello virk')
+    assert.equal(edge.renderSync('foo', { username: 'virk' }).trim(), 'Hello virk')
 
     edge.removeTemplate('foo')
     edge.registerTemplate('foo', {
       template: 'Hi {{ username }}',
     })
-    assert.equal(edge.render('foo', { username: 'virk' }).trim(), 'Hi virk')
-    assert.equal((await edge.renderAsync('foo', { username: 'virk' })).trim(), 'Hi virk')
+    assert.equal((await edge.render('foo', { username: 'virk' })).trim(), 'Hi virk')
+    assert.equal(edge.renderSync('foo', { username: 'virk' }).trim(), 'Hi virk')
   })
 
   test('pass absolute path of template to lexer errors', async (assert) => {
@@ -149,7 +149,7 @@ test.group('Edge', (group) => {
     edge.mount(fs.basePath)
 
     try {
-      edge.render('foo', false)
+      await edge.render('foo', false)
     } catch ({ stack }) {
       assert.equal(
         stack.split('\n')[1].trim(),
@@ -166,7 +166,7 @@ test.group('Edge', (group) => {
     edge.mount(fs.basePath)
 
     try {
-      edge.render('foo', false)
+      await edge.render('foo', false)
     } catch ({ stack }) {
       assert.equal(
         stack.split('\n')[1].trim(),
@@ -184,7 +184,7 @@ test.group('Edge', (group) => {
     edge.mount(fs.basePath)
 
     try {
-      edge.render('foo', false)
+      await edge.render('foo', false)
     } catch ({ stack }) {
       assert.equal(
         stack.split('\n')[1].trim(),
@@ -202,7 +202,7 @@ test.group('Edge', (group) => {
     edge.mount(fs.basePath)
 
     try {
-      edge.render('foo', false)
+      await edge.render('foo', false)
     } catch ({ stack }) {
       assert.equal(
         stack.split('\n')[1].trim(),
@@ -220,7 +220,7 @@ test.group('Edge', (group) => {
     edge.mount(fs.basePath)
 
     try {
-      edge.render('foo', false)
+      await edge.render('foo', false)
     } catch ({ stack }) {
       assert.equal(
         stack.split('\n')[1].trim(),
@@ -238,7 +238,7 @@ test.group('Edge', (group) => {
     edge.mount(fs.basePath)
 
     try {
-      edge.render('foo', false)
+      await edge.render('foo', false)
     } catch ({ stack }) {
       assert.equal(
         stack.split('\n')[1].trim(),
@@ -256,7 +256,7 @@ test.group('Edge', (group) => {
     edge.mount(fs.basePath)
 
     try {
-      edge.render('foo', false)
+      await edge.render('foo', false)
     } catch ({ stack }) {
       assert.equal(
         stack.split('\n')[1].trim(),
@@ -274,7 +274,7 @@ test.group('Edge', (group) => {
     edge.mount(fs.basePath)
 
     try {
-      edge.render('foo', false)
+      await edge.render('foo', false)
     } catch ({ stack }) {
       assert.equal(
         stack.split('\n')[1].trim(),
@@ -299,7 +299,7 @@ test.group('Edge', (group) => {
       template: 'Hello {{ username }}',
     })
 
-    assert.equal(edge.render('hello::foo', { username: 'virk' }).trim(), 'Hello virk')
+    assert.equal((await edge.render('hello::foo', { username: 'virk' })).trim(), 'Hello virk')
   })
 
   test('do not run plugins until a view is rendered', async (assert) => {
@@ -335,9 +335,9 @@ test.group('Edge', (group) => {
       template: 'Hello {{ username }}',
     })
 
-    assert.equal(edge.render('hello::foo', { username: 'virk' }).trim(), 'Hello virk')
-    assert.equal(edge.render('hello::foo', { username: 'virk' }).trim(), 'Hello virk')
-    assert.equal(edge.render('hello::foo', { username: 'virk' }).trim(), 'Hello virk')
+    assert.equal((await edge.render('hello::foo', { username: 'virk' })).trim(), 'Hello virk')
+    assert.equal((await edge.render('hello::foo', { username: 'virk' })).trim(), 'Hello virk')
+    assert.equal((await edge.render('hello::foo', { username: 'virk' })).trim(), 'Hello virk')
   })
 
   test('run recurring plugins again and again', async (assert) => {
@@ -359,14 +359,14 @@ test.group('Edge', (group) => {
       template: 'Hello {{ username }}',
     })
 
-    assert.equal(edge.render('hello::foo', { username: 'virk' }).trim(), 'Hello virk')
-    assert.equal(edge.render('hello::foo', { username: 'virk' }).trim(), 'Hello virk')
-    assert.equal(edge.render('hello::foo', { username: 'virk' }).trim(), 'Hello virk')
+    assert.equal((await edge.render('hello::foo', { username: 'virk' })).trim(), 'Hello virk')
+    assert.equal((await edge.render('hello::foo', { username: 'virk' })).trim(), 'Hello virk')
+    assert.equal((await edge.render('hello::foo', { username: 'virk' })).trim(), 'Hello virk')
   })
 })
 
 test.group('Edge | regression', () => {
-  test('render non-existy values', (assert) => {
+  test('render non-existy values', async (assert) => {
     const edge = new Edge()
     edge.registerTemplate('numeric', {
       template: 'Total {{ total }}',
@@ -376,11 +376,11 @@ test.group('Edge | regression', () => {
       template: 'Is Active {{ isActive }}',
     })
 
-    assert.equal(edge.render('numeric', { total: 0 }), 'Total 0')
-    assert.equal(edge.render('boolean', { isActive: false }), 'Is Active false')
+    assert.equal(await edge.render('numeric', { total: 0 }), 'Total 0')
+    assert.equal(await edge.render('boolean', { isActive: false }), 'Is Active false')
   })
 
-  test('render inline scripts with regex', (assert) => {
+  test('render inline scripts with regex', async (assert) => {
     const edge = new Edge()
     edge.registerTemplate('eval', {
       template: dedent`
@@ -391,7 +391,7 @@ test.group('Edge | regression', () => {
     })
 
     assert.stringEqual(
-      edge.render('eval'),
+      await edge.render('eval'),
       dedent`
       <script type="text/javascript">
         var pl = /\+/g
@@ -400,7 +400,7 @@ test.group('Edge | regression', () => {
     )
   })
 
-  test('render complex binary expressions', (assert) => {
+  test('render complex binary expressions', async (assert) => {
     const edge = new Edge()
     edge.registerTemplate('eval', {
       template: dedent`
@@ -414,7 +414,7 @@ test.group('Edge | regression', () => {
     })
 
     assert.equal(
-      edge.render('eval', {
+      await edge.render('eval', {
         line: { id: 1, lineName: 'aaa', user: {} },
         user: { line: {} },
       }),
@@ -424,17 +424,17 @@ test.group('Edge | regression', () => {
     )
   })
 
-  test('do not escape when using safe global method', (assert) => {
+  test('do not escape when using safe global method', async (assert) => {
     const edge = new Edge()
     Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
 
     edge.registerTemplate('eval', {
       template: 'Hello {{ safe(username) }}',
     })
-    assert.equal(edge.render('eval', { username: '<p>virk</p>' }), 'Hello <p>virk</p>')
+    assert.equal(await edge.render('eval', { username: '<p>virk</p>' }), 'Hello <p>virk</p>')
   })
 
-  test('truncate string by characters', (assert) => {
+  test('truncate string by characters', async (assert) => {
     const edge = new Edge()
     Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
 
@@ -442,12 +442,12 @@ test.group('Edge | regression', () => {
       template: '{{{ truncate(text, 10) }}}',
     })
     assert.equal(
-      edge.render('eval', { text: '<p>hello world & universe</p>' }),
+      await edge.render('eval', { text: '<p>hello world & universe</p>' }),
       '<p>hello world...</p>'
     )
   })
 
-  test('truncate string by characters in strict mode', (assert) => {
+  test('truncate string by characters in strict mode', async (assert) => {
     const edge = new Edge()
     Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
 
@@ -455,12 +455,12 @@ test.group('Edge | regression', () => {
       template: '{{{ truncate(text, 10, { strict: true }) }}}',
     })
     assert.equal(
-      edge.render('eval', { text: '<p>hello world & universe</p>' }),
+      await edge.render('eval', { text: '<p>hello world & universe</p>' }),
       '<p>hello worl...</p>'
     )
   })
 
-  test('define custom suffix for truncate', (assert) => {
+  test('define custom suffix for truncate', async (assert) => {
     const edge = new Edge()
     Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
 
@@ -468,22 +468,12 @@ test.group('Edge | regression', () => {
       template: '{{{ truncate(text, 10, { suffix: ". more" }) }}}',
     })
     assert.equal(
-      edge.render('eval', { text: '<p>hello world & universe</p>' }),
+      await edge.render('eval', { text: '<p>hello world & universe</p>' }),
       '<p>hello world. more</p>'
     )
   })
 
-  test('generate string excerpt', (assert) => {
-    const edge = new Edge()
-    Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
-
-    edge.registerTemplate('eval', {
-      template: '{{{ excerpt(text, 10) }}}',
-    })
-    assert.equal(edge.render('eval', { text: '<p>hello world & universe</p>' }), 'hello world...')
-  })
-
-  test('excerpt remove in-between tag', (assert) => {
+  test('generate string excerpt', async (assert) => {
     const edge = new Edge()
     Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
 
@@ -491,14 +481,27 @@ test.group('Edge | regression', () => {
       template: '{{{ excerpt(text, 10) }}}',
     })
     assert.equal(
-      edge.render('eval', {
+      await edge.render('eval', { text: '<p>hello world & universe</p>' }),
+      'hello world...'
+    )
+  })
+
+  test('excerpt remove in-between tag', async (assert) => {
+    const edge = new Edge()
+    Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
+
+    edge.registerTemplate('eval', {
+      template: '{{{ excerpt(text, 10) }}}',
+    })
+    assert.equal(
+      await edge.render('eval', {
         text: '<p>hello <strong>world</strong> & <strong>universe</strong></p>',
       }),
       'hello world...'
     )
   })
 
-  test('generate excerpt in strict mode', (assert) => {
+  test('generate excerpt in strict mode', async (assert) => {
     const edge = new Edge()
     Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
 
@@ -506,14 +509,14 @@ test.group('Edge | regression', () => {
       template: '{{{ excerpt(text, 10, { strict: true }) }}}',
     })
     assert.equal(
-      edge.render('eval', {
+      await edge.render('eval', {
         text: '<p>hello <strong>world</strong> & <strong>universe</strong></p>',
       }),
       'hello worl...'
     )
   })
 
-  test('add custom suffix for excerpt', (assert) => {
+  test('add custom suffix for excerpt', async (assert) => {
     const edge = new Edge()
     Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
 
@@ -521,7 +524,7 @@ test.group('Edge | regression', () => {
       template: '{{{ excerpt(text, 10, { suffix: ". more" }) }}}',
     })
     assert.equal(
-      edge.render('eval', {
+      await edge.render('eval', {
         text: '<p>hello <strong>world</strong> & <strong>universe</strong></p>',
       }),
       'hello world. more'

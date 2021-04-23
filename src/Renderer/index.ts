@@ -38,8 +38,8 @@ export class EdgeRenderer implements EdgeRendererContract {
   /**
    * Render the template
    */
-  public render(templatePath: string, state: any = {}): string {
-    return new Template(this.compiler, this.globals, this.locals, this.processor).render<string>(
+  public async render(templatePath: string, state: any = {}): Promise<string> {
+    return new Template(this.asyncCompiler, this.globals, this.locals, this.processor).render(
       templatePath,
       state
     )
@@ -48,8 +48,8 @@ export class EdgeRenderer implements EdgeRendererContract {
   /**
    * Render the template
    */
-  public async renderAsync(templatePath: string, state: any = {}): Promise<string> {
-    return new Template(this.asyncCompiler, this.globals, this.locals, this.processor).render(
+  public renderSync(templatePath: string, state: any = {}): string {
+    return new Template(this.compiler, this.globals, this.locals, this.processor).render<string>(
       templatePath,
       state
     )
@@ -58,8 +58,12 @@ export class EdgeRenderer implements EdgeRendererContract {
   /**
    * Render the template from a raw string
    */
-  public renderRaw(contents: string, state: any = {}, templatePath?: string): string {
-    return new Template(this.compiler, this.globals, this.locals, this.processor).renderRaw<string>(
+  public async renderRaw(
+    contents: string,
+    state: any = {},
+    templatePath?: string
+  ): Promise<string> {
+    return new Template(this.asyncCompiler, this.globals, this.locals, this.processor).renderRaw(
       contents,
       state,
       templatePath
@@ -69,12 +73,8 @@ export class EdgeRenderer implements EdgeRendererContract {
   /**
    * Render the template from a raw string
    */
-  public async renderRawAsync(
-    contents: string,
-    state: any = {},
-    templatePath?: string
-  ): Promise<string> {
-    return new Template(this.asyncCompiler, this.globals, this.locals, this.processor).renderRaw(
+  public renderRawSync(contents: string, state: any = {}, templatePath?: string): string {
+    return new Template(this.compiler, this.globals, this.locals, this.processor).renderRaw(
       contents,
       state,
       templatePath
