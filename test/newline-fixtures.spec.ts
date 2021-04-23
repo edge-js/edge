@@ -31,8 +31,8 @@ const compiler = new Compiler(loader, tags, processor)
 test.group('Newline Fixtures', (group) => {
   group.before(() => {
     Object.keys(tags).forEach((tag) => {
-      if (tags[tag].run) {
-        tags[tag].run(Template)
+      if (tags[tag].boot) {
+        tags[tag].boot(Template)
       }
     })
   })

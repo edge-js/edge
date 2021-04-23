@@ -19,7 +19,7 @@ import { isSubsetOf, unallowedExpression, parseJsArg } from '../utils'
 export const injectTag: TagContract = {
   block: false,
   seekable: true,
-  tagName: 'share',
+  tagName: 'inject',
   noNewLine: true,
 
   compile(parser, buffer, token) {
@@ -27,11 +27,11 @@ export const injectTag: TagContract = {
     const parsed = parseJsArg(parser, token)
 
     /**
-     * The share tag only accepts an object expression.
+     * The inject tag only accepts an object expression.
      */
     isSubsetOf(parsed, [expressions.ObjectExpression, expressions.Identifier], () => {
       throw unallowedExpression(
-        `"${token.properties.jsArg}" is not a valid key-value pair for the @share tag`,
+        `"${token.properties.jsArg}" is not a valid key-value pair for the @inject tag`,
         token.filename,
         parser.utils.getExpressionLoc(parsed)
       )
