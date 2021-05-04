@@ -1,4 +1,4 @@
-<div align="center"><img src="https://res.cloudinary.com/adonis-js/image/upload/q_100/v1600679850/edge-banner_wao6ex.png" width="600px"></div>
+<div align="center"><img src="https://res.cloudinary.com/adonis-js/image/upload/v1620150474/edge-banner_tzmnox.jpg" width="600px"></div>
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -10,20 +10,63 @@
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Edge
+> A template for Node.js
 
-> Template engine for Node.js with breath of fresh air
+[![circleci-image]][circleci-url] [![appveyor-image]][appveyor-url] [![typescript-image]][typescript-url] [![npm-image]][npm-url] [![license-image]][license-url] [![synk-image]][synk-url]
 
-[![appveyor-image]][appveyor-url] [![circleci-image]][circleci-url] [![npm-image]][npm-url] ![](https://img.shields.io/badge/Typescript-294E80.svg?style=for-the-badge&logo=typescript) [![synk-image]][synk-url]
+Edge is a logical and batteries included template engine for Node.js. It can render any text based format, whether is **HTML**, **Markdown** or **plain text** files.
 
-## Maintainers
+## Usage
+Install the package from the npm registry.
 
-[Harminder virk](https://github.com/thetutlage)
+```sh
+npm i edge.js
+
+# yarn
+yarn add edge.js
+```
+
+And use it as follows
+
+```js
+const { join } = require('path')
+
+// CommonJS
+const edge = require('edge.js').default
+
+// Typescript import
+// import edge from 'edge.js'
+
+edge.mount(join(__dirname, 'views'))
+
+const html = await edge.render('welcome', {
+	greeting: 'Hello world'
+})
+
+console.log(html)
+```
+
+Next create the `views/welcome.edge` file.
+
+```edge
+<p> {{ greeting }} </p>
+```
+
+Edge was created to be used inside the AdonisJS framework. However it is a framework agnostic library and can be used standalone as well.
+
+The documentation is written on the [AdonisJS website](https://docs.adonisjs.com/guides/views/rendering). In AdonisJS docs, we refer the `edge` variable as `view`.
 
 [appveyor-image]: https://img.shields.io/appveyor/ci/thetutlage/edge/master.svg?style=for-the-badge&logo=appveyor
 [appveyor-url]: https://ci.appveyor.com/project/thetutlage/edge 'appveyor'
 
 [circleci-image]: https://img.shields.io/circleci/project/github/edge-js/edge/master.svg?style=for-the-badge&logo=circleci
 [circleci-url]: https://circleci.com/gh/edge-js/edge 'circleci'
+
+[typescript-image]: https://img.shields.io/badge/Typescript-294E80.svg?style=for-the-badge&logo=typescript
+[typescript-url]: "typescript"
+
+[license-image]: https://img.shields.io/npm/l/edge-error?color=blueviolet&style=for-the-badge
+[license-url]: LICENSE.md 'license'
 
 [npm-image]: https://img.shields.io/npm/v/edge.js.svg?style=for-the-badge&logo=npm
 [npm-url]: https://npmjs.org/package/edge.js 'npm'
