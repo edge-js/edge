@@ -188,6 +188,17 @@ export class Template extends Macroable implements TemplateContract {
   }
 
   /**
+   * Raise an error
+   */
+  public newError(errorMessage: string, filename: string, lineNumber: number, column: number) {
+    throw new EdgeError(errorMessage, 'E_RUNTIME_EXCEPTION', {
+      filename: filename,
+      line: lineNumber,
+      col: column,
+    })
+  }
+
+  /**
    * Rethrows the runtime exception by re-constructing the error message
    * to point back to the original filename
    */
