@@ -10,7 +10,7 @@
 import { expressions } from 'edge-parser'
 
 import { TagContract } from '../Contracts'
-import { isNotSubsetOf, unallowedExpression, parseJsArg } from '../utils'
+import { parseJsArg } from '../utils'
 
 /**
  * newError tag to raise exceptions inside your templates. They will point
