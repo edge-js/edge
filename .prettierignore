@@ -8,3 +8,4 @@ fixtures/*
 async-fixtures/*
 newline-fixtures/*
 *.txt
+*.md
