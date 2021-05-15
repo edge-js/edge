@@ -96,8 +96,11 @@ function getSlotNameAndProps(token: TagToken, parser: Parser): [string, null | s
    * We just generate the acorn AST only, since we don't want parser to transform
    * ast to edge statements for a `@slot` tag.
    */
-  const parsed = parser.utils.generateAST(token.properties.jsArg, token.loc, token.filename)
-    .expression
+  const parsed = parser.utils.generateAST(
+    token.properties.jsArg,
+    token.loc,
+    token.filename
+  ).expression
 
   isSubsetOf(parsed, [expressions.Literal, expressions.SequenceExpression], () => {
     unallowedExpression(
