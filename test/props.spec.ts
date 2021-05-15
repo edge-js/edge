@@ -11,9 +11,14 @@ import test from 'japa'
 import { Props } from '../src/Component/Props'
 
 test.group('Props', () => {
-  test('find if props has value', (assert) => {
+  test('get all props', (assert) => {
     const props = new Props({ title: 'Hello' })
-    assert.isTrue(props.has('title'))
+    assert.deepEqual(props.all(), { title: 'Hello' })
+  })
+
+  test('get value for a given key', (assert) => {
+    const props = new Props({ title: 'Hello' })
+    assert.equal(props.get('title'), 'Hello')
   })
 
   test('cherry pick values from the props', (assert) => {

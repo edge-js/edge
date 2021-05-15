@@ -26,15 +26,29 @@ export class Props implements PropsContract {
    * Find if a key exists inside the props
    */
   public has(key: string) {
-    const value = lodash.get(this[Symbol.for('options')].props, key)
+    const value = this.get(key)
     return value !== undefined && value !== null
+  }
+
+  /**
+   * Get value for a given key
+   */
+  public get(key: string, defaultValue?: any) {
+    return lodash.get(this.all(), key, defaultValue)
+  }
+
+  /**
+   * Returns all the props
+   */
+  public all() {
+    return this[Symbol.for('options')].props
   }
 
   /**
    * Validate prop value
    */
   public validate(key: string, validateFn: (key: string, value?: any) => any) {
-    const value = lodash.get(this[Symbol.for('options')].props, key)
+    const value = this.get(key)
     validateFn(key, value)
   }
 
@@ -42,21 +56,21 @@ export class Props implements PropsContract {
    * Return values for only the given keys
    */
   public only(keys: string[]) {
-    return lodash.pick(this[Symbol.for('options')].props, keys)
+    return lodash.pick(this.all(), keys)
   }
 
   /**
    * Return values except the given keys
    */
   public except(keys: string[]) {
-    return lodash.omit(this[Symbol.for('options')].props, keys)
+    return lodash.omit(this.all(), keys)
   }
 
   /**
    * Serialize all props to a string of HTML attributes
    */
   public serialize(mergeProps?: any) {
-    const attributes = lodash.merge({}, this[Symbol.for('options')].props, mergeProps)
+    const attributes = lodash.merge({}, this.all(), mergeProps)
     return safeValue(stringifyAttributes(attributes))
   }
 
