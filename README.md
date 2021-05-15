@@ -12,7 +12,7 @@
 # Edge
 > A template for Node.js
 
-[![circleci-image]][circleci-url] [![appveyor-image]][appveyor-url] [![typescript-image]][typescript-url] [![npm-image]][npm-url] [![license-image]][license-url] [![synk-image]][synk-url]
+[![gh-workflow-image]][gh-workflow-url] [![appveyor-image]][appveyor-url] [![typescript-image]][typescript-url] [![npm-image]][npm-url] [![license-image]][license-url] [![synk-image]][synk-url]
 
 Edge is a logical and batteries included template engine for Node.js. It can render any text based format, whether is **HTML**, **Markdown** or **plain text** files.
 
@@ -40,7 +40,7 @@ const edge = require('edge.js').default
 edge.mount(join(__dirname, 'views'))
 
 const html = await edge.render('welcome', {
-	greeting: 'Hello world'
+  greeting: 'Hello world'
 })
 
 console.log(html)
@@ -59,8 +59,8 @@ The documentation is written on the [AdonisJS website](https://docs.adonisjs.com
 [appveyor-image]: https://img.shields.io/appveyor/ci/thetutlage/edge/master.svg?style=for-the-badge&logo=appveyor
 [appveyor-url]: https://ci.appveyor.com/project/thetutlage/edge 'appveyor'
 
-[circleci-image]: https://img.shields.io/circleci/project/github/edge-js/edge/master.svg?style=for-the-badge&logo=circleci
-[circleci-url]: https://circleci.com/gh/edge-js/edge 'circleci'
+[gh-workflow-image]: https://img.shields.io/github/workflow/status/edge-js/edge/test?style=for-the-badge
+[gh-workflow-url]: https://github.com/edge-js/edge/actions/workflows/test.yml "Github action"
 
 [typescript-image]: https://img.shields.io/badge/Typescript-294E80.svg?style=for-the-badge&logo=typescript
 [typescript-url]: "typescript"
