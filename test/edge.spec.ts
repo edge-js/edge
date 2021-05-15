@@ -8,6 +8,7 @@
  */
 
 import './assert-extend'
+import { EOL } from 'os'
 import test from 'japa'
 import { join } from 'path'
 import dedent from 'dedent-js'
@@ -528,6 +529,39 @@ test.group('Edge | regression', () => {
         text: '<p>hello <strong>world</strong> & <strong>universe</strong></p>',
       }),
       'hello world. more'
+    )
+  })
+
+  test('convert newline to br tags', async (assert) => {
+    const edge = new Edge()
+    Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
+
+    /**
+     * Intentionally using `EOL`, so that we can test that in windows
+     * the newlines are also converted to br tags
+     */
+    edge.registerTemplate('eval', {
+      template: '{{{ nl2br(text) }}}',
+    })
+
+    assert.equal(await edge.render('eval', { text: `Hello${EOL}world` }), 'Hello<br>world')
+  })
+
+  test('escape user input except the new lines', async (assert) => {
+    const edge = new Edge()
+    Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
+
+    /**
+     * Intentionally using `EOL`, so that we can test that in windows
+     * the newlines are also converted to br tags
+     */
+    edge.registerTemplate('eval', {
+      template: '{{{ nl2br(e(text)) }}}',
+    })
+
+    assert.equal(
+      await edge.render('eval', { text: `Hello${EOL}<strong>world</strong>` }),
+      'Hello<br>&lt;strong&gt;world&lt;/strong&gt;'
     )
   })
 })

@@ -26,6 +26,24 @@ export class SafeValue {
 }
 
 /**
+ * Escapes a given string
+ */
+export function escape<T>(input: T): T extends SafeValue ? T['value'] : T {
+  return typeof input === 'string'
+    ? string.escapeHTML(input)
+    : input instanceof SafeValue
+    ? input.value
+    : input
+}
+
+/**
+ * Mark value as safe and not to be escaped
+ */
+export function safeValue(value: string) {
+  return new SafeValue(value)
+}
+
+/**
  * The template is used to compile and run templates. Also the instance
  * of template is passed during runtime to render `dynamic partials`
  * and `dynamic components`.
@@ -180,11 +198,7 @@ export class Template extends Macroable implements TemplateContract {
    * and rest all values will be returned as it is.
    */
   public escape<T>(input: T): T extends SafeValue ? T['value'] : T {
-    return typeof input === 'string'
-      ? string.escapeHTML(input)
-      : input instanceof SafeValue
-      ? input.value
-      : input
+    return escape(input)
   }
 
   /**
@@ -214,11 +228,4 @@ export class Template extends Macroable implements TemplateContract {
       col: 0,
     })
   }
-}
-
-/**
- * Mark value as safe and not to be escaped
- */
-export function safeValue(value: string) {
-  return new SafeValue(value)
 }

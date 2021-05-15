@@ -7,14 +7,32 @@
  * file that was distributed with this source code.
  */
 
-import { string } from '@poppinss/utils/build/helpers'
 import { EdgeError } from 'edge-error'
-import { safeValue } from '../../Template'
+import { string } from '@poppinss/utils/build/helpers'
+import { safeValue, escape } from '../../Template'
 
 export const GLOBALS = {
+  /**
+   * Converts new lines to break
+   */
+  nl2br: (value: string | null | undefined) => {
+    if (!value) {
+      return
+    }
+
+    return String(value).replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1<br>')
+  },
+
+  /**
+   * Inspect state
+   */
   inspect: (value: any) => {
     return safeValue(require('@poppinss/inspect').string.html(value))
   },
+
+  /**
+   * Truncate a sentence
+   */
   truncate: (
     value: string,
     length: number = 20,
@@ -26,6 +44,10 @@ export const GLOBALS = {
       suffix: options.suffix,
     })
   },
+
+  /**
+   * Raise an exception
+   */
   raise: (message: string, options?: any) => {
     if (!options) {
       throw new Error(message)
@@ -33,6 +55,10 @@ export const GLOBALS = {
       throw new EdgeError(message, 'E_RUNTIME_EXCEPTION', options)
     }
   },
+
+  /**
+   * Generate an excerpt
+   */
   excerpt: (
     value: string,
     length: number = 20,
@@ -44,6 +70,12 @@ export const GLOBALS = {
       suffix: options.suffix,
     })
   },
+  /**
+   * Using `"e"` because, `escape` is a global function in the
+   * Node.js global namespace and edge parser gives priority
+   * to it
+   */
+  e: escape,
   safe: safeValue,
   camelCase: string.camelCase,
   snakeCase: string.snakeCase,
