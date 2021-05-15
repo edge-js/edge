@@ -564,4 +564,22 @@ test.group('Edge | regression', () => {
       'Hello<br>&lt;strong&gt;world&lt;/strong&gt;'
     )
   })
+
+  test('stringify data structures', async (assert) => {
+    const edge = new Edge()
+    Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
+
+    /**
+     * Intentionally using `EOL`, so that we can test that in windows
+     * the newlines are also converted to br tags
+     */
+    edge.registerTemplate('eval', {
+      template: `{{ stringify({ user: { username: 'virk' } }) }}`,
+    })
+
+    assert.equal(
+      await edge.render('eval'),
+      '{&quot;user&quot;:{&quot;username&quot;:&quot;virk&quot;}}'
+    )
+  })
 })

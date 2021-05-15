@@ -8,6 +8,7 @@
  */
 
 import { EdgeError } from 'edge-error'
+import stringify from 'js-stringify'
 import { string } from '@poppinss/utils/build/helpers'
 import { safeValue, escape } from '../../Template'
 
@@ -76,6 +77,14 @@ export const GLOBALS = {
    * to it
    */
   e: escape,
+
+  /**
+   * Convert javascript data structures to a string. The method is a little
+   * better over JSON.stringify in handling certain data structures. For
+   * example: In JSON.stringify, the date is converted to an ISO string
+   * whereas this method converts it to an actual instance of date
+   */
+  stringify: stringify,
   safe: safeValue,
   camelCase: string.camelCase,
   snakeCase: string.snakeCase,

@@ -51,7 +51,6 @@
     "github-label-sync": "^2.0.0",
     "husky": "^6.0.0",
     "japa": "^3.1.1",
-    "js-stringify": "^1.0.2",
     "mrm": "^3.0.1",
     "np": "^7.5.0",
     "prettier": "^2.3.0",
@@ -76,6 +75,7 @@
     "edge-error": "^2.0.4",
     "edge-lexer": "^4.0.5",
     "edge-parser": "^8.0.6",
+    "js-stringify": "^1.0.2",
     "macroable": "^5.1.2",
     "stringify-attributes": "^2.0.0"
   },
