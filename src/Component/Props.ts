@@ -69,24 +69,42 @@ export class Props implements PropsContract {
   /**
    * Serialize all props to a string of HTML attributes
    */
-  public serialize(mergeProps?: any) {
-    const attributes = lodash.merge({}, this.all(), mergeProps)
+  public serialize(mergeProps?: any, priortizeInline: boolean = true) {
+    /**
+     * Priortize user attributes when priortizeInline=false
+     */
+    const attributes = priortizeInline
+      ? lodash.merge({}, this.all(), mergeProps)
+      : lodash.merge({}, mergeProps, this.all())
+
     return safeValue(stringifyAttributes(attributes))
   }
 
   /**
    * Serialize only the given keys to a string of HTML attributes
    */
-  public serializeOnly(keys: string[], mergeProps?: any) {
-    const attributes = lodash.merge({}, this.only(keys), mergeProps)
+  public serializeOnly(keys: string[], mergeProps?: any, priortizeInline: boolean = true) {
+    /**
+     * Priortize user attributes when priortizeInline=false
+     */
+    const attributes = priortizeInline
+      ? lodash.merge({}, this.only(keys), mergeProps)
+      : lodash.merge({}, mergeProps, this.only(keys))
+
     return safeValue(stringifyAttributes(attributes))
   }
 
   /**
    * Serialize except the given keys to a string of HTML attributes
    */
-  public serializeExcept(keys: string[], mergeProps?: any) {
-    const attributes = lodash.merge({}, this.except(keys), mergeProps)
+  public serializeExcept(keys: string[], mergeProps?: any, priortizeInline: boolean = true) {
+    /**
+     * Priortize user attributes when priortizeInline=false
+     */
+    const attributes = priortizeInline
+      ? lodash.merge({}, this.except(keys), mergeProps)
+      : lodash.merge({}, mergeProps, this.except(keys))
+
     return safeValue(stringifyAttributes(attributes))
   }
 }

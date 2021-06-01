@@ -115,4 +115,28 @@ test.group('Props', () => {
   test('do not raise error when state is null', () => {
     new Props(null)
   })
+
+  test('give preference to inline merge object', (assert) => {
+    const props = new Props({
+      class: ['foo', 'bar'],
+      onclick: 'foo = bar',
+    })
+
+    assert.equal(
+      props.serializeExcept(['onclick'], { class: ['foo', 'baz'] }).value,
+      ' class="foo baz"'
+    )
+  })
+
+  test('give preference to user props', (assert) => {
+    const props = new Props({
+      class: ['foo', 'bar'],
+      onclick: 'foo = bar',
+    })
+
+    assert.equal(
+      props.serializeExcept(['onclick'], { class: ['foo', 'baz'] }, false).value,
+      ' class="foo bar"'
+    )
+  })
 })
