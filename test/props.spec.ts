@@ -139,4 +139,39 @@ test.group('Props', () => {
       ' class="foo bar"'
     )
   })
+
+  test('merge class and className props', (assert) => {
+    const props = new Props({
+      class: ['foo', 'bar'],
+      className: ['baz'],
+    })
+
+    assert.equal(props.serialize().value, ' class="foo bar baz"')
+  })
+
+  test('use classname when no class is defined', (assert) => {
+    const props = new Props({
+      className: ['baz'],
+    })
+
+    assert.equal(props.serialize().value, ' class="baz"')
+  })
+
+  test('merge class and className when class is defined as a string', (assert) => {
+    const props = new Props({
+      class: 'foo bar',
+      className: ['baz'],
+    })
+
+    assert.equal(props.serialize().value, ' class="foo bar baz"')
+  })
+
+  test('merge class and className when className is defined as a string', (assert) => {
+    const props = new Props({
+      class: 'foo bar',
+      className: 'baz boom',
+    })
+
+    assert.equal(props.serialize().value, ' class="foo bar baz boom"')
+  })
 })

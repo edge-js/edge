@@ -23,6 +23,29 @@ export class Props implements PropsContract {
   }
 
   /**
+   * Merges the className attribute with the class attribute
+   */
+  private mergeClassAttributes(props: any) {
+    if (props.className) {
+      if (!props.class) {
+        props.class = []
+      }
+
+      /**
+       * Normalize class attribute to be an array
+       */
+      if (!Array.isArray(props.class)) {
+        props.class = [props.class]
+      }
+
+      props.class = props.class.concat(props.className)
+      props.className = false
+    }
+
+    return props
+  }
+
+  /**
    * Find if a key exists inside the props
    */
   public has(key: string) {
@@ -77,7 +100,7 @@ export class Props implements PropsContract {
       ? lodash.merge({}, this.all(), mergeProps)
       : lodash.merge({}, mergeProps, this.all())
 
-    return safeValue(stringifyAttributes(attributes))
+    return safeValue(stringifyAttributes(this.mergeClassAttributes(attributes)))
   }
 
   /**
@@ -91,7 +114,7 @@ export class Props implements PropsContract {
       ? lodash.merge({}, this.only(keys), mergeProps)
       : lodash.merge({}, mergeProps, this.only(keys))
 
-    return safeValue(stringifyAttributes(attributes))
+    return safeValue(stringifyAttributes(this.mergeClassAttributes(attributes)))
   }
 
   /**
@@ -105,6 +128,6 @@ export class Props implements PropsContract {
       ? lodash.merge({}, this.except(keys), mergeProps)
       : lodash.merge({}, mergeProps, this.except(keys))
 
-    return safeValue(stringifyAttributes(attributes))
+    return safeValue(stringifyAttributes(this.mergeClassAttributes(attributes)))
   }
 }
