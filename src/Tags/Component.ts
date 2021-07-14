@@ -7,6 +7,7 @@
  * file that was distributed with this source code.
  */
 
+import exp from 'constants'
 import { EdgeError } from 'edge-error'
 import { TagToken, utils as lexerUtils } from 'edge-lexer'
 import { EdgeBuffer, expressions, Parser } from 'edge-parser'
@@ -75,10 +76,25 @@ function getComponentNameAndProps(
    * Parse rest of sequence expressions as an objectified string.
    */
   if (expression.type === expressions.SequenceExpression) {
-    return [
-      parser.utils.stringify(name),
-      StringifiedObject.fromAcornExpressions(expression.expressions, parser),
-    ]
+    /**
+     * We only need to entertain the first expression of the sequence
+     * expression, as components allows a max of two arguments
+     */
+    const firstSequenceExpression = expression.expressions[0]
+
+    if (
+      firstSequenceExpression &&
+      [expressions.ObjectExpression, expressions.AssignmentExpression].includes(
+        firstSequenceExpression.type
+      )
+    ) {
+      return [
+        parser.utils.stringify(name),
+        StringifiedObject.fromAcornExpressions([firstSequenceExpression], parser),
+      ]
+    }
+
+    return [parser.utils.stringify(name), parser.utils.stringify(firstSequenceExpression)]
   }
 
   /**

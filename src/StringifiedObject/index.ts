@@ -18,6 +18,10 @@ import { Parser } from 'edge-parser'
 export class StringifiedObject {
   private obj: string = ''
 
+  public addSpread(key: string) {
+    this.obj += this.obj.length ? `, ${key}` : `${key}`
+  }
+
   /**
    * Add key/value pair to the object.
    *
@@ -71,9 +75,13 @@ export class StringifiedObject {
     expressions.forEach((arg) => {
       if (arg.type === 'ObjectExpression') {
         arg.properties.forEach((prop: any) => {
-          const key = parser.utils.stringify(prop.key)
-          const value = parser.utils.stringify(prop.value)
-          objectifyString.add(key, value, prop.computed)
+          if (prop.type === 'SpreadElement') {
+            objectifyString.addSpread(parser.utils.stringify(prop))
+          } else {
+            const key = parser.utils.stringify(prop.key)
+            const value = parser.utils.stringify(prop.value)
+            objectifyString.add(key, value, prop.computed)
+          }
         })
       }
 
