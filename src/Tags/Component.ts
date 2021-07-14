@@ -7,7 +7,6 @@
  * file that was distributed with this source code.
  */
 
-import exp from 'constants'
 import { EdgeError } from 'edge-error'
 import { TagToken, utils as lexerUtils } from 'edge-lexer'
 import { EdgeBuffer, expressions, Parser } from 'edge-parser'
