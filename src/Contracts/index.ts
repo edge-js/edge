@@ -207,7 +207,7 @@ export interface TemplateContract {
   /**
    * Escape input
    */
-  escape<T>(input: T): T
+  escape(input: any): string
 
   /**
    * Rethrow exceptions by pointing back to edge source file and line number

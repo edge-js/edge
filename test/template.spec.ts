@@ -140,11 +140,11 @@ test.group('Template', (group) => {
     assert.equal(template.escape('<h2> Hello world </h2>'), '&lt;h2&gt; Hello world &lt;/h2&gt;')
   })
 
-  test('do not escape values, which are not string', (assert) => {
+  test('stringify value during escape', (assert) => {
     const processor = new Processor()
     const compiler = new Compiler(loader, tags, processor, { cache: false })
     const template = new Template(compiler, {}, {}, processor)
-    assert.equal(template.escape(22), 22)
+    assert.equal(template.escape(22), '22')
   })
 
   test('do not escape values, which instance of safe value', (assert) => {
@@ -152,6 +152,27 @@ test.group('Template', (group) => {
     const compiler = new Compiler(loader, tags, processor, { cache: false })
     const template = new Template(compiler, {}, {}, processor)
     assert.equal(template.escape(safeValue('<h2> Hello world </h2>')), '<h2> Hello world </h2>')
+  })
+
+  test('stringify array before escape', (assert) => {
+    const processor = new Processor()
+    const compiler = new Compiler(loader, tags, processor, { cache: false })
+    const template = new Template(compiler, {}, {}, processor)
+    assert.equal(template.escape(['<h2> Hello world </h2>']), '&lt;h2&gt; Hello world &lt;/h2&gt;')
+  })
+
+  test('stringify object before escape', (assert) => {
+    const processor = new Processor()
+    const compiler = new Compiler(loader, tags, processor, { cache: false })
+    const template = new Template(compiler, {}, {}, processor)
+    assert.equal(
+      template.escape({
+        toString() {
+          return '<h2> Hello world </h2>'
+        },
+      }),
+      '&lt;h2&gt; Hello world &lt;/h2&gt;'
+    )
   })
 
   test('add macros to context', (assert) => {

@@ -28,12 +28,8 @@ export class SafeValue {
 /**
  * Escapes a given string
  */
-export function escape<T>(input: T): T extends SafeValue ? T['value'] : T {
-  return typeof input === 'string'
-    ? string.escapeHTML(input)
-    : input instanceof SafeValue
-    ? input.value
-    : input
+export function escape(input: any): string {
+  return input instanceof SafeValue ? input.value : string.escapeHTML(String(input))
 }
 
 /**
@@ -197,7 +193,7 @@ export class Template extends Macroable implements TemplateContract {
    * Escapes the value to be HTML safe. Only strings are escaped
    * and rest all values will be returned as it is.
    */
-  public escape<T>(input: T): T extends SafeValue ? T['value'] : T {
+  public escape(input: any): string {
     return escape(input)
   }
 
