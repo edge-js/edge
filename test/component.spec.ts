@@ -314,7 +314,7 @@ test.group('Component | render | errors', (group) => {
     try {
       template.render('eval.edge', {})
     } catch (error) {
-      assert.equal(error.message, "Cannot read property 'isPrimary' of undefined")
+      assert.match(error.message, /^(?=.*\bCannot read\b)(?=.*\bisPrimary\b).*$/)
       assert.equal(error.line, 5)
       assert.equal(error.col, 0)
       assert.equal(error.filename, join(fs.basePath, 'eval.edge'))
