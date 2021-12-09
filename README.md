@@ -32,11 +32,12 @@ And use it as follows
 const { join } = require('path')
 
 // CommonJS
-const edge = require('edge.js').default
+const { Edge } = require('edge.js')
 
 // Typescript import
-// import edge from 'edge.js'
+// import { Edge } from 'edge.js'
 
+const edge = new Edge({ cache: false })
 edge.mount(join(__dirname, 'views'))
 
 const html = await edge.render('welcome', {
