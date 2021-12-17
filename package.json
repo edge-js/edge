@@ -69,7 +69,7 @@
   },
   "dependencies": {
     "@poppinss/inspect": "^1.0.1",
-    "@poppinss/utils": "^3.2.0",
+    "@poppinss/utils": "^3.3.1",
     "edge-error": "^2.0.6",
     "edge-lexer": "^4.0.8",
     "edge-parser": "^8.0.11",
