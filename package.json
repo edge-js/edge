@@ -77,7 +77,7 @@
     "edge-parser": "^8.0.14",
     "js-stringify": "^1.0.2",
     "macroable": "^7.0.1",
-    "stringify-attributes": "^2.0.0"
+    "stringify-attributes": "^3.0.0"
   },
   "husky": {
     "hooks": {
