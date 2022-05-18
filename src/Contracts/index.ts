@@ -118,7 +118,7 @@ export interface CompilerContract {
   cacheManager: CacheManagerContract
   async: boolean
   claimTag(fn: ClaimTagFn): this
-  compile(templatePath: string, localVariables?: string[]): LoaderTemplate
+  compile(templatePath: string, localVariables?: string[], skipCache?: boolean): LoaderTemplate
   tokenize(templatePath: string, parser?: Parser): Token[]
 
   /**

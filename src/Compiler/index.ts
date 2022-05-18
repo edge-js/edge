@@ -246,10 +246,13 @@ export class Compiler implements CompilerContract {
    * compiler.compile('welcome')
    * ```
    */
-  public compile(templatePath: string, localVariables?: string[]): LoaderTemplate {
+  public compile(
+    templatePath: string,
+    localVariables?: string[],
+    skipCache = false
+  ): LoaderTemplate {
     const absPath = this.loader.makePath(templatePath)
-
-    let cachedResponse = this.cacheManager.get(absPath)
+    let cachedResponse = skipCache ? null : this.cacheManager.get(absPath)
 
     /**
      * Process the template and cache it
@@ -265,7 +268,10 @@ export class Compiler implements CompilerContract {
       templateTokens.forEach((token) => parser.processToken(token, buffer))
 
       const template = buffer.flush()
-      this.cacheManager.set(absPath, { template })
+      if (!skipCache) {
+        this.cacheManager.set(absPath, { template })
+      }
+
       cachedResponse = { template }
     }
 

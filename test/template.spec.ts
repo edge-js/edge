@@ -196,4 +196,23 @@ test.group('Template', (group) => {
     const template = new Template(compiler, {}, {}, processor)
     assert.equal(template['username'], 'virk')
   })
+
+  test('share local variables with partials when caching is enabled', async (assert) => {
+    await fs.add('foo.edge', 'Hello {{ username }}')
+
+    const processor = new Processor()
+    processor.process('compiled', ({ compiled }) => {
+      compiled = `username = 'virk'; \n ${compiled}`
+      return compiled
+    })
+
+    const compiler = new Compiler(loader, tags, processor, { cache: true })
+    const template = new Template(compiler, {}, {}, processor)
+
+    assert.equal(template.compilePartial('foo')(template, {}).trim(), 'Hello undefined')
+    assert.equal(
+      template.compilePartial('foo', 'username')(template, 'username').trim(),
+      'Hello virk'
+    )
+  })
 })

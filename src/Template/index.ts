@@ -127,7 +127,7 @@ export class Template extends Macroable implements TemplateContract {
    * ```
    */
   public compilePartial(templatePath: string, ...localVariables: string[]): Function {
-    const { template: compiledTemplate } = this.compiler.compile(templatePath, localVariables)
+    const { template: compiledTemplate } = this.compiler.compile(templatePath, localVariables, true)
     return this.wrapToFunction(compiledTemplate, ...localVariables)
   }
 
