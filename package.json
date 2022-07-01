@@ -36,25 +36,25 @@
   "homepage": "https://github.com/poppinss/edge#readme",
   "devDependencies": {
     "@adonisjs/mrm-preset": "^5.0.3",
-    "@adonisjs/require-ts": "^2.0.11",
+    "@adonisjs/require-ts": "^2.0.12",
     "@poppinss/dev-utils": "^2.0.3",
-    "@types/node": "^17.0.34",
+    "@types/node": "^18.0.0",
     "commitizen": "^4.2.4",
     "cz-conventional-changelog": "^3.3.0",
     "dedent-js": "^1.0.1",
     "del-cli": "^4.0.1",
     "doctoc": "^2.2.0",
-    "eslint": "^8.15.0",
+    "eslint": "^8.18.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-adonis": "^2.1.0",
-    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-prettier": "^4.2.1",
     "github-label-sync": "^2.2.0",
     "husky": "^8.0.1",
     "japa": "^4.0.0",
     "mrm": "^4.0.0",
-    "np": "^7.6.1",
-    "prettier": "^2.6.2",
-    "typescript": "^4.6.4"
+    "np": "^7.6.2",
+    "prettier": "^2.7.1",
+    "typescript": "^4.7.4"
   },
   "config": {
     "commitizen": {
@@ -71,10 +71,10 @@
   },
   "dependencies": {
     "@poppinss/inspect": "^1.0.1",
-    "@poppinss/utils": "^4.0.4",
+    "@poppinss/utils": "^5.0.0",
     "edge-error": "^2.0.8",
     "edge-lexer": "^4.0.10",
-    "edge-parser": "^8.0.14",
+    "edge-parser": "^8.1.0",
     "js-stringify": "^1.0.2",
     "macroable": "^7.0.1",
     "stringify-attributes": "^2.0.0"
