@@ -57,7 +57,10 @@ Edge was created to be used inside the AdonisJS framework. However it is a frame
 
 The documentation is written on the [AdonisJS website](https://docs.adonisjs.com/guides/views/rendering). In AdonisJS docs, we refer the `edge` variable as `view`.
 
-![](./sponsorkit/sponsors.png)
+<br />
+<hr>
+
+![](https://cdn.jsdelivr.net/gh/thetutlage/static/sponsorkit/sponsors.png)
 
 [appveyor-image]: https://img.shields.io/appveyor/ci/thetutlage/edge/master.svg?style=for-the-badge&logo=appveyor
 [appveyor-url]: https://ci.appveyor.com/project/thetutlage/edge 'appveyor'
