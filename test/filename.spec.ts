@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import test from 'japa'
+import { test } from '@japa/runner'
 import { join } from 'path'
 import dedent from 'dedent-js'
 import { Filesystem } from '@poppinss/dev-utils'
@@ -20,11 +20,11 @@ import './assert-extend'
 const fs = new Filesystem(join(__dirname, 'views'))
 
 test.group('Template FileName', (group) => {
-  group.afterEach(async () => {
+  group.each.teardown(async () => {
     await fs.cleanup()
   })
 
-  test('print file absolute path', async (assert) => {
+  test('print file absolute path', async ({ assert }) => {
     await fs.add('foo.edge', '{{ $filename }}')
 
     const edge = new Edge()
@@ -34,7 +34,7 @@ test.group('Template FileName', (group) => {
     assert.equal(output.trim(), join(fs.basePath, 'foo.edge'))
   })
 
-  test('print file absolute path inside a partial', async (assert) => {
+  test('print file absolute path inside a partial', async ({ assert }) => {
     await fs.add(
       'foo.edge',
       dedent`
@@ -58,7 +58,7 @@ test.group('Template FileName', (group) => {
     )
   })
 
-  test('print file absolute path inside a layout', async (assert) => {
+  test('print file absolute path inside a layout', async ({ assert }) => {
     await fs.add(
       'foo.edge',
       dedent`
@@ -93,7 +93,7 @@ test.group('Template FileName', (group) => {
     )
   })
 
-  test('print file absolute path inside a partial', async (assert) => {
+  test('print file absolute path inside a partial', async ({ assert }) => {
     await fs.add(
       'foo.edge',
       dedent`
@@ -117,7 +117,7 @@ test.group('Template FileName', (group) => {
     )
   })
 
-  test('print file absolute path inside a component', async (assert) => {
+  test('print file absolute path inside a component', async ({ assert }) => {
     await fs.add(
       'foo.edge',
       dedent`

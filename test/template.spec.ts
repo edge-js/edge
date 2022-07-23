@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import test from 'japa'
+import { test } from '@japa/runner'
 import { join } from 'path'
 import { Filesystem } from '@poppinss/dev-utils'
 
@@ -28,12 +28,12 @@ const loader = new Loader()
 loader.mount('default', fs.basePath)
 
 test.group('Template', (group) => {
-  group.afterEach(async () => {
+  group.each.teardown(async () => {
     await fs.cleanup()
     Template.hydrate()
   })
 
-  test('run template using the given state', async (assert) => {
+  test('run template using the given state', async ({ assert }) => {
     await fs.add('foo.edge', 'Hello {{ username }}')
     const processor = new Processor()
     const compiler = new Compiler(loader, tags, processor, { cache: false })
@@ -43,7 +43,7 @@ test.group('Template', (group) => {
     assert.equal(output.trim(), 'Hello virk')
   })
 
-  test('run template with shared state', async (assert) => {
+  test('run template with shared state', async ({ assert }) => {
     await fs.add('foo.edge', 'Hello {{ getUsername() }}')
     const processor = new Processor()
     const compiler = new Compiler(loader, tags, processor, { cache: false })
@@ -61,7 +61,7 @@ test.group('Template', (group) => {
     assert.equal(output.trim(), 'Hello VIRK')
   })
 
-  test('run partial inside existing state', async (assert) => {
+  test('run partial inside existing state', async ({ assert }) => {
     await fs.add('foo.edge', 'Hello {{ username }}')
 
     const processor = new Processor()
@@ -72,7 +72,7 @@ test.group('Template', (group) => {
     assert.equal(output.trim(), 'Hello virk')
   })
 
-  test('pass local variables to inline templates', async (assert) => {
+  test('pass local variables to inline templates', async ({ assert }) => {
     await fs.add('foo.edge', 'Hello {{ user.username }}')
 
     const processor = new Processor()
@@ -84,7 +84,7 @@ test.group('Template', (group) => {
     assert.equal(output.trim(), 'Hello virk')
   })
 
-  test('process file names starting with u', async (assert) => {
+  test('process file names starting with u', async ({ assert }) => {
     await fs.add('users.edge', 'Hello {{ user.username }}')
 
     const processor = new Processor()
@@ -96,7 +96,7 @@ test.group('Template', (group) => {
     assert.equal(output.trim(), 'Hello virk')
   })
 
-  test('execute output processor function', async (assert) => {
+  test('execute output processor function', async ({ assert }) => {
     assert.plan(3)
     await fs.add('users.edge', 'Hello {{ user.username }}')
 
@@ -114,7 +114,7 @@ test.group('Template', (group) => {
     assert.equal(output.trim(), 'Hello virk')
   })
 
-  test('use return value of the output processor function', async (assert) => {
+  test('use return value of the output processor function', async ({ assert }) => {
     assert.plan(3)
     await fs.add('users.edge', 'Hello {{ user.username }}')
 
@@ -133,35 +133,35 @@ test.group('Template', (group) => {
     assert.equal(output.trim(), 'HELLO VIRK')
   })
 
-  test('escape HTML', (assert) => {
+  test('escape HTML', ({ assert }) => {
     const processor = new Processor()
     const compiler = new Compiler(loader, tags, processor, { cache: false })
     const template = new Template(compiler, {}, {}, processor)
     assert.equal(template.escape('<h2> Hello world </h2>'), '&lt;h2&gt; Hello world &lt;/h2&gt;')
   })
 
-  test('stringify value during escape', (assert) => {
+  test('stringify value during escape', ({ assert }) => {
     const processor = new Processor()
     const compiler = new Compiler(loader, tags, processor, { cache: false })
     const template = new Template(compiler, {}, {}, processor)
     assert.equal(template.escape(22), '22')
   })
 
-  test('do not escape values, which instance of safe value', (assert) => {
+  test('do not escape values, which instance of safe value', ({ assert }) => {
     const processor = new Processor()
     const compiler = new Compiler(loader, tags, processor, { cache: false })
     const template = new Template(compiler, {}, {}, processor)
     assert.equal(template.escape(safeValue('<h2> Hello world </h2>')), '<h2> Hello world </h2>')
   })
 
-  test('stringify array before escape', (assert) => {
+  test('stringify array before escape', ({ assert }) => {
     const processor = new Processor()
     const compiler = new Compiler(loader, tags, processor, { cache: false })
     const template = new Template(compiler, {}, {}, processor)
     assert.equal(template.escape(['<h2> Hello world </h2>']), '&lt;h2&gt; Hello world &lt;/h2&gt;')
   })
 
-  test('stringify object before escape', (assert) => {
+  test('stringify object before escape', ({ assert }) => {
     const processor = new Processor()
     const compiler = new Compiler(loader, tags, processor, { cache: false })
     const template = new Template(compiler, {}, {}, processor)
@@ -175,7 +175,7 @@ test.group('Template', (group) => {
     )
   })
 
-  test('add macros to context', (assert) => {
+  test('add macros to context', ({ assert }) => {
     Template.macro('upper', (username) => {
       return username.toUpperCase()
     })
@@ -186,7 +186,7 @@ test.group('Template', (group) => {
     assert.equal(template['upper']('virk'), 'VIRK')
   })
 
-  test('add getters to context', (assert) => {
+  test('add getters to context', ({ assert }) => {
     Template.getter('username', function username() {
       return 'virk'
     })
@@ -197,7 +197,7 @@ test.group('Template', (group) => {
     assert.equal(template['username'], 'virk')
   })
 
-  test('share local variables with partials when caching is enabled', async (assert) => {
+  test('share local variables with partials when caching is enabled', async ({ assert }) => {
     await fs.add('foo.edge', 'Hello {{ username }}')
 
     const processor = new Processor()

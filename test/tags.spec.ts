@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import test from 'japa'
+import { test } from '@japa/runner'
 import { join } from 'path'
 import dedent from 'dedent-js'
 import { Filesystem } from '@poppinss/dev-utils'
@@ -26,11 +26,11 @@ const processor = new Processor()
 const compiler = new Compiler(loader, tags, processor)
 
 test.group('If tag', (group) => {
-  group.afterEach(async () => {
+  group.each.teardown(async () => {
     await fs.cleanup()
   })
 
-  test('raise errors on correct line with if tag', async (assert) => {
+  test('raise errors on correct line with if tag', async ({ assert }) => {
     assert.plan(2)
 
     const templateContent = dedent`Hello everyone!
@@ -48,7 +48,7 @@ test.group('If tag', (group) => {
     }
   })
 
-  test('raise errors when using sequence expression', async (assert) => {
+  test('raise errors when using sequence expression', async ({ assert }) => {
     assert.plan(2)
 
     const templateContent = dedent`Hello everyone!
@@ -66,7 +66,7 @@ test.group('If tag', (group) => {
     }
   })
 
-  test('raise errors when expression was never closed', async (assert) => {
+  test('raise errors when expression was never closed', async ({ assert }) => {
     assert.plan(1)
 
     const templateContent = dedent`Hello everyone!
@@ -84,11 +84,11 @@ test.group('If tag', (group) => {
 })
 
 test.group('Include', (group) => {
-  group.afterEach(async () => {
+  group.each.teardown(async () => {
     await fs.cleanup()
   })
 
-  test('raise errors on correct line with include tag', async (assert) => {
+  test('raise errors on correct line with include tag', async ({ assert }) => {
     assert.plan(1)
 
     const templateContent = dedent`We are writing a bad include condition
@@ -105,7 +105,7 @@ test.group('Include', (group) => {
     }
   })
 
-  test('raise errors when using sequence expression', async (assert) => {
+  test('raise errors when using sequence expression', async ({ assert }) => {
     assert.plan(2)
 
     const templateContent = "@include('foo', 'bar')"
@@ -127,11 +127,11 @@ test.group('Include', (group) => {
 })
 
 test.group('IncludeIf', (group) => {
-  group.afterEach(async () => {
+  group.each.teardown(async () => {
     await fs.cleanup()
   })
 
-  test('raise errors when not passing sequence expression', async (assert) => {
+  test('raise errors when not passing sequence expression', async ({ assert }) => {
     assert.plan(2)
 
     const templateContent = dedent`We are writing a bad include condition
@@ -149,7 +149,7 @@ test.group('IncludeIf', (group) => {
     }
   })
 
-  test('raise errors when passing more than 2 arguments', async (assert) => {
+  test('raise errors when passing more than 2 arguments', async ({ assert }) => {
     assert.plan(2)
 
     const templateContent = dedent`We are writing a bad include condition
@@ -167,7 +167,7 @@ test.group('IncludeIf', (group) => {
     }
   })
 
-  test('raise errors when 1st argument is a sequence expression', async (assert) => {
+  test('raise errors when 1st argument is a sequence expression', async ({ assert }) => {
     assert.plan(2)
 
     const templateContent = dedent`We are writing a bad include condition
@@ -190,11 +190,11 @@ test.group('IncludeIf', (group) => {
 })
 
 test.group('Component', (group) => {
-  group.afterEach(async () => {
+  group.each.teardown(async () => {
     await fs.cleanup()
   })
 
-  test('raise errors when slot name is not defined as a literal', async (assert) => {
+  test('raise errors when slot name is not defined as a literal', async ({ assert }) => {
     assert.plan(2)
 
     const templateContent = dedent`@component('bar')
@@ -215,7 +215,7 @@ test.group('Component', (group) => {
     }
   })
 
-  test('raise errors when slot has more than 2 arguments', async (assert) => {
+  test('raise errors when slot has more than 2 arguments', async ({ assert }) => {
     assert.plan(2)
 
     const templateContent = dedent`@component('bar')
@@ -236,7 +236,7 @@ test.group('Component', (group) => {
     }
   })
 
-  test('raise errors when slot first argument is not a literal', async (assert) => {
+  test('raise errors when slot first argument is not a literal', async ({ assert }) => {
     assert.plan(2)
 
     const templateContent = dedent`@component('bar')
@@ -257,7 +257,7 @@ test.group('Component', (group) => {
     }
   })
 
-  test('raise errors when slot 2nd argument is not an identifier', async (assert) => {
+  test('raise errors when slot 2nd argument is not an identifier', async ({ assert }) => {
     assert.plan(2)
 
     const templateContent = dedent`@component('bar')
@@ -281,7 +281,7 @@ test.group('Component', (group) => {
     }
   })
 
-  test('raise error when slot is inside a conditional block', async (assert) => {
+  test('raise error when slot is inside a conditional block', async ({ assert }) => {
     assert.plan(2)
 
     const templateContent = dedent`@component('bar')
@@ -310,11 +310,11 @@ test.group('Component', (group) => {
 })
 
 test.group('Layouts', (group) => {
-  group.afterEach(async () => {
+  group.each.teardown(async () => {
     await fs.cleanup()
   })
 
-  test('raise error when section is nested inside conditional block', async (assert) => {
+  test('raise error when section is nested inside conditional block', async ({ assert }) => {
     assert.plan(2)
 
     const templateContent = dedent`@layout('master')
@@ -342,7 +342,9 @@ test.group('Layouts', (group) => {
     }
   })
 
-  test('raise error when section is not a top level tag inside nested layouts', async (assert) => {
+  test('raise error when section is not a top level tag inside nested layouts', async ({
+    assert,
+  }) => {
     assert.plan(2)
 
     const templateContent = dedent`@layout('master')
@@ -371,7 +373,7 @@ test.group('Layouts', (group) => {
     }
   })
 
-  test('raise error when there are raw content outside sections', async (assert) => {
+  test('raise error when there are raw content outside sections', async ({ assert }) => {
     assert.plan(2)
 
     const templateContent = dedent`@layout('master')
@@ -396,11 +398,11 @@ test.group('Layouts', (group) => {
 })
 
 test.group('Each tag', (group) => {
-  group.afterEach(async () => {
+  group.each.teardown(async () => {
     await fs.cleanup()
   })
 
-  test('raise errors when arg is not a binary expression', async (assert) => {
+  test('raise errors when arg is not a binary expression', async ({ assert }) => {
     assert.plan(2)
 
     const templateContent = dedent`Hello everyone!
@@ -418,7 +420,7 @@ test.group('Each tag', (group) => {
     }
   })
 
-  test('raise errors when lhs of binary expression is not an indentifier', async (assert) => {
+  test('raise errors when lhs of binary expression is not an indentifier', async ({ assert }) => {
     assert.plan(2)
 
     const templateContent = dedent`Hello everyone!

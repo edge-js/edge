@@ -9,7 +9,7 @@
 
 import './assert-extend'
 import { EOL } from 'os'
-import test from 'japa'
+import { test } from '@japa/runner'
 import { join } from 'path'
 import dedent from 'dedent-js'
 import { Filesystem } from '@poppinss/dev-utils'
@@ -20,36 +20,36 @@ import { GLOBALS } from '../src/Edge/globals'
 const fs = new Filesystem(join(__dirname, 'views'))
 
 test.group('Edge', (group) => {
-  group.afterEach(async () => {
+  group.each.teardown(async () => {
     await fs.cleanup()
   })
 
-  test('mount default disk', async (assert) => {
+  test('mount default disk', async ({ assert }) => {
     const edge = new Edge()
     edge.mount(fs.basePath)
     assert.deepEqual(edge.loader.mounted, { default: fs.basePath })
   })
 
-  test('mount named disk', async (assert) => {
+  test('mount named disk', async ({ assert }) => {
     const edge = new Edge()
     edge.mount('foo', fs.basePath)
     assert.deepEqual(edge.loader.mounted, { foo: fs.basePath })
   })
 
-  test('unmount named disk', async (assert) => {
+  test('unmount named disk', async ({ assert }) => {
     const edge = new Edge()
     edge.mount('foo', fs.basePath)
     edge.unmount('foo')
     assert.deepEqual(edge.loader.mounted, {})
   })
 
-  test('register globals', async (assert) => {
+  test('register globals', async ({ assert }) => {
     const edge = new Edge()
     edge.global('foo', 'bar')
     assert.deepEqual(edge.GLOBALS.foo, 'bar')
   })
 
-  test('add a custom tag to the tags list', async (assert) => {
+  test('add a custom tag to the tags list', async ({ assert }) => {
     const edge = new Edge()
 
     class MyTag {
@@ -63,7 +63,7 @@ test.group('Edge', (group) => {
     assert.deepEqual(edge.compiler['tags'].mytag, MyTag)
   })
 
-  test('invoke tag boot method when registering the tag', async (assert) => {
+  test('invoke tag boot method when registering the tag', async ({ assert }) => {
     assert.plan(2)
 
     const edge = new Edge()
@@ -83,7 +83,7 @@ test.group('Edge', (group) => {
     assert.deepEqual(edge.compiler['tags'].mytag, MyTag)
   })
 
-  test('render a view using the render method', async (assert) => {
+  test('render a view using the render method', async ({ assert }) => {
     const edge = new Edge()
     await fs.add('foo.edge', 'Hello {{ username }}')
 
@@ -91,7 +91,7 @@ test.group('Edge', (group) => {
     assert.equal((await edge.render('foo', { username: 'virk' })).trim(), 'Hello virk')
   })
 
-  test('pass locals to the view context', async (assert) => {
+  test('pass locals to the view context', async ({ assert }) => {
     const edge = new Edge()
     await fs.add('foo.edge', "Hello {{ username || 'guest' }}")
 
@@ -104,7 +104,7 @@ test.group('Edge', (group) => {
     assert.equal((await edge.render('foo', {})).trim(), 'Hello guest')
   })
 
-  test('register a template as a string', async (assert) => {
+  test('register a template as a string', async ({ assert }) => {
     const edge = new Edge()
 
     edge.registerTemplate('foo', {
@@ -114,7 +114,7 @@ test.group('Edge', (group) => {
     assert.equal((await edge.render('foo', { username: 'virk' })).trim(), 'Hello virk')
   })
 
-  test('register a template on a named disk', async (assert) => {
+  test('register a template on a named disk', async ({ assert }) => {
     const edge = new Edge()
     edge.mount('hello', fs.basePath)
 
@@ -125,7 +125,7 @@ test.group('Edge', (group) => {
     assert.equal((await edge.render('hello::foo', { username: 'virk' })).trim(), 'Hello virk')
   })
 
-  test('clear compiled cache when template is removed', async (assert) => {
+  test('clear compiled cache when template is removed', async ({ assert }) => {
     const edge = new Edge({ cache: true })
 
     edge.registerTemplate('foo', {
@@ -142,7 +142,7 @@ test.group('Edge', (group) => {
     assert.equal(edge.renderSync('foo', { username: 'virk' }).trim(), 'Hi virk')
   })
 
-  test('pass absolute path of template to lexer errors', async (assert) => {
+  test('pass absolute path of template to lexer errors', async ({ assert }) => {
     assert.plan(1)
     await fs.add('foo.edge', '@if(1 + 1)')
 
@@ -159,7 +159,7 @@ test.group('Edge', (group) => {
     }
   })
 
-  test('pass absolute path of template to parser errors', async (assert) => {
+  test('pass absolute path of template to parser errors', async ({ assert }) => {
     assert.plan(1)
     await fs.add('foo.edge', 'Hello {{ a,:b }}')
 
@@ -176,7 +176,7 @@ test.group('Edge', (group) => {
     }
   })
 
-  test('pass absolute path of layout to lexer errors', async (assert) => {
+  test('pass absolute path of layout to lexer errors', async ({ assert }) => {
     assert.plan(1)
     await fs.add('foo.edge', "@layout('bar')")
     await fs.add('bar.edge', '@if(username)')
@@ -194,7 +194,7 @@ test.group('Edge', (group) => {
     }
   })
 
-  test('pass absolute path of layout to parser errors', async (assert) => {
+  test('pass absolute path of layout to parser errors', async ({ assert }) => {
     assert.plan(1)
     await fs.add('foo.edge', "@layout('bar')")
     await fs.add('bar.edge', '{{ a:b }}')
@@ -212,7 +212,7 @@ test.group('Edge', (group) => {
     }
   })
 
-  test('pass absolute path of partial to lexer errors', async (assert) => {
+  test('pass absolute path of partial to lexer errors', async ({ assert }) => {
     assert.plan(1)
     await fs.add('foo.edge', "@include('bar')")
     await fs.add('bar.edge', '@if(username)')
@@ -230,7 +230,7 @@ test.group('Edge', (group) => {
     }
   })
 
-  test('pass absolute path of partial to parser errors', async (assert) => {
+  test('pass absolute path of partial to parser errors', async ({ assert }) => {
     assert.plan(1)
     await fs.add('foo.edge', "@include('bar')")
     await fs.add('bar.edge', '{{ a:b }}')
@@ -248,7 +248,7 @@ test.group('Edge', (group) => {
     }
   })
 
-  test('pass absolute path of component to lexer errors', async (assert) => {
+  test('pass absolute path of component to lexer errors', async ({ assert }) => {
     assert.plan(1)
     await fs.add('foo.edge', "@!component('bar')")
     await fs.add('bar.edge', '@if(username)')
@@ -266,7 +266,7 @@ test.group('Edge', (group) => {
     }
   })
 
-  test('pass absolute path of component to parser errors', async (assert) => {
+  test('pass absolute path of component to parser errors', async ({ assert }) => {
     assert.plan(1)
     await fs.add('foo.edge', "@!component('bar')")
     await fs.add('bar.edge', '{{ a:b }}')
@@ -284,7 +284,7 @@ test.group('Edge', (group) => {
     }
   })
 
-  test('register and call plugins before rendering a view', async (assert) => {
+  test('register and call plugins before rendering a view', async ({ assert }) => {
     assert.plan(3)
     const edge = new Edge()
 
@@ -303,7 +303,7 @@ test.group('Edge', (group) => {
     assert.equal((await edge.render('hello::foo', { username: 'virk' })).trim(), 'Hello virk')
   })
 
-  test('do not run plugins until a view is rendered', async (assert) => {
+  test('do not run plugins until a view is rendered', async ({ assert }) => {
     assert.plan(0)
     const edge = new Edge()
 
@@ -320,7 +320,7 @@ test.group('Edge', (group) => {
     })
   })
 
-  test('run plugins only once', async (assert) => {
+  test('run plugins only once', async ({ assert }) => {
     assert.plan(5)
     const edge = new Edge()
 
@@ -341,7 +341,7 @@ test.group('Edge', (group) => {
     assert.equal((await edge.render('hello::foo', { username: 'virk' })).trim(), 'Hello virk')
   })
 
-  test('run recurring plugins again and again', async (assert) => {
+  test('run recurring plugins again and again', async ({ assert }) => {
     assert.plan(9)
     const edge = new Edge()
 
@@ -367,7 +367,7 @@ test.group('Edge', (group) => {
 })
 
 test.group('Edge | regression', () => {
-  test('render non-existy values', async (assert) => {
+  test('render non-existy values', async ({ assert }) => {
     const edge = new Edge()
     edge.registerTemplate('numeric', {
       template: 'Total {{ total }}',
@@ -381,7 +381,7 @@ test.group('Edge | regression', () => {
     assert.equal(await edge.render('boolean', { isActive: false }), 'Is Active false')
   })
 
-  test('render inline scripts with regex', async (assert) => {
+  test('render inline scripts with regex', async ({ assert }) => {
     const edge = new Edge()
     edge.registerTemplate('eval', {
       template: dedent`
@@ -401,7 +401,7 @@ test.group('Edge | regression', () => {
     )
   })
 
-  test('render complex binary expressions', async (assert) => {
+  test('render complex binary expressions', async ({ assert }) => {
     const edge = new Edge()
     edge.registerTemplate('eval', {
       template: dedent`
@@ -425,7 +425,7 @@ test.group('Edge | regression', () => {
     )
   })
 
-  test('do not escape when using safe global method', async (assert) => {
+  test('do not escape when using safe global method', async ({ assert }) => {
     const edge = new Edge()
     Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
 
@@ -435,7 +435,7 @@ test.group('Edge | regression', () => {
     assert.equal(await edge.render('eval', { username: '<p>virk</p>' }), 'Hello <p>virk</p>')
   })
 
-  test('truncate string by characters', async (assert) => {
+  test('truncate string by characters', async ({ assert }) => {
     const edge = new Edge()
     Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
 
@@ -448,7 +448,7 @@ test.group('Edge | regression', () => {
     )
   })
 
-  test('truncate string by characters in strict mode', async (assert) => {
+  test('truncate string by characters in strict mode', async ({ assert }) => {
     const edge = new Edge()
     Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
 
@@ -461,7 +461,7 @@ test.group('Edge | regression', () => {
     )
   })
 
-  test('define custom suffix for truncate', async (assert) => {
+  test('define custom suffix for truncate', async ({ assert }) => {
     const edge = new Edge()
     Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
 
@@ -474,7 +474,7 @@ test.group('Edge | regression', () => {
     )
   })
 
-  test('generate string excerpt', async (assert) => {
+  test('generate string excerpt', async ({ assert }) => {
     const edge = new Edge()
     Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
 
@@ -487,7 +487,7 @@ test.group('Edge | regression', () => {
     )
   })
 
-  test('excerpt remove in-between tag', async (assert) => {
+  test('excerpt remove in-between tag', async ({ assert }) => {
     const edge = new Edge()
     Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
 
@@ -502,7 +502,7 @@ test.group('Edge | regression', () => {
     )
   })
 
-  test('generate excerpt in strict mode', async (assert) => {
+  test('generate excerpt in strict mode', async ({ assert }) => {
     const edge = new Edge()
     Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
 
@@ -517,7 +517,7 @@ test.group('Edge | regression', () => {
     )
   })
 
-  test('add custom suffix for excerpt', async (assert) => {
+  test('add custom suffix for excerpt', async ({ assert }) => {
     const edge = new Edge()
     Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
 
@@ -532,7 +532,7 @@ test.group('Edge | regression', () => {
     )
   })
 
-  test('convert newline to br tags', async (assert) => {
+  test('convert newline to br tags', async ({ assert }) => {
     const edge = new Edge()
     Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
 
@@ -547,7 +547,7 @@ test.group('Edge | regression', () => {
     assert.equal(await edge.render('eval', { text: `Hello${EOL}world` }), 'Hello<br>world')
   })
 
-  test('escape user input except the new lines', async (assert) => {
+  test('escape user input except the new lines', async ({ assert }) => {
     const edge = new Edge()
     Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
 
@@ -565,7 +565,7 @@ test.group('Edge | regression', () => {
     )
   })
 
-  test('stringify data structures', async (assert) => {
+  test('stringify data structures', async ({ assert }) => {
     const edge = new Edge()
     Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
 

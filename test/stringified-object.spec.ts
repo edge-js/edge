@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import test from 'japa'
+import { test } from '@japa/runner'
 import { Parser, Stack } from 'edge-parser'
 import { StringifiedObject } from '../src/StringifiedObject'
 
@@ -26,31 +26,31 @@ const LOC = {
 }
 
 test.group('StringifiedObject', () => {
-  test('add string as a key-value pair to object', (assert) => {
+  test('add string as a key-value pair to object', ({ assert }) => {
     const stringified = new StringifiedObject()
     stringified.add('username', "'virk'")
     assert.equal(stringified.flush(), "{ username: 'virk' }")
   })
 
-  test('add number as a key-value pair to object', (assert) => {
+  test('add number as a key-value pair to object', ({ assert }) => {
     const stringified = new StringifiedObject()
     stringified.add('username', '22')
     assert.equal(stringified.flush(), '{ username: 22 }')
   })
 
-  test('add boolean as a key-value pair to object', (assert) => {
+  test('add boolean as a key-value pair to object', ({ assert }) => {
     const stringified = new StringifiedObject()
     stringified.add('username', 'true')
     assert.equal(stringified.flush(), '{ username: true }')
   })
 
-  test('add object as a key-value pair to object', (assert) => {
+  test('add object as a key-value pair to object', ({ assert }) => {
     const stringified = new StringifiedObject()
     stringified.add('username', '{ age: 22 }')
     assert.equal(stringified.flush(), '{ username: { age: 22 } }')
   })
 
-  test('add array as a key-value pair to object', (assert) => {
+  test('add array as a key-value pair to object', ({ assert }) => {
     const stringified = new StringifiedObject()
     stringified.add('username', '[10, 20]')
     assert.equal(stringified.flush(), '{ username: [10, 20] }')
@@ -58,7 +58,7 @@ test.group('StringifiedObject', () => {
 })
 
 test.group('StringifiedObject | fromAcornAst', () => {
-  test('stringify object expression', (assert) => {
+  test('stringify object expression', ({ assert }) => {
     const parser = new Parser({}, new Stack(), {
       async: false,
       statePropertyName: 'state',
@@ -74,7 +74,7 @@ test.group('StringifiedObject | fromAcornAst', () => {
     assert.equal(props, "{ username: 'virk' }")
   })
 
-  test('parse props with shorthand obj', (assert) => {
+  test('parse props with shorthand obj', ({ assert }) => {
     const parser = new Parser({}, new Stack(), {
       async: false,
       statePropertyName: 'state',
@@ -90,7 +90,7 @@ test.group('StringifiedObject | fromAcornAst', () => {
     assert.equal(props, '{ username: state.username }')
   })
 
-  test('parse props with computed obj', (assert) => {
+  test('parse props with computed obj', ({ assert }) => {
     const parser = new Parser({}, new Stack(), {
       async: false,
       statePropertyName: 'state',
@@ -106,7 +106,7 @@ test.group('StringifiedObject | fromAcornAst', () => {
     assert.equal(props, '{ [state.username]: state.username }')
   })
 
-  test('parse props with multiple obj properties', (assert) => {
+  test('parse props with multiple obj properties', ({ assert }) => {
     const parser = new Parser({}, new Stack(), {
       async: false,
       statePropertyName: 'state',
@@ -123,7 +123,7 @@ test.group('StringifiedObject | fromAcornAst', () => {
     assert.equal(props, "{ username: 'virk', age: 22 }")
   })
 
-  test('parse props with shorthand and full properties', (assert) => {
+  test('parse props with shorthand and full properties', ({ assert }) => {
     const parser = new Parser({}, new Stack(), {
       async: false,
       statePropertyName: 'state',
@@ -139,7 +139,7 @@ test.group('StringifiedObject | fromAcornAst', () => {
     assert.equal(props, '{ username: state.username, age: 22 }')
   })
 
-  test('parse props with assignment expression', (assert) => {
+  test('parse props with assignment expression', ({ assert }) => {
     const parser = new Parser({}, new Stack(), {
       async: false,
       statePropertyName: 'state',
@@ -155,7 +155,7 @@ test.group('StringifiedObject | fromAcornAst', () => {
     assert.equal(props, "{ title: 'Hello' }")
   })
 
-  test('parse props with more than one assignment expression', (assert) => {
+  test('parse props with more than one assignment expression', ({ assert }) => {
     const parser = new Parser({}, new Stack(), {
       async: false,
       statePropertyName: 'state',

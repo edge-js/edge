@@ -8,7 +8,7 @@
  */
 
 import './assert-extend'
-import test from 'japa'
+import { test } from '@japa/runner'
 import { join } from 'path'
 import { readdirSync, readFileSync, statSync } from 'fs'
 
@@ -29,7 +29,7 @@ const processor = new Processor()
 const compiler = new Compiler(loader, tags, processor)
 
 test.group('Newline Fixtures', (group) => {
-  group.before(() => {
+  group.setup(() => {
     Object.keys(tags).forEach((tag) => {
       if (tags[tag].boot) {
         tags[tag].boot(Template)
@@ -41,7 +41,7 @@ test.group('Newline Fixtures', (group) => {
 
   dirs.forEach((dir) => {
     const dirBasePath = join(basePath, dir)
-    test(dir, (assert) => {
+    test(dir, ({ assert }) => {
       const template = new Template(compiler, {}, {}, processor)
 
       /**

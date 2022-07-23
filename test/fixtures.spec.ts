@@ -9,7 +9,7 @@
 
 import './assert-extend'
 
-import test from 'japa'
+import { test } from '@japa/runner'
 import { join } from 'path'
 import { readdirSync, readFileSync, statSync } from 'fs'
 
@@ -29,7 +29,7 @@ loader.mount('default', basePath)
 const processor = new Processor()
 
 test.group('Fixtures', (group) => {
-  group.before(() => {
+  group.setup(() => {
     Object.keys(tags).forEach((tag) => {
       if (tags[tag].boot) {
         tags[tag].boot(Template)
@@ -42,7 +42,7 @@ test.group('Fixtures', (group) => {
 
   dirs.forEach((dir) => {
     const dirBasePath = join(basePath, dir)
-    test(dir, (assert) => {
+    test(dir, ({ assert }) => {
       const template = new Template(compiler, {}, {}, processor)
 
       /**
@@ -77,7 +77,7 @@ test.group('Fixtures', (group) => {
 })
 
 test.group('Fixtures | Cache', (group) => {
-  group.before(() => {
+  group.setup(() => {
     Object.keys(tags).forEach((tag) => {
       if (tags[tag].boot) {
         tags[tag].boot(Template)
@@ -90,7 +90,7 @@ test.group('Fixtures | Cache', (group) => {
 
   dirs.forEach((dir) => {
     const dirBasePath = join(basePath, dir)
-    test(dir, (assert) => {
+    test(dir, ({ assert }) => {
       const template = new Template(compiler, {}, {}, processor)
 
       /**

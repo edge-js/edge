@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import test from 'japa'
+import { test } from '@japa/runner'
 import { join } from 'path'
 import dedent from 'dedent-js'
 import { EdgeError } from 'edge-error'
@@ -41,11 +41,11 @@ const processor = new Processor()
 const compiler = new Compiler(loader, tags, processor, { cache: false })
 
 test.group('Component | compile | errors', (group) => {
-  group.afterEach(async () => {
+  group.each.teardown(async () => {
     await fs.cleanup()
   })
 
-  test('report component arguments error', async (assert) => {
+  test('report component arguments error', async ({ assert }) => {
     assert.plan(4)
 
     await fs.add(
@@ -69,7 +69,7 @@ test.group('Component | compile | errors', (group) => {
     }
   })
 
-  test('report slot argument name error', async (assert) => {
+  test('report slot argument name error', async ({ assert }) => {
     assert.plan(4)
 
     await fs.add(
@@ -95,7 +95,7 @@ test.group('Component | compile | errors', (group) => {
     }
   })
 
-  test('report slot arguments error', async (assert) => {
+  test('report slot arguments error', async ({ assert }) => {
     assert.plan(4)
 
     await fs.add(
@@ -121,7 +121,7 @@ test.group('Component | compile | errors', (group) => {
     }
   })
 
-  test('report slot scope argument error', async (assert) => {
+  test('report slot scope argument error', async ({ assert }) => {
     assert.plan(4)
 
     await fs.add(
@@ -149,11 +149,11 @@ test.group('Component | compile | errors', (group) => {
 })
 
 test.group('Component | render | errors', (group) => {
-  group.afterEach(async () => {
+  group.each.teardown(async () => {
     await fs.cleanup()
   })
 
-  test('report component name runtime error', async (assert) => {
+  test('report component name runtime error', async ({ assert }) => {
     assert.plan(4)
 
     await fs.add(
@@ -177,7 +177,7 @@ test.group('Component | render | errors', (group) => {
     }
   })
 
-  test('report component state argument error', async (assert) => {
+  test('report component state argument error', async ({ assert }) => {
     assert.plan(4)
 
     await fs.add('button.edge', '')
@@ -203,7 +203,9 @@ test.group('Component | render | errors', (group) => {
     }
   })
 
-  test('report component state argument error when spread over multiple lines', async (assert) => {
+  test('report component state argument error when spread over multiple lines', async ({
+    assert,
+  }) => {
     assert.plan(4)
 
     await fs.add('button.edge', '')
@@ -234,7 +236,7 @@ test.group('Component | render | errors', (group) => {
     }
   })
 
-  test('report component state argument error with assignment expression', async (assert) => {
+  test('report component state argument error with assignment expression', async ({ assert }) => {
     assert.plan(4)
 
     await fs.add('button.edge', '')
@@ -260,7 +262,9 @@ test.group('Component | render | errors', (group) => {
     }
   })
 
-  test('report component state argument error with assignment expression in multiple lines', async (assert) => {
+  test('report component state argument error with assignment expression in multiple lines', async ({
+    assert,
+  }) => {
     assert.plan(4)
 
     await fs.add('button.edge', '')
@@ -292,7 +296,7 @@ test.group('Component | render | errors', (group) => {
     }
   })
 
-  test('report scoped slot error', async (assert) => {
+  test('report scoped slot error', async ({ assert }) => {
     assert.plan(4)
 
     await fs.add('button.edge', '{{ $slots.text() }}')
@@ -321,7 +325,7 @@ test.group('Component | render | errors', (group) => {
     }
   })
 
-  test('report component file errors', async (assert) => {
+  test('report component file errors', async ({ assert }) => {
     assert.plan(4)
 
     await fs.add(
@@ -353,7 +357,7 @@ test.group('Component | render | errors', (group) => {
     }
   })
 
-  test('point error back to the caller when props validation fails', async (assert) => {
+  test('point error back to the caller when props validation fails', async ({ assert }) => {
     assert.plan(4)
 
     await fs.add(
@@ -394,11 +398,11 @@ test.group('Component | render | errors', (group) => {
 })
 
 test.group('Component | context API', (group) => {
-  group.afterEach(async () => {
+  group.each.teardown(async () => {
     await fs.cleanup()
   })
 
-  test('inject data from the component to the parent', async (assert) => {
+  test('inject data from the component to the parent', async ({ assert }) => {
     await fs.add(
       'modal.edge',
       dedent`
@@ -432,7 +436,7 @@ test.group('Component | context API', (group) => {
     )
   })
 
-  test('do not leak context out of the component scope', async (assert) => {
+  test('do not leak context out of the component scope', async ({ assert }) => {
     await fs.add(
       'modal.edge',
       dedent`
@@ -470,7 +474,7 @@ test.group('Component | context API', (group) => {
     )
   })
 
-  test('do not leak context across sibling components', async (assert) => {
+  test('do not leak context across sibling components', async ({ assert }) => {
     await fs.add(
       'modal.edge',
       dedent`
@@ -509,7 +513,9 @@ test.group('Component | context API', (group) => {
     )
   })
 
-  test('do not leak context across sibling components within a nested component', async (assert) => {
+  test('do not leak context across sibling components within a nested component', async ({
+    assert,
+  }) => {
     await fs.add(
       'modal.edge',
       dedent`
@@ -558,7 +564,7 @@ test.group('Component | context API', (group) => {
     )
   })
 
-  test('share context with nested components', async (assert) => {
+  test('share context with nested components', async ({ assert }) => {
     await fs.add(
       'modal.edge',
       dedent`
@@ -604,7 +610,7 @@ test.group('Component | context API', (group) => {
     )
   })
 
-  test('share context with partials', async (assert) => {
+  test('share context with partials', async ({ assert }) => {
     await fs.add(
       'modal.edge',
       dedent`
@@ -652,7 +658,7 @@ test.group('Component | context API', (group) => {
     )
   })
 
-  test('share context with components', async (assert) => {
+  test('share context with components', async ({ assert }) => {
     await fs.add(
       'modal.edge',
       dedent`
@@ -700,7 +706,9 @@ test.group('Component | context API', (group) => {
     )
   })
 
-  test('raise error when trying to use inject outside of the component scope', async (assert) => {
+  test('raise error when trying to use inject outside of the component scope', async ({
+    assert,
+  }) => {
     assert.plan(3)
 
     await fs.add(
