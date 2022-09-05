@@ -74,7 +74,7 @@
     "@poppinss/utils": "^5.0.0",
     "edge-error": "^2.0.8",
     "edge-lexer": "^4.0.10",
-    "edge-parser": "^8.2.0",
+    "edge-parser": "^8.2.1",
     "js-stringify": "^1.0.2",
     "macroable": "^7.0.1",
     "stringify-attributes": "^2.0.0"
