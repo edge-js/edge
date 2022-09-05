@@ -3,10 +3,10 @@
 <div class="modal">
   <h1 class="title">{{ title }}</h1>
   <div>
-    {{{ $slots.body() }}}
+    {{{ await $slots.body() }}}
   </div>
 
   <div>
-    {{{ $slots.actions() }}}
+    {{{ await $slots.actions() }}}
   </div>
 </div>

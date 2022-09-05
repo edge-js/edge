@@ -271,7 +271,11 @@ export interface ProcessorContract {
    */
   process(
     event: 'output',
-    handler: (data: { output: string; template: TemplateContract }) => string | void
+    handler: (data: {
+      output: string
+      template: TemplateContract
+      state: Record<string, any>
+    }) => string | void
   ): this
 }
 

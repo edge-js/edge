@@ -72,7 +72,11 @@ export class Processor implements ProcessorContract {
   /**
    * Execute output handlers
    */
-  public executeOutput(data: { output: string; template: TemplateContract }): string {
+  public executeOutput(data: {
+    output: string
+    template: TemplateContract
+    state: Record<string, any>
+  }): string {
     const handlers = this.handlers.get('output')
     if (!handlers) {
       return data.output
@@ -102,7 +106,11 @@ export class Processor implements ProcessorContract {
   ): this
   public process(
     event: 'output',
-    handler: (data: { output: string; template: TemplateContract }) => string | void
+    handler: (data: {
+      output: string
+      template: TemplateContract
+      state: Record<string, any>
+    }) => string | void
   ): this
   public process(event: string, handler: (...args: any[]) => any): this {
     if (!this.handlers.has(event)) {

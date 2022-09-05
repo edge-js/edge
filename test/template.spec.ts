@@ -114,6 +114,36 @@ test.group('Template', (group) => {
     assert.equal(output.trim(), 'Hello virk')
   })
 
+  test('get access to state inside compiled output', async (assert) => {
+    assert.plan(2)
+    await fs.add('users.edge', 'Hello {{ user.username }}')
+
+    const processor = new Processor()
+    processor.process('output', ({ state }) => {
+      assert.deepEqual(state, {
+        user: { username: 'virk' },
+        global: true,
+        local: true,
+      })
+    })
+
+    const compiler = new Compiler(loader, tags, processor, { cache: false })
+    const template = new Template(
+      compiler,
+      {
+        global: true,
+      },
+      {
+        local: true,
+      },
+      processor
+    )
+
+    const user = { username: 'virk' }
+    const output = template.render('users', { user }) as string
+    assert.equal(output.trim(), 'Hello virk')
+  })
+
   test('use return value of the output processor function', async (assert) => {
     assert.plan(3)
     await fs.add('users.edge', 'Hello {{ user.username }}')
