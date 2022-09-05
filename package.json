@@ -38,7 +38,7 @@
     "@adonisjs/mrm-preset": "^5.0.3",
     "@adonisjs/require-ts": "^2.0.12",
     "@poppinss/dev-utils": "^2.0.3",
-    "@types/node": "^18.7.13",
+    "@types/node": "^18.7.14",
     "commitizen": "^4.2.5",
     "cz-conventional-changelog": "^3.3.0",
     "dedent-js": "^1.0.1",
@@ -74,7 +74,7 @@
     "@poppinss/utils": "^5.0.0",
     "edge-error": "^2.0.8",
     "edge-lexer": "^4.0.10",
-    "edge-parser": "^8.1.0",
+    "edge-parser": "^8.2.0",
     "js-stringify": "^1.0.2",
     "macroable": "^7.0.1",
     "stringify-attributes": "^2.0.0"
