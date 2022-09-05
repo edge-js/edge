@@ -369,6 +369,12 @@ export interface EdgeContract {
   unmount(diskName: string): this
 
   /**
+   * Get access to the underlying template renderer. Each render call
+   * to edge results in creating an isolated renderer instance.
+   */
+  onRender(callback: (renderer: EdgeRendererContract) => void): this
+
+  /**
    * Get a renderer instance to render templates
    */
   getRenderer(): EdgeRendererContract

@@ -54,6 +54,11 @@ export class Edge implements EdgeContract {
   }[] = []
 
   /**
+   * Array of registered renderer hooks
+   */
+  private renderCallbacks: ((renderer: EdgeRendererContract) => void)[] = []
+
+  /**
    * Reference to the registered processor handlers
    */
   public processor = new Processor()
@@ -234,12 +239,30 @@ export class Edge implements EdgeContract {
   }
 
   /**
+   * Get access to the underlying template renderer. Each render call
+   * to edge results in creating an isolated renderer instance.
+   */
+  public onRender(callback: (renderer: EdgeRendererContract) => void): this {
+    this.renderCallbacks.push(callback)
+    return this
+  }
+
+  /**
    * Returns a new instance of edge. The instance
    * can be used to define locals.
    */
   public getRenderer(): EdgeRendererContract {
     this.executePlugins()
-    return new EdgeRenderer(this.compiler, this.asyncCompiler, this.GLOBALS, this.processor)
+
+    const renderer = new EdgeRenderer(
+      this.compiler,
+      this.asyncCompiler,
+      this.GLOBALS,
+      this.processor
+    )
+
+    this.renderCallbacks.forEach((callback) => callback(renderer))
+    return renderer
   }
 
   /**
