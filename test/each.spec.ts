@@ -7,11 +7,11 @@
  * file that was distributed with this source code.
  */
 
-import test from 'japa'
+import { test } from '@japa/runner'
 import { asyncEach, each } from '../src/utils'
 
 test.group('async each', () => {
-  test('iterate over array', async (assert) => {
+  test('iterate over array', async ({ assert }) => {
     let pairs: any = {}
 
     await asyncEach(['hi', 'hello', 'hey'], async (value, index) => {
@@ -25,7 +25,7 @@ test.group('async each', () => {
     })
   })
 
-  test('iterate over object', async (assert) => {
+  test('iterate over object', async ({ assert }) => {
     let pairs: any = {}
 
     await asyncEach({ eat: 'banana', goFor: 'walk' }, async (value, index) => {
@@ -38,7 +38,7 @@ test.group('async each', () => {
     })
   })
 
-  test('iterate over string', async (assert) => {
+  test('iterate over string', async ({ assert }) => {
     let pairs: any = {}
 
     await asyncEach('hello', async (value, index) => {
@@ -54,7 +54,7 @@ test.group('async each', () => {
     })
   })
 
-  test('ignore null value', async (assert) => {
+  test('ignore null value', async ({ assert }) => {
     let pairs: any = {}
 
     await asyncEach(null, async (value, index) => {
@@ -64,7 +64,7 @@ test.group('async each', () => {
     assert.deepEqual(pairs, {})
   })
 
-  test('ignore undefined value', async (assert) => {
+  test('ignore undefined value', async ({ assert }) => {
     let pairs: any = {}
 
     await asyncEach(undefined, async (value, index) => {
@@ -74,7 +74,7 @@ test.group('async each', () => {
     assert.deepEqual(pairs, {})
   })
 
-  test('ignore numbers', async (assert) => {
+  test('ignore numbers', async ({ assert }) => {
     let pairs: any = {}
 
     await asyncEach(22, async (value, index) => {
@@ -86,7 +86,7 @@ test.group('async each', () => {
 })
 
 test.group('each', () => {
-  test('iterate over array', (assert) => {
+  test('iterate over array', ({ assert }) => {
     let pairs: any = {}
 
     each(['hi', 'hello', 'hey'], (value, index) => {
@@ -100,7 +100,7 @@ test.group('each', () => {
     })
   })
 
-  test('iterate over object', (assert) => {
+  test('iterate over object', ({ assert }) => {
     let pairs: any = {}
 
     each({ eat: 'banana', goFor: 'walk' }, (value, index) => {
@@ -113,7 +113,7 @@ test.group('each', () => {
     })
   })
 
-  test('iterate over string', (assert) => {
+  test('iterate over string', ({ assert }) => {
     let pairs: any = {}
 
     each('hello', (value, index) => {
@@ -129,7 +129,7 @@ test.group('each', () => {
     })
   })
 
-  test('ignore null value', (assert) => {
+  test('ignore null value', ({ assert }) => {
     let pairs: any = {}
 
     each(null, (value, index) => {
@@ -139,7 +139,7 @@ test.group('each', () => {
     assert.deepEqual(pairs, {})
   })
 
-  test('ignore undefined value', (assert) => {
+  test('ignore undefined value', ({ assert }) => {
     let pairs: any = {}
 
     each(undefined, (value, index) => {
@@ -149,7 +149,7 @@ test.group('each', () => {
     assert.deepEqual(pairs, {})
   })
 
-  test('ignore numbers', (assert) => {
+  test('ignore numbers', ({ assert }) => {
     let pairs: any = {}
 
     each(22, (value, index) => {

@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import test from 'japa'
+import { test } from '@japa/runner'
 import { join } from 'path'
 import dedent from 'dedent-js'
 import { Filesystem } from '@poppinss/dev-utils'
@@ -27,12 +27,12 @@ const loader = new Loader()
 loader.mount('default', fs.basePath)
 
 test.group('New Error', (group) => {
-  group.afterEach(async () => {
+  group.each.teardown(async () => {
     await fs.cleanup()
     Template.hydrate()
   })
 
-  test('raise an exception', async (assert) => {
+  test('raise an exception', async ({ assert }) => {
     assert.plan(4)
 
     await fs.add(
@@ -57,7 +57,7 @@ test.group('New Error', (group) => {
     }
   })
 
-  test('raise an exception from a member expression', async (assert) => {
+  test('raise an exception from a member expression', async ({ assert }) => {
     assert.plan(4)
 
     await fs.add(
@@ -86,7 +86,7 @@ test.group('New Error', (group) => {
     }
   })
 
-  test('raise an exception with custom filename', async (assert) => {
+  test('raise an exception with custom filename', async ({ assert }) => {
     assert.plan(4)
 
     await fs.add(

@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import test from 'japa'
+import { test } from '@japa/runner'
 import { join } from 'path'
 import dedent from 'dedent-js'
 import stringify from 'js-stringify'
@@ -29,11 +29,11 @@ import './assert-extend'
 const fs = new Filesystem(join(__dirname, 'views'))
 
 test.group('Compiler | Cache', (group) => {
-  group.afterEach(async () => {
+  group.each.teardown(async () => {
     await fs.cleanup()
   })
 
-  test('compile template', async (assert) => {
+  test('compile template', async ({ assert }) => {
     await fs.add('foo.edge', 'Hello {{ username }}')
 
     const loader = new Loader()
@@ -57,7 +57,7 @@ test.group('Compiler | Cache', (group) => {
     )
   })
 
-  test('save template to cache when caching is turned on', async (assert) => {
+  test('save template to cache when caching is turned on', async ({ assert }) => {
     await fs.add('foo.edge', 'Hello {{ username }}')
 
     const loader = new Loader()
@@ -70,7 +70,7 @@ test.group('Compiler | Cache', (group) => {
     )
   })
 
-  test('do not cache template when caching is turned off', async (assert) => {
+  test('do not cache template when caching is turned off', async ({ assert }) => {
     await fs.add('foo.edge', 'Hello {{ username }}')
 
     const loader = new Loader()
@@ -83,11 +83,11 @@ test.group('Compiler | Cache', (group) => {
 })
 
 test.group('Compiler | Tokenize', (group) => {
-  group.afterEach(async () => {
+  group.each.teardown(async () => {
     await fs.cleanup()
   })
 
-  test('during tokenize, merge @section tags of a given layout', async (assert) => {
+  test('during tokenize, merge @section tags of a given layout', async ({ assert }) => {
     await fs.add(
       'master.edge',
       dedent`
@@ -148,7 +148,7 @@ test.group('Compiler | Tokenize', (group) => {
     ])
   })
 
-  test('during tokenize, merge @set tags of a given layout', async (assert) => {
+  test('during tokenize, merge @set tags of a given layout', async ({ assert }) => {
     await fs.add(
       'master.edge',
       dedent`
@@ -221,7 +221,7 @@ test.group('Compiler | Tokenize', (group) => {
     ])
   })
 
-  test('ensure template extending layout can only use section or set tags', async (assert) => {
+  test('ensure template extending layout can only use section or set tags', async ({ assert }) => {
     assert.plan(4)
 
     await fs.add(
@@ -262,7 +262,7 @@ test.group('Compiler | Tokenize', (group) => {
     }
   })
 
-  test('during tokenize, merge @section tags of a nested layouts', async (assert) => {
+  test('during tokenize, merge @section tags of a nested layouts', async ({ assert }) => {
     await fs.add(
       'super-master.edge',
       dedent`
@@ -361,7 +361,7 @@ test.group('Compiler | Tokenize', (group) => {
     ])
   })
 
-  test('layout tokens must point to its own filename', async (assert) => {
+  test('layout tokens must point to its own filename', async ({ assert }) => {
     await fs.add(
       'master.edge',
       dedent`
@@ -427,11 +427,11 @@ test.group('Compiler | Tokenize', (group) => {
 })
 
 test.group('Compiler | Compile', (group) => {
-  group.afterEach(async () => {
+  group.each.teardown(async () => {
     await fs.cleanup()
   })
 
-  test('compile template with layouts', async (assert) => {
+  test('compile template with layouts', async ({ assert }) => {
     await fs.add(
       'master.edge',
       dedent`
@@ -480,7 +480,7 @@ test.group('Compiler | Compile', (group) => {
     )
   })
 
-  test('compile errors inside layout must point to the right file', async (assert) => {
+  test('compile errors inside layout must point to the right file', async ({ assert }) => {
     assert.plan(3)
 
     await fs.add(
@@ -522,7 +522,7 @@ test.group('Compiler | Compile', (group) => {
     }
   })
 
-  test('compile errors parent template must point to the right file', async (assert) => {
+  test('compile errors parent template must point to the right file', async ({ assert }) => {
     assert.plan(3)
 
     await fs.add(
@@ -564,7 +564,7 @@ test.group('Compiler | Compile', (group) => {
     }
   })
 
-  test('runtime errors inside layout must point to the right file', async (assert) => {
+  test('runtime errors inside layout must point to the right file', async ({ assert }) => {
     assert.plan(4)
 
     await fs.add(
@@ -608,7 +608,7 @@ test.group('Compiler | Compile', (group) => {
     }
   })
 
-  test('runtime errors inside parent template must point to the right file', async (assert) => {
+  test('runtime errors inside parent template must point to the right file', async ({ assert }) => {
     assert.plan(4)
 
     await fs.add(
@@ -654,11 +654,11 @@ test.group('Compiler | Compile', (group) => {
 })
 
 test.group('Compiler | Compile Raw', (group) => {
-  group.afterEach(async () => {
+  group.each.teardown(async () => {
     await fs.cleanup()
   })
 
-  test('compile template with layouts', async (assert) => {
+  test('compile template with layouts', async ({ assert }) => {
     await fs.add(
       'master.edge',
       dedent`
@@ -702,7 +702,7 @@ test.group('Compiler | Compile Raw', (group) => {
     )
   })
 
-  test('compile errors inside layout must point to the right file', async (assert) => {
+  test('compile errors inside layout must point to the right file', async ({ assert }) => {
     assert.plan(3)
 
     await fs.add(
@@ -739,7 +739,7 @@ test.group('Compiler | Compile Raw', (group) => {
     }
   })
 
-  test('compile errors parent template must point to the right file', async (assert) => {
+  test('compile errors parent template must point to the right file', async ({ assert }) => {
     assert.plan(3)
 
     await fs.add(
@@ -776,7 +776,7 @@ test.group('Compiler | Compile Raw', (group) => {
     }
   })
 
-  test('runtime errors inside layout must point to the right file', async (assert) => {
+  test('runtime errors inside layout must point to the right file', async ({ assert }) => {
     assert.plan(4)
 
     await fs.add(
@@ -815,7 +815,7 @@ test.group('Compiler | Compile Raw', (group) => {
     }
   })
 
-  test('runtime errors inside parent template must point to the right file', async (assert) => {
+  test('runtime errors inside parent template must point to the right file', async ({ assert }) => {
     assert.plan(4)
 
     await fs.add(
@@ -856,11 +856,11 @@ test.group('Compiler | Compile Raw', (group) => {
 })
 
 test.group('Compiler | Processor', (group) => {
-  group.afterEach(async () => {
+  group.each.teardown(async () => {
     await fs.cleanup()
   })
 
-  test('execute raw processor function', async (assert) => {
+  test('execute raw processor function', async ({ assert }) => {
     assert.plan(2)
     await fs.add('index.edge', dedent`Hello`)
 
@@ -885,7 +885,7 @@ test.group('Compiler | Processor', (group) => {
     compiler.compile('index')
   })
 
-  test('use return value of the processor function', async (assert) => {
+  test('use return value of the processor function', async ({ assert }) => {
     assert.plan(5)
     await fs.add('index.edge', dedent`Hello`)
 
@@ -929,7 +929,7 @@ test.group('Compiler | Processor', (group) => {
     )
   })
 
-  test('do not run raw processor when template is cached', async (assert) => {
+  test('do not run raw processor when template is cached', async ({ assert }) => {
     assert.plan(2)
     await fs.add('index.edge', dedent`Hello`)
 
@@ -957,7 +957,7 @@ test.group('Compiler | Processor', (group) => {
     compiler.compile('index.edge')
   })
 
-  test('run raw processor function when template is not cached', async (assert) => {
+  test('run raw processor function when template is not cached', async ({ assert }) => {
     assert.plan(6)
     await fs.add('index.edge', dedent`Hello`)
 
@@ -985,7 +985,7 @@ test.group('Compiler | Processor', (group) => {
     compiler.compile('index.edge')
   })
 
-  test('run compiled processor function', async (assert) => {
+  test('run compiled processor function', async ({ assert }) => {
     assert.plan(2)
     await fs.add('index.edge', dedent`Hello`)
 
@@ -1022,7 +1022,7 @@ test.group('Compiler | Processor', (group) => {
     compiler.compile('index.edge')
   })
 
-  test('use return value of the compiled processor function', async (assert) => {
+  test('use return value of the compiled processor function', async ({ assert }) => {
     assert.plan(5)
     await fs.add('index.edge', dedent`Hello`)
 
@@ -1066,7 +1066,7 @@ test.group('Compiler | Processor', (group) => {
     assert.equal(compiler.compile('index.edge').template, 'bar')
   })
 
-  test('run compiled processor function even when template is cached', async (assert) => {
+  test('run compiled processor function even when template is cached', async ({ assert }) => {
     assert.plan(6)
     await fs.add('index.edge', dedent`Hello`)
 
@@ -1106,7 +1106,9 @@ test.group('Compiler | Processor', (group) => {
     compiler.compile('index.edge')
   })
 
-  test('do not mutate cache when compiled processor function returns a different value', async (assert) => {
+  test('do not mutate cache when compiled processor function returns a different value', async ({
+    assert,
+  }) => {
     assert.plan(9)
     await fs.add('index.edge', dedent`Hello`)
 
@@ -1147,7 +1149,7 @@ test.group('Compiler | Processor', (group) => {
     assert.equal(compiler.compile('index.edge').template, 'foo')
   })
 
-  test('run raw processor function for layouts', async (assert) => {
+  test('run raw processor function for layouts', async ({ assert }) => {
     assert.plan(5)
 
     await fs.add(
@@ -1231,7 +1233,7 @@ test.group('Compiler | Processor', (group) => {
     )
   })
 
-  test('run compiled processor functions for layouts', async (assert) => {
+  test('run compiled processor functions for layouts', async ({ assert }) => {
     assert.plan(3)
 
     await fs.add(
@@ -1309,7 +1311,7 @@ test.group('Compiler | Processor', (group) => {
     )
   })
 
-  test('run tag processor function', async (assert) => {
+  test('run tag processor function', async ({ assert }) => {
     await fs.add(
       'modal.edge',
       dedent`
