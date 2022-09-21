@@ -33,15 +33,10 @@ class User extends Base {
 const user = new User()
 user.parent = user
 
-// edge.processor.process('compiled', ({ compiled, path }) => {
-// 	console.log(path)
-// 	console.log(compiled)
-// })
-
-createServer((_req, res) => {
+createServer(async (_req, res) => {
   res.writeHead(200, { 'content-type': 'text/html' })
   res.end(
-    edge.render('welcome', {
+    await edge.render('welcome', {
       user: user,
     })
   )

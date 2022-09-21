@@ -104,7 +104,7 @@ export class Template extends Macroable implements TemplateContract {
       return this.wrapToFunction(compiledTemplate)(this, templateState, $context).then(
         (output: string) => {
           output = this.trimTopBottomNewLines(output)
-          return this.processor.executeOutput({ output, template: this })
+          return this.processor.executeOutput({ output, template: this, state: templateState })
         }
       )
     }
@@ -113,7 +113,7 @@ export class Template extends Macroable implements TemplateContract {
       this.wrapToFunction(compiledTemplate)(this, templateState, $context)
     )
 
-    return this.processor.executeOutput({ output, template: this })
+    return this.processor.executeOutput({ output, template: this, state: templateState })
   }
 
   /**

@@ -271,7 +271,11 @@ export interface ProcessorContract {
    */
   process(
     event: 'output',
-    handler: (data: { output: string; template: TemplateContract }) => string | void
+    handler: (data: {
+      output: string
+      template: TemplateContract
+      state: Record<string, any>
+    }) => string | void
   ): this
 }
 
@@ -363,6 +367,12 @@ export interface EdgeContract {
    * Unmount disk
    */
   unmount(diskName: string): this
+
+  /**
+   * Get access to the underlying template renderer. Each render call
+   * to edge results in creating an isolated renderer instance.
+   */
+  onRender(callback: (renderer: EdgeRendererContract) => void): this
 
   /**
    * Get a renderer instance to render templates

@@ -364,6 +364,23 @@ test.group('Edge', (group) => {
     assert.equal((await edge.render('hello::foo', { username: 'virk' })).trim(), 'Hello virk')
     assert.equal((await edge.render('hello::foo', { username: 'virk' })).trim(), 'Hello virk')
   })
+
+  test('hook into renderer instance', async ({ assert }) => {
+    const edge = new Edge()
+
+    edge.onRender((renderer) => {
+      renderer.share({ foo: 'bar' })
+    })
+
+    edge.mount('hello', fs.basePath)
+    edge.registerTemplate('hello::foo', {
+      template: 'Hello {{ foo }}',
+    })
+
+    assert.equal((await edge.render('hello::foo')).trim(), 'Hello bar')
+    assert.equal((await edge.render('hello::foo')).trim(), 'Hello bar')
+    assert.equal((await edge.render('hello::foo')).trim(), 'Hello bar')
+  })
 })
 
 test.group('Edge | regression', () => {
