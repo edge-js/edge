@@ -75,7 +75,7 @@
   "dependencies": {
     "@poppinss/inspect": "^1.0.1",
     "@poppinss/utils": "^5.0.0",
-    "edge-error": "^2.0.8",
+    "edge-error": "^3.0.0",
     "edge-lexer": "^4.0.10",
     "edge-parser": "^8.2.1",
     "js-stringify": "^1.0.2",
