@@ -12,7 +12,7 @@
 # Edge
 > A template for Node.js
 
-[![gh-workflow-image]][gh-workflow-url] [![appveyor-image]][appveyor-url] [![typescript-image]][typescript-url] [![npm-image]][npm-url] [![license-image]][license-url] [![synk-image]][synk-url]
+[![gh-workflow-image]][gh-workflow-url] [![typescript-image]][typescript-url] [![npm-image]][npm-url] [![license-image]][license-url] [![synk-image]][synk-url]
 
 Edge is a logical and batteries included template engine for Node.js. It can render any text based format, whether is **HTML**, **Markdown** or **plain text** files.
 
@@ -62,16 +62,13 @@ The documentation is written on the [AdonisJS website](https://docs.adonisjs.com
 
 ![](https://cdn.jsdelivr.net/gh/thetutlage/static/sponsorkit/sponsors.png)
 
-[appveyor-image]: https://img.shields.io/appveyor/ci/thetutlage/edge/master.svg?style=for-the-badge&logo=appveyor
-[appveyor-url]: https://ci.appveyor.com/project/thetutlage/edge 'appveyor'
-
-[gh-workflow-image]: https://img.shields.io/github/workflow/status/edge-js/edge/test?style=for-the-badge
+[gh-workflow-image]: https://img.shields.io/github/actions/workflow/status/edge-js/edge/test.yml?style=for-the-badge
 [gh-workflow-url]: https://github.com/edge-js/edge/actions/workflows/test.yml "Github action"
 
 [typescript-image]: https://img.shields.io/badge/Typescript-294E80.svg?style=for-the-badge&logo=typescript
 [typescript-url]: "typescript"
 
-[license-image]: https://img.shields.io/npm/l/edge-error?color=blueviolet&style=for-the-badge
+[license-image]: https://img.shields.io/npm/l/edge.js?color=blueviolet&style=for-the-badge
 [license-url]: LICENSE.md 'license'
 
 [npm-image]: https://img.shields.io/npm/v/edge.js.svg?style=for-the-badge&logo=npm
