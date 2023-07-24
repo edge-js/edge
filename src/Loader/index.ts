@@ -7,9 +7,9 @@
  * file that was distributed with this source code.
  */
 
-import { readFileSync } from 'fs'
-import { join, isAbsolute } from 'path'
-import { LoaderContract, LoaderTemplate } from '../Contracts'
+import { readFileSync } from 'node:fs'
+import { join, isAbsolute } from 'node:path'
+import type { LoaderContract, LoaderTemplate } from '../types.js'
 
 /**
  * The job of a loader is to load the template from a given path.
@@ -22,18 +22,18 @@ export class Loader implements LoaderContract {
   /**
    * List of mounted directories
    */
-  private mountedDirs: Map<string, string> = new Map()
+  #mountedDirs: Map<string, string> = new Map()
 
   /**
    * List of pre-registered (in-memory) templates
    */
-  private preRegistered: Map<string, LoaderTemplate> = new Map()
+  #preRegistered: Map<string, LoaderTemplate> = new Map()
 
   /**
    * Reads the content of a template from the disk. An exception is raised
    * when file is missing or if `readFileSync` returns an error.
    */
-  private readTemplateContents(absPath: string): string {
+  #readTemplateContents(absPath: string): string {
     try {
       return readFileSync(absPath, 'utf-8')
     } catch (error) {
@@ -59,7 +59,7 @@ export class Loader implements LoaderContract {
    * // returns ['default', 'list.edge']
    * ```
    */
-  private extractDiskAndTemplateName(templatePath: string): [string, string] {
+  #extractDiskAndTemplateName(templatePath: string): [string, string] {
     let [disk, ...rest] = templatePath.split('::')
 
     if (!rest.length) {
@@ -97,11 +97,14 @@ export class Loader implements LoaderContract {
    * }
    * ```
    */
-  public get mounted(): { [key: string]: string } {
-    return Array.from(this.mountedDirs).reduce((obj, [key, value]) => {
-      obj[key] = value
-      return obj
-    }, {})
+  get mounted(): { [key: string]: string } {
+    return Array.from(this.#mountedDirs).reduce(
+      (obj, [key, value]) => {
+        obj[key] = value
+        return obj
+      },
+      {} as Record<string, string>
+    )
   }
 
   /**
@@ -116,11 +119,14 @@ export class Loader implements LoaderContract {
    * }
    * ```
    */
-  public get templates(): { [templatePath: string]: LoaderTemplate } {
-    return Array.from(this.preRegistered).reduce((obj, [key, value]) => {
-      obj[key] = value
-      return obj
-    }, {})
+  get templates(): { [templatePath: string]: LoaderTemplate } {
+    return Array.from(this.#preRegistered).reduce(
+      (obj, [key, value]) => {
+        obj[key] = value
+        return obj
+      },
+      {} as Record<string, LoaderTemplate>
+    )
   }
 
   /**
@@ -135,8 +141,8 @@ export class Loader implements LoaderContract {
    * loader.mount('admin', join(__dirname, 'admin/views'))
    * ```
    */
-  public mount(diskName: string, dirPath: string): void {
-    this.mountedDirs.set(diskName, dirPath)
+  mount(diskName: string, dirPath: string): void {
+    this.#mountedDirs.set(diskName, dirPath)
   }
 
   /**
@@ -146,8 +152,8 @@ export class Loader implements LoaderContract {
    * loader.unmount('default')
    * ```
    */
-  public unmount(diskName: string): void {
-    this.mountedDirs.delete(diskName)
+  unmount(diskName: string): void {
+    this.#mountedDirs.delete(diskName)
   }
 
   /**
@@ -162,12 +168,12 @@ export class Loader implements LoaderContract {
    *
    * @throws Error if disk is not mounted and attempting to make path for it.
    */
-  public makePath(templatePath: string): string {
+  makePath(templatePath: string): string {
     /**
      * Return the template path as it is, when it is registered
      * dynamically
      */
-    if (this.preRegistered.has(templatePath)) {
+    if (this.#preRegistered.has(templatePath)) {
       return templatePath
     }
 
@@ -181,12 +187,12 @@ export class Loader implements LoaderContract {
     /**
      * Extract disk name and template path from the expression
      */
-    const [diskName, template] = this.extractDiskAndTemplateName(templatePath)
+    const [diskName, template] = this.#extractDiskAndTemplateName(templatePath)
 
     /**
      * Raise exception when disk name is not registered
      */
-    const mountedDir = this.mountedDirs.get(diskName)
+    const mountedDir = this.#mountedDirs.get(diskName)
     if (!mountedDir) {
       throw new Error(`"${diskName}" namespace is not mounted`)
     }
@@ -206,12 +212,12 @@ export class Loader implements LoaderContract {
    * }
    * ```
    */
-  public resolve(templatePath: string): LoaderTemplate {
+  resolve(templatePath: string): LoaderTemplate {
     /**
      * Return from pre-registered one's if exists
      */
-    if (this.preRegistered.has(templatePath)) {
-      return this.preRegistered.get(templatePath)!
+    if (this.#preRegistered.has(templatePath)) {
+      return this.#preRegistered.get(templatePath)!
     }
 
     /**
@@ -220,7 +226,7 @@ export class Loader implements LoaderContract {
     templatePath = isAbsolute(templatePath) ? templatePath : this.makePath(templatePath)
 
     return {
-      template: this.readTemplateContents(templatePath),
+      template: this.#readTemplateContents(templatePath),
     }
   }
 
@@ -241,7 +247,7 @@ export class Loader implements LoaderContract {
    *
    * @throws Error if template content is empty.
    */
-  public register(templatePath: string, contents: LoaderTemplate) {
+  register(templatePath: string, contents: LoaderTemplate) {
     /**
      * Ensure template content is defined as a string
      */
@@ -252,17 +258,17 @@ export class Loader implements LoaderContract {
     /**
      * Do not overwrite existing template with same template path
      */
-    if (this.preRegistered.has(templatePath)) {
+    if (this.#preRegistered.has(templatePath)) {
       throw new Error(`Cannot override previously registered "${templatePath}" template`)
     }
 
-    this.preRegistered.set(templatePath, contents)
+    this.#preRegistered.set(templatePath, contents)
   }
 
   /**
    * Remove registered template
    */
-  public remove(templatePath: string) {
-    this.preRegistered.delete(templatePath)
+  remove(templatePath: string) {
+    this.#preRegistered.delete(templatePath)
   }
 }

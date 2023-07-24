@@ -7,10 +7,9 @@
  * file that was distributed with this source code.
  */
 
-export * from './src/Contracts'
-import { Edge } from './src/Edge'
-import { safeValue } from './src/Template'
-import { GLOBALS } from './src/Edge/globals'
+import { Edge } from './src/edge/index.js'
+import { safeValue } from './src/template/index.js'
+import { GLOBALS } from './src/edge/globals/index.js'
 
 /**
  * Default export

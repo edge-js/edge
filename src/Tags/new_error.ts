@@ -9,8 +9,8 @@
 
 import { expressions } from 'edge-parser'
 
-import { TagContract } from '../Contracts'
-import { parseJsArg } from '../utils'
+import { TagContract } from '../types.js'
+import { parseJsArg } from '../utils/index.js'
 
 /**
  * newError tag to raise exceptions inside your templates. They will point

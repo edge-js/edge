@@ -8,7 +8,7 @@
  */
 
 import { EdgeError } from 'edge-error'
-import { TagContract } from '../Contracts'
+import { TagContract } from '../types.js'
 
 /**
  * Slot tag is used to define the slots of a given component. Slots cannot be

@@ -7,8 +7,8 @@
  * file that was distributed with this source code.
  */
 
-import { sep } from 'path'
-import { EOL } from 'os'
+import { sep } from 'node:path'
+import { EOL } from 'node:os'
 import stringify from 'js-stringify'
 
 export function normalizeNewLines(value: string) {

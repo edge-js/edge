@@ -9,8 +9,8 @@
 
 import { expressions, Parser } from 'edge-parser'
 
-import { TagContract } from '../Contracts'
-import { unallowedExpression, isSubsetOf, parseJsArg } from '../utils'
+import { TagContract } from '../types.js'
+import { unallowedExpression, isSubsetOf, parseJsArg } from '../utils/index.js'
 
 /**
  * List of expressions allowed for the include tag

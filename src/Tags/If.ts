@@ -9,8 +9,8 @@
 
 import { expressions } from 'edge-parser'
 
-import { TagContract } from '../Contracts'
-import { unallowedExpression, isNotSubsetOf, parseJsArg } from '../utils'
+import { TagContract } from '../types.js'
+import { unallowedExpression, isNotSubsetOf, parseJsArg } from '../utils/index.js'
 
 /**
  * If tag is used to define conditional blocks.

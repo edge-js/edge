@@ -8,24 +8,25 @@
  */
 
 import { test } from '@japa/runner'
-import { join } from 'path'
+import { dirname, join } from 'node:path'
 import dedent from 'dedent-js'
 import { EdgeError } from 'edge-error'
 import { Filesystem } from '@poppinss/dev-utils'
 
-import { Loader } from '../src/Loader'
-import { Compiler } from '../src/Compiler'
-import { Template } from '../src/Template'
-import { Processor } from '../src/Processor'
+import { Loader } from '../src/loader/index.js'
+import { Compiler } from '../src/compiler/index.js'
+import { Template } from '../src/template/index.js'
+import { Processor } from '../src/processor/index.js'
 
-import { ifTag } from '../src/Tags/If'
-import { slotTag } from '../src/Tags/Slot'
-import { injectTag } from '../src/Tags/Inject'
-import { includeTag } from '../src/Tags/Include'
-import { componentTag } from '../src/Tags/Component'
-import './assert-extend'
+import { ifTag } from '../src/tags/if.js'
+import { slotTag } from '../src/tags/slot.js'
+import { injectTag } from '../src/tags/inject.js'
+import { includeTag } from '../src/tags/include.js'
+import { componentTag } from '../src/tags/component.js'
+import './assert_extend.js'
+import { fileURLToPath } from 'node:url'
 
-const fs = new Filesystem(join(__dirname, 'views'))
+const fs = new Filesystem(join(dirname(fileURLToPath(import.meta.url)), 'views'))
 const tags = {
   component: componentTag,
   slot: slotTag,

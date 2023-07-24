@@ -8,12 +8,14 @@
  */
 
 import { test } from '@japa/runner'
-import { join } from 'path'
+import { dirname, join } from 'node:path'
 import { Filesystem } from '@poppinss/dev-utils'
 
-import { Loader } from '../src/Loader'
+import { Loader } from '../src/loader/index.js'
+import { fileURLToPath } from 'node:url'
 
-const fs = new Filesystem(join(__dirname, 'views'))
+const dirnameEsm = dirname(fileURLToPath(import.meta.url))
+const fs = new Filesystem(join(dirnameEsm, 'views'))
 
 test.group('Loader', (group) => {
   group.each.teardown(async () => {
@@ -131,7 +133,7 @@ test.group('Loader', (group) => {
     loader.register('my-view', {
       template: 'Hello world',
     })
-    loader.mount('default', __dirname)
+    loader.mount('default', dirnameEsm)
 
     const { template } = loader.resolve('my-view')
     assert.equal(template.trim(), 'Hello world')
@@ -139,7 +141,7 @@ test.group('Loader', (group) => {
     loader.remove('my-view')
     assert.throws(
       () => loader.resolve('my-view'),
-      `Cannot resolve "${join(__dirname, 'my-view.edge')}". Make sure the file exists`
+      `Cannot resolve "${join(dirnameEsm, 'my-view.edge')}". Make sure the file exists`
     )
   })
 

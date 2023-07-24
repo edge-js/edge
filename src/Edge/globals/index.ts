@@ -9,8 +9,8 @@
 
 import { EdgeError } from 'edge-error'
 import stringify from 'js-stringify'
-import { string } from '@poppinss/utils/build/helpers'
-import { safeValue, escape } from '../../Template'
+import string from '@poppinss/utils/string'
+import { safeValue, escape } from '../../template/index.js'
 
 export const GLOBALS = {
   /**
@@ -28,6 +28,7 @@ export const GLOBALS = {
    * Inspect state
    */
   inspect: (value: any) => {
+    console.log('inspect', value)
     return safeValue(require('@poppinss/inspect').string.html(value))
   },
 
@@ -96,10 +97,12 @@ export const GLOBALS = {
   noCase: string.noCase,
   titleCase: string.titleCase,
   pluralize: string.pluralize,
-  toSentence: string.toSentence,
-  prettyBytes: string.prettyBytes,
-  toBytes: string.toBytes,
-  prettyMs: string.prettyMs,
-  toMs: string.toMs,
-  ordinalize: string.ordinalize,
+
+  // TODO
+  // toSentence: string.toSentence,
+  // prettyBytes: string.prettyBytes,
+  // toBytes: string.toBytes,
+  // prettyMs: string.prettyMs,
+  // toMs: string.toMs,
+  // ordinalize: string.ordinalize,
 }

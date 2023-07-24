@@ -7,20 +7,21 @@
  * file that was distributed with this source code.
  */
 
-import './assert-extend'
+import './assert_extend.js'
 import { test } from '@japa/runner'
-import { join } from 'path'
-import { readdirSync, readFileSync, statSync } from 'fs'
+import { dirname, join } from 'node:path'
+import { readdirSync, readFileSync, statSync } from 'node:fs'
 
-import * as tags from '../src/Tags'
-import { Loader } from '../src/Loader'
-import { Template } from '../src/Template'
-import { Compiler } from '../src/Compiler'
-import { Processor } from '../src/Processor'
+import * as tags from '../src/tags/index.js'
+import { Loader } from '../src/loader/index.js'
+import { Template } from '../src/template/index.js'
+import { Compiler } from '../src/compiler/index.js'
+import { Processor } from '../src/processor/index.js'
 
-import { normalizeNewLines, normalizeFilename } from '../test-helpers'
+import { normalizeNewLines, normalizeFilename } from '../test_helpers/index.js'
+import { fileURLToPath } from 'node:url'
 
-const basePath = join(__dirname, '../newline-fixtures')
+const basePath = join(dirname(fileURLToPath(import.meta.url)), '../newline-fixtures')
 
 const loader = new Loader()
 loader.mount('default', basePath)

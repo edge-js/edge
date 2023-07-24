@@ -8,7 +8,7 @@
  */
 
 import { test } from '@japa/runner'
-import { Props } from '../src/Component/Props'
+import { Props } from '../src/component/props.js'
 
 test.group('Props', () => {
   test('get all props', ({ assert }) => {

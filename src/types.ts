@@ -7,9 +7,10 @@
  * file that was distributed with this source code.
  */
 
-import { Token, TagToken } from 'edge-lexer'
-import { MacroableConstructorContract } from 'macroable'
-import { ParserTagDefinitionContract, Parser, EdgeBuffer, ClaimTagFn } from 'edge-parser'
+import type { Token, TagToken } from 'edge-lexer'
+import type Macroable from '@poppinss/macroable'
+import type { Parser, EdgeBuffer } from 'edge-parser'
+import type { ParserTagDefinitionContract, ClaimTagFn } from 'edge-parser/types'
 
 /**
  * The shape in which the loader must resolve the template
@@ -66,8 +67,7 @@ export interface LoaderContract {
 /**
  * Shape of template constructor
  */
-export interface TemplateConstructorContract
-  extends MacroableConstructorContract<TemplateContract> {
+export interface TemplateConstructorContract extends Macroable {
   new (
     compiler: CompilerContract,
     globals: any,
@@ -403,4 +403,4 @@ export interface EdgeContract {
 export type EdgeBufferContract = EdgeBuffer
 export type ParserContract = Parser
 export type TagTokenContract = TagToken
-export { ClaimTagFn }
+export type { ClaimTagFn }

@@ -16,10 +16,10 @@ import { Parser } from 'edge-parser'
  * be evaluated when the compiled output is invoked.
  */
 export class StringifiedObject {
-  private obj: string = ''
+  #obj: string = ''
 
-  public addSpread(key: string) {
-    this.obj += this.obj.length ? `, ${key}` : `${key}`
+  addSpread(key: string) {
+    this.#obj += this.#obj.length ? `, ${key}` : `${key}`
   }
 
   /**
@@ -29,9 +29,9 @@ export class StringifiedObject {
    * stringifiedObject.add('username', `'virk'`)
    * ```
    */
-  public add(key: any, value: any, isComputed: boolean = false) {
+  add(key: any, value: any, isComputed: boolean = false) {
     key = isComputed ? `[${key}]` : key
-    this.obj += this.obj.length ? `, ${key}: ${value}` : `${key}: ${value}`
+    this.#obj += this.#obj.length ? `, ${key}: ${value}` : `${key}: ${value}`
   }
 
   /**
@@ -44,9 +44,9 @@ export class StringifiedObject {
    * `{ username: 'virk' }`
    * ```
    */
-  public flush(): string {
-    const obj = `{ ${this.obj} }`
-    this.obj = ''
+  flush(): string {
+    const obj = `{ ${this.#obj} }`
+    this.#obj = ''
     return obj
   }
 
@@ -65,7 +65,7 @@ export class StringifiedObject {
    * // returns { title: 'hello', username: 'virk' }
    * ```
    */
-  public static fromAcornExpressions(expressions: any[], parser: Parser): string {
+  static fromAcornExpressions(expressions: any[], parser: Parser): string {
     if (!Array.isArray(expressions)) {
       throw new Error('"fromAcornExpressions" expects an array of acorn ast expressions')
     }

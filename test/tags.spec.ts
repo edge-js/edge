@@ -8,16 +8,17 @@
  */
 
 import { test } from '@japa/runner'
-import { join } from 'path'
+import { dirname, join } from 'node:path'
 import dedent from 'dedent-js'
 import { Filesystem } from '@poppinss/dev-utils'
 
-import * as tags from '../src/Tags'
-import { Loader } from '../src/Loader'
-import { Compiler } from '../src/Compiler'
-import { Processor } from '../src/Processor'
+import * as tags from '../src/tags/index.js'
+import { Loader } from '../src/loader/index.js'
+import { Compiler } from '../src/compiler/index.js'
+import { Processor } from '../src/processor/index.js'
+import { fileURLToPath } from 'node:url'
 
-const fs = new Filesystem(join(__dirname, 'views'))
+const fs = new Filesystem(join(dirname(fileURLToPath(import.meta.url)), 'views'))
 
 const loader = new Loader()
 loader.mount('default', fs.basePath)

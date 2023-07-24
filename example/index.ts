@@ -1,16 +1,16 @@
 import edge from '../index'
-import { join } from 'path'
-import { createServer } from 'http'
+import { join } from 'node:path'
+import { createServer } from 'node:http'
 
 edge.mount(join(__dirname, 'views'))
 
 class Base {
-  public isModel = true
-  public foo = true
+  isModel = true
+  foo = true
 }
 
 class User extends Base {
-  public attributes = {
+  attributes = {
     username: 'virk',
     email: 'virk@adonisjs.com',
     isAdmin: true,
@@ -20,12 +20,12 @@ class User extends Base {
     lastLoginAt: null,
   }
 
-  public parent: User
-  public get username() {
+  parent: User
+  get username() {
     return this.attributes.username
   }
 
-  public toJSON() {
+  toJSON() {
     return {}
   }
 }

@@ -9,7 +9,7 @@
 
 import { test } from '@japa/runner'
 import { Parser, Stack } from 'edge-parser'
-import { StringifiedObject } from '../src/StringifiedObject'
+import { StringifiedObject } from '../src/stringified_object/index.js'
 
 /**
  * Sample loc

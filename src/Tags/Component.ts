@@ -11,9 +11,9 @@ import { EdgeError } from 'edge-error'
 import { TagToken, utils as lexerUtils } from 'edge-lexer'
 import { EdgeBuffer, expressions, Parser } from 'edge-parser'
 
-import { TagContract } from '../Contracts'
-import { StringifiedObject } from '../StringifiedObject'
-import { isSubsetOf, unallowedExpression, parseJsArg } from '../utils'
+import { TagContract } from '../types.js'
+import { StringifiedObject } from '../stringified_object/index.js'
+import { isSubsetOf, unallowedExpression, parseJsArg } from '../utils/index.js'
 
 /**
  * A list of allowed expressions for the component name

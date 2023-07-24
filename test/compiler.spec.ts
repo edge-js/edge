@@ -8,25 +8,26 @@
  */
 
 import { test } from '@japa/runner'
-import { join } from 'path'
+import { dirname, join } from 'node:path'
 import dedent from 'dedent-js'
 import stringify from 'js-stringify'
 import { Filesystem } from '@poppinss/dev-utils'
 import { TagTypes, MustacheTypes } from 'edge-lexer'
 
-import { Loader } from '../src/Loader'
-import { setTag } from '../src/Tags/Set'
-import { Template } from '../src/Template'
-import { Compiler } from '../src/Compiler'
-import { Processor } from '../src/Processor'
-import { layoutTag } from '../src/Tags/Layout'
-import { sectionTag } from '../src/Tags/Section'
-import { componentTag } from '../src/Tags/Component'
-import { normalizeNewLines } from '../test-helpers'
+import { Loader } from '../src/loader/index.js'
+import { setTag } from '../src/tags/set.js'
+import { Template } from '../src/template/index.js'
+import { Compiler } from '../src/compiler/index.js'
+import { Processor } from '../src/processor/index.js'
+import { layoutTag } from '../src/tags/layout.js'
+import { sectionTag } from '../src/tags/section.js'
+import { componentTag } from '../src/tags/component.js'
+import { normalizeNewLines } from '../test_helpers/index.js'
 
-import './assert-extend'
+import './assert_extend.js'
+import { fileURLToPath } from 'node:url'
 
-const fs = new Filesystem(join(__dirname, 'views'))
+const fs = new Filesystem(join(dirname(fileURLToPath(import.meta.url)), 'views'))
 
 test.group('Compiler | Cache', (group) => {
   group.each.teardown(async () => {

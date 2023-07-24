@@ -9,10 +9,10 @@
 
 import { EdgeError } from 'edge-error'
 import { expressions } from 'edge-parser'
-import { lodash } from '@poppinss/utils'
+import lodash from '@poppinss/utils/lodash'
 
-import { TagContract } from '../Contracts'
-import { isSubsetOf, unallowedExpression, parseJsArg } from '../utils'
+import { TagContract } from '../types.js'
+import { isSubsetOf, unallowedExpression, parseJsArg } from '../utils/index.js'
 
 /**
  * The set tag is used to set runtime values within the template. The value

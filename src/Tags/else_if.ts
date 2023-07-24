@@ -8,8 +8,8 @@
  */
 
 import { expressions } from 'edge-parser'
-import { TagContract } from '../Contracts'
-import { isNotSubsetOf, unallowedExpression, parseJsArg } from '../utils'
+import { TagContract } from '../types.js'
+import { isNotSubsetOf, unallowedExpression, parseJsArg } from '../utils/index.js'
 
 /**
  * Else if tag is used to define conditional blocks. We keep `@elseif` tag

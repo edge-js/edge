@@ -8,16 +8,17 @@
  */
 
 import { test } from '@japa/runner'
-import { join } from 'path'
+import { dirname, join } from 'node:path'
 import dedent from 'dedent-js'
 import { Filesystem } from '@poppinss/dev-utils'
 
-import { Edge } from '../src/Edge'
-import { normalizeNewLines } from '../test-helpers'
+import { Edge } from '../src/edge/index.js'
+import { normalizeNewLines } from '../test_helpers/index.js'
 
-import './assert-extend'
+import './assert_extend.js'
+import { fileURLToPath } from 'node:url'
 
-const fs = new Filesystem(join(__dirname, 'views'))
+const fs = new Filesystem(join(dirname(fileURLToPath(import.meta.url)), 'views'))
 
 test.group('Template FileName', (group) => {
   group.each.teardown(async () => {

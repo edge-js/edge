@@ -9,8 +9,8 @@
 
 import { expressions } from 'edge-parser'
 
-import { TagContract } from '../Contracts'
-import { isNotSubsetOf, unallowedExpression, parseJsArg } from '../utils'
+import { TagContract } from '../types.js'
+import { isNotSubsetOf, unallowedExpression, parseJsArg } from '../utils/index.js'
 
 /**
  * Inverse of the `if` condition. The term `unless` is more readable and logical

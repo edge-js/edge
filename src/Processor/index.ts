@@ -8,20 +8,20 @@
  */
 
 import { TagToken } from 'edge-lexer'
-import { ProcessorContract, TemplateContract } from '../Contracts'
+import { ProcessorContract, TemplateContract } from '../types.js'
 
 /**
  * Exposes the API to register a set of handlers to process the
  * templates output at different stages
  */
 export class Processor implements ProcessorContract {
-  private handlers: Map<string, Set<(...args: any[]) => any>> = new Map()
+  #handlers: Map<string, Set<(...args: any[]) => any>> = new Map()
 
   /**
    * Execute tag handler
    */
-  public executeTag(data: { tag: TagToken; path: string }): void {
-    const handlers = this.handlers.get('tag')
+  executeTag(data: { tag: TagToken; path: string }): void {
+    const handlers = this.#handlers.get('tag')
     if (!handlers) {
       return
     }
@@ -34,8 +34,8 @@ export class Processor implements ProcessorContract {
   /**
    * Execute raw handlers
    */
-  public executeRaw(data: { raw: string; path: string }): string {
-    const handlers = this.handlers.get('raw')
+  executeRaw(data: { raw: string; path: string }): string {
+    const handlers = this.#handlers.get('raw')
     if (!handlers) {
       return data.raw
     }
@@ -53,8 +53,8 @@ export class Processor implements ProcessorContract {
   /**
    * Execute compiled handlers
    */
-  public executeCompiled(data: { compiled: string; path: string }): string {
-    const handlers = this.handlers.get('compiled')
+  executeCompiled(data: { compiled: string; path: string }): string {
+    const handlers = this.#handlers.get('compiled')
     if (!handlers) {
       return data.compiled
     }
@@ -72,12 +72,12 @@ export class Processor implements ProcessorContract {
   /**
    * Execute output handlers
    */
-  public executeOutput(data: {
+  executeOutput(data: {
     output: string
     template: TemplateContract
     state: Record<string, any>
   }): string {
-    const handlers = this.handlers.get('output')
+    const handlers = this.#handlers.get('output')
     if (!handlers) {
       return data.output
     }
@@ -95,16 +95,13 @@ export class Processor implements ProcessorContract {
   /**
    * Define a processor function
    */
-  public process(
-    event: 'raw',
-    handler: (data: { raw: string; path: string }) => string | void
-  ): this
-  public process(event: 'tag', handler: (data: { tag: TagToken; path: string }) => void): this
-  public process(
+  process(event: 'raw', handler: (data: { raw: string; path: string }) => string | void): this
+  process(event: 'tag', handler: (data: { tag: TagToken; path: string }) => void): this
+  process(
     event: 'compiled',
     handler: (data: { compiled: string; path: string }) => string | void
   ): this
-  public process(
+  process(
     event: 'output',
     handler: (data: {
       output: string
@@ -112,12 +109,12 @@ export class Processor implements ProcessorContract {
       state: Record<string, any>
     }) => string | void
   ): this
-  public process(event: string, handler: (...args: any[]) => any): this {
-    if (!this.handlers.has(event)) {
-      this.handlers.set(event, new Set())
+  process(event: string, handler: (...args: any[]) => any): this {
+    if (!this.#handlers.has(event)) {
+      this.#handlers.set(event, new Set())
     }
 
-    this.handlers.get(event)!.add(handler)
+    this.#handlers.get(event)!.add(handler)
     return this
   }
 }

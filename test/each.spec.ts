@@ -8,7 +8,7 @@
  */
 
 import { test } from '@japa/runner'
-import { asyncEach, each } from '../src/utils'
+import { asyncEach, each } from '../src/utils/index.js'
 
 test.group('async each', () => {
   test('iterate over array', async ({ assert }) => {

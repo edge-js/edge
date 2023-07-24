@@ -7,13 +7,13 @@
  * file that was distributed with this source code.
  */
 
-import { LoaderTemplate, CacheManagerContract } from '../Contracts'
+import type { LoaderTemplate, CacheManagerContract } from '../types.js'
 
 /**
  * In memory cache manager to cache pre-compiled templates.
  */
 export class CacheManager implements CacheManagerContract {
-  private cacheStore: Map<string, LoaderTemplate> = new Map()
+  #cacheStore: Map<string, LoaderTemplate> = new Map()
 
   constructor(public enabled: boolean) {}
 
@@ -21,42 +21,42 @@ export class CacheManager implements CacheManagerContract {
    * Returns a boolean to tell if a template has already been cached
    * or not.
    */
-  public has(absPath: string): boolean {
-    return this.cacheStore.has(absPath)
+  has(absPath: string): boolean {
+    return this.#cacheStore.has(absPath)
   }
 
   /**
    * Returns the template from the cache. If caching is disabled,
    * then it will return undefined.
    */
-  public get(absPath: string): undefined | LoaderTemplate {
+  get(absPath: string): undefined | LoaderTemplate {
     if (!this.enabled) {
       return
     }
 
-    return this.cacheStore.get(absPath)
+    return this.#cacheStore.get(absPath)
   }
 
   /**
    * Set's the template path and the payload to the cache. If
    * cache is disabled, then this function results in a noop.
    */
-  public set(absPath: string, payload: LoaderTemplate) {
+  set(absPath: string, payload: LoaderTemplate) {
     if (!this.enabled) {
       return
     }
 
-    this.cacheStore.set(absPath, payload)
+    this.#cacheStore.set(absPath, payload)
   }
 
   /**
    * Delete template from the compiled cache
    */
-  public delete(absPath: string) {
+  delete(absPath: string) {
     if (!this.enabled) {
       return
     }
 
-    this.cacheStore.delete(absPath)
+    this.#cacheStore.delete(absPath)
   }
 }

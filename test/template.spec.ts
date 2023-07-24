@@ -8,21 +8,22 @@
  */
 
 import { test } from '@japa/runner'
-import { join } from 'path'
+import path, { join } from 'node:path'
 import { Filesystem } from '@poppinss/dev-utils'
 
-import { Loader } from '../src/Loader'
-import { Compiler } from '../src/Compiler'
-import { slotTag } from '../src/Tags/Slot'
-import { Processor } from '../src/Processor'
-import { includeTag } from '../src/Tags/Include'
-import { componentTag } from '../src/Tags/Component'
-import { Template, safeValue } from '../src/Template'
+import { Loader } from '../src/loader/index.js'
+import { Compiler } from '../src/compiler/index.js'
+import { slotTag } from '../src/tags/slot.js'
+import { Processor } from '../src/processor/index.js'
+import { includeTag } from '../src/tags/include.js'
+import { componentTag } from '../src/tags/component.js'
+import { Template, safeValue } from '../src/template/index.js'
 
-import './assert-extend'
+import './assert_extend.js'
+import { fileURLToPath } from 'node:url'
 
 const tags = { slot: slotTag, component: componentTag, include: includeTag }
-const fs = new Filesystem(join(__dirname, 'views'))
+const fs = new Filesystem(join(path.dirname(fileURLToPath(import.meta.url)), 'views'))
 
 const loader = new Loader()
 loader.mount('default', fs.basePath)
@@ -30,7 +31,6 @@ loader.mount('default', fs.basePath)
 test.group('Template', (group) => {
   group.each.teardown(async () => {
     await fs.cleanup()
-    Template.hydrate()
   })
 
   test('run template using the given state', async ({ assert }) => {

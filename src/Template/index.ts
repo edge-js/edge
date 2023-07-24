@@ -7,15 +7,14 @@
  * file that was distributed with this source code.
  */
 
-import { Macroable } from 'macroable'
+import Macroable from '@poppinss/macroable'
 import { EdgeError } from 'edge-error'
-import { lodash } from '@poppinss/utils'
-import { string } from '@poppinss/utils/build/helpers'
+import lodash from '@poppinss/utils/lodash'
+import he from 'he'
 
-import { Processor } from '../Processor'
-import { Props } from '../Component/Props'
-import { CompilerContract, TemplateContract } from '../Contracts'
-
+import { Processor } from '../processor/index.js'
+import { Props } from '../component/props.js'
+import type { CompilerContract, TemplateContract } from '../types.js'
 /**
  * An instance of this class passed to the escape
  * method ensures that underlying value is never
@@ -29,7 +28,7 @@ export class SafeValue {
  * Escapes a given string
  */
 export function escape(input: any): string {
-  return input instanceof SafeValue ? input.value : string.escapeHTML(String(input))
+  return input instanceof SafeValue ? input.value : he.escape(String(input))
 }
 
 /**
@@ -126,7 +125,7 @@ export class Template extends Macroable implements TemplateContract {
    * partialFn(template, state, ctx)
    * ```
    */
-  public compilePartial(templatePath: string, ...localVariables: string[]): Function {
+  compilePartial(templatePath: string, ...localVariables: string[]): Function {
     const { template: compiledTemplate } = this.compiler.compile(templatePath, localVariables, true)
     return this.wrapToFunction(compiledTemplate, ...localVariables)
   }
@@ -141,7 +140,7 @@ export class Template extends Macroable implements TemplateContract {
    * componentFn(template, template.getComponentState(props, slots, caller), ctx)
    * ```
    */
-  public compileComponent(templatePath: string, ...localVariables: string[]): string {
+  compileComponent(templatePath: string, ...localVariables: string[]): string {
     const { template: compiledTemplate } = this.compiler.compile(templatePath, localVariables)
     return this.wrapToFunction(compiledTemplate, ...localVariables)
   }
@@ -149,7 +148,7 @@ export class Template extends Macroable implements TemplateContract {
   /**
    * Returns the isolated state for a given component
    */
-  public getComponentState(
+  getComponentState(
     props: { [key: string]: any },
     slots: { [key: string]: any },
     caller: { filename: string; line: number; col: number }
@@ -168,7 +167,7 @@ export class Template extends Macroable implements TemplateContract {
    * template.render('welcome', { key: 'value' })
    * ```
    */
-  public render<T extends Promise<string> | string>(template: string, state: any): T {
+  render<T extends Promise<string> | string>(template: string, state: any): T {
     let { template: compiledTemplate } = this.compiler.compile(template)
     return this.renderCompiled(compiledTemplate, state)
   }
@@ -180,7 +179,7 @@ export class Template extends Macroable implements TemplateContract {
    * template.renderRaw('Hello {{ username }}', { username: 'virk' })
    * ```
    */
-  public renderRaw<T extends Promise<string> | string>(
+  renderRaw<T extends Promise<string> | string>(
     contents: string,
     state: any,
     templatePath?: string
@@ -193,14 +192,14 @@ export class Template extends Macroable implements TemplateContract {
    * Escapes the value to be HTML safe. Only strings are escaped
    * and rest all values will be returned as it is.
    */
-  public escape(input: any): string {
+  escape(input: any): string {
     return escape(input)
   }
 
   /**
    * Raise an error
    */
-  public newError(errorMessage: string, filename: string, lineNumber: number, column: number) {
+  newError(errorMessage: string, filename: string, lineNumber: number, column: number) {
     throw new EdgeError(errorMessage, 'E_RUNTIME_EXCEPTION', {
       filename: filename,
       line: lineNumber,
@@ -212,7 +211,7 @@ export class Template extends Macroable implements TemplateContract {
    * Rethrows the runtime exception by re-constructing the error message
    * to point back to the original filename
    */
-  public reThrow(error: any, filename: string, lineNumber: number): never {
+  reThrow(error: any, filename: string, lineNumber: number): never {
     if (error instanceof EdgeError) {
       throw error
     }

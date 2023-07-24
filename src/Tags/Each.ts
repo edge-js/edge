@@ -7,12 +7,12 @@
  * file that was distributed with this source code.
  */
 
-import { lodash } from '@poppinss/utils'
+import lodash from '@poppinss/utils/lodash'
 import { utils as lexerUtils } from 'edge-lexer'
 import { Parser, expressions } from 'edge-parser'
 
-import { TagContract } from '../Contracts'
-import { isSubsetOf, asyncEach, each, unallowedExpression } from '../utils'
+import { TagContract } from '../types.js'
+import { isSubsetOf, asyncEach, each, unallowedExpression } from '../utils/index.js'
 
 /**
  * Returns the list to loop over for the each binary expression

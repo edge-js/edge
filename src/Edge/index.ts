@@ -7,48 +7,32 @@
  * file that was distributed with this source code.
  */
 
-import * as Tags from '../Tags'
-import { Loader } from '../Loader'
-import { Compiler } from '../Compiler'
-import { Template } from '../Template'
-import { Processor } from '../Processor'
-import { EdgeRenderer } from '../Renderer'
+import * as Tags from '../tags/index.js'
+import { Loader } from '../loader/index.js'
+import { Compiler } from '../compiler/index.js'
+import { Template } from '../template/index.js'
+import { Processor } from '../processor/index.js'
+import { EdgeRenderer } from '../renderer/index.js'
 
 import {
   TagContract,
   EdgeOptions,
   EdgeContract,
   LoaderTemplate,
-  CompilerOptions,
   EdgeRendererContract,
-} from '../Contracts'
+  LoaderContract,
+} from '../types.js'
 
 /**
  * Exposes the API to render templates, register custom tags and globals
  */
 export class Edge implements EdgeContract {
-  private executedPlugins: boolean = false
-
-  /**
-   * Options passed to the compiler instance
-   */
-  private compilerOptions: CompilerOptions = {
-    cache: !!this.options.cache,
-    async: false,
-  }
-
-  /**
-   * Options passed to the async compiler instance
-   */
-  private asyncCompilerOptions: CompilerOptions = {
-    cache: !!this.options.cache,
-    async: true,
-  }
+  #executedPlugins = false
 
   /**
    * An array of registered plugins
    */
-  private plugins: {
+  #plugins: {
     fn: (edge: Edge, firstRun: boolean, options?: any) => void
     options?: any
   }[] = []
@@ -56,47 +40,55 @@ export class Edge implements EdgeContract {
   /**
    * Array of registered renderer hooks
    */
-  private renderCallbacks: ((renderer: EdgeRendererContract) => void)[] = []
+  #renderCallbacks: ((renderer: EdgeRendererContract) => void)[] = []
 
   /**
    * Reference to the registered processor handlers
    */
-  public processor = new Processor()
+  processor = new Processor()
 
   /**
    * Globals are shared with all rendered templates
    */
-  public GLOBALS: { [key: string]: any } = {}
+  GLOBALS: { [key: string]: any } = {}
 
   /**
    * List of registered tags. Adding new tags will only impact
    * this list
    */
-  public tags: { [name: string]: TagContract } = {}
+  tags: { [name: string]: TagContract } = {}
 
   /**
    * The loader to load templates. A loader can read and return
    * templates from anywhere. The default loader reads files
    * from the disk
    */
-  public loader = this.options.loader || new Loader()
+  loader: LoaderContract
 
   /**
    * The underlying compiler in use
    */
-  public compiler = new Compiler(this.loader, this.tags, this.processor, this.compilerOptions)
+  compiler: Compiler
 
   /**
    * The underlying compiler in use
    */
-  public asyncCompiler = new Compiler(
-    this.loader,
-    this.tags,
-    this.processor,
-    this.asyncCompilerOptions
-  )
+  asyncCompiler: Compiler
 
-  constructor(private options: EdgeOptions = {}) {
+  constructor(options: EdgeOptions = {}) {
+    this.loader = options.loader || new Loader()
+
+    this.compiler = new Compiler(this.loader, this.tags, this.processor, {
+      cache: !!options.cache,
+      async: false,
+    })
+
+    this.asyncCompiler = new Compiler(this.loader, this.tags, this.processor, {
+      cache: !!options.cache,
+      async: true,
+    })
+
+    // @ts-ignore
     Object.keys(Tags).forEach((name) => this.registerTag(Tags[name]))
   }
 
@@ -105,15 +97,15 @@ export class Edge implements EdgeContract {
    * once we empty out the array after first call
    */
   private executePlugins() {
-    if (this.executedPlugins) {
-      this.plugins.forEach(({ fn, options }) => {
+    if (this.#executedPlugins) {
+      this.#plugins.forEach(({ fn, options }) => {
         if (options && options.recurring) {
           fn(this, false, options)
         }
       })
     } else {
-      this.executedPlugins = true
-      this.plugins.forEach(({ fn, options }) => {
+      this.#executedPlugins = true
+      this.#plugins.forEach(({ fn, options }) => {
         fn(this, true, options)
       })
     }
@@ -123,12 +115,12 @@ export class Edge implements EdgeContract {
    * Register a plugin. Plugin functions are called once just before
    * an attempt to render a view is made.
    */
-  public use<T extends any>(
+  use<T extends any>(
     pluginFn: (edge: this, firstRun: boolean, options: T) => void,
     options?: T
   ): this {
-    this.plugins.push({
-      fn: pluginFn,
+    this.#plugins.push({
+      fn: pluginFn as any,
       options,
     })
     return this
@@ -144,7 +136,7 @@ export class Edge implements EdgeContract {
    * edge.render('admin::filename')
    * ```
    */
-  public mount(diskName: string, dirPath?: string): this {
+  mount(diskName: string, dirPath?: string): this {
     if (!dirPath) {
       dirPath = diskName
       diskName = 'default'
@@ -161,7 +153,7 @@ export class Edge implements EdgeContract {
    * edge.unmount('admin')
    * ```
    */
-  public unmount(diskName: string): this {
+  unmount(diskName: string): this {
     this.loader.unmount(diskName)
     return this
   }
@@ -175,7 +167,7 @@ export class Edge implements EdgeContract {
    * edge.global('time', () => new Date().getTime())
    * ```
    */
-  public global(name: string, value: any): this {
+  global(name: string, value: any): this {
     this.GLOBALS[name] = value
     return this
   }
@@ -195,7 +187,7 @@ export class Edge implements EdgeContract {
    * })
    * ```
    */
-  public registerTag(tag: TagContract): this {
+  registerTag(tag: TagContract): this {
     if (typeof tag.boot === 'function') {
       tag.boot(Template)
     }
@@ -223,7 +215,7 @@ export class Edge implements EdgeContract {
    * @endcomponent
    * ```
    */
-  public registerTemplate(templatePath: string, contents: LoaderTemplate): this {
+  registerTemplate(templatePath: string, contents: LoaderTemplate): this {
     this.loader.register(templatePath, contents)
     return this
   }
@@ -231,7 +223,7 @@ export class Edge implements EdgeContract {
   /**
    * Remove the template registered using the "registerTemplate" method
    */
-  public removeTemplate(templatePath: string): this {
+  removeTemplate(templatePath: string): this {
     this.loader.remove(templatePath)
     this.compiler.cacheManager.delete(templatePath)
     this.asyncCompiler.cacheManager.delete(templatePath)
@@ -242,8 +234,8 @@ export class Edge implements EdgeContract {
    * Get access to the underlying template renderer. Each render call
    * to edge results in creating an isolated renderer instance.
    */
-  public onRender(callback: (renderer: EdgeRendererContract) => void): this {
-    this.renderCallbacks.push(callback)
+  onRender(callback: (renderer: EdgeRendererContract) => void): this {
+    this.#renderCallbacks.push(callback)
     return this
   }
 
@@ -251,7 +243,7 @@ export class Edge implements EdgeContract {
    * Returns a new instance of edge. The instance
    * can be used to define locals.
    */
-  public getRenderer(): EdgeRendererContract {
+  getRenderer(): EdgeRendererContract {
     this.executePlugins()
 
     const renderer = new EdgeRenderer(
@@ -261,7 +253,7 @@ export class Edge implements EdgeContract {
       this.processor
     )
 
-    this.renderCallbacks.forEach((callback) => callback(renderer))
+    this.#renderCallbacks.forEach((callback) => callback(renderer))
     return renderer
   }
 
@@ -272,7 +264,7 @@ export class Edge implements EdgeContract {
    * edge.render('welcome', { greeting: 'Hello world' })
    * ```
    */
-  public render(templatePath: string, state?: any): Promise<string> {
+  render(templatePath: string, state?: any): Promise<string> {
     return this.getRenderer().render(templatePath, state)
   }
 
@@ -283,7 +275,7 @@ export class Edge implements EdgeContract {
    * edge.render('welcome', { greeting: 'Hello world' })
    * ```
    */
-  public renderSync(templatePath: string, state?: any): string {
+  renderSync(templatePath: string, state?: any): string {
     return this.getRenderer().renderSync(templatePath, state)
   }
 
@@ -294,7 +286,7 @@ export class Edge implements EdgeContract {
    * edge.render('welcome', { greeting: 'Hello world' })
    * ```
    */
-  public renderRaw(contents: string, state?: any, templatePath?: string): Promise<string> {
+  renderRaw(contents: string, state?: any, templatePath?: string): Promise<string> {
     return this.getRenderer().renderRaw(contents, state, templatePath)
   }
 
@@ -305,7 +297,7 @@ export class Edge implements EdgeContract {
    * edge.render('welcome', { greeting: 'Hello world' })
    * ```
    */
-  public renderRawSync(templatePath: string, state?: any): string {
+  renderRawSync(templatePath: string, state?: any): string {
     return this.getRenderer().renderRawSync(templatePath, state)
   }
 
@@ -321,7 +313,7 @@ export class Edge implements EdgeContract {
    * view.render('welcome')
    * ```
    */
-  public share(data: any): EdgeRendererContract {
+  share(data: any): EdgeRendererContract {
     return this.getRenderer().share(data)
   }
 }

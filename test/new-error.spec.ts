@@ -8,20 +8,21 @@
  */
 
 import { test } from '@japa/runner'
-import { join } from 'path'
+import { dirname, join } from 'node:path'
 import dedent from 'dedent-js'
 import { Filesystem } from '@poppinss/dev-utils'
 
-import { Loader } from '../src/Loader'
-import { Compiler } from '../src/Compiler'
-import { newError } from '../src/Tags'
-import { Processor } from '../src/Processor'
-import { Template } from '../src/Template'
+import { Loader } from '../src/loader/index.js'
+import { Compiler } from '../src/compiler/index.js'
+import { newError } from '../src/tags/index.js'
+import { Processor } from '../src/processor/index.js'
+import { Template } from '../src/template/index.js'
 
-import './assert-extend'
+import './assert_extend.js'
+import { fileURLToPath } from 'node:url'
 
 const tags = { newError }
-const fs = new Filesystem(join(__dirname, 'views'))
+const fs = new Filesystem(join(dirname(fileURLToPath(import.meta.url)), 'views'))
 
 const loader = new Loader()
 loader.mount('default', fs.basePath)
@@ -29,7 +30,6 @@ loader.mount('default', fs.basePath)
 test.group('New Error', (group) => {
   group.each.teardown(async () => {
     await fs.cleanup()
-    Template.hydrate()
   })
 
   test('raise an exception', async ({ assert }) => {

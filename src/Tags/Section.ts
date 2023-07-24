@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import { TagContract } from '../Contracts'
+import { TagContract } from '../types.js'
 
 /**
  * Section tag is used to define the sections on a given template. Sections cannot be
