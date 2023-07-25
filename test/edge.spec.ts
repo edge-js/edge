@@ -11,34 +11,26 @@
 import './assert_extend.js'
 import { EOL } from 'node:os'
 import { test } from '@japa/runner'
-import { dirname, join } from 'node:path'
+import { join } from 'node:path'
 import dedent from 'dedent-js'
-import { Filesystem } from '@poppinss/dev-utils'
 
 import { Edge } from '../src/edge/index.js'
 import { GLOBALS } from '../src/edge/globals/index.js'
-import { fileURLToPath } from 'node:url'
 
-const fs = new Filesystem(join(dirname(fileURLToPath(import.meta.url)), 'views'))
-
-test.group('Edge', (group) => {
-  group.each.teardown(async () => {
-    await fs.cleanup()
-  })
-
-  test('mount default disk', async ({ assert }) => {
+test.group('Edge', () => {
+  test('mount default disk', async ({ assert, fs }) => {
     const edge = new Edge()
     edge.mount(fs.basePath)
     assert.deepEqual(edge.loader.mounted, { default: fs.basePath })
   })
 
-  test('mount named disk', async ({ assert }) => {
+  test('mount named disk', async ({ assert, fs }) => {
     const edge = new Edge()
     edge.mount('foo', fs.basePath)
     assert.deepEqual(edge.loader.mounted, { foo: fs.basePath })
   })
 
-  test('unmount named disk', async ({ assert }) => {
+  test('unmount named disk', async ({ assert, fs }) => {
     const edge = new Edge()
     edge.mount('foo', fs.basePath)
     edge.unmount('foo')
@@ -85,17 +77,17 @@ test.group('Edge', (group) => {
     assert.deepEqual(edge['tags'].mytag, MyTag)
   })
 
-  test('render a view using the render method', async ({ assert }) => {
+  test('render a view using the render method', async ({ assert, fs }) => {
     const edge = new Edge()
-    await fs.add('foo.edge', 'Hello {{ username }}')
+    await fs.create('foo.edge', 'Hello {{ username }}')
 
     edge.mount(fs.basePath)
     assert.equal((await edge.render('foo', { username: 'virk' })).trim(), 'Hello virk')
   })
 
-  test('pass locals to the view context', async ({ assert }) => {
+  test('pass locals to the view context', async ({ assert, fs }) => {
     const edge = new Edge()
-    await fs.add('foo.edge', "Hello {{ username || 'guest' }}")
+    await fs.create('foo.edge', "Hello {{ username || 'guest' }}")
 
     edge.mount(fs.basePath)
 
@@ -116,7 +108,7 @@ test.group('Edge', (group) => {
     assert.equal((await edge.render('foo', { username: 'virk' })).trim(), 'Hello virk')
   })
 
-  test('register a template on a named disk', async ({ assert }) => {
+  test('register a template on a named disk', async ({ assert, fs }) => {
     const edge = new Edge()
     edge.mount('hello', fs.basePath)
 
@@ -144,9 +136,9 @@ test.group('Edge', (group) => {
     assert.equal(edge.renderSync('foo', { username: 'virk' }).trim(), 'Hi virk')
   })
 
-  test('pass absolute path of template to lexer errors', async ({ assert }) => {
+  test('pass absolute path of template to lexer errors', async ({ assert, fs }) => {
     assert.plan(1)
-    await fs.add('foo.edge', '@if(1 + 1)')
+    await fs.create('foo.edge', '@if(1 + 1)')
 
     const edge = new Edge()
     edge.mount(fs.basePath)
@@ -161,9 +153,9 @@ test.group('Edge', (group) => {
     }
   })
 
-  test('pass absolute path of template to parser errors', async ({ assert }) => {
+  test('pass absolute path of template to parser errors', async ({ assert, fs }) => {
     assert.plan(1)
-    await fs.add('foo.edge', 'Hello {{ a,:b }}')
+    await fs.create('foo.edge', 'Hello {{ a,:b }}')
 
     const edge = new Edge()
     edge.mount(fs.basePath)
@@ -178,10 +170,10 @@ test.group('Edge', (group) => {
     }
   })
 
-  test('pass absolute path of layout to lexer errors', async ({ assert }) => {
+  test('pass absolute path of layout to lexer errors', async ({ assert, fs }) => {
     assert.plan(1)
-    await fs.add('foo.edge', "@layout('bar')")
-    await fs.add('bar.edge', '@if(username)')
+    await fs.create('foo.edge', "@layout('bar')")
+    await fs.create('bar.edge', '@if(username)')
 
     const edge = new Edge()
     edge.mount(fs.basePath)
@@ -196,10 +188,10 @@ test.group('Edge', (group) => {
     }
   })
 
-  test('pass absolute path of layout to parser errors', async ({ assert }) => {
+  test('pass absolute path of layout to parser errors', async ({ assert, fs }) => {
     assert.plan(1)
-    await fs.add('foo.edge', "@layout('bar')")
-    await fs.add('bar.edge', '{{ a:b }}')
+    await fs.create('foo.edge', "@layout('bar')")
+    await fs.create('bar.edge', '{{ a:b }}')
 
     const edge = new Edge()
     edge.mount(fs.basePath)
@@ -214,10 +206,10 @@ test.group('Edge', (group) => {
     }
   })
 
-  test('pass absolute path of partial to lexer errors', async ({ assert }) => {
+  test('pass absolute path of partial to lexer errors', async ({ assert, fs }) => {
     assert.plan(1)
-    await fs.add('foo.edge', "@include('bar')")
-    await fs.add('bar.edge', '@if(username)')
+    await fs.create('foo.edge', "@include('bar')")
+    await fs.create('bar.edge', '@if(username)')
 
     const edge = new Edge()
     edge.mount(fs.basePath)
@@ -232,10 +224,10 @@ test.group('Edge', (group) => {
     }
   }).skip(true, 'Todo: Fix me')
 
-  test('pass absolute path of partial to parser errors', async ({ assert }) => {
+  test('pass absolute path of partial to parser errors', async ({ assert, fs }) => {
     assert.plan(1)
-    await fs.add('foo.edge', "@include('bar')")
-    await fs.add('bar.edge', '{{ a:b }}')
+    await fs.create('foo.edge', "@include('bar')")
+    await fs.create('bar.edge', '{{ a:b }}')
 
     const edge = new Edge()
     edge.mount(fs.basePath)
@@ -250,10 +242,10 @@ test.group('Edge', (group) => {
     }
   }).skip(true, 'Todo: Fix me')
 
-  test('pass absolute path of component to lexer errors', async ({ assert }) => {
+  test('pass absolute path of component to lexer errors', async ({ assert, fs }) => {
     assert.plan(1)
-    await fs.add('foo.edge', "@!component('bar')")
-    await fs.add('bar.edge', '@if(username)')
+    await fs.create('foo.edge', "@!component('bar')")
+    await fs.create('bar.edge', '@if(username)')
 
     const edge = new Edge()
     edge.mount(fs.basePath)
@@ -268,10 +260,10 @@ test.group('Edge', (group) => {
     }
   }).skip(true, 'Todo: Fix me')
 
-  test('pass absolute path of component to parser errors', async ({ assert }) => {
+  test('pass absolute path of component to parser errors', async ({ assert, fs }) => {
     assert.plan(1)
-    await fs.add('foo.edge', "@!component('bar')")
-    await fs.add('bar.edge', '{{ a:b }}')
+    await fs.create('foo.edge', "@!component('bar')")
+    await fs.create('bar.edge', '{{ a:b }}')
 
     const edge = new Edge()
     edge.mount(fs.basePath)
@@ -286,7 +278,7 @@ test.group('Edge', (group) => {
     }
   }).skip(true, 'Todo: Fix me')
 
-  test('register and call plugins before rendering a view', async ({ assert }) => {
+  test('register and call plugins before rendering a view', async ({ assert, fs }) => {
     assert.plan(3)
     const edge = new Edge()
 
@@ -305,7 +297,7 @@ test.group('Edge', (group) => {
     assert.equal((await edge.render('hello::foo', { username: 'virk' })).trim(), 'Hello virk')
   })
 
-  test('do not run plugins until a view is rendered', async ({ assert }) => {
+  test('do not run plugins until a view is rendered', async ({ assert, fs }) => {
     assert.plan(0)
     const edge = new Edge()
 
@@ -322,7 +314,7 @@ test.group('Edge', (group) => {
     })
   })
 
-  test('run plugins only once', async ({ assert }) => {
+  test('run plugins only once', async ({ assert, fs }) => {
     assert.plan(5)
     const edge = new Edge()
 
@@ -343,7 +335,7 @@ test.group('Edge', (group) => {
     assert.equal((await edge.render('hello::foo', { username: 'virk' })).trim(), 'Hello virk')
   })
 
-  test('run recurring plugins again and again', async ({ assert }) => {
+  test('run recurring plugins again and again', async ({ assert, fs }) => {
     assert.plan(9)
     const edge = new Edge()
 
@@ -367,7 +359,7 @@ test.group('Edge', (group) => {
     assert.equal((await edge.render('hello::foo', { username: 'virk' })).trim(), 'Hello virk')
   })
 
-  test('hook into renderer instance', async ({ assert }) => {
+  test('hook into renderer instance', async ({ assert, fs }) => {
     const edge = new Edge()
 
     edge.onRender((renderer) => {

@@ -8,27 +8,21 @@
  */
 
 import { test } from '@japa/runner'
-import { dirname, join } from 'node:path'
-import { Filesystem } from '@poppinss/dev-utils'
+import { join } from 'node:path'
 
 import { Loader } from '../src/loader/index.js'
-import { fileURLToPath } from 'node:url'
+import { getDirname } from '@poppinss/utils'
 
-const dirnameEsm = dirname(fileURLToPath(import.meta.url))
-const fs = new Filesystem(join(dirnameEsm, 'views'))
+const dirnameEsm = getDirname(import.meta.url)
 
-test.group('Loader', (group) => {
-  group.each.teardown(async () => {
-    await fs.cleanup()
-  })
-
-  test('mount path with a name', ({ assert }) => {
+test.group('Loader', () => {
+  test('mount path with a name', ({ assert, fs }) => {
     const loader = new Loader()
     loader.mount('default', fs.basePath)
     assert.deepEqual(loader.mounted, { default: fs.basePath })
   })
 
-  test('unmount path with a name', ({ assert }) => {
+  test('unmount path with a name', ({ assert, fs }) => {
     const loader = new Loader()
     loader.mount('default', fs.basePath)
     loader.unmount('default')
@@ -41,8 +35,8 @@ test.group('Loader', (group) => {
     assert.throws(fn, '"default" namespace is not mounted')
   })
 
-  test('resolve template for the default disk', async ({ assert }) => {
-    await fs.add('foo.edge', 'Hello world')
+  test('resolve template for the default disk', async ({ assert, fs }) => {
+    await fs.create('foo.edge', 'Hello world')
 
     const loader = new Loader()
     loader.mount('default', fs.basePath)
@@ -51,7 +45,7 @@ test.group('Loader', (group) => {
     assert.equal(template.trim(), 'Hello world')
   })
 
-  test('raise error when template is missing', async ({ assert }) => {
+  test('raise error when template is missing', async ({ assert, fs }) => {
     const loader = new Loader()
     loader.mount('default', fs.basePath)
 
@@ -62,8 +56,8 @@ test.group('Loader', (group) => {
     )
   })
 
-  test('resolve template with extension', async ({ assert }) => {
-    await fs.add('foo.edge', 'Hello world')
+  test('resolve template with extension', async ({ assert, fs }) => {
+    await fs.create('foo.edge', 'Hello world')
 
     const loader = new Loader()
     loader.mount('default', fs.basePath)
@@ -72,8 +66,8 @@ test.group('Loader', (group) => {
     assert.equal(template.trim(), 'Hello world')
   })
 
-  test('resolve template from a named disk', async ({ assert }) => {
-    await fs.add('foo.edge', 'Hello world')
+  test('resolve template from a named disk', async ({ assert, fs }) => {
+    await fs.create('foo.edge', 'Hello world')
 
     const loader = new Loader()
     loader.mount('users', fs.basePath)
@@ -82,7 +76,7 @@ test.group('Loader', (group) => {
     assert.equal(template.trim(), 'Hello world')
   })
 
-  test('do not replace edge within the template path name', async ({ assert }) => {
+  test('do not replace edge within the template path name', async ({ assert, fs }) => {
     const loader = new Loader()
     loader.mount('default', fs.basePath)
 
@@ -90,7 +84,7 @@ test.group('Loader', (group) => {
     assert.equal(templatePath, join(fs.basePath, 'edge-partial.edge'))
   })
 
-  test('do not replace edge within the template path seperator', async ({ assert }) => {
+  test('do not replace edge within the template path seperator', async ({ assert, fs }) => {
     const loader = new Loader()
     loader.mount('default', fs.basePath)
 
@@ -100,6 +94,7 @@ test.group('Loader', (group) => {
 
   test('do not replace edge within the template path seperator with extension', async ({
     assert,
+    fs,
   }) => {
     const loader = new Loader()
     loader.mount('default', fs.basePath)
@@ -110,6 +105,7 @@ test.group('Loader', (group) => {
 
   test('do not replace edge within the template path seperator with named disk', async ({
     assert,
+    fs,
   }) => {
     const loader = new Loader()
     loader.mount('users', fs.basePath)
@@ -153,8 +149,8 @@ test.group('Loader', (group) => {
     assert.throws(fn, 'Cannot override previously registered "my-view" template')
   })
 
-  test('resolve template with dot seperator', async ({ assert }) => {
-    await fs.add('foo/bar.edge', 'Hello world')
+  test('resolve template with dot seperator', async ({ assert, fs }) => {
+    await fs.create('foo/bar.edge', 'Hello world')
 
     const loader = new Loader()
     loader.mount('default', fs.basePath)

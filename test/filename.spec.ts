@@ -7,26 +7,17 @@
  * file that was distributed with this source code.
  */
 
+import './assert_extend.js'
 import { test } from '@japa/runner'
-import { dirname, join } from 'node:path'
+import { join } from 'node:path'
 import dedent from 'dedent-js'
-import { Filesystem } from '@poppinss/dev-utils'
 
 import { Edge } from '../src/edge/index.js'
 import { normalizeNewLines } from '../test_helpers/index.js'
 
-import './assert_extend.js'
-import { fileURLToPath } from 'node:url'
-
-const fs = new Filesystem(join(dirname(fileURLToPath(import.meta.url)), 'views'))
-
-test.group('Template FileName', (group) => {
-  group.each.teardown(async () => {
-    await fs.cleanup()
-  })
-
-  test('print file absolute path', async ({ assert }) => {
-    await fs.add('foo.edge', '{{ $filename }}')
+test.group('Template FileName', () => {
+  test('print file absolute path', async ({ assert, fs }) => {
+    await fs.create('foo.edge', '{{ $filename }}')
 
     const edge = new Edge()
     edge.mount(fs.basePath)
@@ -35,15 +26,15 @@ test.group('Template FileName', (group) => {
     assert.equal(output.trim(), join(fs.basePath, 'foo.edge'))
   })
 
-  test('print file absolute path inside a partial', async ({ assert }) => {
-    await fs.add(
+  test('print file absolute path inside a partial', async ({ assert, fs }) => {
+    await fs.create(
       'foo.edge',
       dedent`
 			@include('bar')
 			{{ $filename }}
 		`
     )
-    await fs.add('bar.edge', '{{ $filename }}')
+    await fs.create('bar.edge', '{{ $filename }}')
 
     const edge = new Edge()
     edge.mount(fs.basePath)
@@ -59,8 +50,8 @@ test.group('Template FileName', (group) => {
     )
   })
 
-  test('print file absolute path inside a layout', async ({ assert }) => {
-    await fs.add(
+  test('print file absolute path inside a layout', async ({ assert, fs }) => {
+    await fs.create(
       'foo.edge',
       dedent`
 			@layout('master')
@@ -71,7 +62,7 @@ test.group('Template FileName', (group) => {
 		`
     )
 
-    await fs.add(
+    await fs.create(
       'master.edge',
       dedent`
 			@section('content')
@@ -94,15 +85,15 @@ test.group('Template FileName', (group) => {
     )
   })
 
-  test('print file absolute path inside a partial', async ({ assert }) => {
-    await fs.add(
+  test('print file absolute path inside a partial', async ({ assert, fs }) => {
+    await fs.create(
       'foo.edge',
       dedent`
 			@include('bar')
 			{{ $filename }}
 		`
     )
-    await fs.add('bar.edge', '{{ $filename }}')
+    await fs.create('bar.edge', '{{ $filename }}')
 
     const edge = new Edge()
     edge.mount(fs.basePath)
@@ -118,8 +109,8 @@ test.group('Template FileName', (group) => {
     )
   })
 
-  test('print file absolute path inside a component', async ({ assert }) => {
-    await fs.add(
+  test('print file absolute path inside a component', async ({ assert, fs }) => {
+    await fs.create(
       'foo.edge',
       dedent`
 			@component('button')
@@ -130,7 +121,7 @@ test.group('Template FileName', (group) => {
 		`
     )
 
-    await fs.add(
+    await fs.create(
       'button.edge',
       dedent`
 			{{{ await $slots.text() }}}

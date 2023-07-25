@@ -7,6 +7,7 @@
  * file that was distributed with this source code.
  */
 
+import './assert_extend.js'
 import { test } from '@japa/runner'
 import path, { join } from 'node:path'
 import { Filesystem } from '@poppinss/dev-utils'
@@ -19,7 +20,6 @@ import { includeTag } from '../src/tags/include.js'
 import { componentTag } from '../src/tags/component.js'
 import { Template, safeValue } from '../src/template/index.js'
 
-import './assert_extend.js'
 import { fileURLToPath } from 'node:url'
 
 const tags = { slot: slotTag, component: componentTag, include: includeTag }
