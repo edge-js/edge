@@ -9,6 +9,7 @@
 
 import { sep } from 'node:path'
 import { EOL } from 'node:os'
+// @ts-ignore untyped module
 import stringify from 'js-stringify'
 
 export function normalizeNewLines(value: string) {

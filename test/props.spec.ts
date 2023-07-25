@@ -94,7 +94,9 @@ test.group('Props', () => {
       onclick: 'foo = bar',
     })
 
+    // @ts-expect-error
     assert.deepEqual(props['class'], ['foo', 'bar'])
+    // @ts-expect-error
     assert.deepEqual(props['onclick'], 'foo = bar')
   })
 
@@ -105,6 +107,7 @@ test.group('Props', () => {
       },
     })
 
+    // @ts-expect-error
     assert.equal(props['user']['name'], 'virk')
   })
 

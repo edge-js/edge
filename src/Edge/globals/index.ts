@@ -8,12 +8,14 @@
  */
 
 import { EdgeError } from 'edge-error'
+// @ts-ignore untyped module
 import stringify from 'js-stringify'
-import string from '@poppinss/utils/string'
-import { safeValue, escape } from '../../template/index.js'
 // @ts-ignore untyped module
 import inspect from '@poppinss/inspect'
 const { string: prettyPrintHtml } = inspect
+import string from '@poppinss/utils/string'
+
+import { safeValue, escape } from '../../template/index.js'
 
 export const GLOBALS = {
   /**
@@ -107,4 +109,4 @@ export const GLOBALS = {
   // prettyMs: string.prettyMs,
   // toMs: string.toMs,
   // ordinalize: string.ordinalize,
-}
+} as Record<string, Function>

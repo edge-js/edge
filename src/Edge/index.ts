@@ -189,6 +189,7 @@ export class Edge implements EdgeContract {
    */
   registerTag(tag: TagContract): this {
     if (typeof tag.boot === 'function') {
+      // @ts-ignore
       tag.boot(Template)
     }
 

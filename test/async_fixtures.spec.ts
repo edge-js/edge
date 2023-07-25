@@ -31,7 +31,9 @@ const processor = new Processor()
 test.group('Async Fixtures', (group) => {
   group.setup(() => {
     Object.keys(tags).forEach((tag) => {
+      // @ts-ignore
       if (tags[tag].boot) {
+        // @ts-ignore
         tags[tag].boot(Template)
       }
     })
@@ -80,7 +82,9 @@ test.group('Async Fixtures', (group) => {
 test.group('Async Fixtures | Cached', (group) => {
   group.setup(() => {
     Object.keys(tags).forEach((tag) => {
+      // @ts-ignore
       if (tags[tag].boot) {
+        // @ts-ignore
         tags[tag].boot(Template)
       }
     })

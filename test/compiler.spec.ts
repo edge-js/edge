@@ -10,6 +10,7 @@
 import { test } from '@japa/runner'
 import { dirname, join } from 'node:path'
 import dedent from 'dedent-js'
+// @ts-ignore untyped module
 import stringify from 'js-stringify'
 import { Filesystem } from '@poppinss/dev-utils'
 import { TagTypes, MustacheTypes } from 'edge-lexer/types'

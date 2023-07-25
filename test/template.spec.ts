@@ -206,24 +206,26 @@ test.group('Template', (group) => {
   })
 
   test('add macros to context', ({ assert }) => {
-    Template.macro('upper', (username) => {
+    Template.macro('upper' as any, (username: string) => {
       return username.toUpperCase()
     })
 
     const processor = new Processor()
     const compiler = new Compiler(loader, tags, processor, { cache: false })
     const template = new Template(compiler, {}, {}, processor)
+    // @ts-expect-error
     assert.equal(template['upper']('virk'), 'VIRK')
   })
 
   test('add getters to context', ({ assert }) => {
-    Template.getter('username', function username() {
+    Template.getter('username' as any, function username() {
       return 'virk'
     })
 
     const processor = new Processor()
     const compiler = new Compiler(loader, tags, processor, { cache: false })
     const template = new Template(compiler, {}, {}, processor)
+    // @ts-expect-error
     assert.equal(template['username'], 'virk')
   })
 

@@ -32,7 +32,9 @@ const processor = new Processor()
 test.group('Fixtures', (group) => {
   group.setup(() => {
     Object.keys(tags).forEach((tag) => {
+      // @ts-ignore
       if (tags[tag].boot) {
+        // @ts-ignore
         tags[tag].boot(Template)
       }
     })
@@ -80,7 +82,9 @@ test.group('Fixtures', (group) => {
 test.group('Fixtures | Cache', (group) => {
   group.setup(() => {
     Object.keys(tags).forEach((tag) => {
+      // @ts-ignore
       if (tags[tag].boot) {
+        // @ts-ignore
         tags[tag].boot(Template)
       }
     })

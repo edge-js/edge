@@ -8,7 +8,6 @@
  */
 
 import type { Token, TagToken } from 'edge-lexer/types'
-import type Macroable from '@poppinss/macroable'
 import type { Parser, EdgeBuffer } from 'edge-parser'
 import type { ParserTagDefinitionContract, ClaimTagFn } from 'edge-parser/types'
 
@@ -67,7 +66,10 @@ export interface LoaderContract {
 /**
  * Shape of template constructor
  */
-export interface TemplateConstructorContract extends Macroable {
+export interface TemplateConstructorContract {
+  macro: (this: any, name: string, value: (...args: any[]) => any) => void
+  getter: (this: any, name: string, accumulator: () => any, singleton?: boolean) => void
+
   new (
     compiler: CompilerContract,
     globals: any,

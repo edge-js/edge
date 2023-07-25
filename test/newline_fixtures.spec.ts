@@ -32,7 +32,9 @@ const compiler = new Compiler(loader, tags, processor)
 test.group('Newline Fixtures', (group) => {
   group.setup(() => {
     Object.keys(tags).forEach((tag) => {
+      // @ts-ignore
       if (tags[tag].boot) {
+        // @ts-ignore
         tags[tag].boot(Template)
       }
     })
