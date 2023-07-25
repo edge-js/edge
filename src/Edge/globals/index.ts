@@ -11,6 +11,9 @@ import { EdgeError } from 'edge-error'
 import stringify from 'js-stringify'
 import string from '@poppinss/utils/string'
 import { safeValue, escape } from '../../template/index.js'
+// @ts-ignore untyped module
+import inspect from '@poppinss/inspect'
+const { string: prettyPrintHtml } = inspect
 
 export const GLOBALS = {
   /**
@@ -28,8 +31,7 @@ export const GLOBALS = {
    * Inspect state
    */
   inspect: (value: any) => {
-    console.log('inspect', value)
-    return safeValue(require('@poppinss/inspect').string.html(value))
+    return safeValue(prettyPrintHtml.html(value))
   },
 
   /**

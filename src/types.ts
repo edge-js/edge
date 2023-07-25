@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import type { Token, TagToken } from 'edge-lexer'
+import type { Token, TagToken } from 'edge-lexer/types'
 import type Macroable from '@poppinss/macroable'
 import type { Parser, EdgeBuffer } from 'edge-parser'
 import type { ParserTagDefinitionContract, ClaimTagFn } from 'edge-parser/types'

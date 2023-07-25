@@ -9,8 +9,8 @@
 
 import { EdgeError } from 'edge-error'
 import { Parser, EdgeBuffer, Stack } from 'edge-parser'
-import { Token, TagToken, utils as lexerUtils } from 'edge-lexer'
-
+import type { Token, TagToken } from 'edge-lexer/types'
+import * as lexerUtils from 'edge-lexer/utils'
 import { Processor } from '../processor/index.js'
 import { CacheManager } from '../cache_manager/index.js'
 import type {

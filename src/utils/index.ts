@@ -7,10 +7,9 @@
  * file that was distributed with this source code.
  */
 
-import { TagToken } from 'edge-lexer'
+import type { TagToken } from 'edge-lexer/types'
 import { EdgeError } from 'edge-error'
 import { expressions as expressionsList, Parser } from 'edge-parser'
-import he, { EncodeOptions } from 'he'
 
 type ExpressionList = readonly (keyof typeof expressionsList)[]
 

@@ -12,7 +12,7 @@ import { dirname, join } from 'node:path'
 import dedent from 'dedent-js'
 import stringify from 'js-stringify'
 import { Filesystem } from '@poppinss/dev-utils'
-import { TagTypes, MustacheTypes } from 'edge-lexer'
+import { TagTypes, MustacheTypes } from 'edge-lexer/types'
 
 import { Loader } from '../src/loader/index.js'
 import { setTag } from '../src/tags/set.js'

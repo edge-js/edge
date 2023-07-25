@@ -54,9 +54,9 @@
     "@poppinss/inspect": "^1.0.1",
     "@poppinss/macroable": "1.0.0-7",
     "@poppinss/utils": "6.5.0-3",
-    "edge-error": "^3.0.0",
-    "edge-lexer": "^5.0.2",
-    "edge-parser": "^8.2.1",
+    "edge-error": "^4.0.0-0",
+    "edge-lexer": "^6.0.0-0",
+    "edge-parser": "^9.0.0-0",
     "he": "^1.2.0",
     "js-stringify": "^1.0.2",
     "stringify-attributes": "^2.0.0"

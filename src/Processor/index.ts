@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import { TagToken } from 'edge-lexer'
+import type { TagToken } from 'edge-lexer/types'
 import { ProcessorContract, TemplateContract } from '../types.js'
 
 /**

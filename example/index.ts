@@ -1,8 +1,9 @@
-import edge from '../index'
+import edge from '../index.js'
 import { join } from 'node:path'
 import { createServer } from 'node:http'
+import { getDirname } from '@poppinss/utils'
 
-edge.mount(join(__dirname, 'views'))
+edge.mount(join(getDirname(import.meta.url), 'views'))
 
 class Base {
   isModel = true
@@ -20,7 +21,7 @@ class User extends Base {
     lastLoginAt: null,
   }
 
-  parent: User
+  parent!: User
   get username() {
     return this.attributes.username
   }

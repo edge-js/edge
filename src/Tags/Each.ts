@@ -8,7 +8,7 @@
  */
 
 import lodash from '@poppinss/utils/lodash'
-import { utils as lexerUtils } from 'edge-lexer'
+import * as lexerUtils from 'edge-lexer/utils'
 import { Parser, expressions } from 'edge-parser'
 
 import { TagContract } from '../types.js'

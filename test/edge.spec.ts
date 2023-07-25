@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-await-expression-member */
 /*
  * edge
  *
