@@ -2,6 +2,9 @@
   "name": "edge.js",
   "description": "Template engine",
   "version": "5.5.1",
+  "engines": {
+    "node": ">=18.16.0"
+  },
   "main": "build/index.js",
   "type": "module",
   "files": [
