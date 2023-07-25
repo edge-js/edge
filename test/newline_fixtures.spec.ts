@@ -21,7 +21,7 @@ import { Processor } from '../src/processor/index.js'
 import { normalizeNewLines, normalizeFilename } from '../test_helpers/index.js'
 import { fileURLToPath } from 'node:url'
 
-const basePath = join(dirname(fileURLToPath(import.meta.url)), '../newline-fixtures')
+const basePath = join(dirname(fileURLToPath(import.meta.url)), '../newline_fixtures')
 
 const loader = new Loader()
 loader.mount('default', basePath)

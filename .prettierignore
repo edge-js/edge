@@ -5,7 +5,7 @@ config.json
 package.json
 *.html
 fixtures/*
-async-fixtures/*
-newline-fixtures/*
+async_fixtures/*
+newline_fixtures/*
 *.txt
 *.md
