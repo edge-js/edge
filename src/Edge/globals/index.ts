@@ -101,12 +101,10 @@ export const GLOBALS = {
   noCase: string.noCase,
   titleCase: string.titleCase,
   pluralize: string.pluralize,
-
-  // TODO
-  // toSentence: string.toSentence,
-  // prettyBytes: string.prettyBytes,
-  // toBytes: string.toBytes,
-  // prettyMs: string.prettyMs,
-  // toMs: string.toMs,
-  // ordinalize: string.ordinalize,
+  sentence: string.sentence,
+  prettyMs: string.milliseconds.format,
+  toMs: string.milliseconds.parse,
+  prettyBytes: string.bytes.format,
+  toBytes: string.bytes.parse,
+  ordinal: string.ordinal,
 } as Record<string, Function>
