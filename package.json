@@ -49,15 +49,16 @@
     "np": "^8.0.4",
     "prettier": "^3.0.0",
     "ts-node": "^10.9.1",
+    "tsup": "^7.1.0",
     "typescript": "^5.1.6"
   },
   "dependencies": {
     "@poppinss/inspect": "^1.0.1",
     "@poppinss/macroable": "1.0.0-7",
-    "@poppinss/utils": "6.5.0-3",
+    "@poppinss/utils": "6.5.0-5",
     "edge-error": "^4.0.0-0",
-    "edge-lexer": "^6.0.0-0",
-    "edge-parser": "^9.0.0-0",
+    "edge-lexer": "^6.0.0-1",
+    "edge-parser": "^9.0.0-1",
     "he": "^1.2.0",
     "js-stringify": "^1.0.2",
     "stringify-attributes": "^4.0.0"
