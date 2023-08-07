@@ -26,13 +26,15 @@
     "format": "prettier --write .",
     "release": "np",
     "version": "npm run build",
-    "sync-labels": "github-label-sync --labels .github/labels.json edge-js/parser",
+    "sync-labels": "github-label-sync --labels .github/labels.json edge-js/edge",
     "quick:test": "node --enable-source-maps --loader=ts-node/esm bin/test.ts"
   },
   "devDependencies": {
     "@adonisjs/eslint-config": "^1.1.8",
     "@adonisjs/prettier-config": "^1.1.8",
     "@adonisjs/tsconfig": "^1.1.8",
+    "@commitlint/cli": "^17.6.7",
+    "@commitlint/config-conventional": "^17.6.7",
     "@japa/assert": "2.0.0-1",
     "@japa/file-system": "2.0.0-1",
     "@japa/runner": "3.0.0-6",
@@ -54,11 +56,11 @@
   },
   "dependencies": {
     "@poppinss/inspect": "^1.0.1",
-    "@poppinss/macroable": "1.0.0-7",
-    "@poppinss/utils": "6.5.0-5",
+    "@poppinss/macroable": "^1.0.0-7",
+    "@poppinss/utils": "^6.5.0-5",
     "edge-error": "^4.0.0-0",
-    "edge-lexer": "^6.0.0-1",
-    "edge-parser": "^9.0.0-1",
+    "edge-lexer": "^6.0.0-4",
+    "edge-parser": "^9.0.0-2",
     "he": "^1.2.0",
     "js-stringify": "^1.0.2",
     "stringify-attributes": "^4.0.0"
@@ -72,11 +74,6 @@
   },
   "bugs": {
     "url": "https://github.com/poppinss/edge/issues"
-  },
-  "config": {
-    "commitizen": {
-      "path": "cz-conventional-changelog"
-    }
   },
   "directories": {
     "example": "examples",
