@@ -7,11 +7,80 @@
  * file that was distributed with this source code.
  */
 
+// @ts-expect-error untyped module
+import JSStringify from 'js-stringify'
+import classNames from 'classnames'
 import { EdgeError } from 'edge-error'
 import type { TagToken } from 'edge-lexer/types'
+import { find, html } from 'property-information'
 import { expressions as expressionsList, Parser } from 'edge-parser'
 
 type ExpressionList = readonly (keyof typeof expressionsList)[]
+
+/**
+ * Function to register custom properties
+ * with "property-information" package.
+ */
+function definePropertyInformation(property: string, value?: any) {
+  html.normal[property] = property
+  html.property[property] = {
+    attribute: property,
+    boolean: true,
+    property: property,
+    space: 'html',
+    booleanish: false,
+    commaOrSpaceSeparated: false,
+    commaSeparated: false,
+    spaceSeparated: false,
+    number: false,
+    overloadedBoolean: false,
+    defined: false,
+    mustUseProperty: false,
+    ...value,
+  }
+}
+
+definePropertyInformation('x-cloak')
+definePropertyInformation('x-ignore')
+definePropertyInformation('x-transition:enterstart', {
+  attribute: 'x-transition:enter-start',
+  property: 'x-transition:enterStart',
+  boolean: false,
+  spaceSeparated: true,
+  commaOrSpaceSeparated: true,
+})
+definePropertyInformation('x-transition:enterend', {
+  attribute: 'x-transition:enter-end',
+  property: 'x-transition:enterEnd',
+  boolean: false,
+  spaceSeparated: true,
+  commaOrSpaceSeparated: true,
+})
+definePropertyInformation('x-transition:leavestart', {
+  attribute: 'x-transition:leave-start',
+  property: 'x-transition:leaveStart',
+  boolean: false,
+  spaceSeparated: true,
+  commaOrSpaceSeparated: true,
+})
+definePropertyInformation('x-transition:leaveend', {
+  attribute: 'x-transition:leave-end',
+  property: 'x-transition:leaveEnd',
+  boolean: false,
+  spaceSeparated: true,
+  commaOrSpaceSeparated: true,
+})
+
+/**
+ * Alpine namespaces we handle with special
+ * rules when stringifying attributes
+ */
+const alpineNamespaces: Record<string, string> = {
+  x: 'x-',
+  xOn: 'x-on:',
+  xBind: 'x-bind:',
+  xTransition: 'x-transition:',
+}
 
 /**
  * Raise an `E_UNALLOWED_EXPRESSION` exception. Filename and expression is
@@ -219,4 +288,78 @@ export class StringifiedObject {
 
     return objectifyString.flush()
   }
+}
+
+/**
+ * Stringify an object to props to HTML attributes
+ */
+export function stringifyAttributes(props: any, namespace?: string): string {
+  const attributes = Object.keys(props)
+  if (attributes.length === 0) {
+    return ''
+  }
+
+  return `${attributes
+    .reduce<string[]>((result, key) => {
+      let value = props[key]
+      key = namespace ? `${namespace}${key}` : key
+
+      /**
+       * No value defined, remove attribute
+       */
+      if (!value) {
+        return result
+      }
+
+      /**
+       * Handle alpine properties separately
+       */
+      if (alpineNamespaces[key] && typeof value === 'object') {
+        result = result.concat(stringifyAttributes(value, alpineNamespaces[key]))
+        return result
+      }
+
+      const propInfo = find(html, key)
+      const attribute = propInfo.attribute
+
+      /**
+       * Ignore svg elements and their attributes
+       */
+      if (!propInfo || propInfo.space === 'svg') {
+        return result
+      }
+
+      /**
+       * Boolean properties
+       */
+      if (propInfo.boolean) {
+        result.push(attribute)
+        return result
+      }
+
+      /**
+       * Encoding rules for certain properties.
+       *
+       * - Class values can be objects with conditionals
+       * - x-data as an object will be converted to a JSON value
+       * - Arrays will be concatenated into a string list and html escaped
+       * - Non-booleanish and numeric properties will be html escaped
+       */
+      if (key === 'class') {
+        value = `"${classNames(value)}"`
+      } else if (key === 'x-data') {
+        value = typeof value === 'string' ? `"${value}"` : JSStringify(value)
+      } else if (Array.isArray(value)) {
+        value = `"${value.join(propInfo.commaSeparated ? ',' : ' ')}"`
+      } else if (!propInfo.booleanish && !propInfo.number) {
+        value = `"${String(value)}"`
+      }
+
+      /**
+       * Push attribute value string
+       */
+      result.push(`${attribute}=${value}`)
+      return result
+    }, [])
+    .join(' ')}`
 }

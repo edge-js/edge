@@ -20,6 +20,7 @@ import { Processor } from '../src/processor.js'
 import { includeTag } from '../src/tags/include.js'
 import { componentTag } from '../src/tags/component.js'
 import { Template, htmlSafe } from '../src/template.js'
+import dedent from 'dedent-js'
 
 const tags = { slot: slotTag, component: componentTag, include: includeTag }
 const fs = new Filesystem(join(path.dirname(fileURLToPath(import.meta.url)), 'views'))
@@ -247,5 +248,274 @@ test.group('Template', (group) => {
 
     const partailWithInlineVariables = template.compilePartial('foo', 'username')
     assert.equal(partailWithInlineVariables(template, {}, {}, 'virk').trim(), 'Hello virk')
+  })
+})
+
+test.group('Template | toAttributes', () => {
+  test('serialize object to HTML attributes', async ({ assert }) => {
+    const processor = new Processor()
+    const compiler = new Compiler(loader, tags, processor, { cache: false })
+    const template = new Template(compiler, {}, {}, processor)
+
+    const html = await template.renderRaw(
+      dedent`
+      <button {{
+        ({
+          disabled: false,
+          type: 'text',
+          ariaLabel: 'Buy products'
+        })
+      }}>
+        Click here
+      </button>
+    `,
+      {
+        hasError: false,
+      }
+    )
+
+    assert.equal(
+      html,
+      dedent`
+    <button type="text" aria-label="Buy products">
+      Click here
+    </button>
+    `
+    )
+  })
+
+  test('allow properties with no values', async ({ assert }) => {
+    const processor = new Processor()
+    const compiler = new Compiler(loader, tags, processor, { cache: false })
+    const template = new Template(compiler, {}, {}, processor)
+
+    const html = await template.renderRaw(
+      dedent`
+      <button {{
+        ({
+          disabled: true,
+          type: 'text',
+          ariaLabel: 'Buy products'
+        })
+      }}>
+        Click here
+      </button>
+    `,
+      {}
+    )
+
+    assert.equal(
+      html,
+      dedent`
+    <button disabled type="text" aria-label="Buy products">
+      Click here
+    </button>
+    `
+    )
+  })
+
+  test('allow non-standard attributes', async ({ assert }) => {
+    const processor = new Processor()
+    const compiler = new Compiler(loader, tags, processor, { cache: false })
+    const template = new Template(compiler, {}, {}, processor)
+
+    const html = await template.renderRaw(
+      dedent`
+      <button {{
+        ({
+          foo: 'bar'
+        })
+      }}>
+        Click here
+      </button>
+    `,
+      {
+        hasError: false,
+      }
+    )
+
+    assert.equal(
+      html,
+      dedent`
+    <button foo="bar">
+      Click here
+    </button>
+    `
+    )
+  })
+
+  test('define comma separated values', async ({ assert }) => {
+    const processor = new Processor()
+    const compiler = new Compiler(loader, tags, processor, { cache: false })
+    const template = new Template(compiler, {}, {}, processor)
+
+    const html = await template.renderRaw(
+      dedent`
+      <input {{
+        ({
+          accept: ["audio/*", "video/*", "image/*"]
+        })
+      }} />
+    `,
+      {}
+    )
+
+    assert.equal(
+      html,
+      dedent`
+      <input accept="audio/*,video/*,image/*" />
+    `
+    )
+  })
+
+  test('define alpine js attributes', async ({ assert }) => {
+    const processor = new Processor()
+    const compiler = new Compiler(loader, tags, processor, { cache: false })
+    const template = new Template(compiler, {}, {}, processor)
+
+    const html = await template.renderRaw(
+      dedent`
+      <div {{
+        ({
+          x: {
+            data: { open: false },
+            init: "console.log('Here I am')",
+            show: 'open',
+          }
+        })
+      }}>
+      </div>
+    `,
+      {}
+    )
+
+    assert.equal(
+      html,
+      dedent`
+      <div x-data={"open":false} x-init="console.log('Here I am')" x-show="open">
+      </div>
+    `
+    )
+  })
+
+  test('define alpine js boolean attributes', async ({ assert }) => {
+    const processor = new Processor()
+    const compiler = new Compiler(loader, tags, processor, { cache: false })
+    const template = new Template(compiler, {}, {}, processor)
+
+    const html = await template.renderRaw(
+      dedent`
+      <div {{
+        ({
+          x: {
+            cloak: true,
+            ignore: false
+          }
+        })
+      }}>
+      </div>
+    `,
+      {}
+    )
+
+    assert.equal(
+      html,
+      dedent`
+      <div x-cloak>
+      </div>
+    `
+    )
+  })
+
+  test('define alpine js event listeners', async ({ assert }) => {
+    const processor = new Processor()
+    const compiler = new Compiler(loader, tags, processor, { cache: false })
+    const template = new Template(compiler, {}, {}, processor)
+
+    const html = await template.renderRaw(
+      dedent`
+      <div {{
+        ({
+          xOn: {
+            click: "alert($event.target.getAttribute('message'))",
+            'keyup.enter': "alert('Submitted!')",
+            'keyup.page-down': "alert('Submitted!')"
+          }
+        })
+      }}>
+      </div>
+    `,
+      {}
+    )
+
+    assert.equal(
+      html,
+      dedent`
+      <div x-on:click="alert($event.target.getAttribute('message'))" x-on:keyup.enter="alert('Submitted!')" x-on:keyup.page-down="alert('Submitted!')">
+      </div>
+    `
+    )
+  })
+
+  test('define alpinejs x-bind properties', async ({ assert }) => {
+    const processor = new Processor()
+    const compiler = new Compiler(loader, tags, processor, { cache: false })
+    const template = new Template(compiler, {}, {}, processor)
+
+    const html = await template.renderRaw(
+      dedent`
+      <div {{
+        ({
+          xBind: {
+            class: "{ 'hidden': !show }",
+            style: "{ color: 'red', display: 'flex' }"
+          }
+        })
+      }}>
+      </div>
+    `,
+      {}
+    )
+
+    assert.equal(
+      html,
+      dedent`
+      <div x-bind:class="{ 'hidden': !show }" x-bind:style="{ color: 'red', display: 'flex' }">
+      </div>
+    `
+    )
+  })
+
+  test('define alpinejs transition properties', async ({ assert }) => {
+    const processor = new Processor()
+    const compiler = new Compiler(loader, tags, processor, { cache: false })
+    const template = new Template(compiler, {}, {}, processor)
+
+    const html = await template.renderRaw(
+      dedent`
+      <div {{
+        ({
+          xTransition: {
+            enter: "transition ease-out duration-300",
+            enterStart: "opacity-0 scale-90",
+            enterEnd: "opacity-100 scale-100",
+            leave: "transition ease-in duration-300",
+            leaveStart: "opacity-100 scale-100",
+            leaveEnd: "opacity-0 scale-90",
+          }
+        })
+      }}>
+      </div>
+    `,
+      {}
+    )
+
+    assert.equal(
+      html,
+      dedent`
+      <div x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-90">
+      </div>
+    `
+    )
   })
 })

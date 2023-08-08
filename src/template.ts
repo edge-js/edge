@@ -11,11 +11,11 @@ import he from 'he'
 import { EdgeError } from 'edge-error'
 import lodash from '@poppinss/utils/lodash'
 import Macroable from '@poppinss/macroable'
-import stringifyAttributes from 'stringify-attributes'
 
 import { Compiler } from './compiler.js'
 import { Processor } from './processor.js'
 import { Props } from './component/props.js'
+import { stringifyAttributes } from './utils.js'
 import type { CompiledTemplate } from './types.js'
 
 /**

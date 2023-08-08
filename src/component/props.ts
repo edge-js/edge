@@ -8,10 +8,10 @@
  */
 
 import lodash from '@poppinss/utils/lodash'
-import stringifyAttributes from 'stringify-attributes'
 
 import { htmlSafe } from '../template.js'
 import { PropsContract } from '../types.js'
+import { stringifyAttributes } from '../utils.js'
 
 /**
  * Class to ease interactions with component props
