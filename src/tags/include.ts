@@ -1,5 +1,5 @@
 /*
- * edge
+ * edge.js
  *
  * (c) AdonisJS
  *
