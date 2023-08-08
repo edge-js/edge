@@ -9,7 +9,7 @@
 
 import { test } from '@japa/runner'
 import { Parser, Stack } from 'edge-parser'
-import { StringifiedObject } from '../src/stringified_object/index.js'
+import { StringifiedObject } from '../src/stringified_object.js'
 
 /**
  * Sample loc
@@ -63,6 +63,7 @@ test.group('StringifiedObject | fromAcornAst', () => {
       async: false,
       statePropertyName: 'state',
       escapeCallPath: 'escape',
+      toAttributesCallPath: 'toAttributes',
     })
     const expression = parser.utils.transformAst(
       parser.utils.generateAST("({ username: 'virk' })", LOC, 'eval.edge'),
@@ -79,6 +80,7 @@ test.group('StringifiedObject | fromAcornAst', () => {
       async: false,
       statePropertyName: 'state',
       escapeCallPath: 'escape',
+      toAttributesCallPath: 'toAttributes',
     })
     const expression = parser.utils.transformAst(
       parser.utils.generateAST('({ username })', LOC, 'eval.edge'),
@@ -95,6 +97,7 @@ test.group('StringifiedObject | fromAcornAst', () => {
       async: false,
       statePropertyName: 'state',
       escapeCallPath: 'escape',
+      toAttributesCallPath: 'toAttributes',
     })
     const expression = parser.utils.transformAst(
       parser.utils.generateAST('({ [username]: username })', LOC, 'eval.edge'),
@@ -111,6 +114,7 @@ test.group('StringifiedObject | fromAcornAst', () => {
       async: false,
       statePropertyName: 'state',
       escapeCallPath: 'escape',
+      toAttributesCallPath: 'toAttributes',
     })
     const expression = parser.utils.transformAst(
       parser.utils.generateAST("({ username: 'virk', age: 22 })", LOC, 'eval.edge'),
@@ -128,6 +132,7 @@ test.group('StringifiedObject | fromAcornAst', () => {
       async: false,
       statePropertyName: 'state',
       escapeCallPath: 'escape',
+      toAttributesCallPath: 'toAttributes',
     })
     const expression = parser.utils.transformAst(
       parser.utils.generateAST('({ username, age: 22 })', LOC, 'eval.edge'),
@@ -144,6 +149,7 @@ test.group('StringifiedObject | fromAcornAst', () => {
       async: false,
       statePropertyName: 'state',
       escapeCallPath: 'escape',
+      toAttributesCallPath: 'toAttributes',
     })
     const expression = parser.utils.transformAst(
       parser.utils.generateAST("(title = 'Hello')", LOC, 'eval.edge'),
@@ -160,6 +166,7 @@ test.group('StringifiedObject | fromAcornAst', () => {
       async: false,
       statePropertyName: 'state',
       escapeCallPath: 'escape',
+      toAttributesCallPath: 'toAttributes',
     })
     const expression = parser.utils.transformAst(
       parser.utils.generateAST("(title = 'Hello', body = 'Some content')", LOC, 'eval.edge'),

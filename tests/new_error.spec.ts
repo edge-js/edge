@@ -7,19 +7,19 @@
  * file that was distributed with this source code.
  */
 
-import { test } from '@japa/runner'
-import { dirname, join } from 'node:path'
 import dedent from 'dedent-js'
+import { test } from '@japa/runner'
+import { fileURLToPath } from 'node:url'
+import { dirname, join } from 'node:path'
 import { Filesystem } from '@poppinss/dev-utils'
 
-import { Loader } from '../src/loader/index.js'
-import { Compiler } from '../src/compiler/index.js'
-import { newError } from '../src/tags/index.js'
-import { Processor } from '../src/processor/index.js'
-import { Template } from '../src/template/index.js'
+import { Loader } from '../src/loader.js'
+import { Compiler } from '../src/compiler.js'
+import { newError } from '../src/tags/main.js'
+import { Processor } from '../src/processor.js'
+import { Template } from '../src/template.js'
 
 import './assert_extend.js'
-import { fileURLToPath } from 'node:url'
 
 const tags = { newError }
 const fs = new Filesystem(join(dirname(fileURLToPath(import.meta.url)), 'views'))

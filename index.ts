@@ -8,7 +8,7 @@
  */
 
 import { Edge } from './src/edge/index.js'
-import { safeValue } from './src/template/index.js'
+import { safeValue } from './src/template.js'
 import { GLOBALS } from './src/edge/globals/index.js'
 
 /**

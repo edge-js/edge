@@ -7,14 +7,17 @@
  * file that was distributed with this source code.
  */
 
-import Macroable from '@poppinss/macroable'
+import he from 'he'
 import { EdgeError } from 'edge-error'
 import lodash from '@poppinss/utils/lodash'
-import he from 'he'
+import Macroable from '@poppinss/macroable'
+import stringifyAttributes from 'stringify-attributes'
 
-import { Processor } from '../processor/index.js'
-import { Props } from '../component/props.js'
-import type { CompilerContract, TemplateContract } from '../types.js'
+import { Compiler } from './compiler.js'
+import { Processor } from './processor.js'
+import { Props } from './component/props.js'
+import { CompiledTemplate } from './types.js'
+
 /**
  * An instance of this class passed to the escape
  * method ensures that underlying value is never
@@ -34,7 +37,7 @@ export function escape(input: any): string {
 /**
  * Mark value as safe and not to be escaped
  */
-export function safeValue(value: string) {
+export function htmlSafe(value: string) {
   return new SafeValue(value)
 }
 
@@ -43,76 +46,49 @@ export function safeValue(value: string) {
  * of template is passed during runtime to render `dynamic partials`
  * and `dynamic components`.
  */
-export class Template extends Macroable implements TemplateContract {
-  /**
-   * Required by Macroable
-   */
-  protected static macros = {}
-  protected static getters = {}
+export class Template extends Macroable {
+  #compiler: Compiler
+  #processor: Processor
 
   /**
    * The shared state is used to hold the globals and locals,
    * since it is shared with components too.
    */
-  private sharedState: any
+  #sharedState: Record<string, any>
 
-  constructor(
-    private compiler: CompilerContract,
-    globals: any,
-    locals: any,
-    private processor: Processor
-  ) {
+  constructor(compiler: Compiler, globals: any, locals: any, processor: Processor) {
     super()
-    this.sharedState = lodash.merge({}, globals, locals)
-  }
-
-  /**
-   * Wraps template to a function
-   */
-  private wrapToFunction(template: string, ...localVariables: string[]) {
-    const args = ['template', 'state', '$context'].concat(localVariables)
-
-    if (this.compiler.async) {
-      return new Function(
-        '',
-        `return async function template (${args.join(',')}) { ${template} }`
-      )()
-    }
-
-    return new Function('', `return function template (${args.join(',')}) { ${template} }`)()
+    this.#compiler = compiler
+    this.#processor = processor
+    this.#sharedState = lodash.merge({}, globals, locals)
   }
 
   /**
    * Trims top and bottom new lines from the content
    */
-  private trimTopBottomNewLines(value: string) {
+  #trimTopBottomNewLines(value: string) {
     return value.replace(/^\n|^\r\n/, '').replace(/\n$|\r\n$/, '')
   }
 
   /**
    * Render a compiled template with state
    */
-  private renderCompiled(compiledTemplate: string, state: any) {
-    const templateState = Object.assign({}, this.sharedState, state)
+  #renderCompiled(compiledTemplate: CompiledTemplate, state: any) {
+    const templateState = Object.assign({}, this.#sharedState, state)
     const $context = {}
 
     /**
      * Process template as a promise.
      */
-    if (this.compiler.async) {
-      return this.wrapToFunction(compiledTemplate)(this, templateState, $context).then(
-        (output: string) => {
-          output = this.trimTopBottomNewLines(output)
-          return this.processor.executeOutput({ output, template: this, state: templateState })
-        }
-      )
+    if (this.#compiler.async) {
+      return compiledTemplate(this, templateState, $context).then((output: string) => {
+        output = this.#trimTopBottomNewLines(output)
+        return this.#processor.executeOutput({ output, template: this, state: templateState })
+      })
     }
 
-    const output = this.trimTopBottomNewLines(
-      this.wrapToFunction(compiledTemplate)(this, templateState, $context)
-    )
-
-    return this.processor.executeOutput({ output, template: this, state: templateState })
+    const output = this.#trimTopBottomNewLines(compiledTemplate(this, templateState, $context))
+    return this.#processor.executeOutput({ output, template: this, state: templateState })
   }
 
   /**
@@ -125,9 +101,8 @@ export class Template extends Macroable implements TemplateContract {
    * partialFn(template, state, ctx)
    * ```
    */
-  compilePartial(templatePath: string, ...localVariables: string[]): Function {
-    const { template: compiledTemplate } = this.compiler.compile(templatePath, localVariables, true)
-    return this.wrapToFunction(compiledTemplate, ...localVariables)
+  compilePartial(templatePath: string, ...localVariables: string[]): CompiledTemplate {
+    return this.#compiler.compile(templatePath, localVariables)
   }
 
   /**
@@ -140,9 +115,8 @@ export class Template extends Macroable implements TemplateContract {
    * componentFn(template, template.getComponentState(props, slots, caller), ctx)
    * ```
    */
-  compileComponent(templatePath: string, ...localVariables: string[]): string {
-    const { template: compiledTemplate } = this.compiler.compile(templatePath, localVariables)
-    return this.wrapToFunction(compiledTemplate, ...localVariables)
+  compileComponent(templatePath: string): CompiledTemplate {
+    return this.#compiler.compile(templatePath)
   }
 
   /**
@@ -153,7 +127,7 @@ export class Template extends Macroable implements TemplateContract {
     slots: { [key: string]: any },
     caller: { filename: string; line: number; col: number }
   ) {
-    return Object.assign({}, this.sharedState, props, {
+    return Object.assign({}, this.#sharedState, props, {
       $slots: slots,
       $caller: caller,
       $props: new Props(props),
@@ -168,8 +142,8 @@ export class Template extends Macroable implements TemplateContract {
    * ```
    */
   render<T extends Promise<string> | string>(template: string, state: any): T {
-    let { template: compiledTemplate } = this.compiler.compile(template)
-    return this.renderCompiled(compiledTemplate, state)
+    let compiledTemplate = this.#compiler.compile(template)
+    return this.#renderCompiled(compiledTemplate, state)
   }
 
   /**
@@ -184,8 +158,8 @@ export class Template extends Macroable implements TemplateContract {
     state: any,
     templatePath?: string
   ): T {
-    let { template: compiledTemplate } = this.compiler.compileRaw(contents, templatePath)
-    return this.renderCompiled(compiledTemplate, state)
+    let compiledTemplate = this.#compiler.compileRaw(contents, templatePath)
+    return this.#renderCompiled(compiledTemplate, state)
   }
 
   /**
@@ -194,6 +168,13 @@ export class Template extends Macroable implements TemplateContract {
    */
   escape(input: any): string {
     return escape(input)
+  }
+
+  /**
+   * Converts an object to HTML attributes
+   */
+  toAttributes(attributes: Record<string, any>) {
+    return stringifyAttributes(attributes)
   }
 
   /**

@@ -12,7 +12,7 @@ import { expressions } from 'edge-parser'
 
 import { TagContract } from '../types.js'
 import { ALLOWED_EXPRESSION, getRenderExpression } from './include.js'
-import { unallowedExpression, isSubsetOf, parseJsArg, isNotSubsetOf } from '../utils/index.js'
+import { unallowedExpression, isSubsetOf, parseJsArg, isNotSubsetOf } from '../utils.js'
 
 /**
  * Include tag is used to include partials in the same scope of the parent

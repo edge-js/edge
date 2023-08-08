@@ -7,13 +7,13 @@
  * file that was distributed with this source code.
  */
 
-import type { LoaderTemplate, CacheManagerContract } from '../types.js'
+import type { CacheManagerContract, CompiledTemplate } from './types.js'
 
 /**
  * In memory cache manager to cache pre-compiled templates.
  */
 export class CacheManager implements CacheManagerContract {
-  #cacheStore: Map<string, LoaderTemplate> = new Map()
+  #cacheStore: Map<string, CompiledTemplate> = new Map()
 
   constructor(public enabled: boolean) {}
 
@@ -29,7 +29,7 @@ export class CacheManager implements CacheManagerContract {
    * Returns the template from the cache. If caching is disabled,
    * then it will return undefined.
    */
-  get(absPath: string): undefined | LoaderTemplate {
+  get(absPath: string): undefined | CompiledTemplate {
     if (!this.enabled) {
       return
     }
@@ -41,7 +41,7 @@ export class CacheManager implements CacheManagerContract {
    * Set's the template path and the payload to the cache. If
    * cache is disabled, then this function results in a noop.
    */
-  set(absPath: string, payload: LoaderTemplate) {
+  set(absPath: string, payload: CompiledTemplate) {
     if (!this.enabled) {
       return
     }

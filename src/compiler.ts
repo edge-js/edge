@@ -8,25 +8,38 @@
  */
 
 import { EdgeError } from 'edge-error'
+import * as lexerUtils from 'edge-lexer/utils'
 import { Parser, EdgeBuffer, Stack } from 'edge-parser'
 import type { Token, TagToken } from 'edge-lexer/types'
-import * as lexerUtils from 'edge-lexer/utils'
-import { Processor } from '../processor/index.js'
-import { CacheManager } from '../cache_manager/index.js'
+
+import { Processor } from './processor.js'
+import { CacheManager } from './cache_manager.js'
 import type {
   ClaimTagFn,
   TagsContract,
   LoaderContract,
-  LoaderTemplate,
   CompilerOptions,
-  CompilerContract,
-} from '../types.js'
+  CompiledTemplate,
+} from './types.js'
+
+const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor
 
 /**
  * Compiler is to used to compile templates using the `edge-parser`. Along with that
  * it natively merges the contents of a layout with a parent template.
  */
-export class Compiler implements CompilerContract {
+export class Compiler {
+  /**
+   * The variables someone can access inside templates. All other
+   * variables will get prefixed with `state` property name
+   */
+  #inlineVariables: string[] = ['$filename', 'state', '$context']
+
+  /**
+   * A fixed set of params to pass to the template every time.
+   */
+  #templateParams = ['template', 'state', '$context']
+
   #claimTagFn?: ClaimTagFn
   #loader: LoaderContract
   #tags: TagsContract
@@ -38,7 +51,7 @@ export class Compiler implements CompilerContract {
   cacheManager: CacheManager
 
   /**
-   * Know if compiler is compiling for the async mode or not
+   * Know if compiler is compiling in the async mode or not
    */
   async: boolean
 
@@ -183,7 +196,8 @@ export class Compiler implements CompilerContract {
       async: this.async,
       statePropertyName: 'state',
       escapeCallPath: ['template', 'escape'],
-      localVariables: ['$filename', 'state', '$context'],
+      toAttributesCallPath: ['template', 'toAttributes'],
+      localVariables: this.#inlineVariables,
       onTag: (tag) => this.#processor.executeTag({ tag, path: templatePath }),
     })
 
@@ -207,6 +221,19 @@ export class Compiler implements CompilerContract {
       outputVar: 'out',
       rethrowCallPath: ['template', 'reThrow'],
     })
+  }
+
+  /**
+   * Wraps template output to a function along with local variables
+   */
+  #wrapToFunction(template: string, localVariables?: string[]): CompiledTemplate {
+    const args = localVariables ? this.#templateParams.concat(localVariables) : this.#templateParams
+
+    if (this.async) {
+      return new AsyncFunction(...args, template)
+    }
+
+    return new Function(...args, template) as CompiledTemplate
   }
 
   /**
@@ -252,9 +279,9 @@ export class Compiler implements CompilerContract {
    * compiler.compile('welcome')
    * ```
    */
-  compile(templatePath: string, localVariables?: string[], skipCache = false): LoaderTemplate {
+  compile(templatePath: string, localVariables?: string[]): CompiledTemplate {
     const absPath = this.#loader.makePath(templatePath)
-    let cachedResponse = skipCache ? null : this.cacheManager.get(absPath)
+    let cachedResponse = localVariables ? null : this.cacheManager.get(absPath)
 
     /**
      * Process the template and cache it
@@ -269,20 +296,23 @@ export class Compiler implements CompilerContract {
       const templateTokens = this.tokenize(absPath, parser)
       templateTokens.forEach((token) => parser.processToken(token, buffer))
 
-      const template = buffer.flush()
-      if (!skipCache) {
-        this.cacheManager.set(absPath, { template })
+      /**
+       * Processing template via hook
+       */
+      const template = this.#processor.executeCompiled({
+        path: absPath,
+        compiled: buffer.flush(),
+      })
+
+      const compiledTemplate = this.#wrapToFunction(template, localVariables)
+      if (!localVariables) {
+        this.cacheManager.set(absPath, compiledTemplate)
       }
 
-      cachedResponse = { template }
+      cachedResponse = compiledTemplate
     }
 
-    const template = this.#processor.executeCompiled({
-      path: absPath,
-      compiled: cachedResponse.template,
-    })
-
-    return { template }
+    return cachedResponse!
   }
 
   /**
@@ -291,10 +321,10 @@ export class Compiler implements CompilerContract {
    * handles layouts.
    *
    * ```js
-   * compiler.compile('welcome')
+   * compiler.compileRaw('welcome')
    * ```
    */
-  compileRaw(contents: string, templatePath: string = 'eval.edge'): LoaderTemplate {
+  compileRaw(contents: string, templatePath: string = 'eval.edge'): CompiledTemplate {
     const parser = this.#getParserFor(templatePath)
     const buffer = this.#getBufferFor(templatePath)
     const templateTokens = this.tokenizeRaw(contents, templatePath, parser)
@@ -306,6 +336,6 @@ export class Compiler implements CompilerContract {
       compiled: buffer.flush(),
     })
 
-    return { template }
+    return this.#wrapToFunction(template)
   }
 }

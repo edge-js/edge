@@ -7,11 +7,11 @@
  * file that was distributed with this source code.
  */
 
-import { test } from '@japa/runner'
 import { join } from 'node:path'
-
-import { Loader } from '../src/loader/index.js'
+import { test } from '@japa/runner'
 import { getDirname } from '@poppinss/utils'
+
+import { Loader } from '../src/loader.js'
 
 const dirnameEsm = getDirname(import.meta.url)
 

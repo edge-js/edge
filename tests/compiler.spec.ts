@@ -8,18 +8,18 @@
  */
 
 import './assert_extend.js'
-import { test } from '@japa/runner'
-import { join } from 'node:path'
 import dedent from 'dedent-js'
+import { join } from 'node:path'
+import { test } from '@japa/runner'
 // @ts-ignore untyped module
 import stringify from 'js-stringify'
-import { TagTypes, MustacheTypes } from 'edge-lexer/types'
+import { TagTypes, MustacheTypes } from 'edge-lexer'
 
-import { Loader } from '../src/loader/index.js'
+import { Loader } from '../src/loader.js'
 import { setTag } from '../src/tags/set.js'
-import { Template } from '../src/template/index.js'
-import { Compiler } from '../src/compiler/index.js'
-import { Processor } from '../src/processor/index.js'
+import { Template } from '../src/template.js'
+import { Compiler } from '../src/compiler.js'
+import { Processor } from '../src/processor.js'
 import { layoutTag } from '../src/tags/layout.js'
 import { sectionTag } from '../src/tags/section.js'
 import { componentTag } from '../src/tags/component.js'
@@ -33,11 +33,13 @@ test.group('Compiler | Cache', () => {
     loader.mount('default', fs.basePath)
 
     const compiler = new Compiler(loader, {}, new Processor())
-    const { template } = compiler.compile('foo')
+    const compiledTemplate = compiler.compile('foo')
 
     assert.stringEqual(
-      template,
-      normalizeNewLines(dedent`let out = "";
+      compiledTemplate.toString(),
+      normalizeNewLines(dedent`function anonymous(template,state,$context
+      ) {
+      let out = "";
       let $lineNumber = 1;
       let $filename = ${stringify(join(fs.basePath, 'foo.edge'))};
       try {
@@ -46,7 +48,8 @@ test.group('Compiler | Cache', () => {
       } catch (error) {
       template.reThrow(error, $filename, $lineNumber);
       }
-      return out;`)
+      return out;
+      }`)
     )
   })
 
@@ -57,9 +60,9 @@ test.group('Compiler | Cache', () => {
     loader.mount('default', fs.basePath)
 
     const compiler = new Compiler(loader, {}, new Processor(), { cache: true })
-    assert.equal(
-      compiler.compile('foo').template,
-      compiler.cacheManager.get(join(fs.basePath, 'foo.edge'))!.template
+    assert.strictEqual(
+      compiler.compile('foo'),
+      compiler.cacheManager.get(join(fs.basePath, 'foo.edge'))
     )
   })
 
@@ -137,7 +140,7 @@ test.group('Compiler | Tokenize', () => {
     ])
   })
 
-  test('during tokenize, merge @set tags of a given layout', async ({ assert, fs }) => {
+  test('during tokenize merge set tags of a given layout', async ({ assert, fs }) => {
     await fs.create(
       'master.edge',
       dedent`
@@ -254,7 +257,7 @@ test.group('Compiler | Tokenize', () => {
     }
   })
 
-  test('during tokenize, merge @section tags of a nested layouts', async ({ assert, fs }) => {
+  test('during tokenize merge @section tags of a nested layouts', async ({ assert, fs }) => {
     await fs.create(
       'super-master.edge',
       dedent`
@@ -448,8 +451,10 @@ test.group('Compiler | Compile', () => {
     const compiler = new Compiler(loader, tags, new Processor())
 
     assert.stringEqual(
-      compiler.compile('index.edge').template,
-      normalizeNewLines(dedent`let out = "";
+      compiler.compile('index.edge').toString(),
+      normalizeNewLines(dedent`function anonymous(template,state,$context
+      ) {
+      let out = "";
       let $lineNumber = 1;
       let $filename = ${stringify(join(fs.basePath, 'index.edge'))};
       try {
@@ -464,7 +469,7 @@ test.group('Compiler | Compile', () => {
       template.reThrow(error, $filename, $lineNumber);
       }
       return out;
-    `)
+      }`)
     )
   })
 
@@ -586,8 +591,8 @@ test.group('Compiler | Compile', () => {
     )
 
     try {
-      const fn = compiler.compile('index.edge').template
-      new Function('template', 'state', fn)(new Template(compiler, {}, {}, new Processor()), {})
+      const fn = compiler.compile('index.edge')
+      fn(new Template(compiler, {}, {}, new Processor()), {}, {})
     } catch (error) {
       assert.equal(error.message, 'getUserName is not a function')
       assert.equal(error.filename, join(fs.basePath, 'master.edge'))
@@ -633,8 +638,8 @@ test.group('Compiler | Compile', () => {
     )
 
     try {
-      const fn = compiler.compile('index.edge').template
-      new Function('template', 'state', fn)(new Template(compiler, {}, {}, new Processor()), {})
+      const fn = compiler.compile('index.edge')
+      fn(new Template(compiler, {}, {}, new Processor()), {}, {})
     } catch (error) {
       assert.equal(error.message, 'getContent is not a function')
       assert.equal(error.filename, join(fs.basePath, 'index.edge'))
@@ -664,13 +669,19 @@ test.group('Compiler | Compile Raw', () => {
     const compiler = new Compiler(loader, tags, new Processor())
 
     assert.stringEqual(
-      compiler.compileRaw(dedent`
+      compiler
+        .compileRaw(
+          dedent`
       @layout('master')
       @section('content')
         {{ content }}
       @endsection
-    `).template,
-      normalizeNewLines(dedent`let out = "";
+    `
+        )
+        .toString(),
+      normalizeNewLines(dedent`function anonymous(template,state,$context
+      ) {
+      let out = "";
       let $lineNumber = 1;
       let $filename = ${stringify('eval.edge')};
       try {
@@ -685,7 +696,7 @@ test.group('Compiler | Compile Raw', () => {
       template.reThrow(error, $filename, $lineNumber);
       }
       return out;
-    `)
+      }`)
     )
   })
 
@@ -787,13 +798,15 @@ test.group('Compiler | Compile Raw', () => {
     )
 
     try {
-      const fn = compiler.compileRaw(dedent`
+      const fn = compiler.compileRaw(
+        dedent`
       @layout('master')
       @section('content')
         {{ content }}
       @endsection
-    `).template
-      new Function('template', 'state', fn)(new Template(compiler, {}, {}, new Processor()), {})
+    `
+      )
+      fn(new Template(compiler, {}, {}, new Processor()), {}, {})
     } catch (error) {
       assert.equal(error.message, 'getUserName is not a function')
       assert.equal(error.filename, join(fs.basePath, 'master.edge'))
@@ -829,13 +842,15 @@ test.group('Compiler | Compile Raw', () => {
     )
 
     try {
-      const fn = compiler.compileRaw(dedent`
+      const fn = compiler.compileRaw(
+        dedent`
       @layout('master')
       @section('content')
         {{ getContent() }}
       @endsection
-      `).template
-      new Function('template', 'state', fn)(new Template(compiler, {}, {}, new Processor()), {})
+      `
+      )
+      fn(new Template(compiler, {}, {}, new Processor()), {}, {})
     } catch (error) {
       assert.equal(error.message, 'getContent is not a function')
       assert.equal(error.filename, 'eval.edge')
@@ -901,8 +916,10 @@ test.group('Compiler | Processor', () => {
     )
 
     assert.stringEqual(
-      compiler.compile('index.edge').template,
-      normalizeNewLines(dedent`let out = "";
+      compiler.compile('index.edge').toString(),
+      normalizeNewLines(dedent`function anonymous(template,state,$context
+      ) {
+      let out = "";
       let $lineNumber = 1;
       let $filename = ${stringify(join(fs.basePath, 'index.edge'))};
       try {
@@ -911,7 +928,7 @@ test.group('Compiler | Processor', () => {
       template.reThrow(error, $filename, $lineNumber);
       }
       return out;
-    `)
+      }`)
     )
   })
 
@@ -1049,11 +1066,17 @@ test.group('Compiler | Processor', () => {
       processor
     )
 
-    assert.equal(compiler.compile('index.edge').template, 'bar')
+    assert.equal(
+      compiler.compile('index.edge').toString(),
+      dedent`function anonymous(template,state,$context
+      ) {
+      bar
+      }`
+    )
   })
 
-  test('run compiled processor function even when template is cached', async ({ assert, fs }) => {
-    assert.plan(6)
+  test('do not run compiled function when template is called', async ({ assert, fs }) => {
+    assert.plan(2)
     await fs.create('index.edge', dedent`Hello`)
 
     const loader = new Loader()
@@ -1090,50 +1113,6 @@ test.group('Compiler | Processor', () => {
     compiler.compile('index.edge')
     compiler.compile('index.edge')
     compiler.compile('index.edge')
-  })
-
-  test('do not mutate cache when compiled processor function returns a different value', async ({
-    assert,
-    fs,
-  }) => {
-    assert.plan(9)
-    await fs.create('index.edge', dedent`Hello`)
-
-    const loader = new Loader()
-    loader.mount('default', fs.basePath)
-
-    const processor = new Processor()
-    processor.process('compiled', ({ compiled, path }) => {
-      assert.stringEqual(
-        compiled,
-        normalizeNewLines(dedent`let out = "";
-		      let $lineNumber = 1;
-		      let $filename = ${stringify(join(fs.basePath, 'index.edge'))};
-		      try {
-		      out += "Hello";
-		      } catch (error) {
-		      template.reThrow(error, $filename, $lineNumber);
-		      }
-		      return out;
-		    `)
-      )
-      assert.equal(path, join(fs.basePath, 'index.edge'))
-      return 'foo'
-    })
-
-    const compiler = new Compiler(
-      loader,
-      {
-        section: sectionTag,
-        layout: layoutTag,
-      },
-      processor,
-      { cache: true }
-    )
-
-    assert.equal(compiler.compile('index.edge').template, 'foo')
-    assert.equal(compiler.compile('index.edge').template, 'foo')
-    assert.equal(compiler.compile('index.edge').template, 'foo')
   })
 
   test('run raw processor function for layouts', async ({ assert, fs }) => {
@@ -1200,8 +1179,10 @@ test.group('Compiler | Processor', () => {
     )
 
     assert.stringEqual(
-      compiler.compile('index.edge').template,
-      normalizeNewLines(dedent`let out = "";
+      compiler.compile('index.edge').toString(),
+      normalizeNewLines(dedent`function anonymous(template,state,$context
+      ) {
+      let out = "";
       let $lineNumber = 1;
       let $filename = ${stringify(join(fs.basePath, 'index.edge'))};
       try {
@@ -1216,7 +1197,7 @@ test.group('Compiler | Processor', () => {
       template.reThrow(error, $filename, $lineNumber);
       }
       return out;
-    `)
+      }`)
     )
   })
 
@@ -1262,8 +1243,7 @@ test.group('Compiler | Processor', () => {
 		      } catch (error) {
 		      template.reThrow(error, $filename, $lineNumber);
 		      }
-		      return out;
-		    `)
+		      return out;`)
       )
       assert.equal(path, join(fs.basePath, 'index.edge'))
     })
@@ -1278,8 +1258,10 @@ test.group('Compiler | Processor', () => {
     )
 
     assert.stringEqual(
-      compiler.compile('index.edge').template,
-      normalizeNewLines(dedent`let out = "";
+      compiler.compile('index.edge').toString(),
+      normalizeNewLines(dedent`function anonymous(template,state,$context
+      ) {
+      let out = "";
       let $lineNumber = 1;
       let $filename = ${stringify(join(fs.basePath, 'index.edge'))};
       try {
@@ -1294,7 +1276,7 @@ test.group('Compiler | Processor', () => {
       template.reThrow(error, $filename, $lineNumber);
       }
       return out;
-    `)
+      }`)
     )
   })
 
@@ -1341,8 +1323,10 @@ test.group('Compiler | Processor', () => {
     })
 
     assert.stringEqual(
-      compiler.compile('index.edge').template,
-      normalizeNewLines(dedent`let out = "";
+      compiler.compile('index.edge').toString(),
+      normalizeNewLines(dedent`function anonymous(template,state,$context
+      ) {
+      let out = "";
       let $lineNumber = 1;
       let $filename = ${stringify(join(fs.basePath, 'index.edge'))};
       try {
@@ -1351,7 +1335,7 @@ test.group('Compiler | Processor', () => {
       template.reThrow(error, $filename, $lineNumber);
       }
       return out;
-    `)
+      }`)
     )
   })
 })

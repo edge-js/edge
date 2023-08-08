@@ -9,27 +9,27 @@
 
 import './assert_extend.js'
 
+import dedent from 'dedent-js'
 import { test } from '@japa/runner'
+import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 
-import * as tags from '../src/tags/index.js'
-import { Loader } from '../src/loader/index.js'
-import { Template } from '../src/template/index.js'
-import { Compiler } from '../src/compiler/index.js'
-import { Processor } from '../src/processor/index.js'
+import * as tags from '../src/tags/main.js'
+import { Loader } from '../src/loader.js'
+import { Template } from '../src/template.js'
+import { Compiler } from '../src/compiler.js'
+import { Processor } from '../src/processor.js'
 
 import { normalizeNewLines, normalizeFilename } from '../test_helpers/index.js'
-import { fileURLToPath } from 'node:url'
 
-const basePath = join(dirname(fileURLToPath(import.meta.url)), '../fixtures')
+const basePath = join(dirname(fileURLToPath(import.meta.url)), '../async_fixtures')
 
 const loader = new Loader()
 loader.mount('default', basePath)
 
 const processor = new Processor()
-
-test.group('Fixtures', (group) => {
+test.group('Async Fixtures', (group) => {
   group.setup(() => {
     Object.keys(tags).forEach((tag) => {
       // @ts-ignore
@@ -41,26 +41,30 @@ test.group('Fixtures', (group) => {
   })
 
   const dirs = readdirSync(basePath).filter((file) => statSync(join(basePath, file)).isDirectory())
-  const compiler = new Compiler(loader, tags, processor, { async: false })
+  const compiler = new Compiler(loader, tags, processor, { async: true })
 
   dirs.forEach((dir) => {
     const dirBasePath = join(basePath, dir)
-    test(dir, ({ assert }) => {
+    test(dir, async ({ assert }) => {
       const template = new Template(compiler, {}, {}, processor)
 
       /**
        * Compiled output
        */
-      const { template: compiled } = compiler.compile(`${dir}/index.edge`)
+      const compiledTemplate = compiler.compile(`${dir}/index.edge`)
       const expectedCompiled = normalizeNewLines(
         readFileSync(join(dirBasePath, 'compiled.js'), 'utf-8')
       )
+
       assert.stringEqual(
-        compiled,
-        expectedCompiled
-          .split('\n')
-          .map((line) => normalizeFilename(dirBasePath, line))
-          .join('\n')
+        compiledTemplate.toString(),
+        dedent`async function anonymous(template,state,$context
+          ) {
+          ${expectedCompiled
+            .split('\n')
+            .map((line) => normalizeFilename(dirBasePath, line))
+            .join('\n')}
+          }`
       )
 
       /**
@@ -68,8 +72,8 @@ test.group('Fixtures', (group) => {
        */
       const out = readFileSync(join(dirBasePath, 'index.txt'), 'utf-8')
       const state = JSON.parse(readFileSync(join(dirBasePath, 'index.json'), 'utf-8'))
-      const output = template.render(`${dir}/index.edge`, state) as string
-      const outputRaw = template.renderRaw<string>(
+      const output = await template.render(`${dir}/index.edge`, state)
+      const outputRaw = await template.renderRaw(
         readFileSync(join(dirBasePath, 'index.edge'), 'utf-8'),
         state
       )
@@ -79,7 +83,7 @@ test.group('Fixtures', (group) => {
   })
 })
 
-test.group('Fixtures | Cache', (group) => {
+test.group('Async Fixtures | Cached', (group) => {
   group.setup(() => {
     Object.keys(tags).forEach((tag) => {
       // @ts-ignore
@@ -91,26 +95,30 @@ test.group('Fixtures | Cache', (group) => {
   })
 
   const dirs = readdirSync(basePath).filter((file) => statSync(join(basePath, file)).isDirectory())
-  const compiler = new Compiler(loader, tags, processor, { async: false, cache: true })
+  const compiler = new Compiler(loader, tags, processor, { async: true, cache: true })
 
   dirs.forEach((dir) => {
     const dirBasePath = join(basePath, dir)
-    test(dir, ({ assert }) => {
+    test(dir, async ({ assert }) => {
       const template = new Template(compiler, {}, {}, processor)
 
       /**
        * Compiled output
        */
-      const { template: compiled } = compiler.compile(`${dir}/index.edge`)
+      const compiledTemplate = compiler.compile(`${dir}/index.edge`)
       const expectedCompiled = normalizeNewLines(
         readFileSync(join(dirBasePath, 'compiled.js'), 'utf-8')
       )
+
       assert.stringEqual(
-        compiled,
-        expectedCompiled
-          .split('\n')
-          .map((line) => normalizeFilename(dirBasePath, line))
-          .join('\n')
+        compiledTemplate.toString(),
+        dedent`async function anonymous(template,state,$context
+          ) {
+          ${expectedCompiled
+            .split('\n')
+            .map((line) => normalizeFilename(dirBasePath, line))
+            .join('\n')}
+          }`
       )
 
       /**
@@ -118,8 +126,8 @@ test.group('Fixtures | Cache', (group) => {
        */
       const out = readFileSync(join(dirBasePath, 'index.txt'), 'utf-8')
       const state = JSON.parse(readFileSync(join(dirBasePath, 'index.json'), 'utf-8'))
-      const output = template.render(`${dir}/index.edge`, state) as string
-      const outputRaw = template.renderRaw<string>(
+      const output = await template.render(`${dir}/index.edge`, state)
+      const outputRaw = await template.renderRaw(
         readFileSync(join(dirBasePath, 'index.edge'), 'utf-8'),
         state
       )

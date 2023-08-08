@@ -12,7 +12,7 @@ import { expressions } from 'edge-parser'
 import lodash from '@poppinss/utils/lodash'
 
 import { TagContract } from '../types.js'
-import { isSubsetOf, unallowedExpression, parseJsArg } from '../utils/index.js'
+import { isSubsetOf, unallowedExpression, parseJsArg } from '../utils.js'
 
 /**
  * The set tag is used to set runtime values within the template. The value

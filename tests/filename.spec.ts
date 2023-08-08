@@ -8,9 +8,9 @@
  */
 
 import './assert_extend.js'
-import { test } from '@japa/runner'
-import { join } from 'node:path'
 import dedent from 'dedent-js'
+import { join } from 'node:path'
+import { test } from '@japa/runner'
 
 import { Edge } from '../src/edge/index.js'
 import { normalizeNewLines } from '../test_helpers/index.js'

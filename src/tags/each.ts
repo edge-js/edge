@@ -12,7 +12,7 @@ import * as lexerUtils from 'edge-lexer/utils'
 import { Parser, expressions } from 'edge-parser'
 
 import { TagContract } from '../types.js'
-import { isSubsetOf, asyncEach, each, unallowedExpression } from '../utils/index.js'
+import { isSubsetOf, asyncEach, each, unallowedExpression } from '../utils.js'
 
 /**
  * Returns the list to loop over for the each binary expression

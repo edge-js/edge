@@ -7,24 +7,25 @@
  * file that was distributed with this source code.
  */
 
-import { test } from '@japa/runner'
-import { dirname, join } from 'node:path'
+import './assert_extend.js'
+
 import dedent from 'dedent-js'
+import { test } from '@japa/runner'
 import { EdgeError } from 'edge-error'
+import { fileURLToPath } from 'node:url'
+import { dirname, join } from 'node:path'
 import { Filesystem } from '@poppinss/dev-utils'
 
-import { Loader } from '../src/loader/index.js'
-import { Compiler } from '../src/compiler/index.js'
-import { Template } from '../src/template/index.js'
-import { Processor } from '../src/processor/index.js'
+import { Loader } from '../src/loader.js'
+import { Compiler } from '../src/compiler.js'
+import { Template } from '../src/template.js'
+import { Processor } from '../src/processor.js'
 
 import { ifTag } from '../src/tags/if.js'
 import { slotTag } from '../src/tags/slot.js'
 import { injectTag } from '../src/tags/inject.js'
 import { includeTag } from '../src/tags/include.js'
 import { componentTag } from '../src/tags/component.js'
-import './assert_extend.js'
-import { fileURLToPath } from 'node:url'
 
 const fs = new Filesystem(join(dirname(fileURLToPath(import.meta.url)), 'views'))
 const tags = {

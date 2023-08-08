@@ -10,17 +10,16 @@
 import './assert_extend.js'
 import { test } from '@japa/runner'
 import path, { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { Filesystem } from '@poppinss/dev-utils'
 
-import { Loader } from '../src/loader/index.js'
-import { Compiler } from '../src/compiler/index.js'
+import { Loader } from '../src/loader.js'
+import { Compiler } from '../src/compiler.js'
 import { slotTag } from '../src/tags/slot.js'
-import { Processor } from '../src/processor/index.js'
+import { Processor } from '../src/processor.js'
 import { includeTag } from '../src/tags/include.js'
 import { componentTag } from '../src/tags/component.js'
-import { Template, safeValue } from '../src/template/index.js'
-
-import { fileURLToPath } from 'node:url'
+import { Template, htmlSafe } from '../src/template.js'
 
 const tags = { slot: slotTag, component: componentTag, include: includeTag }
 const fs = new Filesystem(join(path.dirname(fileURLToPath(import.meta.url)), 'views'))
@@ -33,13 +32,17 @@ test.group('Template', (group) => {
     await fs.cleanup()
   })
 
-  test('run template using the given state', async ({ assert }) => {
+  test('render template using the given state', async ({ assert }) => {
     await fs.add('foo.edge', 'Hello {{ username }}')
+
     const processor = new Processor()
     const compiler = new Compiler(loader, tags, processor, { cache: false })
-    const output = new Template(compiler, {}, {}, processor).render('foo', {
+    const template = new Template(compiler, {}, {}, processor)
+
+    const output = template.render<string>('foo', {
       username: 'virk',
-    }) as string
+    })
+
     assert.equal(output.trim(), 'Hello virk')
   })
 
@@ -47,8 +50,7 @@ test.group('Template', (group) => {
     await fs.add('foo.edge', 'Hello {{ getUsername() }}')
     const processor = new Processor()
     const compiler = new Compiler(loader, tags, processor, { cache: false })
-
-    const output = new Template(
+    const template = new Template(
       compiler,
       { username: 'virk' },
       {
@@ -57,18 +59,21 @@ test.group('Template', (group) => {
         },
       },
       processor
-    ).render('foo', {}) as string
+    )
+
+    const output = template.render<string>('foo', {})
     assert.equal(output.trim(), 'Hello VIRK')
   })
 
-  test('run partial inside existing state', async ({ assert }) => {
+  test('compile and render a partial', async ({ assert }) => {
     await fs.add('foo.edge', 'Hello {{ username }}')
 
     const processor = new Processor()
     const compiler = new Compiler(loader, tags, processor, { cache: false })
     const template = new Template(compiler, {}, {}, processor)
+    const partial = template.compilePartial('foo')
 
-    const output = template.compilePartial('foo')(template, { username: 'virk' })
+    const output = partial(template, { username: 'virk' }, {})
     assert.equal(output.trim(), 'Hello virk')
   })
 
@@ -78,9 +83,10 @@ test.group('Template', (group) => {
     const processor = new Processor()
     const compiler = new Compiler(loader, tags, processor, { cache: false })
     const template = new Template(compiler, {}, {}, processor)
+    const partial = template.compilePartial('foo', 'user')
 
     const user = { username: 'virk' }
-    const output = template.compilePartial('foo', 'user')(template, {}, {}, user)
+    const output = partial(template, {}, {}, user)
     assert.equal(output.trim(), 'Hello virk')
   })
 
@@ -181,7 +187,7 @@ test.group('Template', (group) => {
     const processor = new Processor()
     const compiler = new Compiler(loader, tags, processor, { cache: false })
     const template = new Template(compiler, {}, {}, processor)
-    assert.equal(template.escape(safeValue('<h2> Hello world </h2>')), '<h2> Hello world </h2>')
+    assert.equal(template.escape(htmlSafe('<h2> Hello world </h2>')), '<h2> Hello world </h2>')
   })
 
   test('stringify array before escape', ({ assert }) => {
@@ -233,18 +239,13 @@ test.group('Template', (group) => {
     await fs.add('foo.edge', 'Hello {{ username }}')
 
     const processor = new Processor()
-    processor.process('compiled', ({ compiled }) => {
-      compiled = `username = 'virk'; \n ${compiled}`
-      return compiled
-    })
-
     const compiler = new Compiler(loader, tags, processor, { cache: true })
     const template = new Template(compiler, {}, {}, processor)
 
-    assert.equal(template.compilePartial('foo')(template, {}).trim(), 'Hello undefined')
-    assert.equal(
-      template.compilePartial('foo', 'username')(template, 'username').trim(),
-      'Hello virk'
-    )
+    const partail = template.compilePartial('foo')
+    assert.equal(partail(template, {}, {}).trim(), 'Hello undefined')
+
+    const partailWithInlineVariables = template.compilePartial('foo', 'username')
+    assert.equal(partailWithInlineVariables(template, {}, {}, 'virk').trim(), 'Hello virk')
   })
 })

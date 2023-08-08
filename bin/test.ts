@@ -18,7 +18,7 @@ import { BASE_URL } from '../test_helpers/index.js'
 */
 processCLIArgs(process.argv.slice(2))
 configure({
-  files: ['test/**/*.spec.ts'],
+  files: ['tests/**/*.spec.ts'],
   plugins: [assert(), fileSystem({ basePath: BASE_URL })],
 })
 

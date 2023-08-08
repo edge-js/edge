@@ -7,12 +7,12 @@
  * file that was distributed with this source code.
  */
 
-import * as Tags from '../tags/index.js'
-import { Loader } from '../loader/index.js'
-import { Compiler } from '../compiler/index.js'
-import { Template } from '../template/index.js'
-import { Processor } from '../processor/index.js'
-import { EdgeRenderer } from '../renderer/index.js'
+import * as Tags from '../tags/main.js'
+import { Loader } from '../loader.js'
+import { Compiler } from '../compiler.js'
+import { Template } from '../template.js'
+import { Processor } from '../processor.js'
+import { EdgeRenderer } from '../renderer.js'
 
 import {
   TagContract,

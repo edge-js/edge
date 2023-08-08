@@ -7,14 +7,14 @@
  * file that was distributed with this source code.
  */
 
+import type { Template } from './template.js'
 import type { TagToken } from 'edge-lexer/types'
-import { ProcessorContract, TemplateContract } from '../types.js'
 
 /**
  * Exposes the API to register a set of handlers to process the
  * templates output at different stages
  */
-export class Processor implements ProcessorContract {
+export class Processor {
   #handlers: Map<string, Set<(...args: any[]) => any>> = new Map()
 
   /**
@@ -72,11 +72,7 @@ export class Processor implements ProcessorContract {
   /**
    * Execute output handlers
    */
-  executeOutput(data: {
-    output: string
-    template: TemplateContract
-    state: Record<string, any>
-  }): string {
+  executeOutput(data: { output: string; template: Template; state: Record<string, any> }): string {
     const handlers = this.#handlers.get('output')
     if (!handlers) {
       return data.output
@@ -105,7 +101,7 @@ export class Processor implements ProcessorContract {
     event: 'output',
     handler: (data: {
       output: string
-      template: TemplateContract
+      template: Template
       state: Record<string, any>
     }) => string | void
   ): this

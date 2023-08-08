@@ -7,16 +7,16 @@
  * file that was distributed with this source code.
  */
 
-import { test } from '@japa/runner'
-import { dirname, join } from 'node:path'
 import dedent from 'dedent-js'
+import { test } from '@japa/runner'
+import { fileURLToPath } from 'node:url'
+import { dirname, join } from 'node:path'
 import { Filesystem } from '@poppinss/dev-utils'
 
-import * as tags from '../src/tags/index.js'
-import { Loader } from '../src/loader/index.js'
-import { Compiler } from '../src/compiler/index.js'
-import { Processor } from '../src/processor/index.js'
-import { fileURLToPath } from 'node:url'
+import * as tags from '../src/tags/main.js'
+import { Loader } from '../src/loader.js'
+import { Compiler } from '../src/compiler.js'
+import { Processor } from '../src/processor.js'
 
 const fs = new Filesystem(join(dirname(fileURLToPath(import.meta.url)), 'views'))
 

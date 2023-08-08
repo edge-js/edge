@@ -9,17 +9,16 @@
 
 import './assert_extend.js'
 import { test } from '@japa/runner'
+import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 
-import * as tags from '../src/tags/index.js'
-import { Loader } from '../src/loader/index.js'
-import { Template } from '../src/template/index.js'
-import { Compiler } from '../src/compiler/index.js'
-import { Processor } from '../src/processor/index.js'
-
+import { Loader } from '../src/loader.js'
+import * as tags from '../src/tags/main.js'
+import { Template } from '../src/template.js'
+import { Compiler } from '../src/compiler.js'
+import { Processor } from '../src/processor.js'
 import { normalizeNewLines, normalizeFilename } from '../test_helpers/index.js'
-import { fileURLToPath } from 'node:url'
 
 const basePath = join(dirname(fileURLToPath(import.meta.url)), '../newline_fixtures')
 

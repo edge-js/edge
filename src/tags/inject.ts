@@ -10,7 +10,7 @@
 import { expressions } from 'edge-parser'
 
 import { TagContract } from '../types.js'
-import { isSubsetOf, unallowedExpression, parseJsArg } from '../utils/index.js'
+import { isSubsetOf, unallowedExpression, parseJsArg } from '../utils.js'
 
 /**
  * The inject tag is used within the components to share values with the

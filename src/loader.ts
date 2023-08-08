@@ -9,7 +9,7 @@
 
 import { readFileSync } from 'node:fs'
 import { join, isAbsolute } from 'node:path'
-import type { LoaderContract, LoaderTemplate } from '../types.js'
+import type { LoaderContract, LoaderTemplate } from './types.js'
 
 /**
  * The job of a loader is to load the template from a given path.

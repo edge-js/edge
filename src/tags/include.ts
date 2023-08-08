@@ -1,7 +1,7 @@
 /*
  * edge
  *
- * (c) Harminder Virk <virk@adonisjs.com>
+ * (c) AdonisJS
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -9,20 +9,20 @@
 
 import { expressions, Parser } from 'edge-parser'
 
-import { TagContract } from '../types.js'
-import { unallowedExpression, isSubsetOf, parseJsArg } from '../utils/index.js'
+import type { TagContract } from '../types.js'
+import { unallowedExpression, isSubsetOf, parseJsArg } from '../utils.js'
 
 /**
  * List of expressions allowed for the include tag
  */
 export const ALLOWED_EXPRESSION = [
-  expressions.Identifier,
   expressions.Literal,
-  expressions.LogicalExpression,
-  expressions.MemberExpression,
-  expressions.ConditionalExpression,
+  expressions.Identifier,
   expressions.CallExpression,
   expressions.TemplateLiteral,
+  expressions.MemberExpression,
+  expressions.LogicalExpression,
+  expressions.ConditionalExpression,
 ]
 
 /**

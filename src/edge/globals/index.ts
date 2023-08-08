@@ -15,7 +15,7 @@ import inspect from '@poppinss/inspect'
 const { string: prettyPrintHtml } = inspect
 import string from '@poppinss/utils/string'
 
-import { safeValue, escape } from '../../template/index.js'
+import { htmlSafe, escape } from '../../template.js'
 
 export const GLOBALS = {
   /**
@@ -33,7 +33,7 @@ export const GLOBALS = {
    * Inspect state
    */
   inspect: (value: any) => {
-    return safeValue(prettyPrintHtml.html(value))
+    return htmlSafe(prettyPrintHtml.html(value))
   },
 
   /**
@@ -90,7 +90,7 @@ export const GLOBALS = {
    * whereas this method converts it to an actual instance of date
    */
   stringify: stringify,
-  safe: safeValue,
+  safe: htmlSafe,
   camelCase: string.camelCase,
   snakeCase: string.snakeCase,
   dashCase: string.dashCase,

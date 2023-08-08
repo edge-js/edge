@@ -9,26 +9,21 @@
 
 import lodash from '@poppinss/utils/lodash'
 
-import { Template } from '../template/index.js'
-import { Processor } from '../processor/index.js'
-import { EdgeRendererContract, CompilerContract } from '../types.js'
+import { Template } from './template.js'
+import { Processor } from './processor.js'
+import type { Compiler } from './compiler.js'
 
 /**
  * Renders a given template with it's shared state
  */
-export class EdgeRenderer implements EdgeRendererContract {
+export class EdgeRenderer {
   #locals: any = {}
-  #compiler: CompilerContract
-  #asyncCompiler: CompilerContract
+  #compiler: Compiler
+  #asyncCompiler: Compiler
   #globals: any
   #processor: Processor
 
-  constructor(
-    compiler: CompilerContract,
-    asyncCompiler: CompilerContract,
-    globals: any,
-    processor: Processor
-  ) {
+  constructor(compiler: Compiler, asyncCompiler: Compiler, globals: any, processor: Processor) {
     this.#compiler = compiler
     this.#asyncCompiler = asyncCompiler
     this.#globals = globals

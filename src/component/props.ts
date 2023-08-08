@@ -10,7 +10,7 @@
 import lodash from '@poppinss/utils/lodash'
 import stringifyAttributes from 'stringify-attributes'
 
-import { safeValue } from '../template/index.js'
+import { htmlSafe } from '../template.js'
 import { PropsContract } from '../types.js'
 
 /**
@@ -102,7 +102,7 @@ export class Props implements PropsContract {
       ? lodash.merge({}, this.all(), mergeProps)
       : lodash.merge({}, mergeProps, this.all())
 
-    return safeValue(stringifyAttributes(this.#mergeClassAttributes(attributes)))
+    return htmlSafe(stringifyAttributes(this.#mergeClassAttributes(attributes)))
   }
 
   /**
@@ -116,7 +116,7 @@ export class Props implements PropsContract {
       ? lodash.merge({}, this.only(keys), mergeProps)
       : lodash.merge({}, mergeProps, this.only(keys))
 
-    return safeValue(stringifyAttributes(this.#mergeClassAttributes(attributes)))
+    return htmlSafe(stringifyAttributes(this.#mergeClassAttributes(attributes)))
   }
 
   /**
@@ -130,6 +130,6 @@ export class Props implements PropsContract {
       ? lodash.merge({}, this.except(keys), mergeProps)
       : lodash.merge({}, mergeProps, this.except(keys))
 
-    return safeValue(stringifyAttributes(this.#mergeClassAttributes(attributes)))
+    return htmlSafe(stringifyAttributes(this.#mergeClassAttributes(attributes)))
   }
 }
