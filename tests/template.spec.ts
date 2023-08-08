@@ -8,6 +8,7 @@
  */
 
 import './assert_extend.js'
+import dedent from 'dedent-js'
 import { test } from '@japa/runner'
 import path, { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -20,7 +21,6 @@ import { Processor } from '../src/processor.js'
 import { includeTag } from '../src/tags/include.js'
 import { componentTag } from '../src/tags/component.js'
 import { Template, htmlSafe } from '../src/template.js'
-import dedent from 'dedent-js'
 
 const tags = { slot: slotTag, component: componentTag, include: includeTag }
 const fs = new Filesystem(join(path.dirname(fileURLToPath(import.meta.url)), 'views'))

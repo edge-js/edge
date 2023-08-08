@@ -13,10 +13,11 @@ import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { Filesystem } from '@poppinss/dev-utils'
 
-import * as tags from '../src/tags/main.js'
 import { Loader } from '../src/loader.js'
+import * as tags from '../src/tags/main.js'
 import { Compiler } from '../src/compiler.js'
 import { Processor } from '../src/processor.js'
+import * as compatTags from '../src/migrate/tags/main.js'
 
 const fs = new Filesystem(join(dirname(fileURLToPath(import.meta.url)), 'views'))
 
@@ -310,10 +311,11 @@ test.group('Component', (group) => {
   })
 })
 
-test.group('Layouts', (group) => {
+test.group('Layouts | Compat', (group) => {
   group.each.teardown(async () => {
     await fs.cleanup()
   })
+  group.tap((t) => t.tags(['compat']))
 
   test('raise error when section is nested inside conditional block', async ({ assert }) => {
     assert.plan(2)
@@ -330,7 +332,7 @@ test.group('Layouts', (group) => {
     await fs.add('master.edge', "@!section('body')")
 
     try {
-      compiler.compile('foo')
+      new Compiler(loader, { ...tags, ...compatTags }, processor, { compat: true }).compile('foo')
     } catch (error) {
       assert.equal(
         error.stack.split('\n')[1],
@@ -361,7 +363,7 @@ test.group('Layouts', (group) => {
     await fs.add('super.edge', "@!section('body')")
 
     try {
-      compiler.compile('foo')
+      new Compiler(loader, { ...tags, ...compatTags }, processor, { compat: true }).compile('foo')
     } catch (error) {
       assert.equal(
         error.stack.split('\n')[1],
@@ -384,7 +386,7 @@ test.group('Layouts', (group) => {
     await fs.add('master.edge', "@!section('body')")
 
     try {
-      compiler.compile('foo')
+      new Compiler(loader, { ...tags, ...compatTags }, processor, { compat: true }).compile('foo')
     } catch (error) {
       assert.equal(
         error.stack.split('\n')[1],

@@ -14,9 +14,10 @@ import Macroable from '@poppinss/macroable'
 
 import { Compiler } from './compiler.js'
 import { Processor } from './processor.js'
-import { Props } from './component/props.js'
+import { Props } from './migrate/props.js'
 import { stringifyAttributes } from './utils.js'
 import type { CompiledTemplate } from './types.js'
+import { ComponentProps } from './component/props.js'
 
 /**
  * An instance of this class passed to the escape
@@ -130,7 +131,7 @@ export class Template extends Macroable {
     return Object.assign({}, this.#sharedState, props, {
       $slots: slots,
       $caller: caller,
-      $props: new Props(props),
+      $props: this.#compiler.compat ? new Props(props) : new ComponentProps(props),
     })
   }
 

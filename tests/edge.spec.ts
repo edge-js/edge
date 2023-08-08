@@ -14,7 +14,9 @@ import { join } from 'node:path'
 import { test } from '@japa/runner'
 
 import { Edge } from '../src/edge/main.js'
+import { migrate } from '../src/migrate/plugin.js'
 import { edgeGlobals } from '../src/edge/globals.js'
+import { PerformanceObserver } from 'node:perf_hooks'
 
 test.group('Edge', () => {
   test('mount default disk', async ({ assert, fs }) => {
@@ -186,6 +188,7 @@ test.group('Edge', () => {
 
     const edge = new Edge()
     edge.mount(fs.basePath)
+    edge.use(migrate)
 
     try {
       await edge.render('foo')
@@ -195,7 +198,7 @@ test.group('Edge', () => {
         `at anonymous (${join(fs.basePath, 'bar.edge')}:1:4)`
       )
     }
-  })
+  }).tags(['compat'])
 
   test('pass absolute path of layout to parser errors', async ({ assert, fs }) => {
     assert.plan(1)
@@ -204,6 +207,7 @@ test.group('Edge', () => {
 
     const edge = new Edge()
     edge.mount(fs.basePath)
+    edge.use(migrate)
 
     try {
       await edge.render('foo')
@@ -213,7 +217,7 @@ test.group('Edge', () => {
         `at anonymous (${join(fs.basePath, 'bar.edge')}:1:3)`
       )
     }
-  })
+  }).tags(['compat'])
 
   test('pass absolute path of partial to lexer errors', async ({ assert, fs }) => {
     assert.plan(1)
@@ -448,17 +452,17 @@ test.group('Edge | regression', () => {
 
   test('do not escape when using safe global method', async ({ assert }) => {
     const edge = new Edge()
-    Object.keys(edgeGlobals).forEach((key) => edge.global(key, edgeGlobals[key]))
+    edge.use(migrate)
 
     edge.registerTemplate('eval', {
-      template: 'Hello {{ htmlSafe(username) }}',
+      template: 'Hello {{ safe(username) }}',
     })
     assert.equal(await edge.render('eval', { username: '<p>virk</p>' }), 'Hello <p>virk</p>')
-  })
+  }).tags(['compat'])
 
   test('truncate string by characters', async ({ assert }) => {
     const edge = new Edge()
-    Object.keys(edgeGlobals).forEach((key) => edge.global(key, edgeGlobals[key]))
+    edge.globals = edgeGlobals
 
     edge.registerTemplate('eval', {
       template: '{{{ truncate(text, 10) }}}',
@@ -471,7 +475,7 @@ test.group('Edge | regression', () => {
 
   test('truncate string by characters in strict mode', async ({ assert }) => {
     const edge = new Edge()
-    Object.keys(edgeGlobals).forEach((key) => edge.global(key, edgeGlobals[key]))
+    edge.globals = edgeGlobals
 
     edge.registerTemplate('eval', {
       template: '{{{ truncate(text, 10, { strict: true }) }}}',
@@ -484,7 +488,7 @@ test.group('Edge | regression', () => {
 
   test('define custom suffix for truncate', async ({ assert }) => {
     const edge = new Edge()
-    Object.keys(edgeGlobals).forEach((key) => edge.global(key, edgeGlobals[key]))
+    edge.globals = edgeGlobals
 
     edge.registerTemplate('eval', {
       template: '{{{ truncate(text, 10, { suffix: ". more" }) }}}',
@@ -497,7 +501,7 @@ test.group('Edge | regression', () => {
 
   test('generate string excerpt', async ({ assert }) => {
     const edge = new Edge()
-    Object.keys(edgeGlobals).forEach((key) => edge.global(key, edgeGlobals[key]))
+    edge.globals = edgeGlobals
 
     edge.registerTemplate('eval', {
       template: '{{{ excerpt(text, 10) }}}',
@@ -510,7 +514,7 @@ test.group('Edge | regression', () => {
 
   test('excerpt remove in-between tag', async ({ assert }) => {
     const edge = new Edge()
-    Object.keys(edgeGlobals).forEach((key) => edge.global(key, edgeGlobals[key]))
+    edge.globals = edgeGlobals
 
     edge.registerTemplate('eval', {
       template: '{{{ excerpt(text, 10) }}}',
@@ -525,7 +529,7 @@ test.group('Edge | regression', () => {
 
   test('generate excerpt in strict mode', async ({ assert }) => {
     const edge = new Edge()
-    Object.keys(edgeGlobals).forEach((key) => edge.global(key, edgeGlobals[key]))
+    edge.globals = edgeGlobals
 
     edge.registerTemplate('eval', {
       template: '{{{ excerpt(text, 10, { strict: true }) }}}',
@@ -540,7 +544,7 @@ test.group('Edge | regression', () => {
 
   test('add custom suffix for excerpt', async ({ assert }) => {
     const edge = new Edge()
-    Object.keys(edgeGlobals).forEach((key) => edge.global(key, edgeGlobals[key]))
+    edge.globals = edgeGlobals
 
     edge.registerTemplate('eval', {
       template: '{{{ excerpt(text, 10, { suffix: ". more" }) }}}',
@@ -555,7 +559,7 @@ test.group('Edge | regression', () => {
 
   test('convert newline to br tags', async ({ assert }) => {
     const edge = new Edge()
-    Object.keys(edgeGlobals).forEach((key) => edge.global(key, edgeGlobals[key]))
+    edge.globals = edgeGlobals
 
     /**
      * Intentionally using `EOL`, so that we can test that in windows
@@ -570,7 +574,7 @@ test.group('Edge | regression', () => {
 
   test('escape user input except the new lines', async ({ assert }) => {
     const edge = new Edge()
-    Object.keys(edgeGlobals).forEach((key) => edge.global(key, edgeGlobals[key]))
+    edge.use(migrate)
 
     /**
      * Intentionally using `EOL`, so that we can test that in windows
@@ -584,11 +588,11 @@ test.group('Edge | regression', () => {
       await edge.render('eval', { text: `Hello${EOL}<strong>world</strong>` }),
       'Hello<br>&lt;strong&gt;world&lt;/strong&gt;'
     )
-  })
+  }).tags(['compat'])
 
   test('stringify data structures', async ({ assert }) => {
     const edge = new Edge()
-    Object.keys(edgeGlobals).forEach((key) => edge.global(key, edgeGlobals[key]))
+    edge.use(migrate)
 
     /**
      * Intentionally using `EOL`, so that we can test that in windows
@@ -602,5 +606,5 @@ test.group('Edge | regression', () => {
       await edge.render('eval'),
       '{&quot;user&quot;:{&quot;username&quot;:&quot;virk&quot;}}'
     )
-  })
+  }).tags(['compat'])
 })

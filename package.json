@@ -64,7 +64,8 @@
     "edge-parser": "^9.0.0-2",
     "he": "^1.2.0",
     "js-stringify": "^1.0.2",
-    "property-information": "^6.2.0"
+    "property-information": "^6.2.0",
+    "stringify-attributes": "^4.0.0"
   },
   "author": "virk",
   "license": "MIT",

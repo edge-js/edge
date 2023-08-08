@@ -299,7 +299,7 @@ export function stringifyAttributes(props: any, namespace?: string): string {
     return ''
   }
 
-  return `${attributes
+  return attributes
     .reduce<string[]>((result, key) => {
       let value = props[key]
       key = namespace ? `${namespace}${key}` : key
@@ -361,5 +361,5 @@ export function stringifyAttributes(props: any, namespace?: string): string {
       result.push(`${attribute}=${value}`)
       return result
     }, [])
-    .join(' ')}`
+    .join(' ')
 }

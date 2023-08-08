@@ -20,6 +20,7 @@ import { Loader } from '../src/loader.js'
 import { Template } from '../src/template.js'
 import { Compiler } from '../src/compiler.js'
 import { Processor } from '../src/processor.js'
+import * as compatTags from '../src/migrate/tags/main.js'
 
 import { normalizeNewLines, normalizeFilename } from '../test_helpers/index.js'
 
@@ -32,21 +33,31 @@ const processor = new Processor()
 test.group('Async Fixtures', (group) => {
   group.setup(() => {
     Object.keys(tags).forEach((tag) => {
-      // @ts-ignore
-      if (tags[tag].boot) {
-        // @ts-ignore
-        tags[tag].boot(Template)
-      }
+      tags[tag as keyof typeof tags].boot?.(Template)
+    })
+    Object.keys(compatTags).forEach((tag) => {
+      compatTags[tag as keyof typeof compatTags].boot?.(Template)
     })
   })
 
   const dirs = readdirSync(basePath).filter((file) => statSync(join(basePath, file)).isDirectory())
-  const compiler = new Compiler(loader, tags, processor, { async: true })
+  const compiler = new Compiler(
+    loader,
+    {
+      ...tags,
+      ...compatTags,
+    },
+    processor,
+    { async: true }
+  )
 
   dirs.forEach((dir) => {
     const dirBasePath = join(basePath, dir)
+    const compatMode = dir.endsWith('-compat')
+
     test(dir, async ({ assert }) => {
       const template = new Template(compiler, {}, {}, processor)
+      compiler.compat = compatMode
 
       /**
        * Compiled output
@@ -79,28 +90,38 @@ test.group('Async Fixtures', (group) => {
       )
       assert.stringEqual(output.trim(), out)
       assert.stringEqual(outputRaw.trim(), out)
-    })
+    }).tags(compatMode ? ['compat'] : [])
   })
 })
 
 test.group('Async Fixtures | Cached', (group) => {
   group.setup(() => {
     Object.keys(tags).forEach((tag) => {
-      // @ts-ignore
-      if (tags[tag].boot) {
-        // @ts-ignore
-        tags[tag].boot(Template)
-      }
+      tags[tag as keyof typeof tags].boot?.(Template)
+    })
+    Object.keys(compatTags).forEach((tag) => {
+      compatTags[tag as keyof typeof compatTags].boot?.(Template)
     })
   })
 
   const dirs = readdirSync(basePath).filter((file) => statSync(join(basePath, file)).isDirectory())
-  const compiler = new Compiler(loader, tags, processor, { async: true, cache: true })
+  const compiler = new Compiler(
+    loader,
+    {
+      ...tags,
+      ...compatTags,
+    },
+    processor,
+    { async: true, cache: true }
+  )
 
   dirs.forEach((dir) => {
     const dirBasePath = join(basePath, dir)
+    const compatMode = dir.endsWith('-compat')
+
     test(dir, async ({ assert }) => {
       const template = new Template(compiler, {}, {}, processor)
+      compiler.compat = compatMode
 
       /**
        * Compiled output
@@ -133,6 +154,6 @@ test.group('Async Fixtures | Cached', (group) => {
       )
       assert.stringEqual(output.trim(), out)
       assert.stringEqual(outputRaw.trim(), out)
-    })
+    }).tags(compatMode ? ['compat'] : [])
   })
 })

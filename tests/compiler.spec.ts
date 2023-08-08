@@ -16,14 +16,15 @@ import stringify from 'js-stringify'
 import { TagTypes, MustacheTypes } from 'edge-lexer'
 
 import { Loader } from '../src/loader.js'
-import { setTag } from '../src/tags/set.js'
 import { Template } from '../src/template.js'
 import { Compiler } from '../src/compiler.js'
 import { Processor } from '../src/processor.js'
-import { layoutTag } from '../src/tags/layout.js'
-import { sectionTag } from '../src/tags/section.js'
 import { componentTag } from '../src/tags/component.js'
 import { normalizeNewLines } from '../test_helpers/index.js'
+
+import { setTag } from '../src/migrate/tags/set.js'
+import { sectionTag } from '../src/migrate/tags/section.js'
+import { layoutTag } from '../src/migrate/tags/layout.js'
 
 test.group('Compiler | Cache', () => {
   test('compile template', async ({ assert, fs }) => {
@@ -78,7 +79,9 @@ test.group('Compiler | Cache', () => {
   })
 })
 
-test.group('Compiler | Tokenize', () => {
+test.group('Compiler | Tokenize | compat', (group) => {
+  group.tap((t) => t.tags(['compat']))
+
   test('during tokenize, merge @section tags of a given layout', async ({ assert, fs }) => {
     await fs.create(
       'master.edge',
@@ -107,6 +110,7 @@ test.group('Compiler | Tokenize', () => {
     }
 
     const compiler = new Compiler(loader, tags, new Processor())
+    compiler.compat = true
 
     assert.deepEqual(compiler.tokenize('index.edge'), [
       {
@@ -170,6 +174,7 @@ test.group('Compiler | Tokenize', () => {
     }
 
     const compiler = new Compiler(loader, tags, new Processor())
+    compiler.compat = true
 
     assert.deepEqual(compiler.tokenize('index.edge'), [
       {
@@ -243,6 +248,7 @@ test.group('Compiler | Tokenize', () => {
     }
 
     const compiler = new Compiler(loader, tags, new Processor())
+    compiler.compat = true
 
     try {
       compiler.tokenize('index.edge')
@@ -296,6 +302,7 @@ test.group('Compiler | Tokenize', () => {
     }
 
     const compiler = new Compiler(loader, tags, new Processor())
+    compiler.compat = true
 
     assert.deepEqual(compiler.tokenize('index.edge'), [
       {
@@ -384,6 +391,7 @@ test.group('Compiler | Tokenize', () => {
     }
 
     const compiler = new Compiler(loader, tags, new Processor())
+    compiler.compat = true
 
     assert.deepEqual(compiler.tokenize('index.edge'), [
       {
@@ -421,7 +429,9 @@ test.group('Compiler | Tokenize', () => {
   })
 })
 
-test.group('Compiler | Compile', () => {
+test.group('Compiler | Compile | compat', (group) => {
+  group.tap((t) => t.tags(['compat']))
+
   test('compile template with layouts', async ({ assert, fs }) => {
     await fs.create(
       'master.edge',
@@ -449,6 +459,7 @@ test.group('Compiler | Compile', () => {
     }
 
     const compiler = new Compiler(loader, tags, new Processor())
+    compiler.compat = true
 
     assert.stringEqual(
       compiler.compile('index.edge').toString(),
@@ -505,6 +516,7 @@ test.group('Compiler | Compile', () => {
       },
       new Processor()
     )
+    compiler.compat = true
 
     try {
       compiler.compile('index.edge')
@@ -547,6 +559,7 @@ test.group('Compiler | Compile', () => {
       },
       new Processor()
     )
+    compiler.compat = true
 
     try {
       compiler.compile('index.edge')
@@ -589,6 +602,7 @@ test.group('Compiler | Compile', () => {
       },
       new Processor()
     )
+    compiler.compat = true
 
     try {
       const fn = compiler.compile('index.edge')
@@ -636,6 +650,7 @@ test.group('Compiler | Compile', () => {
       },
       new Processor()
     )
+    compiler.compat = true
 
     try {
       const fn = compiler.compile('index.edge')
@@ -649,7 +664,9 @@ test.group('Compiler | Compile', () => {
   })
 })
 
-test.group('Compiler | Compile Raw', () => {
+test.group('Compiler | Compile Raw | compat', (group) => {
+  group.tap((t) => t.tags(['compat']))
+
   test('compile template with layouts', async ({ assert, fs }) => {
     await fs.create(
       'master.edge',
@@ -667,6 +684,7 @@ test.group('Compiler | Compile Raw', () => {
     }
 
     const compiler = new Compiler(loader, tags, new Processor())
+    compiler.compat = true
 
     assert.stringEqual(
       compiler
@@ -722,6 +740,7 @@ test.group('Compiler | Compile Raw', () => {
       },
       new Processor()
     )
+    compiler.compat = true
 
     try {
       compiler.compileRaw(dedent`
@@ -759,6 +778,7 @@ test.group('Compiler | Compile Raw', () => {
       },
       new Processor()
     )
+    compiler.compat = true
 
     try {
       compiler.compileRaw(dedent`
@@ -796,6 +816,7 @@ test.group('Compiler | Compile Raw', () => {
       },
       new Processor()
     )
+    compiler.compat = true
 
     try {
       const fn = compiler.compileRaw(
@@ -840,6 +861,7 @@ test.group('Compiler | Compile Raw', () => {
       },
       new Processor()
     )
+    compiler.compat = true
 
     try {
       const fn = compiler.compileRaw(
@@ -1177,6 +1199,7 @@ test.group('Compiler | Processor', () => {
       },
       processor
     )
+    compiler.compat = true
 
     assert.stringEqual(
       compiler.compile('index.edge').toString(),
@@ -1199,7 +1222,7 @@ test.group('Compiler | Processor', () => {
       return out;
       }`)
     )
-  })
+  }).tags(['compat'])
 
   test('run compiled processor functions for layouts', async ({ assert, fs }) => {
     assert.plan(3)
@@ -1256,6 +1279,7 @@ test.group('Compiler | Processor', () => {
       },
       processor
     )
+    compiler.compat = true
 
     assert.stringEqual(
       compiler.compile('index.edge').toString(),
@@ -1278,7 +1302,7 @@ test.group('Compiler | Processor', () => {
       return out;
       }`)
     )
-  })
+  }).tags(['compat'])
 
   test('run tag processor function', async ({ assert, fs }) => {
     await fs.create(

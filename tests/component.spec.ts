@@ -378,8 +378,9 @@ test.group('Component | render | errors', (group) => {
     `
     )
 
+    const compatCompiler = new Compiler(loader, tags, processor, { cache: false, compat: true })
     const template = new Template(
-      compiler,
+      compatCompiler,
       {
         raise: (message: string, options: any) => {
           throw new EdgeError(message, 'E_RUNTIME_EXCEPTION', options)
@@ -732,7 +733,8 @@ test.group('Component | context API', (group) => {
     `
     )
 
-    const template = new Template(compiler, {}, {}, processor)
+    const compatCompiler = new Compiler(loader, tags, processor, { cache: false, compat: true })
+    const template = new Template(compatCompiler, {}, {}, processor)
     try {
       template.render<string>('eval.edge', {})
     } catch (error) {
@@ -740,5 +742,5 @@ test.group('Component | context API', (group) => {
       assert.equal(error.filename, join(fs.basePath, 'button.edge'))
       assert.equal(error.line, 5)
     }
-  })
+  }).tags(['compat'])
 })

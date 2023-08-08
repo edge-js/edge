@@ -9,8 +9,9 @@
 
 import type { TagToken } from 'edge-lexer/types'
 import type { Parser, EdgeBuffer } from 'edge-parser'
-import type { ParserTagDefinitionContract, ClaimTagFn } from 'edge-parser/types'
+import type { ParserTagDefinitionContract } from 'edge-parser/types'
 
+import type { Edge } from './edge/main.js'
 import type { Template } from './template.js'
 
 /**
@@ -108,41 +109,7 @@ export interface CacheManagerContract {
 export type CompilerOptions = {
   cache?: boolean
   async?: boolean
-}
-
-/**
- * Shape of the props class passed to the components
- */
-export interface PropsContract {
-  /**
-   * Find if a key exists inside the props
-   */
-  has(key: string): boolean
-
-  /**
-   * Return values for only the given keys
-   */
-  only(keys: string[]): { [key: string]: any }
-
-  /**
-   * Return values except the given keys
-   */
-  except(keys: string[]): { [key: string]: any }
-
-  /**
-   * Serialize all props to a string of HTML attributes
-   */
-  serialize(mergeProps?: any): { value: string }
-
-  /**
-   * Serialize only the given keys to a string of HTML attributes
-   */
-  serializeOnly(keys: string[], mergeProps?: any): { value: string }
-
-  /**
-   * Serialize except the given keys to a string of HTML attributes
-   */
-  serializeExcept(keys: string[], mergeProps?: any): { value: string }
+  compat?: boolean
 }
 
 /**
@@ -155,12 +122,16 @@ export type EdgeOptions = {
 }
 
 /**
- * Required for someone creating custom tags
+ * Shape of edge plugin
+ */
+export type PluginFn<T> = (edge: Edge, firstRun: boolean, options: T) => void
+
+/**
+ * Required when creating custom tags
  */
 export type ParserContract = Parser
 export type TagTokenContract = TagToken
 export type EdgeBufferContract = EdgeBuffer
-export type { ClaimTagFn }
 
 export * from 'edge-lexer/types'
 export * from 'edge-parser/types'

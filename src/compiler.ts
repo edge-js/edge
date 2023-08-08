@@ -51,6 +51,11 @@ export class Compiler {
   cacheManager: CacheManager
 
   /**
+   * A boolean to know if compat mode is enabled
+   */
+  compat: boolean
+
+  /**
    * Know if compiler is compiling in the async mode or not
    */
   async: boolean
@@ -62,6 +67,7 @@ export class Compiler {
     options: CompilerOptions = {
       cache: true,
       async: false,
+      compat: false,
     }
   ) {
     this.#processor = processor
@@ -69,6 +75,7 @@ export class Compiler {
     this.#tags = tags
 
     this.async = !!options.async
+    this.compat = options.compat === true
     this.cacheManager = new CacheManager(!!options.cache)
   }
 
@@ -173,15 +180,21 @@ export class Compiler {
    */
   #templateContentToTokens(content: string, parser: Parser, absPath: string): Token[] {
     let templateTokens = parser.tokenize(content, { filename: absPath })
-    const firstToken = templateTokens[0]
 
     /**
-     * The `layout` is inbuilt feature from core, where we merge the layout
-     * and parent template sections together
+     * Parse layout and section in compat mode only
      */
-    if (lexerUtils.isTag(firstToken, 'layout')) {
-      const layoutName = firstToken.properties.jsArg.replace(/'|"/g, '')
-      templateTokens = this.#mergeSections(this.tokenize(layoutName, parser), templateTokens)
+    if (this.compat) {
+      const firstToken = templateTokens[0]
+
+      /**
+       * The `layout` is inbuilt feature from core, where we merge the layout
+       * and parent template sections together
+       */
+      if (lexerUtils.isTag(firstToken, 'layout')) {
+        const layoutName = firstToken.properties.jsArg.replace(/'|"/g, '')
+        templateTokens = this.#mergeSections(this.tokenize(layoutName, parser), templateTokens)
+      }
     }
 
     return templateTokens

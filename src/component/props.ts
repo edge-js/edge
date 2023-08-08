@@ -8,128 +8,74 @@
  */
 
 import lodash from '@poppinss/utils/lodash'
-
 import { htmlSafe } from '../template.js'
-import { PropsContract } from '../types.js'
 import { stringifyAttributes } from '../utils.js'
 
 /**
- * Class to ease interactions with component props
+ * Representation of component props with ability to serialize
+ * them into HTML attributes
  */
-export class Props implements PropsContract {
-  constructor(props: any) {
-    // @ts-ignore
-    this[Symbol.for('options')] = { props }
-    Object.assign(this, props)
+export class ComponentProps {
+  #values: Record<string, any>
+
+  constructor(values: Record<string, any>) {
+    this.#values = values
   }
 
   /**
-   * Merges the className attribute with the class attribute
-   */
-  #mergeClassAttributes(props: any) {
-    if (props.className) {
-      if (!props.class) {
-        props.class = []
-      }
-
-      /**
-       * Normalize class attribute to be an array
-       */
-      if (!Array.isArray(props.class)) {
-        props.class = [props.class]
-      }
-
-      props.class = props.class.concat(props.className)
-      props.className = false
-    }
-
-    return props
-  }
-
-  /**
-   * Find if a key exists inside the props
-   */
-  has(key: string) {
-    const value = this.get(key)
-    return value !== undefined && value !== null
-  }
-
-  /**
-   * Get value for a given key
-   */
-  get(key: string, defaultValue?: any) {
-    return lodash.get(this.all(), key, defaultValue)
-  }
-
-  /**
-   * Returns all the props
+   * Reference to props raw values
    */
   all() {
-    // @ts-ignore
-    return this[Symbol.for('options')].props
+    return this.#values
   }
 
   /**
-   * Validate prop value
+   * Check if a key exists
    */
-  validate(key: string, validateFn: (key: string, value?: any) => any) {
-    const value = this.get(key)
-    validateFn(key, value)
+  has(key: string) {
+    return lodash.has(this.#values, key)
   }
 
   /**
-   * Return values for only the given keys
+   * Get key value
+   */
+  get(key: string, defaultValue?: any) {
+    return lodash.get(this.#values, key, defaultValue)
+  }
+
+  /**
+   * Returns a new props bag with only the mentioned keys
    */
   only(keys: string[]) {
-    return lodash.pick(this.all(), keys)
+    return new ComponentProps(lodash.pick(this.#values, keys))
   }
 
   /**
-   * Return values except the given keys
+   * Returns a new props bag with except the mentioned keys
    */
   except(keys: string[]) {
-    return lodash.omit(this.all(), keys)
+    return new ComponentProps(lodash.omit(this.#values, keys))
   }
 
   /**
-   * Serialize all props to a string of HTML attributes
+   * Define defaults for the props values.
+   *
+   * - All other attributes will be overwritten when defined in props
+   * - Classes will be merged together.
    */
-  serialize(mergeProps?: any, prioritizeInline: boolean = true) {
-    /**
-     * Prioritize user attributes when prioritizeInline=false
-     */
-    const attributes = prioritizeInline
-      ? lodash.merge({}, this.all(), mergeProps)
-      : lodash.merge({}, mergeProps, this.all())
+  defaults(values: Record<string, any>) {
+    if (values.class && this.#values['class']) {
+      const classes = Object.assign({}, values.class, this.#values.class)
+      return new ComponentProps(Object.assign({}, values, this.#values, { class: classes }))
+    }
 
-    return htmlSafe(stringifyAttributes(this.#mergeClassAttributes(attributes)))
+    return new ComponentProps(Object.assign({}, values, this.#values))
   }
 
   /**
-   * Serialize only the given keys to a string of HTML attributes
+   * Converts props to HTML attributes
    */
-  serializeOnly(keys: string[], mergeProps?: any, prioritizeInline: boolean = true) {
-    /**
-     * Prioritize user attributes when prioritizeInline=false
-     */
-    const attributes = prioritizeInline
-      ? lodash.merge({}, this.only(keys), mergeProps)
-      : lodash.merge({}, mergeProps, this.only(keys))
-
-    return htmlSafe(stringifyAttributes(this.#mergeClassAttributes(attributes)))
-  }
-
-  /**
-   * Serialize except the given keys to a string of HTML attributes
-   */
-  serializeExcept(keys: string[], mergeProps?: any, prioritizeInline: boolean = true) {
-    /**
-     * Prioritize user attributes when prioritizeInline=false
-     */
-    const attributes = prioritizeInline
-      ? lodash.merge({}, this.except(keys), mergeProps)
-      : lodash.merge({}, mergeProps, this.except(keys))
-
-    return htmlSafe(stringifyAttributes(this.#mergeClassAttributes(attributes)))
+  toAttributes() {
+    return htmlSafe(stringifyAttributes(this.#values))
   }
 }

@@ -13,6 +13,7 @@ import { join } from 'node:path'
 import { test } from '@japa/runner'
 
 import { Edge } from '../src/edge/main.js'
+import { migrate } from '../src/migrate/plugin.js'
 import { normalizeNewLines } from '../test_helpers/index.js'
 
 test.group('Template FileName', () => {
@@ -72,6 +73,7 @@ test.group('Template FileName', () => {
     )
 
     const edge = new Edge()
+    edge.use(migrate)
     edge.mount(fs.basePath)
 
     const output = await edge.render('foo', {})
@@ -83,7 +85,7 @@ test.group('Template FileName', () => {
 					${join(fs.basePath, 'foo.edge')}
 			`)
     )
-  })
+  }).tags(['compat'])
 
   test('print file absolute path inside a partial', async ({ assert, fs }) => {
     await fs.create(

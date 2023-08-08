@@ -11,10 +11,15 @@ import { Loader } from '../loader.js'
 import * as Tags from '../tags/main.js'
 import { Compiler } from '../compiler.js'
 import { Template } from '../template.js'
-import { edgeGlobals } from './globals.js'
 import { Processor } from '../processor.js'
 import { EdgeRenderer } from './renderer.js'
-import type { TagContract, EdgeOptions, LoaderTemplate, LoaderContract } from '../types.js'
+import type {
+  PluginFn,
+  TagContract,
+  EdgeOptions,
+  LoaderTemplate,
+  LoaderContract,
+} from '../types.js'
 
 /**
  * Exposes the API to render templates, register custom tags and globals
@@ -33,7 +38,7 @@ export class Edge {
    * An array of registered plugins
    */
   #plugins: {
-    fn: (edge: Edge, firstRun: boolean, options?: any) => void
+    fn: PluginFn<any>
     options?: any
   }[] = []
 
@@ -46,6 +51,11 @@ export class Edge {
    * Reference to the registered processor handlers
    */
   processor = new Processor()
+
+  /**
+   * A flag to know if using compat mode
+   */
+  compat: boolean = false
 
   /**
    * The loader to load templates. A loader can read and return
@@ -67,7 +77,7 @@ export class Edge {
   /**
    * Globals are shared with all rendered templates
    */
-  globals: { [key: string]: any } = edgeGlobals
+  globals: { [key: string]: any } = {}
 
   /**
    * List of registered tags. Adding new tags will only impact
@@ -116,10 +126,7 @@ export class Edge {
    * Register a plugin. Plugin functions are called once just before
    * an attempt to render a view is made.
    */
-  use<T extends any>(
-    pluginFn: (edge: Edge, firstRun: boolean, options: T) => void,
-    options?: T
-  ): this {
+  use<T extends any>(pluginFn: PluginFn<T>, options?: T): this {
     this.#plugins.push({
       fn: pluginFn,
       options,

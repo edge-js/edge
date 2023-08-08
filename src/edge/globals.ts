@@ -9,11 +9,13 @@
 
 // @ts-expect-error untyped module
 import stringify from 'js-stringify'
+import classNames from 'classnames'
 // @ts-expect-error untyped module
 import inspect from '@poppinss/inspect'
 import string from '@poppinss/utils/string'
 
 import { htmlSafe, escape } from '../template.js'
+import { stringifyAttributes } from '../utils.js'
 
 /**
  * Inbuilt globals
@@ -68,35 +70,19 @@ export const edgeGlobals = {
   },
 
   /**
-   * Using `"e"` because, `escape` is a global function in the
-   * Node.js global namespace and edge parser gives priority
-   * to it
+   * Helpers related to HTML
    */
-  e: escape,
+  html: {
+    escape: escape,
+    safe: htmlSafe,
+    classNames: classNames,
+    toAttributes: stringifyAttributes,
+  },
 
   /**
-   * Convert javascript data structures to a string. The method is a little
-   * better over JSON.stringify in handling certain data structures. For
-   * example: In JSON.stringify, the date is converted to an ISO string
-   * whereas this method converts it to an actual instance of date
+   * Helpers related to JavaScript
    */
-  stringify: stringify,
-  htmlSafe: htmlSafe,
-
-  camelCase: string.camelCase,
-  snakeCase: string.snakeCase,
-  dashCase: string.dashCase,
-  pascalCase: string.pascalCase,
-  capitalCase: string.capitalCase,
-  sentenceCase: string.sentenceCase,
-  dotCase: string.dotCase,
-  noCase: string.noCase,
-  titleCase: string.titleCase,
-  pluralize: string.pluralize,
-  sentence: string.sentence,
-  prettyMs: string.milliseconds.format,
-  toMs: string.milliseconds.parse,
-  prettyBytes: string.bytes.format,
-  toBytes: string.bytes.parse,
-  ordinal: string.ordinal,
-} as Record<string, Function>
+  js: {
+    stringify: stringify,
+  },
+}
