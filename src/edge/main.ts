@@ -12,7 +12,7 @@ import { Loader } from '../loader.js'
 import { Compiler } from '../compiler.js'
 import { Template } from '../template.js'
 import { Processor } from '../processor.js'
-import { EdgeRenderer } from '../renderer.js'
+import { EdgeRenderer } from './renderer.js'
 import type { TagContract, EdgeOptions, LoaderTemplate, LoaderContract } from '../types.js'
 
 /**

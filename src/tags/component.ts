@@ -13,8 +13,7 @@ import type { TagToken } from 'edge-lexer/types'
 import { EdgeBuffer, expressions, Parser } from 'edge-parser'
 
 import type { TagContract } from '../types.js'
-import { StringifiedObject } from '../stringified_object.js'
-import { isSubsetOf, unallowedExpression, parseJsArg } from '../utils.js'
+import { isSubsetOf, unallowedExpression, parseJsArg, StringifiedObject } from '../utils.js'
 
 /**
  * A list of allowed expressions for the component name

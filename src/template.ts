@@ -23,7 +23,7 @@ import { CompiledTemplate } from './types.js'
  * method ensures that underlying value is never
  * escaped.
  */
-export class SafeValue {
+class SafeValue {
   constructor(public value: any) {}
 }
 
