@@ -12,7 +12,9 @@
   ],
   "exports": {
     ".": "./build/index.js",
-    "./types": "./build/src/types.js"
+    "./types": "./build/src/types.js",
+    "./plugins/migrate": "./build/src/migrate/plugin.js",
+    "./globals": "./build/src/edge/globals.js"
   },
   "scripts": {
     "pretest": "npm run lint",
