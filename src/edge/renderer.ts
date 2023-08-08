@@ -27,7 +27,12 @@ export class EdgeRenderer {
   #locals: Record<string, any> = {}
   #globals: Record<string, any>
 
-  constructor(compiler: Compiler, asyncCompiler: Compiler, globals: any, processor: Processor) {
+  constructor(
+    compiler: Compiler,
+    asyncCompiler: Compiler,
+    processor: Processor,
+    globals: Record<string, any>
+  ) {
     this.#compiler = compiler
     this.#asyncCompiler = asyncCompiler
     this.#processor = processor

@@ -1,8 +1,9 @@
-import edge from '../index.js'
+import { Edge } from '../index.js'
 import { join } from 'node:path'
 import { createServer } from 'node:http'
 import { getDirname } from '@poppinss/utils'
 
+const edge = Edge.create()
 edge.mount(join(getDirname(import.meta.url), 'views'))
 
 class Base {

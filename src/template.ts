@@ -16,7 +16,7 @@ import stringifyAttributes from 'stringify-attributes'
 import { Compiler } from './compiler.js'
 import { Processor } from './processor.js'
 import { Props } from './component/props.js'
-import { CompiledTemplate } from './types.js'
+import type { CompiledTemplate } from './types.js'
 
 /**
  * An instance of this class passed to the escape

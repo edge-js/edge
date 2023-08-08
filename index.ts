@@ -8,13 +8,4 @@
  */
 
 import { Edge } from './src/edge/main.js'
-import { GLOBALS } from './src/edge/globals.js'
-
-/**
- * Default export
- */
-const edge = new Edge()
-Object.keys(GLOBALS).forEach((key) => edge.global(key, GLOBALS[key]))
-export default edge
-
-export { Edge, GLOBALS }
+export { Edge }

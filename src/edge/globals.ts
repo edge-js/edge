@@ -7,17 +7,18 @@
  * file that was distributed with this source code.
  */
 
-import { EdgeError } from 'edge-error'
-// @ts-ignore untyped module
+// @ts-expect-error untyped module
 import stringify from 'js-stringify'
-// @ts-ignore untyped module
+// @ts-expect-error untyped module
 import inspect from '@poppinss/inspect'
-const { string: prettyPrintHtml } = inspect
 import string from '@poppinss/utils/string'
 
 import { htmlSafe, escape } from '../template.js'
 
-export const GLOBALS = {
+/**
+ * Inbuilt globals
+ */
+export const edgeGlobals = {
   /**
    * Converts new lines to break
    */
@@ -33,7 +34,7 @@ export const GLOBALS = {
    * Inspect state
    */
   inspect: (value: any) => {
-    return htmlSafe(prettyPrintHtml.html(value))
+    return htmlSafe(inspect.string.html(value))
   },
 
   /**
@@ -52,17 +53,6 @@ export const GLOBALS = {
   },
 
   /**
-   * Raise an exception
-   */
-  raise: (message: string, options?: any) => {
-    if (!options) {
-      throw new Error(message)
-    } else {
-      throw new EdgeError(message, 'E_RUNTIME_EXCEPTION', options)
-    }
-  },
-
-  /**
    * Generate an excerpt
    */
   excerpt: (
@@ -76,6 +66,7 @@ export const GLOBALS = {
       suffix: options.suffix,
     })
   },
+
   /**
    * Using `"e"` because, `escape` is a global function in the
    * Node.js global namespace and edge parser gives priority
@@ -90,7 +81,8 @@ export const GLOBALS = {
    * whereas this method converts it to an actual instance of date
    */
   stringify: stringify,
-  safe: htmlSafe,
+  htmlSafe: htmlSafe,
+
   camelCase: string.camelCase,
   snakeCase: string.snakeCase,
   dashCase: string.dashCase,

@@ -7,10 +7,11 @@
  * file that was distributed with this source code.
  */
 
-import * as Tags from '../tags/main.js'
 import { Loader } from '../loader.js'
+import * as Tags from '../tags/main.js'
 import { Compiler } from '../compiler.js'
 import { Template } from '../template.js'
+import { edgeGlobals } from './globals.js'
 import { Processor } from '../processor.js'
 import { EdgeRenderer } from './renderer.js'
 import type { TagContract, EdgeOptions, LoaderTemplate, LoaderContract } from '../types.js'
@@ -19,6 +20,13 @@ import type { TagContract, EdgeOptions, LoaderTemplate, LoaderContract } from '.
  * Exposes the API to render templates, register custom tags and globals
  */
 export class Edge {
+  /**
+   * Create an instance of edge with given options
+   */
+  static create(options: EdgeOptions = {}) {
+    return new Edge(options)
+  }
+
   #executedPlugins = false
 
   /**
@@ -40,17 +48,6 @@ export class Edge {
   processor = new Processor()
 
   /**
-   * Globals are shared with all rendered templates
-   */
-  GLOBALS: { [key: string]: any } = {}
-
-  /**
-   * List of registered tags. Adding new tags will only impact
-   * this list
-   */
-  tags: { [name: string]: TagContract } = {}
-
-  /**
    * The loader to load templates. A loader can read and return
    * templates from anywhere. The default loader reads files
    * from the disk
@@ -67,6 +64,17 @@ export class Edge {
    */
   asyncCompiler: Compiler
 
+  /**
+   * Globals are shared with all rendered templates
+   */
+  globals: { [key: string]: any } = edgeGlobals
+
+  /**
+   * List of registered tags. Adding new tags will only impact
+   * this list
+   */
+  tags: { [name: string]: TagContract } = {}
+
   constructor(options: EdgeOptions = {}) {
     this.loader = options.loader || new Loader()
 
@@ -80,8 +88,9 @@ export class Edge {
       async: true,
     })
 
-    // @ts-ignore
-    Object.keys(Tags).forEach((name) => this.registerTag(Tags[name]))
+    Object.keys(Tags).forEach((name) => {
+      this.registerTag(Tags[name as keyof typeof Tags])
+    })
   }
 
   /**
@@ -90,11 +99,11 @@ export class Edge {
    */
   #executePlugins() {
     if (this.#executedPlugins) {
-      this.#plugins.forEach(({ fn, options }) => {
-        if (options && options.recurring) {
+      this.#plugins
+        .filter(({ options }) => options && options.recurring)
+        .forEach(({ fn, options }) => {
           fn(this, false, options)
-        }
-      })
+        })
     } else {
       this.#executedPlugins = true
       this.#plugins.forEach(({ fn, options }) => {
@@ -108,11 +117,11 @@ export class Edge {
    * an attempt to render a view is made.
    */
   use<T extends any>(
-    pluginFn: (edge: this, firstRun: boolean, options: T) => void,
+    pluginFn: (edge: Edge, firstRun: boolean, options: T) => void,
     options?: T
   ): this {
     this.#plugins.push({
-      fn: pluginFn as any,
+      fn: pluginFn,
       options,
     })
     return this
@@ -160,7 +169,7 @@ export class Edge {
    * ```
    */
   global(name: string, value: any): this {
-    this.GLOBALS[name] = value
+    this.globals[name] = value
     return this
   }
 
@@ -235,14 +244,14 @@ export class Edge {
    * Returns a new instance of edge. The instance
    * can be used to define locals.
    */
-  getRenderer(): EdgeRenderer {
+  createRenderer(): EdgeRenderer {
     this.#executePlugins()
 
     const renderer = new EdgeRenderer(
       this.compiler,
       this.asyncCompiler,
-      this.GLOBALS,
-      this.processor
+      this.processor,
+      this.globals
     )
 
     this.#renderCallbacks.forEach((callback) => callback(renderer))
@@ -257,7 +266,7 @@ export class Edge {
    * ```
    */
   render(templatePath: string, state?: Record<string, any>): Promise<string> {
-    return this.getRenderer().render(templatePath, state)
+    return this.createRenderer().render(templatePath, state)
   }
 
   /**
@@ -268,7 +277,7 @@ export class Edge {
    * ```
    */
   renderSync(templatePath: string, state?: Record<string, any>): string {
-    return this.getRenderer().renderSync(templatePath, state)
+    return this.createRenderer().renderSync(templatePath, state)
   }
 
   /**
@@ -279,7 +288,7 @@ export class Edge {
    * ```
    */
   renderRaw(contents: string, state?: Record<string, any>, templatePath?: string): Promise<string> {
-    return this.getRenderer().renderRaw(contents, state, templatePath)
+    return this.createRenderer().renderRaw(contents, state, templatePath)
   }
 
   /**
@@ -290,7 +299,7 @@ export class Edge {
    * ```
    */
   renderRawSync(templatePath: string, state?: Record<string, any>): string {
-    return this.getRenderer().renderRawSync(templatePath, state)
+    return this.createRenderer().renderRawSync(templatePath, state)
   }
 
   /**
@@ -306,6 +315,6 @@ export class Edge {
    * ```
    */
   share(data: Record<string, any>): EdgeRenderer {
-    return this.getRenderer().share(data)
+    return this.createRenderer().share(data)
   }
 }

@@ -11,7 +11,7 @@ import type { TagToken } from 'edge-lexer/types'
 import type { Parser, EdgeBuffer } from 'edge-parser'
 import type { ParserTagDefinitionContract, ClaimTagFn } from 'edge-parser/types'
 
-import { Template } from './template.js'
+import type { Template } from './template.js'
 
 /**
  * The shape in which the loader must resolve the template
@@ -161,3 +161,6 @@ export type ParserContract = Parser
 export type TagTokenContract = TagToken
 export type EdgeBufferContract = EdgeBuffer
 export type { ClaimTagFn }
+
+export * from 'edge-lexer/types'
+export * from 'edge-parser/types'
