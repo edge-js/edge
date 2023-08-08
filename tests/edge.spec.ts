@@ -13,8 +13,8 @@ import { EOL } from 'node:os'
 import { join } from 'node:path'
 import { test } from '@japa/runner'
 
-import { Edge } from '../src/edge/index.js'
-import { GLOBALS } from '../src/edge/globals/index.js'
+import { Edge } from '../src/edge/main.js'
+import { GLOBALS } from '../src/edge/globals.js'
 
 test.group('Edge', () => {
   test('mount default disk', async ({ assert, fs }) => {
@@ -153,7 +153,7 @@ test.group('Edge', () => {
     edge.mount(fs.basePath)
 
     try {
-      await edge.render('foo', false)
+      await edge.render('foo')
     } catch ({ stack }) {
       assert.equal(
         stack.split('\n')[1].trim(),
@@ -170,7 +170,7 @@ test.group('Edge', () => {
     edge.mount(fs.basePath)
 
     try {
-      await edge.render('foo', false)
+      await edge.render('foo')
     } catch ({ stack }) {
       assert.equal(
         stack.split('\n')[1].trim(),
@@ -188,7 +188,7 @@ test.group('Edge', () => {
     edge.mount(fs.basePath)
 
     try {
-      await edge.render('foo', false)
+      await edge.render('foo')
     } catch ({ stack }) {
       assert.equal(
         stack.split('\n')[1].trim(),
@@ -206,7 +206,7 @@ test.group('Edge', () => {
     edge.mount(fs.basePath)
 
     try {
-      await edge.render('foo', false)
+      await edge.render('foo')
     } catch ({ stack }) {
       assert.equal(
         stack.split('\n')[1].trim(),
@@ -224,7 +224,7 @@ test.group('Edge', () => {
     edge.mount(fs.basePath)
 
     try {
-      await edge.render('foo', false)
+      await edge.render('foo')
     } catch ({ stack }) {
       console.log(stack)
       assert.equal(
@@ -243,7 +243,7 @@ test.group('Edge', () => {
     edge.mount(fs.basePath)
 
     try {
-      await edge.render('foo', false)
+      await edge.render('foo')
     } catch ({ stack }) {
       assert.equal(
         stack.split('\n')[1].trim(),
@@ -261,7 +261,7 @@ test.group('Edge', () => {
     edge.mount(fs.basePath)
 
     try {
-      await edge.render('foo', false)
+      await edge.render('foo')
     } catch ({ stack }) {
       assert.equal(
         stack.split('\n')[1].trim(),
@@ -279,7 +279,7 @@ test.group('Edge', () => {
     edge.mount(fs.basePath)
 
     try {
-      await edge.render('foo', false)
+      await edge.render('foo')
     } catch ({ stack }) {
       assert.equal(
         stack.split('\n')[1].trim(),

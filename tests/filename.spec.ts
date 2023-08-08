@@ -12,7 +12,7 @@ import dedent from 'dedent-js'
 import { join } from 'node:path'
 import { test } from '@japa/runner'
 
-import { Edge } from '../src/edge/index.js'
+import { Edge } from '../src/edge/main.js'
 import { normalizeNewLines } from '../test_helpers/index.js'
 
 test.group('Template FileName', () => {

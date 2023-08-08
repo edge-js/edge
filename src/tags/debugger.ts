@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import { TagContract } from '../types.js'
+import type { TagContract } from '../types.js'
 
 /**
  * Add debugger break point to the compiled template

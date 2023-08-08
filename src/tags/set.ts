@@ -14,6 +14,12 @@ import lodash from '@poppinss/utils/lodash'
 import { TagContract } from '../types.js'
 import { isSubsetOf, unallowedExpression, parseJsArg } from '../utils.js'
 
+declare module '../template.js' {
+  export interface Template {
+    setValue: (typeof lodash)['set']
+  }
+}
+
 /**
  * The set tag is used to set runtime values within the template. The value
  * is set inside the current scope of the template.
@@ -56,7 +62,8 @@ export const setTag: TagContract = {
     })
 
     /**
-     * Disallow more than 2 values for the sequence expression
+     * Disallow less than 2 and more than 3 values for the sequence
+     * expression
      */
     if (parsed.expressions.length < 2 || parsed.expressions.length > 3) {
       throw new EdgeError(
@@ -85,17 +92,6 @@ export const setTag: TagContract = {
       key = parsed.expressions[0]
       value = parsed.expressions[1]
     }
-
-    /**
-     * The key has to be a literal value
-     */
-    isSubsetOf(key, [expressions.Literal], () => {
-      throw unallowedExpression(
-        `The ${collection ? 'second' : 'first'} argument for @set tag must be a string literal`,
-        token.filename,
-        parser.utils.getExpressionLoc(key)
-      )
-    })
 
     /**
      * Mutate the collection when defined

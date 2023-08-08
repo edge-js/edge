@@ -15,7 +15,7 @@ import inspect from '@poppinss/inspect'
 const { string: prettyPrintHtml } = inspect
 import string from '@poppinss/utils/string'
 
-import { htmlSafe, escape } from '../../template.js'
+import { htmlSafe, escape } from '../template.js'
 
 export const GLOBALS = {
   /**

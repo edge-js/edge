@@ -9,7 +9,7 @@
 
 import { expressions } from 'edge-parser'
 
-import { TagContract } from '../types.js'
+import type { TagContract } from '../types.js'
 import { isSubsetOf, unallowedExpression, parseJsArg } from '../utils.js'
 
 /**
@@ -29,13 +29,17 @@ export const injectTag: TagContract = {
     /**
      * The inject tag only accepts an object expression.
      */
-    isSubsetOf(parsed, [expressions.ObjectExpression, expressions.Identifier], () => {
-      throw unallowedExpression(
-        `"${token.properties.jsArg}" is not a valid key-value pair for the @inject tag`,
-        token.filename,
-        parser.utils.getExpressionLoc(parsed)
-      )
-    })
+    isSubsetOf(
+      parsed,
+      [expressions.ObjectExpression, expressions.Identifier, expressions.CallExpression],
+      () => {
+        throw unallowedExpression(
+          `"${token.properties.jsArg}" is not a valid key-value pair for the @inject tag`,
+          token.filename,
+          parser.utils.getExpressionLoc(parsed)
+        )
+      }
+    )
 
     /**
      * Ensure $slots are defined before merging shared state

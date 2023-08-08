@@ -1,3 +1,7 @@
-@set('foo', 'foobar')
-@inject({ foo: () => foo })
+@set('getData', () => {
+  return {
+    foo: 'bar'
+  }
+})
+@inject(getData())
 {{{ $slots.main() }}}

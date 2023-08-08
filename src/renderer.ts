@@ -17,24 +17,29 @@ import type { Compiler } from './compiler.js'
  * Renders a given template with it's shared state
  */
 export class EdgeRenderer {
-  #locals: any = {}
   #compiler: Compiler
-  #asyncCompiler: Compiler
-  #globals: any
   #processor: Processor
+  #asyncCompiler: Compiler
+
+  /**
+   * Global state
+   */
+  #locals: Record<string, any> = {}
+  #globals: Record<string, any>
 
   constructor(compiler: Compiler, asyncCompiler: Compiler, globals: any, processor: Processor) {
     this.#compiler = compiler
     this.#asyncCompiler = asyncCompiler
-    this.#globals = globals
     this.#processor = processor
+
+    this.#globals = globals
   }
 
   /**
    * Share local variables with the template. They will overwrite the
    * globals
    */
-  share(data: any): this {
+  share(data: Record<string, any>): this {
     lodash.merge(this.#locals, data)
     return this
   }
@@ -42,7 +47,7 @@ export class EdgeRenderer {
   /**
    * Render the template
    */
-  async render(templatePath: string, state: any = {}): Promise<string> {
+  async render(templatePath: string, state: Record<string, any> = {}): Promise<string> {
     return new Template(this.#asyncCompiler, this.#globals, this.#locals, this.#processor).render(
       templatePath,
       state
@@ -52,7 +57,7 @@ export class EdgeRenderer {
   /**
    * Render the template
    */
-  renderSync(templatePath: string, state: any = {}): string {
+  renderSync(templatePath: string, state: Record<string, any> = {}): string {
     return new Template(
       this.#compiler,
       this.#globals,
@@ -64,7 +69,11 @@ export class EdgeRenderer {
   /**
    * Render the template from a raw string
    */
-  async renderRaw(contents: string, state: any = {}, templatePath?: string): Promise<string> {
+  async renderRaw(
+    contents: string,
+    state: Record<string, any> = {},
+    templatePath?: string
+  ): Promise<string> {
     return new Template(
       this.#asyncCompiler,
       this.#globals,
@@ -76,7 +85,7 @@ export class EdgeRenderer {
   /**
    * Render the template from a raw string
    */
-  renderRawSync(contents: string, state: any = {}, templatePath?: string): string {
+  renderRawSync(contents: string, state: Record<string, any> = {}, templatePath?: string): string {
     return new Template(this.#compiler, this.#globals, this.#locals, this.#processor).renderRaw(
       contents,
       state,

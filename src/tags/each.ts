@@ -14,6 +14,14 @@ import { Parser, expressions } from 'edge-parser'
 import { TagContract } from '../types.js'
 import { isSubsetOf, asyncEach, each, unallowedExpression } from '../utils.js'
 
+declare module '../template.js' {
+  export interface Template {
+    loopAsync: typeof asyncEach
+    loop: typeof each
+    size: (typeof lodash)['size']
+  }
+}
+
 /**
  * Returns the list to loop over for the each binary expression
  */

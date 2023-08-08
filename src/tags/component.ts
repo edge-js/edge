@@ -8,11 +8,11 @@
  */
 
 import { EdgeError } from 'edge-error'
-import type { TagToken } from 'edge-lexer/types'
 import * as lexerUtils from 'edge-lexer/utils'
+import type { TagToken } from 'edge-lexer/types'
 import { EdgeBuffer, expressions, Parser } from 'edge-parser'
 
-import { TagContract } from '../types.js'
+import type { TagContract } from '../types.js'
 import { StringifiedObject } from '../stringified_object.js'
 import { isSubsetOf, unallowedExpression, parseJsArg } from '../utils.js'
 

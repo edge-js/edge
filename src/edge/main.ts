@@ -13,20 +13,12 @@ import { Compiler } from '../compiler.js'
 import { Template } from '../template.js'
 import { Processor } from '../processor.js'
 import { EdgeRenderer } from '../renderer.js'
-
-import {
-  TagContract,
-  EdgeOptions,
-  EdgeContract,
-  LoaderTemplate,
-  EdgeRendererContract,
-  LoaderContract,
-} from '../types.js'
+import type { TagContract, EdgeOptions, LoaderTemplate, LoaderContract } from '../types.js'
 
 /**
  * Exposes the API to render templates, register custom tags and globals
  */
-export class Edge implements EdgeContract {
+export class Edge {
   #executedPlugins = false
 
   /**
@@ -40,7 +32,7 @@ export class Edge implements EdgeContract {
   /**
    * Array of registered renderer hooks
    */
-  #renderCallbacks: ((renderer: EdgeRendererContract) => void)[] = []
+  #renderCallbacks: ((renderer: EdgeRenderer) => void)[] = []
 
   /**
    * Reference to the registered processor handlers
@@ -96,7 +88,7 @@ export class Edge implements EdgeContract {
    * Execute plugins. Since plugins are meant to be called only
    * once we empty out the array after first call
    */
-  private executePlugins() {
+  #executePlugins() {
     if (this.#executedPlugins) {
       this.#plugins.forEach(({ fn, options }) => {
         if (options && options.recurring) {
@@ -189,7 +181,6 @@ export class Edge implements EdgeContract {
    */
   registerTag(tag: TagContract): this {
     if (typeof tag.boot === 'function') {
-      // @ts-ignore
       tag.boot(Template)
     }
 
@@ -235,7 +226,7 @@ export class Edge implements EdgeContract {
    * Get access to the underlying template renderer. Each render call
    * to edge results in creating an isolated renderer instance.
    */
-  onRender(callback: (renderer: EdgeRendererContract) => void): this {
+  onRender(callback: (renderer: EdgeRenderer) => void): this {
     this.#renderCallbacks.push(callback)
     return this
   }
@@ -244,8 +235,8 @@ export class Edge implements EdgeContract {
    * Returns a new instance of edge. The instance
    * can be used to define locals.
    */
-  getRenderer(): EdgeRendererContract {
-    this.executePlugins()
+  getRenderer(): EdgeRenderer {
+    this.#executePlugins()
 
     const renderer = new EdgeRenderer(
       this.compiler,
@@ -265,7 +256,7 @@ export class Edge implements EdgeContract {
    * edge.render('welcome', { greeting: 'Hello world' })
    * ```
    */
-  render(templatePath: string, state?: any): Promise<string> {
+  render(templatePath: string, state?: Record<string, any>): Promise<string> {
     return this.getRenderer().render(templatePath, state)
   }
 
@@ -276,7 +267,7 @@ export class Edge implements EdgeContract {
    * edge.render('welcome', { greeting: 'Hello world' })
    * ```
    */
-  renderSync(templatePath: string, state?: any): string {
+  renderSync(templatePath: string, state?: Record<string, any>): string {
     return this.getRenderer().renderSync(templatePath, state)
   }
 
@@ -287,7 +278,7 @@ export class Edge implements EdgeContract {
    * edge.render('welcome', { greeting: 'Hello world' })
    * ```
    */
-  renderRaw(contents: string, state?: any, templatePath?: string): Promise<string> {
+  renderRaw(contents: string, state?: Record<string, any>, templatePath?: string): Promise<string> {
     return this.getRenderer().renderRaw(contents, state, templatePath)
   }
 
@@ -298,7 +289,7 @@ export class Edge implements EdgeContract {
    * edge.render('welcome', { greeting: 'Hello world' })
    * ```
    */
-  renderRawSync(templatePath: string, state?: any): string {
+  renderRawSync(templatePath: string, state?: Record<string, any>): string {
     return this.getRenderer().renderRawSync(templatePath, state)
   }
 
@@ -314,7 +305,7 @@ export class Edge implements EdgeContract {
    * view.render('welcome')
    * ```
    */
-  share(data: any): EdgeRendererContract {
+  share(data: Record<string, any>): EdgeRenderer {
     return this.getRenderer().share(data)
   }
 }
