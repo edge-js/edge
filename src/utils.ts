@@ -7,8 +7,6 @@
  * file that was distributed with this source code.
  */
 
-// @ts-expect-error untyped module
-import JSStringify from 'js-stringify'
 import classNames from 'classnames'
 import { EdgeError } from 'edge-error'
 import type { TagToken } from 'edge-lexer/types'
@@ -341,14 +339,11 @@ export function stringifyAttributes(props: any, namespace?: string): string {
        * Encoding rules for certain properties.
        *
        * - Class values can be objects with conditionals
-       * - x-data as an object will be converted to a JSON value
-       * - Arrays will be concatenated into a string list and html escaped
        * - Non-booleanish and numeric properties will be html escaped
+       * - Arrays will be concatenated into a string list and html escaped
        */
       if (key === 'class') {
         value = `"${classNames(value)}"`
-      } else if (key === 'x-data') {
-        value = typeof value === 'string' ? `"${value}"` : JSStringify(value)
       } else if (Array.isArray(value)) {
         value = `"${value.join(propInfo.commaSeparated ? ',' : ' ')}"`
       } else if (!propInfo.booleanish && !propInfo.number) {

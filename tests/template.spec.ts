@@ -378,7 +378,7 @@ test.group('Template | toAttributes', () => {
       <div {{
         ({
           x: {
-            data: { open: false },
+            data: '{ open: false }',
             init: "console.log('Here I am')",
             show: 'open',
           }
@@ -392,7 +392,7 @@ test.group('Template | toAttributes', () => {
     assert.equal(
       html,
       dedent`
-      <div x-data={"open":false} x-init="console.log('Here I am')" x-show="open">
+      <div x-data="{ open: false }" x-init="console.log('Here I am')" x-show="open">
       </div>
     `
     )

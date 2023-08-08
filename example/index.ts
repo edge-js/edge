@@ -2,8 +2,10 @@ import { Edge } from '../index.js'
 import { join } from 'node:path'
 import { createServer } from 'node:http'
 import { getDirname } from '@poppinss/utils'
+import { migrate } from '../src/migrate/plugin.js'
 
 const edge = Edge.create()
+edge.use(migrate)
 edge.mount(join(getDirname(import.meta.url), 'views'))
 
 class Base {
@@ -37,11 +39,11 @@ user.parent = user
 
 createServer(async (_req, res) => {
   res.writeHead(200, { 'content-type': 'text/html' })
-  res.end(
-    await edge.render('welcome', {
-      user: user,
-    })
-  )
+  const html = await edge.render('welcome', {
+    user: user,
+  })
+  console.log(html)
+  res.end(html)
 }).listen(3000, () => {
   console.log('Listening on 127.0.0.1:3000')
 })
