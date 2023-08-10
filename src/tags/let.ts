@@ -7,12 +7,11 @@
  * file that was distributed with this source code.
  */
 
-import { EdgeError } from 'edge-error'
 import { expressions } from 'edge-parser'
 import lodash from '@poppinss/utils/lodash'
 
 import { TagContract } from '../types.js'
-import { isSubsetOf, unallowedExpression, parseJsArg } from '../utils.js'
+import { isSubsetOf, unallowedExpression } from '../utils.js'
 
 /**
  * The let tag is used to set runtime values within the template. The value
@@ -74,7 +73,6 @@ export const letTag: TagContract = {
     )}`
 
     buffer.writeExpression(expression, token.filename, token.loc.start.line)
-    parser.stack.defineVariable(key.value)
   },
 
   /**
