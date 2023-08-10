@@ -144,13 +144,15 @@ export class Edge {
    * edge.render('admin::filename')
    * ```
    */
-  mount(diskName: string, dirPath?: string): this {
-    if (!dirPath) {
-      dirPath = diskName
+  mount(viewsDirectory: string | URL): this
+  mount(diskName: string, viewsDirectory: string | URL): this
+  mount(diskName: string | URL, viewsDirectory?: string | URL): this {
+    if (!viewsDirectory) {
+      viewsDirectory = diskName
       diskName = 'default'
     }
 
-    this.loader.mount(diskName, dirPath)
+    this.loader.mount(diskName as string, viewsDirectory)
     return this
   }
 

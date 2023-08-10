@@ -38,7 +38,7 @@ export interface LoaderContract {
   /**
    * Save disk name and dirPath to resolve views
    */
-  mount(diskName: string, dirPath: string): void
+  mount(diskName: string, dirPath: string | URL): void
 
   /**
    * Remove disk from the previously saved paths

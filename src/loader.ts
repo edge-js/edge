@@ -8,6 +8,7 @@
  */
 
 import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import { join, isAbsolute } from 'node:path'
 import type { LoaderContract, LoaderTemplate } from './types.js'
 
@@ -68,18 +69,6 @@ export class Loader implements LoaderContract {
     }
 
     let [template, ext] = rest.join('::').split('.edge')
-
-    /**
-     * Depreciate dot based path seperators
-     */
-    if (template.indexOf('.') > -1) {
-      process.emitWarning(
-        'DeprecationWarning',
-        'edge: dot "." based path seperators are depreciated. We recommend using "/" instead'
-      )
-      template = template.replace(/\./g, '/')
-    }
-
     return [disk, `${template}.${ext || 'edge'}`]
   }
 
@@ -141,8 +130,8 @@ export class Loader implements LoaderContract {
    * loader.mount('admin', join(__dirname, 'admin/views'))
    * ```
    */
-  mount(diskName: string, dirPath: string): void {
-    this.#mountedDirs.set(diskName, dirPath)
+  mount(diskName: string, dirPath: string | URL): void {
+    this.#mountedDirs.set(diskName, typeof dirPath === 'string' ? dirPath : fileURLToPath(dirPath))
   }
 
   /**
