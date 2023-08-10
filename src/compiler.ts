@@ -209,7 +209,6 @@ export class Compiler {
       async: this.async,
       statePropertyName: 'state',
       escapeCallPath: ['template', 'escape'],
-      toAttributesCallPath: ['template', 'toAttributes'],
       localVariables: this.#inlineVariables,
       onTag: (tag) => this.#processor.executeTag({ tag, path: templatePath }),
     })

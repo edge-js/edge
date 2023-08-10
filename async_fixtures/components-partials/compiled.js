@@ -2,7 +2,9 @@ let out = "";
 let $lineNumber = 1;
 let $filename = "{{__dirname}}index.edge";
 try {
-out += await template.compileComponent("components-partials/alert")(template, template.getComponentState({ username: "virk" }, { $context: Object.assign({}, $context), main: async function () { const $context = this.$context;
+out += await template.compileComponent("components-partials/alert")(template, template.getComponentState({
+  username: 'virk'
+}, { $context: Object.assign({}, $context), main: async function () { const $context = this.$context;
 let slot_main = "";
 try {
 slot_main += "  Hello ";

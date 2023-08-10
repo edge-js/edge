@@ -15,7 +15,6 @@ import Macroable from '@poppinss/macroable'
 import { Compiler } from './compiler.js'
 import { Processor } from './processor.js'
 import { Props } from './migrate/props.js'
-import { stringifyAttributes } from './utils.js'
 import type { CompiledTemplate } from './types.js'
 import { ComponentProps } from './component/props.js'
 
@@ -169,13 +168,6 @@ export class Template extends Macroable {
    */
   escape(input: any): string {
     return escape(input)
-  }
-
-  /**
-   * Converts an object to HTML attributes
-   */
-  toAttributes(attributes: Record<string, any>) {
-    return stringifyAttributes(attributes)
   }
 
   /**

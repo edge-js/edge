@@ -80,19 +80,6 @@ function getComponentNameAndProps(
      * expression, as components allows a max of two arguments
      */
     const firstSequenceExpression = expression.expressions[0]
-
-    if (
-      firstSequenceExpression &&
-      [expressions.ObjectExpression, expressions.AssignmentExpression].includes(
-        firstSequenceExpression.type
-      )
-    ) {
-      return [
-        parser.utils.stringify(name),
-        StringifiedObject.fromAcornExpressions([firstSequenceExpression], parser),
-      ]
-    }
-
     return [parser.utils.stringify(name), parser.utils.stringify(firstSequenceExpression)]
   }
 

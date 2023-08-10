@@ -16,7 +16,6 @@ import { test } from '@japa/runner'
 import { Edge } from '../src/edge/main.js'
 import { migrate } from '../src/migrate/plugin.js'
 import { edgeGlobals } from '../src/edge/globals.js'
-import { PerformanceObserver } from 'node:perf_hooks'
 
 test.group('Edge', () => {
   test('mount default disk', async ({ assert, fs }) => {

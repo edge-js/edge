@@ -4,6 +4,6 @@
   name: {{ user.name }}
   job: {{ user.job }}
   skills:
-  @component('yaml-components/skills', skills = user.skills)
+  @component('yaml-components/skills', { skills: user.skills })
   @endcomponent
 @endeach

@@ -421,7 +421,7 @@ test.group('Component | context API', (group) => {
       dedent`
       <p> Some content </p>
 
-      @component('modal', needsHandler = true)
+      @component('modal', { needsHandler: true })
       	<p>{{ $context.closeHandler }}</p>
       @endcomponent
     `
@@ -455,7 +455,7 @@ test.group('Component | context API', (group) => {
       dedent`
       <p> Some content </p>
 
-      @component('modal', needsHandler = true)
+      @component('modal', { needsHandler: true })
       	<p>{{ $context.closeHandler }}</p>
       @endcomponent
 
@@ -493,7 +493,7 @@ test.group('Component | context API', (group) => {
       dedent`
       <p> Some content </p>
 
-      @component('modal', needsHandler = true)
+      @component('modal', { needsHandler: true })
       	<p>{{ $context.closeHandler }}</p>
       @endcomponent
 
@@ -543,7 +543,7 @@ test.group('Component | context API', (group) => {
       <p> Some content </p>
 
       @component('wrapper')
-	      @component('modal', needsHandler = true)
+	      @component('modal', { needsHandler: true })
 	      	<p>{{ $context.closeHandler }}</p>
 	      @endcomponent
 

@@ -63,7 +63,7 @@
     "classnames": "^2.3.2",
     "edge-error": "^4.0.0-0",
     "edge-lexer": "^6.0.0-4",
-    "edge-parser": "^9.0.0-2",
+    "edge-parser": "^9.0.0-3",
     "he": "^1.2.0",
     "js-stringify": "^1.0.2",
     "property-information": "^6.2.0",

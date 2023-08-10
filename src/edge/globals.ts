@@ -76,7 +76,9 @@ export const edgeGlobals = {
     escape: escape,
     safe: htmlSafe,
     classNames: classNames,
-    toAttributes: stringifyAttributes,
+    attrs: (values: Record<string, any>) => {
+      return htmlSafe(stringifyAttributes(values))
+    },
   },
 
   /**

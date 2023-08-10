@@ -75,7 +75,7 @@ export class ComponentProps {
   /**
    * Converts props to HTML attributes
    */
-  toAttributes() {
+  toAttrs() {
     return htmlSafe(stringifyAttributes(this.#values))
   }
 }
