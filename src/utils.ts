@@ -13,7 +13,7 @@ import type { TagToken } from 'edge-lexer/types'
 import { find, html } from 'property-information'
 import { expressions as expressionsList, Parser } from 'edge-parser'
 
-type ExpressionList = readonly (keyof typeof expressionsList)[]
+type ExpressionList = readonly (keyof typeof expressionsList | 'ObjectPattern' | 'ArrayPattern')[]
 
 /**
  * Function to register custom properties

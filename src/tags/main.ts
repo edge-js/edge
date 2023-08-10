@@ -8,6 +8,7 @@
  */
 
 export { ifTag as if } from './if.js'
+export { letTag as let } from './let.js'
 export { eachTag as each } from './each.js'
 export { slotTag as slot } from './slot.js'
 export { elseTag as else } from './else.js'
