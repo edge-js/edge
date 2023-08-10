@@ -60,7 +60,12 @@ export class Template extends Macroable {
     super()
     this.#compiler = compiler
     this.#processor = processor
-    this.#sharedState = lodash.merge({}, globals, locals)
+    this.#sharedState = compiler.compat
+      ? lodash.merge({}, globals, locals)
+      : {
+          ...globals,
+          ...locals,
+        }
   }
 
   /**
@@ -74,7 +79,7 @@ export class Template extends Macroable {
    * Render a compiled template with state
    */
   #renderCompiled(compiledTemplate: CompiledTemplate, state: any) {
-    const templateState = Object.assign({}, this.#sharedState, state)
+    const templateState = { ...this.#sharedState, ...state }
     const $context = {}
 
     /**
@@ -127,11 +132,13 @@ export class Template extends Macroable {
     slots: { [key: string]: any },
     caller: { filename: string; line: number; col: number }
   ) {
-    return Object.assign({}, this.#sharedState, props, {
+    return {
+      ...this.#sharedState,
+      ...props,
       $slots: slots,
       $caller: caller,
       $props: this.#compiler.compat ? new Props(props) : new ComponentProps(props),
-    })
+    }
   }
 
   /**

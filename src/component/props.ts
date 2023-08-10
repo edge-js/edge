@@ -65,11 +65,11 @@ export class ComponentProps {
    */
   defaults(values: Record<string, any>) {
     if (values.class && this.#values['class']) {
-      const classes = Object.assign({}, values.class, this.#values.class)
-      return new ComponentProps(Object.assign({}, values, this.#values, { class: classes }))
+      const classes = { ...values.class, ...this.#values.class }
+      return new ComponentProps({ ...values, ...this.#values, class: classes })
     }
 
-    return new ComponentProps(Object.assign({}, values, this.#values))
+    return new ComponentProps({ ...values, ...this.#values })
   }
 
   /**

@@ -315,7 +315,7 @@ export class Edge {
    * Share locals with the current view context.
    *
    * ```js
-   * const view = edge.getRenderer()
+   * const view = edge.createRenderer()
    *
    * // local state for the current render
    * view.share({ foo: 'bar' })
