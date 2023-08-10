@@ -81,11 +81,11 @@ test.group('Fixtures', (group) => {
        * Render output
        */
       const out = readFileSync(join(dirBasePath, 'index.txt'), 'utf-8')
-      const state = JSON.parse(readFileSync(join(dirBasePath, 'index.json'), 'utf-8'))
-      const output = template.render(`${dir}/index.edge`, state) as string
+      const state = readFileSync(join(dirBasePath, 'index.json'), 'utf-8')
+      const output = template.render(`${dir}/index.edge`, JSON.parse(state)) as string
       const outputRaw = template.renderRaw<string>(
         readFileSync(join(dirBasePath, 'index.edge'), 'utf-8'),
-        state
+        JSON.parse(state)
       )
       assert.stringEqual(output.trim(), out)
       assert.stringEqual(outputRaw.trim(), out)
@@ -144,11 +144,11 @@ test.group('Fixtures | Cache', (group) => {
        * Render output
        */
       const out = readFileSync(join(dirBasePath, 'index.txt'), 'utf-8')
-      const state = JSON.parse(readFileSync(join(dirBasePath, 'index.json'), 'utf-8'))
-      const output = template.render(`${dir}/index.edge`, state) as string
+      const state = readFileSync(join(dirBasePath, 'index.json'), 'utf-8')
+      const output = template.render(`${dir}/index.edge`, JSON.parse(state)) as string
       const outputRaw = template.renderRaw<string>(
         readFileSync(join(dirBasePath, 'index.edge'), 'utf-8'),
-        state
+        JSON.parse(state)
       )
       assert.stringEqual(output.trim(), out)
       assert.stringEqual(outputRaw.trim(), out)
