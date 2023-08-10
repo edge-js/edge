@@ -52,7 +52,7 @@ test.group('Template | toAttributes', () => {
       }
     )
 
-    assert.equal(
+    assert.stringEqual(
       html,
       dedent`
     <button type="text" aria-label="Buy products">
@@ -82,7 +82,7 @@ test.group('Template | toAttributes', () => {
       {}
     )
 
-    assert.equal(
+    assert.stringEqual(
       html,
       dedent`
     <button disabled type="text" aria-label="Buy products">
@@ -112,7 +112,7 @@ test.group('Template | toAttributes', () => {
       }
     )
 
-    assert.equal(
+    assert.stringEqual(
       html,
       dedent`
     <button foo="bar">
@@ -138,7 +138,7 @@ test.group('Template | toAttributes', () => {
       {}
     )
 
-    assert.equal(
+    assert.stringEqual(
       html,
       dedent`
       <input accept="audio/*,video/*,image/*" />
@@ -167,7 +167,7 @@ test.group('Template | toAttributes', () => {
       {}
     )
 
-    assert.equal(
+    assert.stringEqual(
       html,
       dedent`
       <div x-data="{ open: false }" x-init="console.log('Here I am')" x-show="open">
@@ -196,7 +196,7 @@ test.group('Template | toAttributes', () => {
       {}
     )
 
-    assert.equal(
+    assert.stringEqual(
       html,
       dedent`
       <div x-cloak>
@@ -226,7 +226,7 @@ test.group('Template | toAttributes', () => {
       {}
     )
 
-    assert.equal(
+    assert.stringEqual(
       html,
       dedent`
       <div x-on:click="alert($event.target.getAttribute('message'))" x-on:keyup.enter="alert('Submitted!')" x-on:keyup.page-down="alert('Submitted!')">
@@ -255,7 +255,7 @@ test.group('Template | toAttributes', () => {
       {}
     )
 
-    assert.equal(
+    assert.stringEqual(
       html,
       dedent`
       <div x-bind:class="{ 'hidden': !show }" x-bind:style="{ color: 'red', display: 'flex' }">
@@ -288,7 +288,7 @@ test.group('Template | toAttributes', () => {
       {}
     )
 
-    assert.equal(
+    assert.stringEqual(
       html,
       dedent`
       <div x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-90">
