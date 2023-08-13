@@ -10,8 +10,8 @@
 import { fileURLToPath } from 'node:url'
 import string from '@poppinss/utils/string'
 import { join, isAbsolute } from 'node:path'
-import { readFileSync, readdirSync } from 'node:fs'
-import type { LoaderContract, LoaderTemplate } from './types.js'
+import { existsSync, readFileSync, readdirSync } from 'node:fs'
+import type { ComponentsTree, LoaderContract, LoaderTemplate } from './types.js'
 
 /**
  * The job of a loader is to load the template from a given path.
@@ -50,16 +50,21 @@ export class Loader implements LoaderContract {
   /**
    * Returns a list of components for a given disk
    */
-  #getDiskComponents(diskName: string): { componentName: string; tagName: string }[] {
+  #getDiskComponents(diskName: string): ComponentsTree[0]['components'] {
+    const componentsDirName = 'components'
     const diskBasePath = this.#mountedDirs.get(diskName)!
-    const files = readdirSync(join(diskBasePath, 'components'), {
+    if (!existsSync(join(diskBasePath, componentsDirName))) {
+      return []
+    }
+
+    const files = readdirSync(join(diskBasePath, componentsDirName), {
       recursive: true,
       encoding: 'utf8',
     }).filter((file) => file.endsWith('.edge'))
 
     return files.map((file) => {
       const fileName = file.replace(/\.edge$/, '')
-      const componentPath = `components/${fileName}`
+      const componentPath = `${componentsDirName}/${fileName}`
       const tagName = fileName
         .split('/')
         .filter((segment, index) => {
@@ -299,7 +304,7 @@ export class Loader implements LoaderContract {
    * The return path is same the path you will pass to the `@component`
    * tag.
    */
-  listComponents(): { diskName: string; components: string[] }[] {
+  listComponents(): ComponentsTree {
     const diskNames = [...this.#mountedDirs.keys()]
     return diskNames.map((diskName) => {
       return {

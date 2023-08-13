@@ -11,6 +11,7 @@ import { Loader } from '../loader.js'
 import * as Tags from '../tags/main.js'
 import { Compiler } from '../compiler.js'
 import { Template } from '../template.js'
+import { edgeGlobals } from './globals.js'
 import { Processor } from '../processor.js'
 import { EdgeRenderer } from './renderer.js'
 import type {
@@ -20,6 +21,7 @@ import type {
   LoaderTemplate,
   LoaderContract,
 } from '../types.js'
+import { pluginSuperCharged } from '../plugins/supercharged.js'
 
 /**
  * Exposes the API to render templates, register custom tags and globals
@@ -77,7 +79,7 @@ export class Edge {
   /**
    * Globals are shared with all rendered templates
    */
-  globals: { [key: string]: any } = {}
+  globals: { [key: string]: any } = edgeGlobals
 
   /**
    * List of registered tags. Adding new tags will only impact
@@ -98,9 +100,17 @@ export class Edge {
       async: true,
     })
 
+    /**
+     * Registering bundled set of tags
+     */
     Object.keys(Tags).forEach((name) => {
       this.registerTag(Tags[name as keyof typeof Tags])
     })
+
+    /**
+     * Registering super charged plugin
+     */
+    this.use(pluginSuperCharged, { recurring: !options.cache })
   }
 
   /**

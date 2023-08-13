@@ -388,6 +388,42 @@ test.group('Edge', () => {
     const output = await edge.render('hello::foo')
     assert.equal(output.trim(), 'Hello bar')
   })
+
+  test('render components as tags', async ({ assert, fs }) => {
+    const edge = new Edge()
+    await fs.create('foo.edge', '@!foo({ username })')
+    await fs.create('components/foo.edge', 'Hello {{ username }}')
+
+    edge.mount(fs.basePath)
+    const output = await edge.render('foo', { username: 'virk' })
+    assert.equal(output.trim(), 'Hello virk')
+  })
+
+  test('refresh components list on each render', async ({ assert, fs }) => {
+    const edge = new Edge()
+    await fs.create('foo.edge', '@!foo({ username })')
+    edge.mount(fs.basePath)
+
+    const output = await edge.render('foo', { username: 'virk' })
+    assert.equal(output.trim(), '@!foo({ username })')
+
+    await fs.create('components/foo.edge', 'Hello {{ username }}')
+    const output1 = await edge.render('foo', { username: 'virk' })
+    assert.equal(output1.trim(), 'Hello virk')
+  })
+
+  test('do not refresh list when cache mode is enabled', async ({ assert, fs }) => {
+    const edge = new Edge({ cache: true })
+    await fs.create('foo.edge', '@!foo({ username })')
+    edge.mount(fs.basePath)
+
+    const output = await edge.render('foo', { username: 'virk' })
+    assert.equal(output.trim(), '@!foo({ username })')
+
+    await fs.create('components/foo.edge', 'Hello {{ username }}')
+    const output1 = await edge.render('foo', { username: 'virk' })
+    assert.equal(output1.trim(), '@!foo({ username })')
+  })
 })
 
 test.group('Edge | regression', () => {

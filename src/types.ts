@@ -21,6 +21,14 @@ export type LoaderTemplate = {
   template: string
 }
 
+export type ComponentsTree = {
+  diskName: string
+  components: {
+    componentName: string
+    tagName: string
+  }[]
+}[]
+
 /**
  * Loader contract that every loader must adheres to.
  */
@@ -64,6 +72,11 @@ export interface LoaderContract {
    * Remove the pre-registered template
    */
   remove(templatePath: string): void
+
+  /**
+   * Returns a list of components for all the registered disks
+   */
+  listComponents(): ComponentsTree
 }
 
 /**
