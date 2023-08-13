@@ -7,9 +7,10 @@
  * file that was distributed with this source code.
  */
 
-import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
+import string from '@poppinss/utils/string'
 import { join, isAbsolute } from 'node:path'
+import { readFileSync, readdirSync } from 'node:fs'
 import type { LoaderContract, LoaderTemplate } from './types.js'
 
 /**
@@ -44,6 +45,34 @@ export class Loader implements LoaderContract {
         throw error
       }
     }
+  }
+
+  /**
+   * Returns a list of components for a given disk
+   */
+  #getDiskComponents(diskName: string): { componentName: string; tagName: string }[] {
+    const diskBasePath = this.#mountedDirs.get(diskName)!
+    const files = readdirSync(join(diskBasePath, 'components'), {
+      recursive: true,
+      encoding: 'utf8',
+    }).filter((file) => file.endsWith('.edge'))
+
+    return files.map((file) => {
+      const fileName = file.replace(/\.edge$/, '')
+      const componentPath = `components/${fileName}`
+      const tagName = fileName
+        .split('/')
+        .filter((segment, index) => {
+          return index === 0 || segment !== 'index'
+        })
+        .map((segment) => string.camelCase(segment))
+        .join('.')
+
+      return {
+        componentName: diskName !== 'default' ? `${diskName}::${componentPath}` : componentPath,
+        tagName: diskName !== 'default' ? `${diskName}.${tagName}` : tagName,
+      }
+    })
   }
 
   /**
@@ -104,7 +133,7 @@ export class Loader implements LoaderContract {
    * // output
    *
    * {
-   *   'form.label': { template: '/users/virk/code/app/form/label' }
+   *   'form.label': { template: 'Template contents' }
    * }
    * ```
    */
@@ -259,5 +288,24 @@ export class Loader implements LoaderContract {
    */
   remove(templatePath: string) {
     this.#preRegistered.delete(templatePath)
+  }
+
+  /**
+   * Returns a list of components from all the disks. We assume
+   * the components are stored within the components directory.
+   *
+   * Also, we treat all in-memory templates as components.
+   *
+   * The return path is same the path you will pass to the `@component`
+   * tag.
+   */
+  listComponents(): { diskName: string; components: string[] }[] {
+    const diskNames = [...this.#mountedDirs.keys()]
+    return diskNames.map((diskName) => {
+      return {
+        diskName,
+        components: this.#getDiskComponents(diskName),
+      }
+    })
   }
 }

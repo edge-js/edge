@@ -148,4 +148,117 @@ test.group('Loader', () => {
 
     assert.throws(fn, 'Cannot override previously registered "my-view" template')
   })
+
+  test('get components for the default disk', async ({ assert, fs }) => {
+    await fs.create('components/foo.edge', 'Hello world')
+
+    const loader = new Loader()
+    loader.mount('default', fs.basePath)
+
+    const componentsList = loader.listComponents()
+    assert.deepEqual(componentsList, [
+      {
+        diskName: 'default',
+        components: [
+          {
+            componentName: 'components/foo',
+            tagName: 'foo',
+          },
+        ],
+      },
+    ])
+  })
+
+  test('get components from nested directories', async ({ assert, fs }) => {
+    await fs.create('components/modal/root.edge', 'Hello world')
+
+    const loader = new Loader()
+    loader.mount('default', fs.basePath)
+
+    const componentsList = loader.listComponents()
+    assert.deepEqual(componentsList, [
+      {
+        diskName: 'default',
+        components: [
+          {
+            componentName: 'components/modal/root',
+            tagName: 'modal.root',
+          },
+        ],
+      },
+    ])
+  })
+
+  test('get components from nested directories from a named disk', async ({ assert, fs }) => {
+    await fs.create('components/modal/root.edge', 'Hello world')
+
+    const loader = new Loader()
+    loader.mount('uikit', fs.basePath)
+
+    const componentsList = loader.listComponents()
+    assert.deepEqual(componentsList, [
+      {
+        diskName: 'uikit',
+        components: [
+          {
+            componentName: 'uikit::components/modal/root',
+            tagName: 'uikit.modal.root',
+          },
+        ],
+      },
+    ])
+  })
+
+  test('rename nested components saved in index.edge file', async ({ assert, fs }) => {
+    await fs.create('components/modal/index.edge', 'Hello world')
+    await fs.create('components/index.edge', 'Hello world')
+
+    const loader = new Loader()
+    loader.mount('uikit', fs.basePath)
+
+    const componentsList = loader.listComponents()
+    assert.deepEqual(componentsList, [
+      {
+        diskName: 'uikit',
+        components: [
+          {
+            componentName: 'uikit::components/index',
+            tagName: 'uikit.index',
+          },
+          {
+            componentName: 'uikit::components/modal/index',
+            tagName: 'uikit.modal',
+          },
+        ],
+      },
+    ])
+  })
+
+  test('rename nested components saved in index.edge file from default disk', async ({
+    assert,
+    fs,
+  }) => {
+    await fs.create('components/modal/index.edge', 'Hello world')
+    await fs.create('components/index.edge', 'Hello world')
+
+    const loader = new Loader()
+    loader.mount('default', fs.basePath)
+
+    const componentsList = loader.listComponents()
+    assert.deepEqual(componentsList, [
+      {
+        diskName: 'default',
+        components: [
+          {
+            componentName: 'components/index',
+            tagName: 'index',
+          },
+          {
+            componentName: 'components/modal/index',
+            tagName: 'modal',
+          },
+        ],
+      },
+    ])
+  })
 })
