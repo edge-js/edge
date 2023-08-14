@@ -7,6 +7,7 @@
  * file that was distributed with this source code.
  */
 
+import { Loader } from '../loader.js'
 import * as Tags from '../tags/main.js'
 import { Compiler } from '../compiler.js'
 import { Template } from '../template.js'
@@ -109,6 +110,8 @@ export class Edge {
   configure(options: EdgeOptions) {
     if (options.loader) {
       this.loader = options.loader
+    } else if (!this.loader) {
+      this.loader = new Loader()
     }
 
     this.compiler = new Compiler(this.loader, this.tags, this.processor, {
