@@ -7,7 +7,6 @@
  * file that was distributed with this source code.
  */
 
-import { Loader } from '../loader.js'
 import * as Tags from '../tags/main.js'
 import { Compiler } from '../compiler.js'
 import { Template } from '../template.js'
@@ -65,17 +64,17 @@ export class Edge {
    * templates from anywhere. The default loader reads files
    * from the disk
    */
-  loader: LoaderContract
+  declare loader: LoaderContract
 
   /**
    * The underlying compiler in use
    */
-  compiler: Compiler
+  declare compiler: Compiler
 
   /**
    * The underlying compiler in use
    */
-  asyncCompiler: Compiler
+  declare asyncCompiler: Compiler
 
   /**
    * Globals are shared with all rendered templates
@@ -89,17 +88,7 @@ export class Edge {
   tags: { [name: string]: TagContract } = {}
 
   constructor(options: EdgeOptions = {}) {
-    this.loader = options.loader || new Loader()
-
-    this.compiler = new Compiler(this.loader, this.tags, this.processor, {
-      cache: !!options.cache,
-      async: false,
-    })
-
-    this.asyncCompiler = new Compiler(this.loader, this.tags, this.processor, {
-      cache: !!options.cache,
-      async: true,
-    })
+    this.configure(options)
 
     /**
      * Registering bundled set of tags
@@ -112,6 +101,25 @@ export class Edge {
      * Registering super charged plugin
      */
     this.use(pluginSuperCharged, { recurring: !options.cache })
+  }
+
+  /**
+   * Re-configure an existing edge instance
+   */
+  configure(options: EdgeOptions) {
+    if (options.loader) {
+      this.loader = options.loader
+    }
+
+    this.compiler = new Compiler(this.loader, this.tags, this.processor, {
+      cache: !!options.cache,
+      async: false,
+    })
+
+    this.asyncCompiler = new Compiler(this.loader, this.tags, this.processor, {
+      cache: !!options.cache,
+      async: true,
+    })
   }
 
   /**
