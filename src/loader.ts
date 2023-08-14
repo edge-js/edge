@@ -7,6 +7,7 @@
  * file that was distributed with this source code.
  */
 
+import { slash } from '@poppinss/utils'
 import { fileURLToPath } from 'node:url'
 import string from '@poppinss/utils/string'
 import { join, isAbsolute } from 'node:path'
@@ -63,7 +64,7 @@ export class Loader implements LoaderContract {
     }).filter((file) => file.endsWith('.edge'))
 
     return files.map((file) => {
-      const fileName = file.replace(/\.edge$/, '')
+      const fileName = slash(file).replace(/\.edge$/, '')
       const componentPath = `${componentsDirName}/${fileName}`
       const tagName = fileName
         .split('/')
