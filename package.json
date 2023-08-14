@@ -13,8 +13,7 @@
   "exports": {
     ".": "./build/index.js",
     "./types": "./build/src/types.js",
-    "./plugins/migrate": "./build/src/migrate/plugin.js",
-    "./globals": "./build/src/edge/globals.js"
+    "./plugins/migrate": "./build/src/migrate/plugin.js"
   },
   "scripts": {
     "pretest": "npm run lint",
@@ -119,7 +118,8 @@
   "tsup": {
     "entry": [
       "./index.ts",
-      "./src/types.ts"
+      "./src/types.ts",
+      "./src/migrate/plugin.ts"
     ],
     "outDir": "./build",
     "clean": true,

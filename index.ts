@@ -7,5 +7,5 @@
  * file that was distributed with this source code.
  */
 
-import { Edge } from './src/edge/main.js'
-export { Edge }
+export { Edge } from './src/edge/main.js'
+export { edgeGlobals } from './src/edge/globals.js'

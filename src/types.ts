@@ -151,5 +151,13 @@ export type ParserContract = Parser
 export type TagTokenContract = TagToken
 export type EdgeBufferContract = EdgeBuffer
 
-export * from 'edge-lexer/types'
-export * from 'edge-parser/types'
+export type * from 'edge-lexer/types'
+export type {
+  AcornLoc,
+  ClaimTagFn,
+  MustacheTransformer,
+  OnLineFn,
+  ParserOptions,
+  ParserTagDefinitionContract,
+  TagTransformer,
+} from 'edge-parser/types'
