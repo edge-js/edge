@@ -17,6 +17,7 @@ import { EdgeRenderer } from './renderer.js'
 import type {
   PluginFn,
   TagContract,
+  EdgeGlobals,
   EdgeOptions,
   LoaderTemplate,
   LoaderContract,
@@ -79,7 +80,7 @@ export class Edge {
   /**
    * Globals are shared with all rendered templates
    */
-  globals: { [key: string]: any } = edgeGlobals
+  globals: EdgeGlobals = edgeGlobals
 
   /**
    * List of registered tags. Adding new tags will only impact

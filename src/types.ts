@@ -140,6 +140,11 @@ export type EdgeOptions = {
 export type PluginFn<T> = (edge: Edge, firstRun: boolean, options: T) => void
 
 /**
+ * Shape of global helpers
+ */
+export type EdgeGlobals = Record<string, any>
+
+/**
  * Required when creating custom tags
  */
 export type ParserContract = Parser

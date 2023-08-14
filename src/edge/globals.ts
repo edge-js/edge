@@ -14,13 +14,14 @@ import classNames from 'classnames'
 import inspect from '@poppinss/inspect'
 import string from '@poppinss/utils/string'
 
+import type { EdgeGlobals } from '../types.js'
 import { htmlSafe, escape } from '../template.js'
 import { stringifyAttributes } from '../utils.js'
 
 /**
  * Inbuilt globals
  */
-export const edgeGlobals = {
+export const edgeGlobals: EdgeGlobals = {
   /**
    * Converts new lines to break
    */
@@ -87,4 +88,21 @@ export const edgeGlobals = {
   js: {
     stringify: stringify,
   },
+
+  camelCase: string.camelCase,
+  snakeCase: string.snakeCase,
+  dashCase: string.dashCase,
+  pascalCase: string.pascalCase,
+  capitalCase: string.capitalCase,
+  sentenceCase: string.sentenceCase,
+  dotCase: string.dotCase,
+  noCase: string.noCase,
+  titleCase: string.titleCase,
+  pluralize: string.pluralize,
+  sentence: string.sentence,
+  prettyMs: string.milliseconds.format,
+  toMs: string.milliseconds.parse,
+  prettyBytes: string.bytes.format,
+  toBytes: string.bytes.parse,
+  ordinal: string.ordinal,
 }
