@@ -92,6 +92,62 @@ test.group('Template | toAttributes', () => {
     )
   })
 
+  test('handle overloaded boolean properties', async ({ assert }) => {
+    const processor = new Processor()
+    const compiler = new Compiler(loader, tags, processor, { cache: false })
+    const template = new Template(compiler, edgeGlobals, {}, processor)
+
+    const html = await template.renderRaw(
+      dedent`
+      <button {{
+        html.attrs({
+          download: true
+        })
+      }}>
+        Click here
+      </button>
+    `,
+      {}
+    )
+
+    assert.stringEqual(
+      html,
+      dedent`
+    <button download>
+      Click here
+    </button>
+    `
+    )
+  })
+
+  test('handle overloaded boolean properties with explicit value', async ({ assert }) => {
+    const processor = new Processor()
+    const compiler = new Compiler(loader, tags, processor, { cache: false })
+    const template = new Template(compiler, edgeGlobals, {}, processor)
+
+    const html = await template.renderRaw(
+      dedent`
+      <button {{
+        html.attrs({
+          download: 'sample.pdf'
+        })
+      }}>
+        Click here
+      </button>
+    `,
+      {}
+    )
+
+    assert.stringEqual(
+      html,
+      dedent`
+    <button download="sample.pdf">
+      Click here
+    </button>
+    `
+    )
+  })
+
   test('allow non-standard attributes', async ({ assert }) => {
     const processor = new Processor()
     const compiler = new Compiler(loader, tags, processor, { cache: false })

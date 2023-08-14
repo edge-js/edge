@@ -275,19 +275,20 @@ export function stringifyAttributes(props: any, namespace?: string): string {
       }
 
       const propInfo = find(html, key)
-      const attribute = propInfo.attribute
 
       /**
-       * Ignore svg elements and their attributes
+       * Ignore unknown attributes
        */
-      if (!propInfo || propInfo.space === 'svg') {
+      if (!propInfo) {
         return result
       }
+
+      const attribute = propInfo.attribute
 
       /**
        * Boolean properties
        */
-      if (propInfo.boolean) {
+      if (value === true) {
         result.push(attribute)
         return result
       }
@@ -303,7 +304,7 @@ export function stringifyAttributes(props: any, namespace?: string): string {
         value = `"${classNames(value)}"`
       } else if (Array.isArray(value)) {
         value = `"${value.join(propInfo.commaSeparated ? ',' : ' ')}"`
-      } else if (!propInfo.booleanish && !propInfo.number) {
+      } else {
         value = `"${String(value)}"`
       }
 
