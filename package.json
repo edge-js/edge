@@ -1,7 +1,7 @@
 {
   "name": "edge.js",
   "description": "Template engine",
-  "version": "6.0.0-6",
+  "version": "6.0.0-7",
   "engines": {
     "node": ">=18.16.0"
   },
