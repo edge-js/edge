@@ -58,18 +58,48 @@ export class ComponentProps {
   }
 
   /**
-   * Define defaults for the props values.
+   * Merge defaults with the props
    *
    * - All other attributes will be overwritten when defined in props
    * - Classes will be merged together.
    */
-  defaults(values: Record<string, any>) {
+  merge(values: Record<string, any>) {
     if (values.class && this.#values['class']) {
-      const classes = { ...values.class, ...this.#values.class }
-      return new ComponentProps({ ...values, ...this.#values, class: classes })
+      const classesSet: Set<any> = new Set()
+      ;(Array.isArray(values.class) ? values.class : [values]).forEach((item) => {
+        classesSet.add(item)
+      })
+      ;(Array.isArray(this.#values['class'])
+        ? this.#values['class']
+        : [this.#values['class']]
+      ).forEach((item) => {
+        classesSet.add(item)
+      })
+
+      return new ComponentProps({ ...values, ...this.#values, class: Array.from(classesSet) })
     }
 
     return new ComponentProps({ ...values, ...this.#values })
+  }
+
+  /**
+   * Merge defaults with the props, if the given condition is truthy
+   */
+  mergeIf(conditional: any, values: Record<string, any>) {
+    if (conditional) {
+      return this.merge(values)
+    }
+    return this
+  }
+
+  /**
+   * Merge defaults with the props, if the given condition is falsy
+   */
+  mergeUnless(conditional: any, values: Record<string, any>) {
+    if (!conditional) {
+      return this.merge(values)
+    }
+    return this
   }
 
   /**
