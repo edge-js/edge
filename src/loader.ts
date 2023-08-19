@@ -11,7 +11,8 @@ import { slash } from '@poppinss/utils'
 import { fileURLToPath } from 'node:url'
 import string from '@poppinss/utils/string'
 import { join, isAbsolute } from 'node:path'
-import { existsSync, readFileSync, readdirSync } from 'node:fs'
+import readdirSync from 'fs-readdir-recursive'
+import { existsSync, readFileSync } from 'node:fs'
 import type { ComponentsTree, LoaderContract, LoaderTemplate } from './types.js'
 
 /**
@@ -58,10 +59,9 @@ export class Loader implements LoaderContract {
       return []
     }
 
-    const files = readdirSync(join(diskBasePath, componentsDirName), {
-      recursive: true,
-      encoding: 'utf8',
-    }).filter((file) => file.endsWith('.edge'))
+    const files = readdirSync(join(diskBasePath, componentsDirName)).filter((file) =>
+      file.endsWith('.edge')
+    )
 
     return files.map((file) => {
       const fileName = slash(file).replace(/\.edge$/, '')
