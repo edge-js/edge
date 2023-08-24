@@ -80,7 +80,7 @@ export class Edge {
   /**
    * Globals are shared with all rendered templates
    */
-  globals: EdgeGlobals = edgeGlobals
+  globals: EdgeGlobals = { ...edgeGlobals }
 
   /**
    * List of registered tags. Adding new tags will only impact
