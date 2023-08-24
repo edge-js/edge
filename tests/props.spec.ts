@@ -12,17 +12,18 @@ import { ComponentProps } from '../src/component/props.js'
 
 test.group('ComponentProps', () => {
   test('get all props', ({ assert }) => {
-    const props = new ComponentProps({ title: 'Hello' })
+    const props = ComponentProps.create({ title: 'Hello' })
     assert.deepEqual(props.all(), { title: 'Hello' })
   })
 
   test('get value for a given key', ({ assert }) => {
-    const props = new ComponentProps({ title: 'Hello' })
+    const props = ComponentProps.create({ title: 'Hello' })
     assert.equal(props.get('title'), 'Hello')
+    assert.equal(props.title, 'Hello')
   })
 
   test('cherry pick values from the props', ({ assert }) => {
-    const props = new ComponentProps({
+    const props = ComponentProps.create({
       title: 'Hello',
       label: 'Hello world',
       actionText: 'Confirm',
@@ -35,7 +36,7 @@ test.group('ComponentProps', () => {
   })
 
   test('get values except for the defined keys from the props', ({ assert }) => {
-    const props = new ComponentProps({
+    const props = ComponentProps.create({
       title: 'Hello',
       label: 'Hello world',
       actionText: 'Confirm',
@@ -47,7 +48,7 @@ test.group('ComponentProps', () => {
   })
 
   test('serialize props to html attributes', ({ assert }) => {
-    const props = new ComponentProps({
+    const props = ComponentProps.create({
       class: ['foo', 'bar'],
       onclick: 'foo = bar',
     })
@@ -55,7 +56,7 @@ test.group('ComponentProps', () => {
   })
 
   test('serialize by merging custom properties', ({ assert }) => {
-    const props = new ComponentProps({
+    const props = ComponentProps.create({
       class: ['foo', 'bar'],
       onclick: 'foo = bar',
     })
@@ -66,7 +67,7 @@ test.group('ComponentProps', () => {
   })
 
   test('serialize specific keys to html attributes', ({ assert }) => {
-    const props = new ComponentProps({
+    const props = ComponentProps.create({
       class: ['foo', 'bar'],
       onclick: 'foo = bar',
     })
@@ -74,7 +75,7 @@ test.group('ComponentProps', () => {
   })
 
   test('serialize specific keys and merge custom properties', ({ assert }) => {
-    const props = new ComponentProps({
+    const props = ComponentProps.create({
       class: ['foo', 'bar'],
       onclick: 'foo = bar',
     })
@@ -82,7 +83,7 @@ test.group('ComponentProps', () => {
   })
 
   test('serialize all except defined keys to html attributes', ({ assert }) => {
-    const props = new ComponentProps({
+    const props = ComponentProps.create({
       class: ['foo', 'bar'],
       onclick: 'foo = bar',
     })
@@ -91,7 +92,7 @@ test.group('ComponentProps', () => {
   })
 
   test('serialize specific keys and merge custom properties', ({ assert }) => {
-    const props = new ComponentProps({
+    const props = ComponentProps.create({
       class: ['foo', 'bar'],
       onclick: 'foo = bar',
     })
@@ -103,7 +104,7 @@ test.group('ComponentProps', () => {
   })
 
   test('merge default and user supplied classes', ({ assert }) => {
-    const props = new ComponentProps({
+    const props = ComponentProps.create({
       class: ['foo', 'bar'],
       onclick: 'foo = bar',
     })
@@ -118,7 +119,7 @@ test.group('ComponentProps', () => {
   })
 
   test('merge default and user supplied classes as object', ({ assert }) => {
-    const props = new ComponentProps({
+    const props = ComponentProps.create({
       class: [
         'foo',
         {
@@ -142,7 +143,7 @@ test.group('ComponentProps', () => {
   })
 
   test('mergeUnless a conditional is true', ({ assert }) => {
-    const props = new ComponentProps({
+    const props = ComponentProps.create({
       class: [
         'foo',
         {
@@ -167,7 +168,7 @@ test.group('ComponentProps', () => {
   })
 
   test('mergeIf a conditional is true', ({ assert }) => {
-    const props = new ComponentProps({
+    const props = ComponentProps.create({
       class: [
         'foo',
         {

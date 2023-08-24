@@ -20,6 +20,14 @@ export class ComponentProps {
 
   constructor(values: Record<string, any>) {
     this.#values = values
+    Object.assign(this, values)
+  }
+
+  /**
+   * Create a typed instance of Component props with properties
+   */
+  static create<T extends Record<string, any>>(values: T): ComponentProps & T {
+    return new ComponentProps(values) as ComponentProps & T
   }
 
   /**
