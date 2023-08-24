@@ -35,13 +35,12 @@ export class Edge {
     return new Edge(options)
   }
 
-  #executedPlugins = false
-
   /**
    * An array of registered plugins
    */
   #plugins: {
     fn: PluginFn<any>
+    executed: boolean
     options?: any
   }[] = []
 
@@ -126,22 +125,20 @@ export class Edge {
   }
 
   /**
-   * Execute plugins. Since plugins are meant to be called only
-   * once we empty out the array after first call
+   * Execute plugins
    */
   #executePlugins() {
-    if (this.#executedPlugins) {
-      this.#plugins
-        .filter(({ options }) => options && options.recurring)
-        .forEach(({ fn, options }) => {
-          fn(this, false, options)
-        })
-    } else {
-      this.#executedPlugins = true
-      this.#plugins.forEach(({ fn, options }) => {
-        fn(this, true, options)
+    this.#plugins
+      .filter(({ options, executed }) => {
+        if (options && options.recurring) {
+          return true
+        }
+        return !executed
       })
-    }
+      .forEach((plugin) => {
+        plugin.fn(this, !plugin.executed, plugin.options)
+        plugin.executed = true
+      })
   }
 
   /**
@@ -151,6 +148,7 @@ export class Edge {
   use<T extends any>(pluginFn: PluginFn<T>, options?: T): this {
     this.#plugins.push({
       fn: pluginFn,
+      executed: false,
       options,
     })
     return this
