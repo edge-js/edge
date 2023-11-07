@@ -36,6 +36,15 @@ export class Edge {
   }
 
   /**
+   * An array of bundled plugins
+   */
+  #bundledPlugins: {
+    fn: PluginFn<any>
+    executed: boolean
+    options?: any
+  }[] = []
+
+  /**
    * An array of registered plugins
    */
   #plugins: {
@@ -97,10 +106,11 @@ export class Edge {
       this.registerTag(Tags[name as keyof typeof Tags])
     })
 
-    /**
-     * Registering super charged plugin
-     */
-    this.use(pluginSuperCharged, { recurring: !options.cache })
+    this.#bundledPlugins.push({
+      fn: pluginSuperCharged,
+      executed: false,
+      options: { recurring: !options.cache },
+    })
   }
 
   /**
@@ -128,7 +138,26 @@ export class Edge {
    * Execute plugins
    */
   #executePlugins() {
+    /**
+     * Running user-land plugins
+     */
     this.#plugins
+      .filter(({ options, executed }) => {
+        if (options && options.recurring) {
+          return true
+        }
+        return !executed
+      })
+      .forEach((plugin) => {
+        plugin.fn(this, !plugin.executed, plugin.options)
+        plugin.executed = true
+      })
+
+    /**
+     * Running bundled plugins after the user-land
+     * plugins
+     */
+    this.#bundledPlugins
       .filter(({ options, executed }) => {
         if (options && options.recurring) {
           return true
@@ -142,8 +171,11 @@ export class Edge {
   }
 
   /**
-   * Register a plugin. Plugin functions are called once just before
-   * an attempt to render a view is made.
+   * Register a plugin. Plugins are called only once just before
+   * a rendering a view.
+   *
+   * You can invoke a plugin multiple times by marking it as a
+   * recurring plugin
    */
   use<T extends any>(pluginFn: PluginFn<T>, options?: T): this {
     this.#plugins.push({
