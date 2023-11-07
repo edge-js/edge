@@ -1,7 +1,7 @@
 import { assert } from '@japa/assert'
 import { processCLIArgs, configure, run } from '@japa/runner'
 import { fileSystem } from '@japa/file-system'
-import { BASE_URL } from '../test_helpers/index.js'
+import { BASE_URL } from '../tests_helpers/index.js'
 
 /*
 |--------------------------------------------------------------------------

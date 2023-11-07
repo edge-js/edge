@@ -22,7 +22,7 @@ import { Compiler } from '../src/compiler.js'
 import { Processor } from '../src/processor.js'
 import * as compatTags from '../src/migrate/tags/main.js'
 
-import { normalizeNewLines, normalizeFilename } from '../test_helpers/index.js'
+import { normalizeNewLines, normalizeFilename } from '../tests_helpers/index.js'
 
 const basePath = join(dirname(fileURLToPath(import.meta.url)), '../async_fixtures')
 

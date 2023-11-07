@@ -20,7 +20,7 @@ import { Template } from '../src/template.js'
 import { Compiler } from '../src/compiler.js'
 import { Processor } from '../src/processor.js'
 import { componentTag } from '../src/tags/component.js'
-import { normalizeNewLines } from '../test_helpers/index.js'
+import { normalizeNewLines } from '../tests_helpers/index.js'
 
 import { setTag } from '../src/migrate/tags/set.js'
 import { sectionTag } from '../src/migrate/tags/section.js'

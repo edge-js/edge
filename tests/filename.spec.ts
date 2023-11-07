@@ -14,7 +14,7 @@ import { test } from '@japa/runner'
 
 import { Edge } from '../src/edge/main.js'
 import { migrate } from '../src/migrate/plugin.js'
-import { normalizeNewLines } from '../test_helpers/index.js'
+import { normalizeNewLines } from '../tests_helpers/index.js'
 
 test.group('Template FileName', () => {
   test('print file absolute path', async ({ assert, fs }) => {
