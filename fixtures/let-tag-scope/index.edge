@@ -1,0 +1,8 @@
+@each(user in users)
+  @let(index = 0)
+  @eval(index = index + 1)
+  {{ index }}
+@end
+@eval(index = (index || 0) + 1)
+
+{{ index }}

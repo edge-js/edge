@@ -21,6 +21,6 @@ indent_style = space
 [*.md]
 trim_trailing_whitespace = false
 
-[{fixtures,examples,newline-fixtures,async-fixtures}/**/*]
+[{fixtures,examples,newline_fixtures,async_fixtures}/**/*]
 insert_final_newline = ignore
 indent_style = space

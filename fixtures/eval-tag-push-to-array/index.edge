@@ -1,0 +1,4 @@
+@eval(users.push({ username: 'romain' }))
+@each(user in users)
+  - {{ user.username }}
+@end

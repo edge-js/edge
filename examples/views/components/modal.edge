@@ -1,0 +1,27 @@
+{{ inspect(state) }}
+
+<div {{
+  ({
+    class: 'modal',
+    x: {
+      data: `{
+        title: '${title}',
+        trigger: {
+          ['@click']() {
+            alert(this.title)
+          }
+        }
+      }`
+    }
+  })
+}}
+>
+  <h1 class="title">{{ title }}</h1>
+  <div>
+    {{{ await $slots.body() }}}
+  </div>
+
+  <div>
+    {{{ await $slots.actions() }}}
+  </div>
+</div>
