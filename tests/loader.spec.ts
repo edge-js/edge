@@ -148,7 +148,9 @@ test.group('Loader', () => {
 
     assert.throws(fn, 'Cannot override previously registered "my-view" template')
   })
+})
 
+test.group('Loader | listComponents', () => {
   test('get components for the default disk', async ({ assert, fs }) => {
     await fs.create('components/foo.edge', 'Hello world')
 
@@ -258,6 +260,94 @@ test.group('Loader', () => {
             tagName: 'modal',
           },
         ],
+      },
+    ])
+  })
+
+  test('get in-memory templates as components', async ({ assert, fs }) => {
+    await fs.create('components/foo.edge', 'Hello world')
+
+    const loader = new Loader()
+    loader.mount('default', fs.basePath)
+    loader.register('uikit/button', {
+      template: ``,
+    })
+
+    const componentsList = loader.listComponents()
+    assert.deepEqual(componentsList, [
+      {
+        diskName: 'default',
+        components: [
+          {
+            componentName: 'uikit/button',
+            tagName: 'uikit.button',
+          },
+          {
+            componentName: 'components/foo',
+            tagName: 'foo',
+          },
+        ],
+      },
+    ])
+  })
+})
+
+test.group('Loader | listComponents', () => {
+  test('get templates for the default disk', async ({ assert, fs }) => {
+    await fs.create('components/foo.edge', 'Hello world')
+    await fs.create('header.edge', 'Hello world')
+    await fs.create('footer.edge', 'Hello world')
+
+    const loader = new Loader()
+    loader.mount('default', fs.basePath)
+
+    const componentsList = loader.listTemplates()
+    assert.deepEqual(componentsList, [
+      {
+        diskName: 'default',
+        templates: ['components/foo', 'footer', 'header'],
+      },
+    ])
+  })
+
+  test('get templates for the named disk', async ({ assert, fs }) => {
+    await fs.create('components/foo.edge', 'Hello world')
+    await fs.create('header.edge', 'Hello world')
+    await fs.create('footer.edge', 'Hello world')
+
+    const loader = new Loader()
+    loader.mount('elegant', fs.basePath)
+
+    const componentsList = loader.listTemplates()
+    assert.deepEqual(componentsList, [
+      {
+        diskName: 'elegant',
+        templates: ['elegant::components/foo', 'elegant::footer', 'elegant::header'],
+      },
+    ])
+  })
+
+  test('get in-memory templates', async ({ assert, fs }) => {
+    await fs.create('components/foo.edge', 'Hello world')
+    await fs.create('header.edge', 'Hello world')
+    await fs.create('footer.edge', 'Hello world')
+
+    const loader = new Loader()
+    loader.mount('elegant', fs.basePath)
+    loader.mount('default', join(fs.basePath, 'foo'))
+    loader.register('uibutton', {
+      template: '',
+    })
+
+    const componentsList = loader.listTemplates()
+    assert.deepEqual(componentsList, [
+      {
+        diskName: 'elegant',
+        templates: ['elegant::components/foo', 'elegant::footer', 'elegant::header'],
+      },
+      {
+        diskName: 'default',
+        templates: ['uibutton'],
       },
     ])
   })

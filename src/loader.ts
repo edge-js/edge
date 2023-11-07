@@ -55,17 +55,34 @@ export class Loader implements LoaderContract {
   #getDiskComponents(diskName: string): ComponentsTree[0]['components'] {
     const componentsDirName = 'components'
     const diskBasePath = this.#mountedDirs.get(diskName)!
-    if (!existsSync(join(diskBasePath, componentsDirName))) {
-      return []
+    let files =
+      diskName === 'default'
+        ? Array.from(this.#preRegistered.keys()).map((template) => {
+            return {
+              fileName: template,
+              componentPath: template,
+            }
+          })
+        : []
+
+    /**
+     * Read disk files
+     */
+    if (existsSync(join(diskBasePath, componentsDirName))) {
+      files = files.concat(
+        readdirSync(join(diskBasePath, componentsDirName))
+          .filter((file) => file.endsWith('.edge'))
+          .map((template) => {
+            const fileName = slash(template).replace(/\.edge$/, '')
+            return {
+              fileName,
+              componentPath: `${componentsDirName}/${fileName}`,
+            }
+          })
+      )
     }
 
-    const files = readdirSync(join(diskBasePath, componentsDirName)).filter((file) =>
-      file.endsWith('.edge')
-    )
-
-    return files.map((file) => {
-      const fileName = slash(file).replace(/\.edge$/, '')
-      const componentPath = `${componentsDirName}/${fileName}`
+    return files.map(({ fileName, componentPath }) => {
       const tagName = fileName
         .split('/')
         .filter((segment, index) => {
@@ -78,6 +95,23 @@ export class Loader implements LoaderContract {
         componentName: diskName !== 'default' ? `${diskName}::${componentPath}` : componentPath,
         tagName: diskName !== 'default' ? `${diskName}.${tagName}` : tagName,
       }
+    })
+  }
+
+  /**
+   * Returns a list of templates for a given disk
+   */
+  #getDiskTemplates(diskName: string): string[] {
+    const diskBasePath = this.#mountedDirs.get(diskName)!
+    let files = diskName === 'default' ? Array.from(this.#preRegistered.keys()) : []
+
+    if (existsSync(diskBasePath)) {
+      files = files.concat(readdirSync(join(diskBasePath)).filter((file) => file.endsWith('.edge')))
+    }
+
+    return files.map((file) => {
+      const fileName = slash(file).replace(/\.edge$/, '')
+      return diskName !== 'default' ? `${diskName}::${fileName}` : fileName
     })
   }
 
@@ -311,6 +345,20 @@ export class Loader implements LoaderContract {
       return {
         diskName,
         components: this.#getDiskComponents(diskName),
+      }
+    })
+  }
+
+  /**
+   * Returns a list of templates from all the disks and in-memory
+   * templates as well
+   */
+  listTemplates(): { diskName: string; templates: string[] }[] {
+    const diskNames = [...this.#mountedDirs.keys()]
+    return diskNames.map((diskName) => {
+      return {
+        diskName,
+        templates: this.#getDiskTemplates(diskName),
       }
     })
   }
