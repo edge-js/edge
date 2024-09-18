@@ -26,12 +26,20 @@ import { normalizeNewLines, normalizeFilename } from '../tests_helpers/index.js'
 
 const basePath = join(dirname(fileURLToPath(import.meta.url)), '../async_fixtures')
 
+let counter = 0
 const loader = new Loader()
 loader.mount('default', basePath)
-
 const processor = new Processor()
+
 test.group('Async Fixtures', (group) => {
+  group.each.setup(() => {
+    counter = 1
+  })
+
   group.setup(() => {
+    tags.pushTo.generateId = () => `stack_${counter++}`
+    tags.pushOnceTo.generateId = () => `stack_${counter++}`
+
     Object.keys(tags).forEach((tag) => {
       tags[tag as keyof typeof tags].boot?.(Template)
     })
@@ -56,7 +64,6 @@ test.group('Async Fixtures', (group) => {
     const compatMode = dir.endsWith('-compat')
 
     test(dir, async ({ assert }) => {
-      const template = new Template(compiler, {}, {}, processor)
       compiler.compat = compatMode
 
       /**
@@ -83,8 +90,11 @@ test.group('Async Fixtures', (group) => {
        */
       const out = readFileSync(join(dirBasePath, 'index.txt'), 'utf-8')
       const state = JSON.parse(readFileSync(join(dirBasePath, 'index.json'), 'utf-8'))
-      const output = await template.render(`${dir}/index.edge`, state)
-      const outputRaw = await template.renderRaw(
+      const output = await new Template(compiler, {}, {}, processor).render(
+        `${dir}/index.edge`,
+        state
+      )
+      const outputRaw = await new Template(compiler, {}, {}, processor).renderRaw(
         readFileSync(join(dirBasePath, 'index.edge'), 'utf-8'),
         state
       )
@@ -95,7 +105,14 @@ test.group('Async Fixtures', (group) => {
 })
 
 test.group('Async Fixtures | Cached', (group) => {
+  group.each.setup(() => {
+    counter = 1
+  })
+
   group.setup(() => {
+    tags.pushTo.generateId = () => `stack_${counter++}`
+    tags.pushOnceTo.generateId = () => `stack_${counter++}`
+
     Object.keys(tags).forEach((tag) => {
       tags[tag as keyof typeof tags].boot?.(Template)
     })
@@ -120,7 +137,6 @@ test.group('Async Fixtures | Cached', (group) => {
     const compatMode = dir.endsWith('-compat')
 
     test(dir, async ({ assert }) => {
-      const template = new Template(compiler, {}, {}, processor)
       compiler.compat = compatMode
 
       /**
@@ -147,8 +163,11 @@ test.group('Async Fixtures | Cached', (group) => {
        */
       const out = readFileSync(join(dirBasePath, 'index.txt'), 'utf-8')
       const state = JSON.parse(readFileSync(join(dirBasePath, 'index.json'), 'utf-8'))
-      const output = await template.render(`${dir}/index.edge`, state)
-      const outputRaw = await template.renderRaw(
+      const output = await new Template(compiler, {}, {}, processor).render(
+        `${dir}/index.edge`,
+        state
+      )
+      const outputRaw = await new Template(compiler, {}, {}, processor).renderRaw(
         readFileSync(join(dirBasePath, 'index.edge'), 'utf-8'),
         state
       )

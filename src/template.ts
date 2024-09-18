@@ -12,6 +12,7 @@ import { EdgeError } from 'edge-error'
 import lodash from '@poppinss/utils/lodash'
 import Macroable from '@poppinss/macroable'
 
+import Stacks from './edge/stacks.js'
 import { Compiler } from './compiler.js'
 import { Processor } from './processor.js'
 import { Props } from './migrate/props.js'
@@ -56,6 +57,13 @@ export class Template extends Macroable {
    */
   #sharedState: Record<string, any>
 
+  /**
+   * Template stacks holds a collection of placeholders
+   * and their content to be filled before returning
+   * the output.
+   */
+  stacks = new Stacks()
+
   constructor(compiler: Compiler, globals: any, locals: any, processor: Processor) {
     super()
     this.#compiler = compiler
@@ -88,11 +96,13 @@ export class Template extends Macroable {
     if (this.#compiler.async) {
       return compiledTemplate(this, templateState, $context).then((output: string) => {
         output = this.#trimTopBottomNewLines(output)
+        output = this.stacks.fillPlaceholders(output)
         return this.#processor.executeOutput({ output, template: this, state: templateState })
       })
     }
 
-    const output = this.#trimTopBottomNewLines(compiledTemplate(this, templateState, $context))
+    let output = this.#trimTopBottomNewLines(compiledTemplate(this, templateState, $context))
+    output = this.stacks.fillPlaceholders(output)
     return this.#processor.executeOutput({ output, template: this, state: templateState })
   }
 

@@ -1,0 +1,9 @@
+@stack('js')
+
+@if(true)
+  @pushTo('js')
+    <script>
+    var a = {{{ requireFoo }}}
+    </script>
+  @end
+@end

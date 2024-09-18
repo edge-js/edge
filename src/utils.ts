@@ -316,3 +316,17 @@ export function stringifyAttributes(props: any, namespace?: string): string {
     }, [])
     .join(' ')
 }
+
+/**
+ * Copy-pasted from
+ * https://github.com/ai/nanoid/blob/main/nanoid.js
+ */
+const seed = 'useandom26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict'
+export let nanoid = (length = 15) => {
+  let output = ''
+  const random = crypto.getRandomValues(new Uint8Array(length))
+  for (let n = 0; n < length; n++) {
+    output += seed[63 & random[n]]
+  }
+  return output
+}

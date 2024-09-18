@@ -1,0 +1,4 @@
+{
+  "username": "virk",
+  "requireFoo": "require('a')"
+}

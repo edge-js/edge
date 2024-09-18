@@ -25,13 +25,21 @@ import * as compatTags from '../src/migrate/tags/main.js'
 import { normalizeNewLines, normalizeFilename } from '../tests_helpers/index.js'
 const basePath = join(dirname(fileURLToPath(import.meta.url)), '../fixtures')
 
+let counter = 0
 const loader = new Loader()
 const processor = new Processor()
 
 loader.mount('default', basePath)
 
 test.group('Fixtures', (group) => {
+  group.each.setup(() => {
+    counter = 1
+  })
+
   group.setup(() => {
+    tags.pushTo.generateId = () => `stack_${counter++}`
+    tags.pushOnceTo.generateId = () => `stack_${counter++}`
+
     Object.keys(tags).forEach((tag) => {
       tags[tag as keyof typeof tags].boot?.(Template)
     })
@@ -56,7 +64,6 @@ test.group('Fixtures', (group) => {
     const compatMode = dir.endsWith('-compat')
 
     test(dir, ({ assert }) => {
-      const template = new Template(compiler, {}, {}, processor)
       compiler.compat = compatMode
 
       /**
@@ -82,8 +89,11 @@ test.group('Fixtures', (group) => {
        */
       const out = readFileSync(join(dirBasePath, 'index.txt'), 'utf-8')
       const state = readFileSync(join(dirBasePath, 'index.json'), 'utf-8')
-      const output = template.render(`${dir}/index.edge`, JSON.parse(state)) as string
-      const outputRaw = template.renderRaw<string>(
+      const output = new Template(compiler, {}, {}, processor).render(
+        `${dir}/index.edge`,
+        JSON.parse(state)
+      ) as string
+      const outputRaw = new Template(compiler, {}, {}, processor).renderRaw<string>(
         readFileSync(join(dirBasePath, 'index.edge'), 'utf-8'),
         JSON.parse(state)
       )
@@ -94,7 +104,14 @@ test.group('Fixtures', (group) => {
 })
 
 test.group('Fixtures | Cache', (group) => {
+  group.each.setup(() => {
+    counter = 1
+  })
+
   group.setup(() => {
+    tags.pushTo.generateId = () => `stack_${counter++}`
+    tags.pushOnceTo.generateId = () => `stack_${counter++}`
+
     Object.keys(tags).forEach((tag) => {
       tags[tag as keyof typeof tags].boot?.(Template)
     })
@@ -119,7 +136,6 @@ test.group('Fixtures | Cache', (group) => {
     const compatMode = dir.endsWith('-compat')
 
     test(dir, ({ assert }) => {
-      const template = new Template(compiler, {}, {}, processor)
       compiler.compat = compatMode
 
       /**
@@ -145,8 +161,11 @@ test.group('Fixtures | Cache', (group) => {
        */
       const out = readFileSync(join(dirBasePath, 'index.txt'), 'utf-8')
       const state = readFileSync(join(dirBasePath, 'index.json'), 'utf-8')
-      const output = template.render(`${dir}/index.edge`, JSON.parse(state)) as string
-      const outputRaw = template.renderRaw<string>(
+      const output = new Template(compiler, {}, {}, processor).render(
+        `${dir}/index.edge`,
+        JSON.parse(state)
+      ) as string
+      const outputRaw = new Template(compiler, {}, {}, processor).renderRaw<string>(
         readFileSync(join(dirBasePath, 'index.edge'), 'utf-8'),
         JSON.parse(state)
       )
