@@ -41,6 +41,19 @@ export class EdgeRenderer {
   }
 
   /**
+   * Clone renderer instance with shared data
+   */
+  clone() {
+    const renderer = new EdgeRenderer(
+      this.#compiler,
+      this.#asyncCompiler,
+      this.#processor,
+      this.#globals
+    )
+    return renderer.share(this.#locals)
+  }
+
+  /**
    * Share local variables with the template. They will overwrite the
    * globals
    */

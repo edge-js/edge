@@ -424,6 +424,25 @@ test.group('Edge', () => {
     const output1 = await edge.render('foo', { username: 'virk' })
     assert.equal(output1.trim(), '@!foo({ username })')
   })
+
+  test('clone renderer with shared data', async ({ assert, fs }) => {
+    const edge = new Edge()
+    await fs.create('foo.edge', "Hello {{ username || 'guest' }}")
+
+    edge.mount(fs.basePath)
+
+    const tmpl = edge.createRenderer()
+    tmpl.share({ username: 'nikk' })
+    const tmpl1 = tmpl.clone()
+
+    const output = await tmpl.render('foo', {})
+    const output1 = await tmpl1.render('foo', {})
+    const output2 = await edge.render('foo', {})
+
+    assert.equal(output.trim(), 'Hello nikk')
+    assert.equal(output1.trim(), 'Hello nikk')
+    assert.equal(output2.trim(), 'Hello guest')
+  })
 })
 
 test.group('Edge | regression', () => {
