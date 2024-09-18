@@ -69,13 +69,13 @@
     "property-information": "^6.5.0",
     "stringify-attributes": "^4.0.0"
   },
-  "homepage": "https://github.com/poppinss/edge#readme",
+  "homepage": "https://github.com/edge-js/edge#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/poppinss/edge.git"
+    "url": "git+https://github.com/edge-js/edge.git"
   },
   "bugs": {
-    "url": "https://github.com/poppinss/edge/issues"
+    "url": "https://github.com/edge-js/edge/issues"
   },
   "keywords": [
     "template",
