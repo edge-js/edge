@@ -11,7 +11,7 @@ import './assert_extend.js'
 import dedent from 'dedent-js'
 import { join } from 'node:path'
 import { test } from '@japa/runner'
-// @ts-ignore untyped module
+// @ts-expect-error "untyped module"
 import stringify from 'js-stringify'
 import { TagTypes, MustacheTypes } from 'edge-lexer'
 
