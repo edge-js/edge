@@ -12,7 +12,6 @@ import { expressions } from 'edge-parser'
 
 import { nanoid } from '../utils.js'
 import { TagContract } from '../types.js'
-import type { Template } from '../template.js'
 
 declare module '../template.js' {
   export interface Template {
@@ -31,29 +30,6 @@ export const pushOnceToTag: TagContract & { generateId(): string } = {
   noNewLine: true,
   generateId() {
     return `stack_${nanoid()}`
-  },
-  boot(template) {
-    /**
-     * Tracking stack sources to avoid duplicate calls
-     * from the same file:line:col
-     */
-    template.getter(
-      'stackSources',
-      () => {
-        return {}
-      },
-      true
-    )
-
-    template.macro('trackStackSource', function (this: Template, stack, filename, line, col) {
-      const key = `${stack}_${filename}_${line}_${col}`
-      if (this.stackSources[key]) {
-        return false
-      }
-
-      this.stackSources[key] = true
-      return true
-    })
   },
   compile(parser, buffer, token) {
     const parsed = parser.utils.transformAst(
@@ -80,22 +56,12 @@ export const pushOnceToTag: TagContract & { generateId(): string } = {
      * Each stack must be unique
      */
     const stackId = this.generateId()
-    const stackName = parser.utils.stringify(parsed)
 
     /**
      * Create a custom buffer for the stack. Since we do not want to the write
      * to the main buffer
      */
     const stackBuffer = buffer.create(token.filename, { outputVar: stackId })
-
-    const { line, col } = token.loc.start
-    const normalizedFileName = token.filename.replace(/\\|\//g, '_')
-    const conditional = `template.trackStackSource(${stackName}, '${normalizedFileName}', ${line}, ${col})`
-
-    /**
-     * Start if block
-     */
-    buffer.writeStatement(`if (${conditional}) {`, token.filename, line)
 
     /**
      * Process children
@@ -114,18 +80,17 @@ export const pushOnceToTag: TagContract & { generateId(): string } = {
         .disableTryCatchBlock()
         .flush(),
       token.filename,
-      line
+      token.loc.start.line
     )
 
+    const { line, col } = token.loc.start
+    const normalizedFileName = token.filename.replace(/\\|\//g, '_')
+    const sourceId = `${normalizedFileName}-${line}-${col}`
+
     buffer.writeExpression(
-      `template.stacks.pushTo(${parser.utils.stringify(parsed)}, ${stackId})`,
+      `template.stacks.pushOnceTo(${parser.utils.stringify(parsed)}, '${sourceId}', ${stackId})`,
       token.filename,
       line
     )
-
-    /**
-     * End if block
-     */
-    buffer.writeStatement('}', token.filename, line)
   },
 }

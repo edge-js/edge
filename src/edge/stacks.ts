@@ -10,6 +10,8 @@
 import { EOL } from 'node:os'
 
 export default class Stacks {
+  #contentSources: Map<string, Set<string>> = new Map()
+
   /**
    * Pre-seeded content before the placeholder has been
    * defined.
@@ -69,6 +71,28 @@ export default class Stacks {
      */
     placeholder.push(contents)
     return this
+  }
+
+  /**
+   * Push contents to a stack with a unique source id. A
+   * source can only push once to a given stack.
+   */
+  pushOnceTo(name: string, sourceId: string, contents: string) {
+    const contentSources = this.#contentSources.get(name)
+    if (contentSources && contentSources.has(sourceId)) {
+      return
+    }
+
+    this.pushTo(name, contents)
+
+    /**
+     * Track source
+     */
+    if (contentSources) {
+      contentSources.add(sourceId)
+    } else {
+      this.#contentSources.set(name, new Set([sourceId]))
+    }
   }
 
   /**
