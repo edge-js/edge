@@ -9,6 +9,7 @@
 
 import { Edge } from './src/edge/main.js'
 
+export { EdgeError } from 'edge-error'
 export { Template } from './src/template.js'
 export { edgeGlobals } from './src/edge/globals.js'
 export { Edge }

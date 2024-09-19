@@ -188,14 +188,22 @@ export class Template extends Macroable {
   }
 
   /**
-   * Raise an error
+   * Creates an instance of the EdgeError
    */
-  newError(errorMessage: string, filename: string, lineNumber: number, column: number) {
-    throw new EdgeError(errorMessage, 'E_RUNTIME_EXCEPTION', {
+  createError(errorMessage: string, filename: string, lineNumber: number, column: number) {
+    return new EdgeError(errorMessage, 'E_RUNTIME_EXCEPTION', {
       filename: filename,
       line: lineNumber,
       col: column,
     })
+  }
+
+  /**
+   * Throws EdgeError. Use "createError" to create a new
+   * error instance
+   */
+  newError(errorMessage: string, filename: string, lineNumber: number, column: number) {
+    throw this.createError(errorMessage, filename, lineNumber, column)
   }
 
   /**
