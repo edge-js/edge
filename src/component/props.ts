@@ -10,12 +10,13 @@
 import lodash from '@poppinss/utils/lodash'
 import { htmlSafe } from '../template.js'
 import { stringifyAttributes } from '../utils.js'
+import { HtmlableContract } from '../types.js'
 
 /**
  * Representation of component props with ability to serialize
  * them into HTML attributes
  */
-export class ComponentProps {
+export class ComponentProps implements HtmlableContract {
   #values: Record<string, any>
 
   constructor(values: Record<string, any>) {
@@ -115,5 +116,12 @@ export class ComponentProps {
    */
   toAttrs() {
     return htmlSafe(stringifyAttributes(this.#values))
+  }
+
+  /**
+   * Converts props to HTML attributes
+   */
+  toHtml() {
+    return stringifyAttributes(this.#values)
   }
 }

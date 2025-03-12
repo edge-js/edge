@@ -20,6 +20,7 @@ import { Processor } from '../src/processor.js'
 import { includeTag } from '../src/tags/include.js'
 import { componentTag } from '../src/tags/component.js'
 import { Template, htmlSafe } from '../src/template.js'
+import { edgeGlobals } from '../src/edge/globals.js'
 
 const tags = { slot: slotTag, component: componentTag, include: includeTag }
 const fs = new Filesystem(join(path.dirname(fileURLToPath(import.meta.url)), 'views'))
@@ -247,5 +248,37 @@ test.group('Template', (group) => {
 
     const partailWithInlineVariables = template.compilePartial('foo', 'username')
     assert.equal(partailWithInlineVariables(template, {}, {}, 'virk').trim(), 'Hello virk')
+  })
+
+  test('do not escape object with toHtml method', ({ assert }) => {
+    const processor = new Processor()
+    const compiler = new Compiler(loader, tags, processor, { cache: false })
+    const template = new Template(compiler, {}, {}, processor)
+    assert.equal(
+      template.escape({
+        toHtml() {
+          return '<h2> Hello world </h2>'
+        },
+      }),
+      '<h2> Hello world </h2>'
+    )
+  })
+
+  test('render raw template with various data types', ({ assert }) => {
+    const processor = new Processor()
+    const compiler = new Compiler(loader, tags, processor, { cache: false })
+    const template = new Template(compiler, edgeGlobals, {}, processor)
+    assert.equal(template.renderRaw('{{ null }}', {}), 'null')
+    assert.equal(template.renderRaw('{{ undefined }}', {}), 'undefined')
+    assert.equal(template.renderRaw('{{ [1, 2, 3] }}', {}), '1,2,3')
+    assert.equal(template.renderRaw('{{ ({ hello: "world" }) }}', {}), '[object Object]')
+    assert.include(
+      template.renderRaw('{{ new Date("2025-04-22T17:00:56.000Z") }}', {}),
+      'Tue Apr 22 2025'
+    )
+    assert.include(
+      template.renderRaw('{{ html.safe("<p> hello world </p>") }}', {}),
+      '<p> hello world </p>'
+    )
   })
 })

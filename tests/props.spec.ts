@@ -191,4 +191,13 @@ test.group('ComponentProps', () => {
       'class="foo input-error input-disabled input-medium input-rounded"'
     )
   })
+
+  test('convert to HTML string', ({ assert }) => {
+    const props = ComponentProps.create({
+      title: 'Hello',
+      class: ['foo', 'bar'],
+    })
+
+    assert.equal(props.toHtml(), 'title="Hello" class="foo bar"')
+  })
 })

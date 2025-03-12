@@ -29,6 +29,15 @@ export type ComponentsTree = {
   }[]
 }[]
 
+export interface HtmlableContract {
+  /**
+   * Get content as a string of HTML.
+   *
+   * @return string
+   */
+  toHtml(): string
+}
+
 /**
  * Loader contract that every loader must adheres to.
  */

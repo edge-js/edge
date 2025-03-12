@@ -32,7 +32,11 @@ class SafeValue {
  * Escapes a given string
  */
 export function escape(input: any): string {
-  return input instanceof SafeValue ? input.value : he.escape(String(input))
+  return input instanceof SafeValue
+    ? input.value
+    : input && typeof input === 'object' && 'toHtml' in input
+      ? input.toHtml()
+      : he.escape(String(input))
 }
 
 /**
