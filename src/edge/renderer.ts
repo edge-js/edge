@@ -63,6 +63,17 @@ export class EdgeRenderer {
   }
 
   /**
+   * Retrieves the local and global variables, used for testing things that
+   * share variables
+   */
+  getState(): Record<string, any> {
+    return {
+      ...this.#globals,
+      ...this.#locals,
+    }
+  }
+
+  /**
    * Render the template
    */
   async render(templatePath: string, state: Record<string, any> = {}): Promise<string> {

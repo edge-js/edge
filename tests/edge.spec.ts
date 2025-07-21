@@ -443,6 +443,25 @@ test.group('Edge', () => {
     assert.equal(output1.trim(), 'Hello nikk')
     assert.equal(output2.trim(), 'Hello guest')
   })
+
+  test('retrieve shared data from renderer', async ({ assert, fs }) => {
+    const edge = new Edge()
+    await fs.create('foo.edge', "Hello {{ username || 'guest' }}")
+
+    edge.mount(fs.basePath)
+
+    const tmpl = edge.share({ username: 'jane' })
+    const tmpl1 = tmpl.clone()
+
+    tmpl1.share({ username: 'nikk' })
+
+    // getState also exposes all the globals, so we're just testing the
+    // explicitly shared value, here jane comes from the globals:
+    assert.equal(tmpl.getState().username, 'jane')
+
+    // tmpl1 overrides the username, so it comes from the locals:
+    assert.equal(tmpl1.getState().username, 'nikk')
+  })
 })
 
 test.group('Edge | regression', () => {
