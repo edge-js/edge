@@ -6,6 +6,67 @@ Edge is a simple, Modern, and batteries included template engine for Node.js. Ed
 
 ## 👉 [Learn more](https://edgejs.dev)
 
+**Featured sponsors**
+
+<table>
+
+<tr>
+<td>
+
+<a href="https://route4me.com/?utm_source=adonisjs.com">
+  <img src="https://raw.githubusercontent.com/thetutlage/static/refs/heads/main/featured_sponsors/logos/route4me.jpg" />
+</a>
+
+</td>
+
+<td>
+
+<a href="https://ezycourse.com/?utm_source=adonisjs.com">
+  <img src="https://raw.githubusercontent.com/thetutlage/static/refs/heads/main/featured_sponsors/logos/ezycourse.jpg" />
+</a>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<a href="https://meteor.software/g6h?utm_source=adonisjs.com">
+  <img src="https://raw.githubusercontent.com/thetutlage/static/refs/heads/main/featured_sponsors/logos/galaxy.jpg" />
+</a>
+
+</td>
+
+<td>
+
+<a href="https://www.lambdatest.com/?utm_source=adonisjs.com">
+  <img src="https://raw.githubusercontent.com/thetutlage/static/refs/heads/main/featured_sponsors/logos/lambdatest.jpg" />
+</a>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<a href="https://relancer.com/?utm_source=adonisjs.com">
+  <img src="https://raw.githubusercontent.com/thetutlage/static/refs/heads/main/featured_sponsors/logos/relancer.jpg" />
+</a>
+
+</td>
+
+<td>
+
+</td>
+
+</tr>
+
+</table>
+
 ![](https://cdn.jsdelivr.net/gh/thetutlage/static/sponsorkit/sponsors.png)
 
 [gh-workflow-image]: https://img.shields.io/github/actions/workflow/status/edge-js/edge/checks.yml?style=for-the-badge
