@@ -10,9 +10,8 @@
 import { slash } from '@poppinss/utils'
 import { fileURLToPath } from 'node:url'
 import string from '@poppinss/utils/string'
-import { join, isAbsolute } from 'node:path'
-import readdirSync from 'fs-readdir-recursive'
-import { existsSync, readFileSync } from 'node:fs'
+import { join, isAbsolute, relative } from 'node:path'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import type { ComponentsTree, LoaderContract, LoaderTemplate } from './types.js'
 
 /**
@@ -68,12 +67,20 @@ export class Loader implements LoaderContract {
     /**
      * Read disk files
      */
-    if (existsSync(join(diskBasePath, componentsDirName))) {
+    const componentsPath = join(diskBasePath, componentsDirName)
+    if (existsSync(componentsPath)) {
       files = files.concat(
-        readdirSync(join(diskBasePath, componentsDirName))
-          .filter((file) => file.endsWith('.edge'))
-          .map((template) => {
-            const fileName = slash(template).replace(/\.edge$/, '')
+        readdirSync(join(componentsPath), {
+          recursive: true,
+          withFileTypes: true,
+        })
+          .filter((file) => {
+            return file.isFile() && file.name.endsWith('.edge')
+          })
+          .map((file) => {
+            const fileName = slash(
+              relative(componentsPath, join(file.parentPath, file.name))
+            ).replace(/\.edge$/, '')
             return {
               fileName,
               componentPath: `${componentsDirName}/${fileName}`,
@@ -106,7 +113,18 @@ export class Loader implements LoaderContract {
     let files = diskName === 'default' ? Array.from(this.#preRegistered.keys()) : []
 
     if (existsSync(diskBasePath)) {
-      files = files.concat(readdirSync(join(diskBasePath)).filter((file) => file.endsWith('.edge')))
+      files = files.concat(
+        readdirSync(diskBasePath, {
+          recursive: true,
+          withFileTypes: true,
+        })
+          .filter((file) => {
+            return file.isFile() && file.name.endsWith('.edge')
+          })
+          .map((file) => {
+            return relative(diskBasePath, join(file.parentPath, file.name)).replace(/\.edge$/, '')
+          })
+      )
     }
 
     return files.map((file) => {

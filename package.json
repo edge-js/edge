@@ -62,7 +62,6 @@
     "edge-error": "^4.0.2",
     "edge-lexer": "^6.0.4",
     "edge-parser": "^9.0.4",
-    "fs-readdir-recursive": "^1.1.0",
     "he": "^1.2.0",
     "js-stringify": "^1.0.2",
     "property-information": "^7.1.0",

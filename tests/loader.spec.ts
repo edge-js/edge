@@ -305,7 +305,7 @@ test.group('Loader | listComponents', () => {
     assert.deepEqual(componentsList, [
       {
         diskName: 'default',
-        templates: ['components/foo', 'footer', 'header'],
+        templates: ['footer', 'header', 'components/foo'],
       },
     ])
   })
@@ -322,7 +322,7 @@ test.group('Loader | listComponents', () => {
     assert.deepEqual(componentsList, [
       {
         diskName: 'elegant',
-        templates: ['elegant::components/foo', 'elegant::footer', 'elegant::header'],
+        templates: ['elegant::footer', 'elegant::header', 'elegant::components/foo'],
       },
     ])
   })
@@ -343,7 +343,7 @@ test.group('Loader | listComponents', () => {
     assert.deepEqual(componentsList, [
       {
         diskName: 'elegant',
-        templates: ['elegant::components/foo', 'elegant::footer', 'elegant::header'],
+        templates: ['elegant::footer', 'elegant::header', 'elegant::components/foo'],
       },
       {
         diskName: 'default',
