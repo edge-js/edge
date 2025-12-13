@@ -7,8 +7,8 @@
  * file that was distributed with this source code.
  */
 
-import { Edge } from '../edge/main.js'
-import { PluginFn } from '../types.js'
+import { type Edge } from '../edge/main.js'
+import { type PluginFn } from '../types.js'
 
 /**
  * Hooks into the compiler phase of Edge and converts

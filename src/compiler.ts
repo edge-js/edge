@@ -12,7 +12,7 @@ import * as lexerUtils from 'edge-lexer/utils'
 import { Parser, EdgeBuffer, Stack } from 'edge-parser'
 import type { Token, TagToken } from 'edge-lexer/types'
 
-import { Processor } from './processor.js'
+import { type Processor } from './processor.js'
 import { CacheManager } from './cache_manager.js'
 import type {
   ClaimTagFn,

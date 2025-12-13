@@ -10,7 +10,7 @@
 import { expressions } from 'edge-parser'
 import lodash from '@poppinss/utils/lodash'
 
-import { TagContract } from '../types.js'
+import { type TagContract } from '../types.js'
 import { isSubsetOf, unallowedExpression } from '../utils.js'
 
 /**

@@ -9,7 +9,7 @@
 
 import { EdgeError } from 'edge-error'
 import { expressions } from 'edge-parser'
-import { TagContract } from '../types.js'
+import { type TagContract } from '../types.js'
 
 /**
  * Stack tag to define stack placeholders

@@ -10,7 +10,7 @@
 import { EdgeError } from 'edge-error'
 import { expressions } from 'edge-parser'
 
-import { TagContract } from '../types.js'
+import { type TagContract } from '../types.js'
 import { ALLOWED_EXPRESSION, getRenderExpression } from './include.js'
 import { unallowedExpression, isSubsetOf, parseJsArg, isNotSubsetOf } from '../utils.js'
 

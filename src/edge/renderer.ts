@@ -10,7 +10,7 @@
 import lodash from '@poppinss/utils/lodash'
 
 import { Template } from '../template.js'
-import { Processor } from '../processor.js'
+import { type Processor } from '../processor.js'
 import type { Compiler } from '../compiler.js'
 
 /**

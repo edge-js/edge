@@ -9,7 +9,7 @@
 
 import { expressions } from 'edge-parser'
 
-import { TagContract } from '../types.js'
+import { type TagContract } from '../types.js'
 import { unallowedExpression, isNotSubsetOf, parseJsArg } from '../utils.js'
 
 /**

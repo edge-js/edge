@@ -9,9 +9,9 @@
 
 import lodash from '@poppinss/utils/lodash'
 import * as lexerUtils from 'edge-lexer/utils'
-import { Parser, expressions } from 'edge-parser'
+import { type Parser, expressions } from 'edge-parser'
 
-import { TagContract } from '../types.js'
+import { type TagContract } from '../types.js'
 import { isSubsetOf, asyncEach, each, unallowedExpression } from '../utils.js'
 
 declare module '../template.js' {

@@ -8,7 +8,7 @@
  */
 
 import { EdgeError } from 'edge-error'
-import { TagContract } from '../../types.js'
+import { type TagContract } from '../../types.js'
 
 /**
  * Super tag is used inside sections to inherit the parent section

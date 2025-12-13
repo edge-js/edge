@@ -11,7 +11,7 @@ import { EdgeError } from 'edge-error'
 import { expressions } from 'edge-parser'
 
 import { nanoid } from '../utils.js'
-import { TagContract } from '../types.js'
+import { type TagContract } from '../types.js'
 
 declare module '../template.js' {
   export interface Template {
