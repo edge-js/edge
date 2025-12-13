@@ -1,12 +1,11 @@
 import { Edge } from '../index.js'
 import { join } from 'node:path'
 import { createServer } from 'node:http'
-import { getDirname } from '@poppinss/utils'
 import { migrate } from '../src/migrate/plugin.js'
 
 const edge = Edge.create()
 edge.use(migrate)
-edge.mount(join(getDirname(import.meta.url), 'views'))
+edge.mount(join(import.meta.dirname, 'views'))
 
 class Base {
   isModel = true

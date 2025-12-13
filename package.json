@@ -57,7 +57,7 @@
   "dependencies": {
     "@poppinss/inspect": "^1.0.1",
     "@poppinss/macroable": "^1.1.0",
-    "@poppinss/utils": "^6.10.1",
+    "@poppinss/utils": "^7.0.0-next.4",
     "classnames": "^2.5.1",
     "edge-error": "^4.0.2",
     "edge-lexer": "^6.0.4",

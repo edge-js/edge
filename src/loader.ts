@@ -7,7 +7,6 @@
  * file that was distributed with this source code.
  */
 
-import { slash } from '@poppinss/utils'
 import { fileURLToPath } from 'node:url'
 import string from '@poppinss/utils/string'
 import { join, isAbsolute, relative } from 'node:path'
@@ -78,9 +77,9 @@ export class Loader implements LoaderContract {
             return file.isFile() && file.name.endsWith('.edge')
           })
           .map((file) => {
-            const fileName = slash(
-              relative(componentsPath, join(file.parentPath, file.name))
-            ).replace(/\.edge$/, '')
+            const fileName = string
+              .toUnixSlash(relative(componentsPath, join(file.parentPath, file.name)))
+              .replace(/\.edge$/, '')
             return {
               fileName,
               componentPath: `${componentsDirName}/${fileName}`,
@@ -128,7 +127,7 @@ export class Loader implements LoaderContract {
     }
 
     return files.map((file) => {
-      const fileName = slash(file).replace(/\.edge$/, '')
+      const fileName = string.toUnixSlash(file).replace(/\.edge$/, '')
       return diskName !== 'default' ? `${diskName}::${fileName}` : fileName
     })
   }

@@ -9,11 +9,10 @@
 
 import { join } from 'node:path'
 import { test } from '@japa/runner'
-import { getDirname } from '@poppinss/utils'
 
 import { Loader } from '../src/loader.js'
 
-const dirnameEsm = getDirname(import.meta.url)
+const dirnameEsm = import.meta.dirname
 
 test.group('Loader', () => {
   test('mount path with a name', ({ assert, fs }) => {
