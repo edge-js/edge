@@ -58,4 +58,43 @@ test.group('Stacks', () => {
 
     assert.equal(stacks.fillPlaceholders(contents), `hello world${EOL}hi world`)
   })
+
+  test('push contents to the top of a stack', ({ assert }) => {
+    const stacks = new Stacks()
+
+    const contents = stacks.create('js')
+    stacks.pushToTop('js', 'hello world')
+
+    assert.equal(stacks.fillPlaceholders(contents), 'hello world')
+  })
+
+  test('push contents to the top of a stack that was already pushed to', ({ assert }) => {
+    const stacks = new Stacks()
+
+    const contents = stacks.create('js')
+    stacks.pushTo('js', 'world')
+    stacks.pushToTop('js', 'hello')
+
+    assert.equal(stacks.fillPlaceholders(contents), 'hello\nworld')
+  })
+
+  test('push contents multiple times to stack', ({ assert }) => {
+    const stacks = new Stacks()
+
+    const contents = stacks.create('js')
+    stacks.pushToTop('js', 'world')
+    stacks.pushToTop('js', 'hello')
+
+    assert.equal(stacks.fillPlaceholders(contents), `hello\nworld`)
+  })
+
+  test('push contents to the top before creating the stack', ({ assert }) => {
+    const stacks = new Stacks()
+
+    stacks.pushToTop('js', 'hello world')
+    stacks.pushToTop('js', 'hi world')
+    const contents = stacks.create('js')
+
+    assert.equal(stacks.fillPlaceholders(contents), `hi world${EOL}hello world`)
+  })
 })
