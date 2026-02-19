@@ -75,7 +75,7 @@ test.group('Stacks', () => {
     stacks.pushTo('js', 'world')
     stacks.pushToTop('js', 'hello')
 
-    assert.equal(stacks.fillPlaceholders(contents), 'hello\nworld')
+    assert.equal(stacks.fillPlaceholders(contents), `hello${EOL}world`)
   })
 
   test('push contents multiple times to stack', ({ assert }) => {
@@ -85,7 +85,7 @@ test.group('Stacks', () => {
     stacks.pushToTop('js', 'world')
     stacks.pushToTop('js', 'hello')
 
-    assert.equal(stacks.fillPlaceholders(contents), `hello\nworld`)
+    assert.equal(stacks.fillPlaceholders(contents), `hello${EOL}world`)
   })
 
   test('push contents to the top before creating the stack', ({ assert }) => {
