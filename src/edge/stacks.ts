@@ -74,6 +74,30 @@ export default class Stacks {
   }
 
   /**
+   * Push content to the top inside a given stack.
+   * Content can be pre-seeded without creating a stack
+   */
+  pushToTop(name: string, contents: string) {
+    let placeholder = this.#placeholders.get(name)
+
+    if (!placeholder) {
+      if (!this.#seededPlaceholders.has(name)) {
+        this.#seededPlaceholders.set(name, [])
+      }
+      const seededPlaceholder = this.#seededPlaceholders.get(name)!
+      seededPlaceholder.unshift(contents)
+      return this
+    }
+
+    /**
+     * Defined content for the unique key inside a given
+     * stack
+     */
+    placeholder.unshift(contents)
+    return this
+  }
+
+  /**
    * Push contents to a stack with a unique source id. A
    * source can only push once to a given stack.
    */
@@ -84,6 +108,28 @@ export default class Stacks {
     }
 
     this.pushTo(name, contents)
+
+    /**
+     * Track source
+     */
+    if (contentSources) {
+      contentSources.add(sourceId)
+    } else {
+      this.#contentSources.set(name, new Set([sourceId]))
+    }
+  }
+
+  /**
+   * Push contents to the top of a stack with a unique source id.
+   * A source can only push once to a given stack.
+   */
+  pushOnceToTop(name: string, sourceId: string, contents: string) {
+    const contentSources = this.#contentSources.get(name)
+    if (contentSources && contentSources.has(sourceId)) {
+      return
+    }
+
+    this.pushToTop(name, contents)
 
     /**
      * Track source
