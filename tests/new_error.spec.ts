@@ -49,7 +49,7 @@ test.group('New Error', (group) => {
 
     try {
       template.render('foo', {})
-    } catch (error) {
+    } catch (error: any) {
       assert.equal(error.message, 'This is an error')
       assert.equal(error.filename, join(fs.basePath, 'foo.edge'))
       assert.equal(error.line, 2)
@@ -78,7 +78,7 @@ test.group('New Error', (group) => {
           message: 'This is an error',
         },
       })
-    } catch (error) {
+    } catch (error: any) {
       assert.equal(error.message, 'This is an error')
       assert.equal(error.filename, join(fs.basePath, 'foo.edge'))
       assert.equal(error.line, 2)
@@ -107,7 +107,7 @@ test.group('New Error', (group) => {
           message: 'This is an error',
         },
       })
-    } catch (error) {
+    } catch (error: any) {
       assert.equal(error.message, 'This is an error')
       assert.equal(error.filename, 'foo.edge')
       assert.equal(error.line, 2)

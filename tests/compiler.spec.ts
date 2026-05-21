@@ -252,7 +252,7 @@ test.group('Compiler | Tokenize | compat', (group) => {
 
     try {
       compiler.tokenize('index.edge')
-    } catch (error) {
+    } catch (error: any) {
       assert.equal(
         error.message,
         'Template extending a layout can only use "@section" or "@set" tags as top level nodes'
@@ -520,7 +520,7 @@ test.group('Compiler | Compile | compat', (group) => {
 
     try {
       compiler.compile('index.edge')
-    } catch (error) {
+    } catch (error: any) {
       assert.equal(error.filename, join(fs.basePath, 'master.edge'))
       assert.equal(error.line, 1)
       assert.equal(error.col, 8)
@@ -563,7 +563,7 @@ test.group('Compiler | Compile | compat', (group) => {
 
     try {
       compiler.compile('index.edge')
-    } catch (error) {
+    } catch (error: any) {
       assert.equal(error.filename, join(fs.basePath, 'index.edge'))
       assert.equal(error.line, 3)
       assert.equal(error.col, 9)
@@ -607,7 +607,7 @@ test.group('Compiler | Compile | compat', (group) => {
     try {
       const fn = compiler.compile('index.edge')
       fn(new Template(compiler, {}, {}, new Processor()), {}, {})
-    } catch (error) {
+    } catch (error: any) {
       assert.equal(error.message, 'getUserName is not a function')
       assert.equal(error.filename, join(fs.basePath, 'master.edge'))
       assert.equal(error.line, 1)
@@ -655,7 +655,7 @@ test.group('Compiler | Compile | compat', (group) => {
     try {
       const fn = compiler.compile('index.edge')
       fn(new Template(compiler, {}, {}, new Processor()), {}, {})
-    } catch (error) {
+    } catch (error: any) {
       assert.equal(error.message, 'getContent is not a function')
       assert.equal(error.filename, join(fs.basePath, 'index.edge'))
       assert.equal(error.line, 3)
@@ -749,7 +749,7 @@ test.group('Compiler | Compile Raw | compat', (group) => {
         {{ content }}
       @endsection
     `)
-    } catch (error) {
+    } catch (error: any) {
       assert.equal(error.filename, join(fs.basePath, 'master.edge'))
       assert.equal(error.line, 1)
       assert.equal(error.col, 8)
@@ -787,7 +787,7 @@ test.group('Compiler | Compile Raw | compat', (group) => {
         {{ con tent }}
       @endsection
     `)
-    } catch (error) {
+    } catch (error: any) {
       assert.equal(error.filename, 'eval.edge')
       assert.equal(error.line, 3)
       assert.equal(error.col, 9)
@@ -828,7 +828,7 @@ test.group('Compiler | Compile Raw | compat', (group) => {
     `
       )
       fn(new Template(compiler, {}, {}, new Processor()), {}, {})
-    } catch (error) {
+    } catch (error: any) {
       assert.equal(error.message, 'getUserName is not a function')
       assert.equal(error.filename, join(fs.basePath, 'master.edge'))
       assert.equal(error.line, 1)
@@ -873,7 +873,7 @@ test.group('Compiler | Compile Raw | compat', (group) => {
       `
       )
       fn(new Template(compiler, {}, {}, new Processor()), {}, {})
-    } catch (error) {
+    } catch (error: any) {
       assert.equal(error.message, 'getContent is not a function')
       assert.equal(error.filename, 'eval.edge')
       assert.equal(error.line, 3)

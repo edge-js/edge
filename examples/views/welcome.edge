@@ -1,22 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<title></title>
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-</head>
-<body>
-  {{ inspect(state.user) }}
-	@set('time', 'afternoon')
+  <head>
+    <meta charset="UTF-8" />
+    <title>
+    </title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js">
 
-	@component('components/modal', title = 'foo', title = 'bar')
-		@slot('body')
-			<p>hello</p>
-		@endslot
+    </script>
+  </head>
+  <body>
+    {{ inspect(state.user) }}
+    @set('time', 'afternoon')
 
-		@slot('actions')
-			@include('partials/button')
-		@endslot
-	@endcomponent
-</body>
-</html>
+      @component('components/modal', title = 'foo', title = 'bar')
+        @slot('body')
+          <p>
+            hello
+          </p>
+        @endslot
+        
+        @slot('actions')
+          @include('partials/button')
+        @endslot
+      @endcomponent
+    </body>
+  </html>

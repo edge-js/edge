@@ -1,7 +1,6 @@
 {{ inspect(state) }}
-
-<div {{
-  ({
+<div
+  {{ ({
     class: 'modal',
     x: {
       data: `{
@@ -13,10 +12,11 @@
         }
       }`
     }
-  })
-}}
+  }) }}
 >
-  <h1 class="title">{{ title }}</h1>
+  <h1 class="title">
+    {{ title }}
+  </h1>
   <div>
     {{{ await $slots.body() }}}
   </div>

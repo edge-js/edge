@@ -38,7 +38,7 @@ export class Loader implements LoaderContract {
   #readTemplateContents(absPath: string): string {
     try {
       return readFileSync(absPath, 'utf-8')
-    } catch (error) {
+    } catch (error: any) {
       if (error.code === 'ENOENT') {
         throw new Error(`Cannot resolve "${absPath}". Make sure the file exists`)
       } else {
