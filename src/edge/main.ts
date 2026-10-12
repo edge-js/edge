@@ -54,6 +54,12 @@ export class Edge {
   }[] = []
 
   /**
+   * Whether compiled templates are cached. Bundled plugins re-run on
+   * every render when caching is disabled
+   */
+  #cache: boolean = false
+
+  /**
    * Array of registered renderer hooks
    */
   #renderCallbacks: ((renderer: EdgeRenderer) => void)[] = []
@@ -109,7 +115,6 @@ export class Edge {
     this.#bundledPlugins.push({
       fn: pluginSuperCharged,
       executed: false,
-      options: { recurring: !options.cache },
     })
   }
 
@@ -117,6 +122,8 @@ export class Edge {
    * Re-configure an existing edge instance
    */
   configure(options: EdgeOptions) {
+    this.#cache = !!options.cache
+
     if (options.loader) {
       this.loader = options.loader
     } else if (!this.loader) {
@@ -157,15 +164,11 @@ export class Edge {
      * Running bundled plugins after the user-land
      * plugins
      */
+    const recurring = !this.#cache
     this.#bundledPlugins
-      .filter(({ options, executed }) => {
-        if (options && options.recurring) {
-          return true
-        }
-        return !executed
-      })
+      .filter(({ executed }) => recurring || !executed)
       .forEach((plugin) => {
-        plugin.fn(this, !plugin.executed, plugin.options)
+        plugin.fn(this, !plugin.executed, { recurring })
         plugin.executed = true
       })
   }

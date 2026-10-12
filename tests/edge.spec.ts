@@ -425,6 +425,39 @@ test.group('Edge', () => {
     assert.equal(output1.trim(), '@!foo({ username })')
   })
 
+  test('do not refresh list when cache mode is enabled via configure', async ({ assert, fs }) => {
+    const edge = Edge.create()
+    edge.configure({ cache: true })
+    await fs.create('foo.edge', '@!foo({ username })')
+    await fs.create('bar.edge', '@!foo({ username })')
+    edge.mount(fs.basePath)
+
+    const output = await edge.render('foo', { username: 'virk' })
+    assert.equal(output.trim(), '@!foo({ username })')
+
+    /**
+     * "bar" has not been compiled yet, so the template cache
+     * cannot hide a refreshed components list
+     */
+    await fs.create('components/foo.edge', 'Hello {{ username }}')
+    const output1 = await edge.render('bar', { username: 'virk' })
+    assert.equal(output1.trim(), '@!foo({ username })')
+  })
+
+  test('refresh list when cache mode is disabled via configure', async ({ assert, fs }) => {
+    const edge = Edge.create({ cache: true })
+    edge.configure({ cache: false })
+    await fs.create('foo.edge', '@!foo({ username })')
+    edge.mount(fs.basePath)
+
+    const output = await edge.render('foo', { username: 'virk' })
+    assert.equal(output.trim(), '@!foo({ username })')
+
+    await fs.create('components/foo.edge', 'Hello {{ username }}')
+    const output1 = await edge.render('foo', { username: 'virk' })
+    assert.equal(output1.trim(), 'Hello virk')
+  })
+
   test('clone renderer with shared data', async ({ assert, fs }) => {
     const edge = new Edge()
     await fs.create('foo.edge', "Hello {{ username || 'guest' }}")
