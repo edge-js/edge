@@ -123,6 +123,9 @@ export class Edge {
       this.loader = new Loader()
     }
 
+    const previousCompiler = this.compiler
+    const previousAsyncCompiler = this.asyncCompiler
+
     this.compiler = new Compiler(this.loader, this.tags, this.processor, {
       cache: !!options.cache,
       async: false,
@@ -132,6 +135,17 @@ export class Edge {
       cache: !!options.cache,
       async: true,
     })
+
+    /**
+     * Keep the tags claimed on the previous compilers. Plugins run
+     * once and do not claim them again on the new compilers
+     */
+    if (previousCompiler?.claimTagFn) {
+      this.compiler.claimTag(previousCompiler.claimTagFn)
+    }
+    if (previousAsyncCompiler?.claimTagFn) {
+      this.asyncCompiler.claimTag(previousAsyncCompiler.claimTagFn)
+    }
   }
 
   /**

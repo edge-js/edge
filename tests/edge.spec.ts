@@ -399,6 +399,41 @@ test.group('Edge', () => {
     assert.equal(output.trim(), 'Hello virk')
   })
 
+  test('refresh components list of each edge instance', async ({ assert, fs }) => {
+    const edgeA = new Edge()
+    edgeA.mount(join(fs.basePath, 'a'))
+    await fs.create('a/foo.edge', '@!foo({ username })')
+    await fs.create('a/components/foo.edge', 'Hello {{ username }}')
+    await fs.create('a/bar.edge', '@!bar({ username })')
+
+    const edgeB = new Edge()
+    edgeB.mount(join(fs.basePath, 'b'))
+    await fs.create('b/foo.edge', '@!foo({ username })')
+
+    const output1 = await edgeA.render('foo', { username: 'virk' })
+    assert.equal(output1.trim(), 'Hello virk')
+    const output2 = await edgeB.render('foo', { username: 'virk' })
+    assert.equal(output2.trim(), '@!foo({ username })')
+
+    await fs.create('a/components/bar.edge', 'Bye {{ username }}')
+    const output3 = await edgeA.render('bar', { username: 'virk' })
+    assert.equal(output3.trim(), 'Bye virk')
+  })
+
+  test('render components as tags after configure', async ({ assert, fs }) => {
+    const edge = Edge.create()
+    await fs.create('foo.edge', '@!foo({ username })')
+    await fs.create('components/foo.edge', 'Hello {{ username }}')
+    edge.mount(fs.basePath)
+
+    const output = await edge.render('foo', { username: 'virk' })
+    assert.equal(output.trim(), 'Hello virk')
+
+    edge.configure({ cache: true })
+    const output1 = await edge.render('foo', { username: 'virk' })
+    assert.equal(output1.trim(), 'Hello virk')
+  })
+
   test('refresh components list on each render', async ({ assert, fs }) => {
     const edge = new Edge()
     await fs.create('foo.edge', '@!foo({ username })')

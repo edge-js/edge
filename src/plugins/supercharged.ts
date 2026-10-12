@@ -85,10 +85,10 @@ class SuperChargedComponents {
  * The superCharged plugin converts components stored within the
  * components directory of all the disk to Edge tags.
  */
-let superCharged: SuperChargedComponents
+const instances = new WeakMap<Edge, SuperChargedComponents>()
 export const pluginSuperCharged: PluginFn<{ recurring: boolean }> = (edge, firstRun) => {
   if (firstRun) {
-    superCharged = new SuperChargedComponents(edge)
+    instances.set(edge, new SuperChargedComponents(edge))
   }
-  superCharged.refreshComponents()
+  instances.get(edge)!.refreshComponents()
 }

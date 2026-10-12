@@ -249,6 +249,13 @@ export class Compiler {
   }
 
   /**
+   * The function registered using "claimTag", if any
+   */
+  get claimTagFn(): ClaimTagFn | undefined {
+    return this.#claimTagFn
+  }
+
+  /**
    * Define a function to claim tags
    */
   claimTag(fn: ClaimTagFn): this {
